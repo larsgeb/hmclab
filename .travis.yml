@@ -1,0 +1,34 @@
+language: python
+
+matrix:
+  include:
+
+    # Here you can add or remove specific builds, and Python versions. You
+    # should currently be able to use Python 2.6, 2.7, or 3.3 or later. The
+    # NUMPY and SCIPY versions are set here as an example, but you can
+    # add/remove environment variables, and use them below during the install.
+
+    - python: 3.7
+
+
+before_install:
+
+  # Here we just install Miniconda, which you shouldn't have to change.
+
+  - wget https://repo.anaconda.com/archive/Anaconda3-2019.03-Linux-x86_64.sh -O anaconda.sh
+  - chmod +x anaconda.sh
+  - ./anaconda.sh -b
+  - export PATH=/home/travis/miniconda/bin:$PATH
+  - conda update --yes conda
+
+install:
+
+  # We just set up a conda environment with the right Python version. This
+  # should not need changing.
+
+  - conda create --yes -f environment.yml
+  - source activate hmc-tomography
+
+script:
+
+  - py.test  # will run all tests in the package
