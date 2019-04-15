@@ -3,17 +3,9 @@ language: python
 matrix:
   include:
 
-    # Here you can add or remove specific builds, and Python versions. You
-    # should currently be able to use Python 2.6, 2.7, or 3.3 or later. The
-    # NUMPY and SCIPY versions are set here as an example, but you can
-    # add/remove environment variables, and use them below during the install.
-
     - python: 3.7
 
-
 before_install:
-
-  # Here we just install Miniconda, which you shouldn't have to change.
 
   - wget https://repo.anaconda.com/miniconda/Miniconda3-4.5.12-Linux-x86_64.sh -O miniconda.sh
   - chmod +x miniconda.sh
@@ -23,12 +15,10 @@ before_install:
 
 install:
 
-  # We just set up a conda environment with the right Python version. This
-  # should not need changing.
-
   - conda env create -f environment.yml
   - source activate hmc-tomography
 
 script:
 
-  - py.test  # will run all tests in the package
+  - tests/kinetic_energy.test.py
+  -
