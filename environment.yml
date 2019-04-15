@@ -1,7 +1,0 @@
-name: hmc-tomography
-dependencies:
-- python=3.7
-- numpy
-- pyyaml
-- numpydoc
-- sphinx_rtd_theme
