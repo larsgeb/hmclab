@@ -5,6 +5,16 @@ from hmc_tomography import sampler
 
 
 def main(sampler):
+    """
+    Unit test for kinetic energy
+    Parameters
+    ----------
+    sampler
+
+    Returns
+    -------
+
+    """
     print("Unit test on kinetic energy.")
     sampler = sampler.sampler('tests/kinetic_energy.test.yml', quiet=True)
     sampler.momentum[0] = 4.0

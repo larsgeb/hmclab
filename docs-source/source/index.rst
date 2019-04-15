@@ -8,7 +8,7 @@ HMC Tomography
 
    hmc_tomography
    mcmc_visualization
-
+   tests
 
 
 Indices and tables

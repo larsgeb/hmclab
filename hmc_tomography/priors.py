@@ -13,8 +13,12 @@ class normal():
 
         Parameters
         ----------
-        means
-        covariance
+        means : numpy.ndarray
+            Means vector of the normal distribution.
+
+        covariance : numpy.ndarray
+            Covariance matrix of the normal distribution.
+
         """
         super().__init__()
         self.name = "Gaussian prior"
@@ -26,7 +30,8 @@ class normal():
 
         Parameters
         ----------
-        position
+        position : numpy.ndarray
+            Position vector to calculate prior misfit at.
 
         Returns
         -------

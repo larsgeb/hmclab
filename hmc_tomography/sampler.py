@@ -14,7 +14,9 @@ class sampler():
 
         Parameters
         ----------
-        config_file_path
+        config_file_path : basestring
+            Path to configuration file for sampler.
+
         """
 
         # Open the configuration file.
