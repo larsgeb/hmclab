@@ -20,5 +20,4 @@ install:
 
 script:
 
-  - tests/kinetic_energy.test.py
-  -
+  - python3 tests/kinetic_energy.test.py
