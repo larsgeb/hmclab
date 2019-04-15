@@ -26,7 +26,7 @@ install:
   # We just set up a conda environment with the right Python version. This
   # should not need changing.
 
-  - conda create -f environment.yml --yes
+  - conda env create -f environment.yml --yes
   - source activate hmc-tomography
 
 script:
