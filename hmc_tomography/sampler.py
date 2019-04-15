@@ -9,7 +9,7 @@ class sampler():
 
     """
 
-    def __init__(self, config_file_path):
+    def __init__(self, config_file_path, quiet=False):
         """Constructor for an Hamiltonian Monte Carlo sampler object.
 
         Parameters
@@ -22,9 +22,10 @@ class sampler():
             cfg = yaml.load(config_file, Loader=yaml.FullLoader)
 
         # Show an overview of the input file.
-        print("Sections in configuration file:")
-        for section in cfg:
-            print("{:<20} {:>20} ".format(section, cfg[section]))
+        if quiet is not True:
+            print("Sections in configuration file:")
+            for section in cfg:
+                print("{:<20} {:>20} ".format(section, cfg[section]))
 
         # Parse dimensions
         if 'dimensions' in cfg:
