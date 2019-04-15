@@ -15,10 +15,10 @@ before_install:
 
   # Here we just install Miniconda, which you shouldn't have to change.
 
-  - wget https://repo.anaconda.com/archive/Anaconda3-2019.03-Linux-x86_64.sh -O anaconda.sh
-  - chmod +x anaconda.sh
+  - wget https://repo.anaconda.com/miniconda/Miniconda2-4.5.12-Linux-x86_64.sh -O miniconda.sh
+  - chmod +x miniconda.sh
   - ./anaconda.sh -b
-  - export PATH=/home/travis/anaconda3/bin:$PATH
+  - export PATH=/home/travis/miniconda/bin:$PATH
   - conda update --yes conda
 
 install:
@@ -26,7 +26,7 @@ install:
   # We just set up a conda environment with the right Python version. This
   # should not need changing.
 
-  - conda create --yes -f environment.yml
+  - conda create -f environment.yml --yes
   - source activate hmc-tomography
 
 script:
