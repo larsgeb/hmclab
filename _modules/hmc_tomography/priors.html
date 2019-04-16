@@ -82,6 +82,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../hmc_tomography.html">HMC Tomography sampling module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../mcmc_visualization.html">Markov chain Monte Carlo visualization module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tests.html">Unit tests</a></li>
 </ul>
 
             
@@ -160,8 +161,12 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        means</span>
-<span class="sd">        covariance</span>
+<span class="sd">        means : numpy.ndarray</span>
+<span class="sd">            Means vector of the normal distribution.</span>
+
+<span class="sd">        covariance : numpy.ndarray</span>
+<span class="sd">            Covariance matrix of the normal distribution.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Gaussian prior&quot;</span>
@@ -173,7 +178,8 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        position</span>
+<span class="sd">        position : numpy.ndarray</span>
+<span class="sd">            Position vector to calculate prior misfit at.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
