@@ -8,7 +8,7 @@ https://larsgeb.github.io/hmc-tomography/
 
 ## How to work with this repositories' code
 
-This repository is meant to be an introduction to Bayesian tomography using Hamiltonian Monte Carlo. We desgined a general Monte Carlo sampler that is applied to multiple tomographic problems.
+This repository is meant to be an introduction to Bayesian tomography using Hamiltonian Monte Carlo. We designed a general Monte Carlo sampler that is applied to multiple tomographic problems.
 
 To make the code run machine independent, we use a virtual environment. This makes sure that everyone uses the same Python version and packages. Here we use Conda (Anaconda or Miniconda are both supported). Make sure that you have Conda installed: 
 
