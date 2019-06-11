@@ -21,6 +21,10 @@ install:
   - cd bin
 
 script:
-
+  - which python
+  - python3 ../tests/kinetic_energy.test.py
+  - python3 ../tests/sampling.test.py
+  - source deactivate
+  - which python
   - python3 ../tests/kinetic_energy.test.py
   - python3 ../tests/sampling.test.py
