@@ -1,0 +1,8 @@
+inversion-prefix: example-inversion
+
+# Inverse problem description
+dimensions: 2
+
+# Tuning settings
+timestep: 0.1
+number-of-steps: 0.1

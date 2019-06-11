@@ -4,6 +4,7 @@ Sampler classes and associated methods.
 import numpy, yaml
 import hmc_tomography.priors as priors
 
+
 class sampler():
     """Hamiltonian Monte Carlo class.
 
@@ -19,6 +20,7 @@ class sampler():
 
         """
 
+        # Loading and parsing configuration ----------------------------------------------------------------------------
         # Open the configuration file.
         with open(config_file_path, 'r') as config_file:
             cfg = yaml.load(config_file, Loader=yaml.FullLoader)
@@ -38,7 +40,6 @@ class sampler():
                             'YML key: dimensions.')
 
         # Assign HMC variables
-
         self.prior = priors.normal
         self.momentum = numpy.zeros((dimensions, 1))
         self.position = numpy.zeros((dimensions, 1))
@@ -47,7 +48,8 @@ class sampler():
     def kinetic_energy(self, momentum: numpy.ndarray) -> float:
         """Function to compute kinetic energy for a given momentum.
 
-        This method computes the kinetic energy associated with the given input momentum vector based on the Gaussian kinetic energy distribution.
+        This method computes the kinetic energy associated with the given input momentum vector based on the Gaussian
+        kinetic energy distribution.
 
         Parameters
         ----------
@@ -62,4 +64,3 @@ class sampler():
 
         """
         return .5 * numpy.asscalar(momentum.T @ self.mass_matrix @ momentum)
-

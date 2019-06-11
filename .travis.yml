@@ -15,8 +15,11 @@ before_install:
 
 install:
 
+  - pip install -r requirements.txt
   - conda env create -f environment.yml
   - source activate hmc-tomography
+  - mkdir bin
+  - cd bin
 
 script:
 
