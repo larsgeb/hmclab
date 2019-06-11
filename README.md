@@ -18,7 +18,12 @@ Anaconda or Miniconda are both supported. Make sure that you have one of these i
 1.  https://www.anaconda.com/distribution/;
 2.  https://docs.conda.io/en/latest/miniconda.html.
 
-Also, make sure that you can activate anaconda environments ([i.e. add the executable to your PATH](https://support.anaconda.com/customer/en/portal/articles/2621189-conda-%22command-not-found%22-error)).
+Also, make sure that you can activate anaconda environments ([i.e. add the executable to your PATH](https://support.anaconda.com/customer/en/portal/articles/2621189-conda-%22command-not-found%22-error)). 
+
+For new Conda users, you might now want to automatically start Anaconda every time you open a command line shell. You can do that by using the following from the shell:
+```
+$ conda config --set auto_activate_base false
+```
 
 Then, find a suitable folder on your machine for the code. Git clone and change your directory to the newly cloned code.:
 ```
