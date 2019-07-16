@@ -64,3 +64,6 @@ $ which python
 [your repo clone location]/hmc-tomography/venv-hmc-tomography/bin/python
 ```
 Now, to install all the required packages:
+```bash
+pip install -r requirements.txt
+```

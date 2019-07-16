@@ -1,11 +1,13 @@
 """
 Sampler classes and associated methods.
 """
-import numpy, yaml
-import hmc_tomography.priors as priors
+import numpy
+import yaml
+
+import hmc_tomography.Priors as Priors
 
 
-class sampler():
+class HMC:
     """Hamiltonian Monte Carlo class.
 
     """
@@ -20,9 +22,9 @@ class sampler():
 
         """
 
-        # Loading and parsing configuration ----------------------------------------------------------------------------
+        # Loading and parsing configuration ------------------------------------
         # Open the configuration file.
-        with open(config_file_path, 'r') as config_file:
+        with open(config_file_path, "r") as config_file:
             cfg = yaml.load(config_file, Loader=yaml.FullLoader)
 
         # Show an overview of the input file.
@@ -32,15 +34,17 @@ class sampler():
                 print("{:<20} {:>20} ".format(section, cfg[section]))
 
         # Parse dimensions
-        if 'dimensions' in cfg:
-            dimensions = int(cfg['dimensions'])
+        if "dimensions" in cfg:
+            dimensions = int(cfg["dimensions"])
         else:
-            raise Exception('Invalid configuration file.'
-                            'Missing *AT LEAST* the dimensions of the inverse problem.'
-                            'YML key: dimensions.')
+            raise Exception(
+                "Invalid configuration file."
+                "Missing *AT LEAST* the dimensions of the inverse problem."
+                "YML key: dimensions."
+            )
 
         # Assign HMC variables
-        self.prior = priors.normal
+        self.prior = Priors.Normal
         self.momentum = numpy.zeros((dimensions, 1))
         self.position = numpy.zeros((dimensions, 1))
         self.mass_matrix = numpy.eye(dimensions, dimensions)
@@ -48,8 +52,8 @@ class sampler():
     def kinetic_energy(self, momentum: numpy.ndarray) -> float:
         """Function to compute kinetic energy for a given momentum.
 
-        This method computes the kinetic energy associated with the given input momentum vector based on the Gaussian
-        kinetic energy distribution.
+        This method computes the kinetic energy associated with the given input
+        momentum vector based on the Gaussian kinetic energy distribution.
 
         Parameters
         ----------
@@ -63,4 +67,4 @@ class sampler():
 
 
         """
-        return .5 * numpy.asscalar(momentum.T @ self.mass_matrix @ momentum)
+        return 0.5 * (momentum.T @ self.mass_matrix @ momentum).item()

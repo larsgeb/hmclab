@@ -3,7 +3,7 @@ Prior distributions available to the HMC sampler.
 """
 
 
-class normal():
+class Normal:
     """Normal distribution in model space.
 
     """
@@ -40,7 +40,7 @@ class normal():
         return (self.means - position).T @ (self.covariance @ (self.means - position))
 
 
-class log_normal():
+class Priors:
     """Normal distribution in logarithmic model space.
 
     """
