@@ -22,9 +22,11 @@ install:
 
 script:
   - which python
-  - python3 ../tests/kinetic_energy.test.py
+  - python3 ../tests/mass_matrix.test.test.py
   - python3 ../tests/sampling.test.py
+  - python3 ../tests/target.test.py
   - source deactivate
   - which python
-  - python3 ../tests/kinetic_energy.test.py
+  - python3 ../tests/mass_matrix.test.test.py
   - python3 ../tests/sampling.test.py
+  - python3 ../tests/target.test.py

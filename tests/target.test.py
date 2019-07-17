@@ -24,9 +24,9 @@ for (ix, iy), value in numpy.ndenumerate(grid_x):
     gradx[ix, iy] = gr[0, 0] / numpy.sqrt(gr[0, 0] ** 2 + gr[1, 0] ** 2)
     grady[ix, iy] = gr[1, 0] / numpy.sqrt(gr[0, 0] ** 2 + gr[1, 0] ** 2)
 
-pyplot.imshow(numpy.log(misfit + 1e-10), vmin=-10)
-pyplot.show()
-pyplot.quiver(xv, yv, gradx, grady)
-pyplot.show()
+# pyplot.imshow(numpy.log(misfit + 1e-10), vmin=-10)
+# pyplot.show()
+# pyplot.quiver(xv, yv, gradx, grady)
+# pyplot.show()
 # pyplot.streamplot(xv, yv, gradx, grady, density=10)
 # pyplot.show()

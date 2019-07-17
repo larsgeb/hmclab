@@ -12,8 +12,6 @@ from mcmc_visualization import Processing
 print("\r\nStarting sampling test ...\r\n")
 
 target = Targets.Himmelblau(annealing=100)
-
-
 diagonal = 10**numpy.random.randn(target.dimensions, 1)
 diagonal[0] = 0.05
 diagonal[1] = 100
@@ -24,7 +22,7 @@ prior = Priors.UnboundedUniform(target.dimensions)
 
 sampler = Samplers.HMC("../tests/sampling.test.yml", target, mass_matrix, prior)
 
-sampler.sample(time_step=0.1, proposals=5000, iterations=50)
+sampler.sample(time_step=0.1, proposals=500, iterations=50)
 
 figure_analysis = pyplot.figure(figsize=(16, 8))
 axis_2d_histogram = figure_analysis.add_axes([0.025, 0.52, 0.2, 0.4])
@@ -61,6 +59,6 @@ axis_1d_traceplot.set_xlim([0, sampler.samples[1, :].size])
 axis_autocorrelation.plot(Processing.autocorrelation(sampler.samples[0, :]), 'r', label="Dimension 0")
 axis_autocorrelation.plot(Processing.autocorrelation(sampler.samples[1, :]), 'k', label="Dimension 1")
 axis_autocorrelation.legend()
-pyplot.show()
+pyplot.savefig("sampling.test.jpg")
 
 print("Test successful.\r\n")

@@ -51,7 +51,7 @@ def main() -> int:
             matrix_image, cax=axis_matrix_colourbar, orientation="vertical"
         )
         axis_histogram_kinetic_energy.hist(k, 100)
-        pyplot.show()
+        pyplot.savefig(f"{mass_matrix.full_name()}.jpg")
 
     print("\r\nTest successful.\r\n")
 
