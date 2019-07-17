@@ -1,51 +1,50 @@
 """
 Prior distributions available to the HMC sampler.
 """
+from abc import ABC, abstractmethod
+
+import numpy
 
 
-class Normal:
+class Prior(ABC):
+
+    name: str = ""
+    dimensions: int = -1
+
+    @abstractmethod
+    def misfit(self, coordinates: numpy.ndarray) -> float:
+        """
+
+        Parameters
+        ----------
+        coordinates
+        """
+        pass
+
+    @abstractmethod
+    def gradient(self, coordinates: numpy.ndarray) -> numpy.ndarray:
+        """
+
+        Parameters
+        ----------
+        coordinates
+        """
+        pass
+
+    @abstractmethod
+    def generate(self) -> numpy.ndarray:
+        """
+
+        """
+        pass
+
+
+class Normal(Prior):
     """Normal distribution in model space.
 
     """
 
-    def __init__(self, means, covariance):
-        """
-
-        Parameters
-        ----------
-        means : numpy.ndarray
-            Means vector of the normal distribution.
-
-        covariance : numpy.ndarray
-            Covariance matrix of the normal distribution.
-
-        """
-        super().__init__()
-        self.name = "Gaussian prior"
-        self.means = means
-        self.covariance = covariance
-
-    def prior_misfit(self, position):
-        """
-
-        Parameters
-        ----------
-        position : numpy.ndarray
-            Position vector to calculate prior misfit at.
-
-        Returns
-        -------
-
-        """
-        return (self.means - position).T @ (self.covariance @ (self.means - position))
-
-
-class Priors:
-    """Normal distribution in logarithmic model space.
-
-    """
-
-    def __init__(self, means, covariance):
+    def __init__(self, means: numpy.ndarray, covariance: numpy.ndarray):
         """
 
         Parameters
@@ -53,20 +52,119 @@ class Priors:
         means
         covariance
         """
-        super().__init__()
-        self.name = "Log normal (logarithmic Gaussian) prior"
-        self.means = means
+        self.name = "Gaussian prior"
+        self.means: numpy.ndarray = means
+        self.dimensions = means.size
         self.covariance = covariance
 
-    def prior_misfit(self, position):
+    def misfit(self, coordinates: numpy.ndarray) -> float:
         """
 
         Parameters
         ----------
-        position
+        coordinates
 
         Returns
         -------
 
         """
-        return (self.means - position).T @ (self.covariance @ (self.means - position))
+        return (
+            0.5
+            * (self.means - coordinates).T
+            @ (self.covariance @ (self.means - coordinates)).item(0)
+        )
+
+    def gradient(self, coordinates: numpy.ndarray) -> numpy.ndarray:
+        """
+
+        Parameters
+        ----------
+        coordinates
+
+        Returns
+        -------
+
+        """
+        return self.covariance @ (self.means - coordinates)
+
+    def generate(self) -> numpy.ndarray:
+        """
+
+        """
+        raise NotImplementedError("This function is not finished yet")
+
+
+class LogNormal(Prior):
+    """Normal distribution in logarithmic model space.
+
+    """
+
+    def __init__(self, means: numpy.ndarray, covariance: numpy.ndarray):
+        """
+
+        Parameters
+        ----------
+        means
+        covariance
+        """
+        self.name = "log normal (logarithmic Gaussian) prior"
+        self.means: numpy.ndarray = means  # in log space
+        self.dimensions = means.size
+        self.covariance = covariance  # in log space
+
+    def misfit(self, coordinates: numpy.ndarray) -> float:
+        raise NotImplementedError("This function is not finished yet")
+
+    def gradient(self, coordinates: numpy.ndarray) -> numpy.ndarray:
+        raise NotImplementedError("This function is not finished yet")
+
+    def generate(self) -> numpy.ndarray:
+        raise NotImplementedError("This function is not finished yet")
+
+
+class UnboundedUniform(Prior):
+    def __init__(self, dimensions: int):
+        """
+
+        Parameters
+        ----------
+        dimensions
+        """
+        self.name = "unbounded uniform prior"
+        self.dimensions = dimensions
+
+    def misfit(self, coordinates: numpy.ndarray) -> float:
+        """
+
+        Parameters
+        ----------
+        coordinates
+
+        Returns
+        -------
+
+        """
+        return 0
+
+    def gradient(self, coordinates: numpy.ndarray) -> numpy.ndarray:
+        """
+
+        Parameters
+        ----------
+        coordinates
+
+        Returns
+        -------
+
+        """
+        return numpy.zeros((self.dimensions, 1))
+
+    # noinspection PyTypeChecker
+    def generate(self) -> numpy.ndarray:  # One shouldn't be able to do this
+        """
+
+        """
+        TypeError(
+            "This prior is unbounded, so it is impossible to generate samples"
+            "from it."
+        )
