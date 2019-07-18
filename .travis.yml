@@ -6,6 +6,7 @@ python:
   - "3.7"
 install:
   - sudo apt-get update
+  - pip install -r requirements.txt
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
@@ -20,18 +21,17 @@ install:
   - conda update -q conda
   - conda info -a
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy pyyaml h5py matplotlib
-  - source activate test-environment
-  - pip install -r requirements.txt
+  - conda activate test-environment
 script:
   - cd bin
   # Run tests in Conda
   - which python
-  - python3 ../tests/mass_matrix.test.test.py
+  - python3 ../tests/mass_matrix.test.py
   - python3 ../tests/sampling.test.py
   - python3 ../tests/target.test.py
-  - source deactivate
+  - conda deactivate
   # Run test in native Python (VirtualEnv)
   - which python
-  - python3 ../tests/mass_matrix.test.test.py
+  - python3 ../tests/mass_matrix.test.py
   - python3 ../tests/sampling.test.py
   - python3 ../tests/target.test.py
