@@ -98,48 +98,54 @@ class HMC(Sampler):
         coordinates = numpy.ones((self.dimensions, 1))
         self.samples = coordinates.copy()
 
-        for proposal in tqdm.tqdm(range(proposals)):
-            # Compute initial Hamiltonian --------------------------------------
-            potential: float = self.target.misfit(
-                coordinates
-            ) + self.prior.misfit(coordinates)
-            momentum = self.mass_matrix.generate_momentum()
-            kinetic: float = self.mass_matrix.kinetic_energy(momentum)
-            hamiltonian: float = potential + kinetic
+        iterable = tqdm.tqdm(range(proposals))
+        try:
+            for proposal in iterable:
+                # Compute initial Hamiltonian ----------------------------------
+                potential: float = self.target.misfit(
+                    coordinates
+                ) + self.prior.misfit(coordinates)
+                momentum = self.mass_matrix.generate_momentum()
+                kinetic: float = self.mass_matrix.kinetic_energy(momentum)
+                hamiltonian: float = potential + kinetic
 
-            # Propagate using a numerical integrator ---------------------------
-            new_coordinates, new_momentum = self.propagate_leapfrog(
-                coordinates, momentum, iterations, time_step
-            )
+                # Propagate using a numerical integrator -----------------------
+                new_coordinates, new_momentum = self.propagate_leapfrog(
+                    coordinates, momentum, iterations, time_step
+                )
 
-            # Compute resulting Hamiltonian ------------------------------------
-            new_potential: float = self.target.misfit(
-                new_coordinates
-            ) + self.prior.misfit(new_coordinates)
-            new_kinetic: float = self.mass_matrix.kinetic_energy(new_momentum)
-            new_hamiltonian: float = new_potential + new_kinetic
+                # Compute resulting Hamiltonian --------------------------------
+                new_potential: float = self.target.misfit(
+                    new_coordinates
+                ) + self.prior.misfit(new_coordinates)
+                new_kinetic: float = self.mass_matrix.kinetic_energy(
+                    new_momentum
+                )
+                new_hamiltonian: float = new_potential + new_kinetic
 
-            # Print results ----------------------------------------------------
-            # print(
-            #     f"""
-            #     Initial Hamiltonian: \t{hamiltonian:.3f}
-            #     New Hamiltonian: \t\t{new_hamiltonian:.3f}
-            #     """
-            # )
+                # Print results ------------------------------------------------
+                # print(
+                #     f"""
+                #     Initial Hamiltonian: \t{hamiltonian:.3f}
+                #     New Hamiltonian: \t\t{new_hamiltonian:.3f}
+                #     """
+                # )
 
-            # Evaluate acceptance criterion ------------------------------------
-            if numpy.exp(hamiltonian - new_hamiltonian) > numpy.random.uniform(
-                0, 1
-            ):
-                accepted += 1
-                coordinates = new_coordinates.copy()
-                # print("Accepted")
-            else:
-                # print("Rejected")
-                pass
+                # Evaluate acceptance criterion --------------------------------
+                if numpy.exp(
+                    hamiltonian - new_hamiltonian
+                ) > numpy.random.uniform(0, 1):
+                    accepted += 1
+                    coordinates = new_coordinates.copy()
+                    # print("Accepted")
+                else:
+                    # print("Rejected")
+                    pass
 
-            # Append new state -------------------------------------------------
-            self.samples = numpy.append(self.samples, coordinates, axis=1)
+                # Append new state ---------------------------------------------
+                self.samples = numpy.append(self.samples, coordinates, axis=1)
+        except KeyboardInterrupt:
+            iterable.close()
 
         print(f"Accepted proposals: {accepted}")
         return 0
