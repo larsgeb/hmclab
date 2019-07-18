@@ -1,6 +1,5 @@
 language: python
 python:
-  # We don't actually use the Travis Python, but this keeps it organized.
   - "2.7"
   - "3.5"
   - "3.6"
@@ -22,14 +21,16 @@ install:
   - conda info -a
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy pyyaml h5py matplotlib
   - source activate test-environment
-  - python setup.py install
+  - pip install -r requirements.txt
 script:
   - cd bin
+  # Run tests in Conda
   - which python
   - python3 ../tests/mass_matrix.test.test.py
   - python3 ../tests/sampling.test.py
   - python3 ../tests/target.test.py
   - source deactivate
+  # Run test in native Python (VirtualEnv)
   - which python
   - python3 ../tests/mass_matrix.test.test.py
   - python3 ../tests/sampling.test.py
