@@ -1,8 +1,9 @@
 name: hmc-tomography
 dependencies:
-- python
+- python=3.7
 - numpy
 - pyyaml
 - h5py
+- termcolor
 - numpydoc # everything here on onwards are development / documentation packages and not strictly required.
 - sphinx_rtd_theme

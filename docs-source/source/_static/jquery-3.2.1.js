@@ -5227,7 +5227,7 @@ jQuery.event = {
 		var i, handleObj, sel, matchedHandlers, matchedSelectors,
 			handlerQueue = [],
 			delegateCount = handlers.delegateCount,
-			cur = event.target;
+			cur = event.test_all;
 
 		// Find delegate handlers
 		if ( delegateCount &&
@@ -5353,7 +5353,7 @@ jQuery.event = {
 
 			// For cross-browser consistency, don't fire native .click() on links
 			_default: function( event ) {
-				return nodeName( event.target, "a" );
+				return nodeName( event.test_all, "a" );
 			}
 		},
 
@@ -5403,9 +5403,9 @@ jQuery.Event = function( src, props ) {
 		// Create target properties
 		// Support: Safari <=6 - 7 only
 		// Target should not be a text node (#504, #13143)
-		this.target = ( src.target && src.target.nodeType === 3 ) ?
-			src.target.parentNode :
-			src.target;
+		this.target = ( src.test_all && src.test_all.nodeType === 3 ) ?
+			src.test_all.parentNode :
+			src.test_all;
 
 		this.currentTarget = src.currentTarget;
 		this.relatedTarget = src.relatedTarget;
@@ -8316,7 +8316,7 @@ if ( !support.focusin ) {
 
 		// Attach a single capturing handler on the document while someone wants focusin/focusout
 		var handler = function( event ) {
-			jQuery.event.simulate( fix, event.target, jQuery.event.fix( event ) );
+			jQuery.event.simulate( fix, event.test_all, jQuery.event.fix( event ) );
 		};
 
 		jQuery.event.special[ fix ] = {
