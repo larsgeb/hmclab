@@ -100,9 +100,9 @@ class Normal(Prior):
                 ValueError("Incorrect size of covariance matrix.")
             self.covariance = covariance
         if self.diagonal:
-            self.inverse_covariance = 1.0 / covariance
+            self.inverse_covariance = 1.0 / self.covariance
         else:
-            self.inverse_covariance = numpy.linalg.inv(covariance)
+            self.inverse_covariance = numpy.linalg.inv(self.covariance)
 
     def misfit(self, coordinates: numpy.ndarray) -> float:
         """
@@ -209,9 +209,9 @@ class LogNormal(Prior):
                 ValueError("Incorrect size of covariance matrix.")
             self.covariance: numpy.ndarray = covariance
         if self.diagonal:
-            self.inverse_covariance = 1.0 / covariance
+            self.inverse_covariance = 1.0 / self.covariance
         else:
-            self.inverse_covariance = numpy.linalg.inv(covariance)
+            self.inverse_covariance = numpy.linalg.inv(self.covariance)
 
     def misfit(self, coordinates: numpy.ndarray) -> float:
         logarithmic_coordinates = numpy.log(coordinates)

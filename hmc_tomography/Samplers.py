@@ -4,6 +4,7 @@ Sampler classes and associated methods.
 from abc import ABC, abstractmethod
 
 import numpy
+import tqdm as tqdm
 import yaml
 from typing import Tuple
 
@@ -97,7 +98,7 @@ class HMC(Sampler):
         coordinates = numpy.ones((self.dimensions, 1))
         self.samples = coordinates.copy()
 
-        for proposal in range(proposals):
+        for proposal in tqdm.tqdm(range(proposals)):
             # Compute initial Hamiltonian --------------------------------------
             potential: float = self.target.misfit(
                 coordinates
