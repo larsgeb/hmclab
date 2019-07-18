@@ -1,6 +1,6 @@
 name: hmc-tomography
 dependencies:
-- python=3.7
+- python
 - numpy
 - pyyaml
 - h5py
