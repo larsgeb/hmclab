@@ -94,7 +94,7 @@ class HMC(Sampler):
 
         """
         accepted = 0
-        coordinates = numpy.zeros((self.dimensions, 1))
+        coordinates = numpy.ones((self.dimensions, 1))
         self.samples = coordinates.copy()
 
         for proposal in range(proposals):

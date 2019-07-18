@@ -47,7 +47,7 @@ class Himmelblau(Target):
     dimensions = 2
     annealing = 1
 
-    def __init__(self, annealing: float = 1):
+    def __init__(self, dimensions: int = -1, annealing: float = 1):
         """
 
         Parameters
@@ -90,3 +90,21 @@ class Himmelblau(Target):
         gradient[0] = 2 * (2 * x * (x ** 2 + y - 11) + x + y ** 2 - 7)
         gradient[1] = 2 * (x ** 2 + 2 * y * (x + y ** 2 - 7) + y - 11)
         return gradient / self.annealing
+
+
+class Empty(Target):
+    def __init__(self, dimensions: int):
+        """
+
+        Parameters
+        ----------
+        dimensions
+        """
+        self.name = "empty target"
+        self.dimensions = dimensions
+
+    def misfit(self, coordinates: numpy.ndarray) -> float:
+        return 0.0
+
+    def gradient(self, coordinates: numpy.ndarray) -> numpy.ndarray:
+        return numpy.zeros((self.dimensions, 1))
