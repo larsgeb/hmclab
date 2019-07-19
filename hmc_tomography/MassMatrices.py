@@ -116,6 +116,7 @@ class Diagonal(MassMatrix):
                     f"dimensions, which would be ({self.dimensions, 1})."
                 )
             self.diagonal = diagonal
+        self.inverse_diagonal = 1.0 / self.diagonal
 
     def kinetic_energy(self, momentum: numpy.ndarray) -> float:
         """
@@ -128,7 +129,7 @@ class Diagonal(MassMatrix):
         -------
 
         """
-        return 0.5 * (momentum.T @ ((self.diagonal ** -1) * momentum)).item(0)
+        return 0.5 * (momentum.T @ (self.inverse_diagonal * momentum)).item(0)
 
     def kinetic_energy_gradient(self, momentum: numpy.ndarray) -> numpy.ndarray:
         """
@@ -141,7 +142,7 @@ class Diagonal(MassMatrix):
         -------
 
         """
-        return (self.diagonal ** -1) * momentum
+        return self.inverse_diagonal * momentum
 
     def generate_momentum(self) -> numpy.ndarray:
         """
