@@ -11,6 +11,7 @@ class Prior(ABC):
 
     name: str = ""
     dimensions: int = -1
+    bounded: bool = False
 
     @abstractmethod
     def misfit(self, coordinates: numpy.ndarray) -> float:
@@ -45,12 +46,16 @@ class Normal(Prior):
 
     """
 
+    lower_bounds: numpy.ndarray = None
+    upper_bounds: numpy.ndarray = None
+
     def __init__(
         self,
         dimensions: int,
         means: numpy.ndarray = None,
         covariance: numpy.ndarray = None,
-        inverse_covariance: numpy.ndarray = None,
+        lower_bounds: numpy.ndarray = None,
+        upper_bounds: numpy.ndarray = None,
     ):
         """
 
@@ -83,7 +88,7 @@ class Normal(Prior):
 
             # Parse means
             if means.shape != (self.dimensions, 1):
-                ValueError("Incorrect size of means vector.")
+                raise ValueError("Incorrect size of means vector.")
             self.means: numpy.ndarray = means
 
             # Parse covariance
@@ -97,12 +102,31 @@ class Normal(Prior):
                     "yellow",
                 )
             else:
-                ValueError("Incorrect size of covariance matrix.")
+                raise ValueError("Incorrect size of covariance matrix.")
             self.covariance = covariance
         if self.diagonal:
             self.inverse_covariance = 1.0 / self.covariance
         else:
             self.inverse_covariance = numpy.linalg.inv(self.covariance)
+
+        # Process optional bounds
+        if lower_bounds is not None and lower_bounds.shape == (
+            self.dimensions,
+            1,
+        ):
+            self.lower_bounds = lower_bounds
+            self.bounded = True
+        elif lower_bounds is not None:
+            raise ValueError("Incorrect size of lower bounds vector.")
+
+        if upper_bounds is not None and upper_bounds.shape == (
+            self.dimensions,
+            1,
+        ):
+            self.upper_bounds = upper_bounds
+            self.bounded = True
+        elif upper_bounds is not None:
+            raise ValueError("Incorrect size of upper bounds vector.")
 
     def misfit(self, coordinates: numpy.ndarray) -> float:
         """
@@ -115,6 +139,16 @@ class Normal(Prior):
         -------
 
         """
+        if self.bounded:
+            if self.lower_bounds is not None and not numpy.all(
+                coordinates > self.lower_bounds
+            ):
+                return numpy.inf
+            if self.upper_bounds is not None and not numpy.all(
+                coordinates < self.upper_bounds
+            ):
+                return numpy.inf
+
         if self.diagonal:
             return 0.5 * (
                 (self.means - coordinates).T
@@ -147,6 +181,9 @@ class Normal(Prior):
         """
 
         """
+        raise NotImplementedError("This function is not finished yet")
+
+    def post_update_hook(self):
         raise NotImplementedError("This function is not finished yet")
 
 
@@ -192,7 +229,7 @@ class LogNormal(Prior):
 
             # Parse means
             if means.shape != (self.dimensions, 1):
-                ValueError("Incorrect size of means vector.")
+                raise ValueError("Incorrect size of means vector.")
             self.means: numpy.ndarray = means
 
             # Parse covariance
@@ -206,7 +243,7 @@ class LogNormal(Prior):
                     "yellow",
                 )
             else:
-                ValueError("Incorrect size of covariance matrix.")
+                raise ValueError("Incorrect size of covariance matrix.")
             self.covariance: numpy.ndarray = covariance
         if self.diagonal:
             self.inverse_covariance = 1.0 / self.covariance
@@ -247,6 +284,9 @@ class LogNormal(Prior):
             ) + numpy.sum(1.0 / coordinates)
 
     def generate(self) -> numpy.ndarray:
+        raise NotImplementedError("This function is not finished yet")
+
+    def post_update_hook(self):
         raise NotImplementedError("This function is not finished yet")
 
 
@@ -296,6 +336,71 @@ class UnboundedUniform(Prior):
             "This prior is unbounded, so it is impossible to generate samples"
             "from it."
         )
+
+    def post_update_hook(self):
+        raise NotImplementedError("This function is not finished yet")
+
+
+class Uniform(Prior):
+    def __init__(
+        self,
+        dimensions: int,
+        lower_bounds: numpy.ndarray,
+        upper_bounds: numpy.ndarray,
+    ):
+        """
+
+        Parameters
+        ----------
+        dimensions
+        """
+        self.name = "uniform prior"
+        self.dimensions = dimensions
+        if not lower_bounds.shape == upper_bounds.shape == (dimensions, 1):
+            raise ValueError("Bounds vectors are of incorrect size.")
+        self.lower_bounds = lower_bounds
+        self.widths = upper_bounds - lower_bounds
+        if not numpy.all(self.widths > 0.0):
+            raise ValueError("Some upper bounds are below lower bounds.")
+        self._misfit = -numpy.sum(numpy.log(self.widths))
+
+    def misfit(self, coordinates: numpy.ndarray) -> float:
+        """
+
+        Parameters
+        ----------
+        coordinates
+
+        Returns
+        -------
+
+        """
+        return self._misfit
+
+    def gradient(self, coordinates: numpy.ndarray) -> numpy.ndarray:
+        """
+
+        Parameters
+        ----------
+        coordinates
+
+        Returns
+        -------
+
+        """
+        return numpy.zeros((self.dimensions, 1))
+
+    # noinspection PyTypeChecker
+    def generate(self) -> numpy.ndarray:  # One shouldn't be able to do this
+        """
+
+        """
+        return self.lower_bounds + self.widths * numpy.random.rand(
+            self.dimensions, 1
+        )
+
+    def post_update_hook(self):
+        raise NotImplementedError("This function is not finished yet")
 
 
 def make_spd_matrix(dim):
