@@ -1,6 +1,8 @@
 """
 Sampler classes and associated methods.
 """
+import sys
+import time
 from abc import ABC, abstractmethod
 
 import numpy
@@ -17,6 +19,7 @@ class Sampler(ABC):
 
     name: str = "Monte Carlo sampler abstract base class"
     dimensions: int = -1
+    online_thinning: int = 1
     prior: Prior
     target: Target
 
@@ -43,6 +46,7 @@ class HMC(Sampler):
         mass_matrix: MassMatrix,
         prior: Prior,
         quiet: bool = False,
+        online_thinning=1,
     ):
         """
 
@@ -70,6 +74,7 @@ class HMC(Sampler):
         self.prior = prior
         self.mass_matrix = mass_matrix
         self.target = target
+        self.online_thinning = online_thinning
 
         # Loading and parsing configuration ------------------------------------
         with open(config_file_path, "r") as config_file:
@@ -80,12 +85,17 @@ class HMC(Sampler):
                 print("{:<20} {:>20} ".format(section, cfg[section]))
 
     def sample(
-        self, proposals=100, iterations: int = 10, time_step: float = 0.1
+        self,
+        proposals=100,
+        iterations: int = 10,
+        time_step: float = 0.1,
+        online_thinning: int = None,
     ) -> int:
         """
 
         Parameters
         ----------
+        online_thinning : object
         proposals
         iterations
         time_step
@@ -94,14 +104,27 @@ class HMC(Sampler):
         -------
 
         """
+
+        # Prepare sampling -----------------------------------------------------
         accepted = 0
         coordinates = numpy.ones((self.dimensions, 1))
         self.samples = coordinates.copy()
+        if online_thinning is None:
+            online_thinning = self.online_thinning
 
-        iterable = tqdm.tqdm(range(proposals))
+        # Flush output (works best if followed by sleep() )
+        sys.stdout.flush()
+        time.sleep(0.001)
+
+        # Create progress bar
+        iterable = tqdm.trange(
+            proposals, desc="Sampling. Acceptance rate:", leave=True
+        )
+
+        # Start sampling, but catch CTRL+C (SIGINT) and continue ---------------
         try:
             for proposal in iterable:
-                # Compute initial Hamiltonian ----------------------------------
+                # Compute initial Hamiltonian
                 potential: float = self.target.misfit(
                     coordinates
                 ) + self.prior.misfit(coordinates)
@@ -109,12 +132,12 @@ class HMC(Sampler):
                 kinetic: float = self.mass_matrix.kinetic_energy(momentum)
                 hamiltonian: float = potential + kinetic
 
-                # Propagate using a numerical integrator -----------------------
+                # Propagate using a numerical integrator
                 new_coordinates, new_momentum = self.propagate_leapfrog(
                     coordinates, momentum, iterations, time_step
                 )
 
-                # Compute resulting Hamiltonian --------------------------------
+                # Compute resulting Hamiltonian
                 new_potential: float = self.target.misfit(
                     new_coordinates
                 ) + self.prior.misfit(new_coordinates)
@@ -123,31 +146,31 @@ class HMC(Sampler):
                 )
                 new_hamiltonian: float = new_potential + new_kinetic
 
-                # Print results ------------------------------------------------
-                # print(
-                #     f"""
-                #     Initial Hamiltonian: \t{hamiltonian:.3f}
-                #     New Hamiltonian: \t\t{new_hamiltonian:.3f}
-                #     """
-                # )
-
-                # Evaluate acceptance criterion --------------------------------
+                # Evaluate acceptance criterion
                 if numpy.exp(
                     hamiltonian - new_hamiltonian
                 ) > numpy.random.uniform(0, 1):
                     accepted += 1
                     coordinates = new_coordinates.copy()
-                    # print("Accepted")
                 else:
-                    # print("Rejected")
                     pass
 
-                # Append new state ---------------------------------------------
-                self.samples = numpy.append(self.samples, coordinates, axis=1)
-        except KeyboardInterrupt:
-            iterable.close()
+                # On-line thinning
+                if proposal % online_thinning == 0:
+                    self.samples = numpy.append(
+                        self.samples, coordinates, axis=1
+                    )
+                    iterable.set_description(
+                        f"Average acceptance rate: {accepted/(proposal+1):.2f}."
+                        "Progress"
+                    )
+        except KeyboardInterrupt:  # Catch SIGINT
+            iterable.close()  # Close tqdm progressbar
 
-        print(f"Accepted proposals: {accepted}")
+        # Flush output
+        sys.stdout.flush()
+        time.sleep(0.001)
+
         return 0
 
     def propagate_leapfrog(
@@ -170,6 +193,7 @@ class HMC(Sampler):
         -------
 
         """
+        # Make sure not to alter a view but a copy of the passed arrays.
         coordinates = coordinates.copy()
         momentum = momentum.copy()
 
