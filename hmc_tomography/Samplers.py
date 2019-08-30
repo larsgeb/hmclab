@@ -2,12 +2,12 @@
 Sampler classes and associated methods.
 """
 import sys
-import time
 from abc import ABC, abstractmethod
 
+import h5py
 import numpy
+import time
 import tqdm as tqdm
-import yaml
 from typing import Tuple
 
 from hmc_tomography.Priors import Prior
@@ -16,16 +16,33 @@ from hmc_tomography.Targets import Target
 
 
 class Sampler(ABC):
+    """Monte Carlo Sampler base class
+
+    """
 
     name: str = "Monte Carlo sampler abstract base class"
     dimensions: int = -1
-    online_thinning: int = 1
     prior: Prior
     target: Target
+    sample_hdf5_file = None
+    sample_hdf5_dataset = None
+    sample_ram_buffer: numpy.ndarray
 
     @abstractmethod
-    def sample(self):
+    def sample(
+        self,
+        samples_filename: str,
+        proposals: int = 100,
+        online_thinning: int = 1,
+        sample_ram_buffer_size: int = 1000,
+    ) -> int:
         """
+        Parameters
+        ----------
+        proposals
+        online_thinning
+        sample_ram_buffer_size
+        samples_filename
 
         """
         pass
@@ -39,24 +56,14 @@ class HMC(Sampler):
     name = "Hamiltonian Monte Carlo sampler"
     mass_matrix: MassMatrix
 
-    def __init__(
-        self,
-        config_file_path: str,
-        target: Target,
-        mass_matrix: MassMatrix,
-        prior: Prior,
-        quiet: bool = False,
-        online_thinning=1,
-    ):
+    def __init__(self, target: Target, mass_matrix: MassMatrix, prior: Prior):
         """
 
         Parameters
         ----------
-        config_file_path
         target
         mass_matrix
         prior
-        quiet
         """
         # Sanity check on the dimensions of passed objects ---------------------
         if not (
@@ -74,31 +81,30 @@ class HMC(Sampler):
         self.prior = prior
         self.mass_matrix = mass_matrix
         self.target = target
-        self.online_thinning = online_thinning
-
-        # Loading and parsing configuration ------------------------------------
-        with open(config_file_path, "r") as config_file:
-            cfg = yaml.load(config_file, Loader=yaml.FullLoader)
-        if quiet is not True:
-            print("Sections in configuration file:")
-            for section in cfg:
-                print("{:<20} {:>20} ".format(section, cfg[section]))
 
     def sample(
         self,
-        proposals=100,
-        iterations: int = 10,
+        samples_filename: str,
+        proposals: int = 100,
+        online_thinning: int = 1,
+        sample_ram_buffer_size: int = 1000,
+        integration_steps: int = 10,
         time_step: float = 0.1,
-        online_thinning: int = None,
+        randomize_integration_steps: bool = True,
+        randomize_time_step: bool = True,
     ) -> int:
         """
 
         Parameters
         ----------
-        online_thinning : object
+        samples_filename
         proposals
-        iterations
+        online_thinning
+        sample_ram_buffer_size
+        integration_steps
         time_step
+        randomize_integration_steps
+        randomize_time_step
 
         Returns
         -------
@@ -107,23 +113,68 @@ class HMC(Sampler):
 
         # Prepare sampling -----------------------------------------------------
         accepted = 0
+
+        # Initial model
         coordinates = numpy.ones((self.dimensions, 1))
-        self.samples = coordinates.copy()
-        if online_thinning is None:
-            online_thinning = self.online_thinning
+
+        # Create RAM buffer for samples
+        self.sample_ram_buffer = numpy.empty(
+            (self.dimensions + 1, sample_ram_buffer_size)
+        )
+
+        # Create or open HDF5 file
+        total_samples_to_be_generated = int((1.0 / online_thinning) * proposals)
+        self.open_hdf5(samples_filename, total_samples_to_be_generated)
+
+        # Set attributes of the dataset to correspond to sampling settings
+        self.sample_hdf5_dataset.attrs["proposals"] = proposals
+        self.sample_hdf5_dataset.attrs["online_thinning"] = online_thinning
+        self.sample_hdf5_dataset.attrs["time_step"] = time_step
+        self.sample_hdf5_dataset.attrs["integration_steps"] = integration_steps
+        self.sample_hdf5_dataset.attrs[
+            "randomize_time_step"
+        ] = randomize_time_step
+        self.sample_hdf5_dataset.attrs[
+            "randomize_iterations"
+        ] = randomize_integration_steps
 
         # Flush output (works best if followed by sleep() )
         sys.stdout.flush()
         time.sleep(0.001)
 
         # Create progress bar
-        iterable = tqdm.trange(
+        proposals_total = tqdm.trange(
             proposals, desc="Sampling. Acceptance rate:", leave=True
         )
 
-        # Start sampling, but catch CTRL+C (SIGINT) and continue ---------------
+        # Selection of integrator ----------------------------------------------
+        propagate = self.propagate_leapfrog
+
+        # Optional randomization -----------------------------------------------
+        if randomize_integration_steps:
+
+            def _iterations():
+                return int(integration_steps * (0.5 + numpy.random.rand()))
+
+        else:
+
+            def _iterations():
+                return integration_steps
+
+        if randomize_time_step:
+
+            def _time_step():
+                return float(time_step * (0.5 + numpy.random.rand()))
+
+        else:
+
+            def _time_step():
+                return time_step
+
+        # Start sampling, but catch CTRL+C (SIGINT) ----------------------------
         try:
-            for proposal in iterable:
+            for proposal in proposals_total:
+
                 # Compute initial Hamiltonian
                 potential: float = self.target.misfit(
                     coordinates
@@ -132,9 +183,9 @@ class HMC(Sampler):
                 kinetic: float = self.mass_matrix.kinetic_energy(momentum)
                 hamiltonian: float = potential + kinetic
 
-                # Propagate using a numerical integrator
-                new_coordinates, new_momentum = self.propagate_leapfrog(
-                    coordinates, momentum, iterations, time_step
+                # Propagate using the numerical integrator
+                new_coordinates, new_momentum = propagate(
+                    coordinates, momentum, _iterations(), _time_step()
                 )
 
                 # Compute resulting Hamiltonian
@@ -155,17 +206,55 @@ class HMC(Sampler):
                 else:
                     pass
 
-                # On-line thinning
+                # On-line thinning and  writing samples to disk ----------------
                 if proposal % online_thinning == 0:
-                    self.samples = numpy.append(
-                        self.samples, coordinates, axis=1
+                    buffer_location: int = int(
+                        (proposal / online_thinning) % sample_ram_buffer_size
                     )
-                    iterable.set_description(
+                    self.sample_ram_buffer[:-1, buffer_location] = coordinates[
+                        :, 0
+                    ]
+                    self.sample_ram_buffer[
+                        -1, buffer_location
+                    ] = self.target.misfit(coordinates) + self.prior.misfit(
+                        coordinates
+                    )
+                    proposals_total.set_description(
                         f"Average acceptance rate: {accepted/(proposal+1):.2f}."
                         "Progress"
                     )
-        except KeyboardInterrupt:  # Catch SIGINT
-            iterable.close()  # Close tqdm progressbar
+                    # Write out to disk when at the end of the buffer
+                    if buffer_location == sample_ram_buffer_size - 1:
+                        start = int(
+                            (proposal / online_thinning)
+                            - sample_ram_buffer_size
+                            + 1
+                        )
+                        end = int((proposal / online_thinning))
+                        self.flush_samples(start, end, self.sample_ram_buffer)
+
+        except KeyboardInterrupt:  # Catch SIGINT ------------------------------
+            # Close tqdm progressbar
+            proposals_total.close()
+            # Flush the last samples
+        finally:  # Write out samples still in the buffer ----------------------
+            buffer_location: int = int(
+                (proposal / online_thinning) % sample_ram_buffer_size
+            )
+            start = (
+                int((proposal / online_thinning) / sample_ram_buffer_size)
+                * sample_ram_buffer_size
+            )
+            end = (
+                int(proposal / online_thinning) - 1
+            )  # Write out one less to be sure
+            if (
+                end - start + 1 > 0
+                and buffer_location != sample_ram_buffer_size - 1
+            ):
+                self.flush_samples(
+                    start, end, self.sample_ram_buffer[:, :buffer_location]
+                )
 
         # Flush output
         sys.stdout.flush()
@@ -193,14 +282,20 @@ class HMC(Sampler):
         -------
 
         """
+
         # Make sure not to alter a view but a copy of the passed arrays.
         coordinates = coordinates.copy()
         momentum = momentum.copy()
 
         # Leapfrog integration -------------------------------------------------
+        # Coordinates half step before loop
         coordinates += (
             0.5 * time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
         )
+        if self.prior.bounded:  # Correct if the distribution is bounded
+            self.prior.corrector(coordinates, momentum)
+
+        # Integration loop
         for i in range(iterations - 1):
             potential_gradient = self.target.gradient(
                 coordinates
@@ -209,6 +304,10 @@ class HMC(Sampler):
             coordinates += time_step * self.mass_matrix.kinetic_energy_gradient(
                 momentum
             )
+            if self.prior.bounded:  # Correct if the distribution is bounded
+                self.prior.corrector(coordinates, momentum)
+
+        # Full momentum and half step coordinates after loop
         potential_gradient = self.target.gradient(
             coordinates
         ) + self.prior.gradient(coordinates)
@@ -216,5 +315,19 @@ class HMC(Sampler):
         coordinates += (
             0.5 * time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
         )
+        if self.prior.bounded:  # Correct if the distribution is bounded
+            self.prior.corrector(coordinates, momentum)
 
         return coordinates, momentum
+
+    def open_hdf5(self, name: str, length: int, dtype: str = "f8"):
+        self.sample_hdf5_file = h5py.File(name, "a")
+        _time = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+        self.sample_hdf5_dataset = self.sample_hdf5_file.create_dataset(
+            f"samples {_time}", (self.dimensions + 1, length), dtype=dtype
+        )
+        self.sample_hdf5_dataset.attrs["sampler"] = "HMC"
+
+    def flush_samples(self, start: int, end: int, data: numpy.ndarray):
+        self.sample_hdf5_dataset.attrs["end_of_samples"] = end + 1
+        self.sample_hdf5_dataset[:, start : end + 1] = data

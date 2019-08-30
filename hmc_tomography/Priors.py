@@ -40,6 +40,10 @@ class Prior(ABC):
         """
         pass
 
+    @abstractmethod
+    def corrector(self, coordinates: numpy.ndarray, momentum: numpy.ndarray):
+        pass
+
 
 class Normal(Prior):
     """Normal distribution in model space.
@@ -69,7 +73,7 @@ class Normal(Prior):
         self.diagonal: bool = False  # whether or not Gaussian is uncorrelated
 
         if means is None and covariance is None:
-            # Neither means nor covariance is provided
+            # Neither means nor covariance is provided -------------------------
             cprint(
                 "Neither means or covariance matrix provided. Generating "
                 "random means and variances.",
@@ -79,12 +83,12 @@ class Normal(Prior):
             self.covariance = make_spd_matrix(self.dimensions)
 
         elif means is None or covariance is None:
-            # Only one of means or covariance is provided
+            # Only one of means or covariance is provided ----------------------
             raise ValueError(
                 "No means or covariance matrix provided. Not sure what to do!"
             )
         else:
-            # Both means and covariance are provided
+            # Both means and covariance are provided ---------------------------
 
             # Parse means
             if means.shape != (self.dimensions, 1):
@@ -109,7 +113,7 @@ class Normal(Prior):
         else:
             self.inverse_covariance = numpy.linalg.inv(self.covariance)
 
-        # Process optional bounds
+        # Process optional bounds ----------------------------------------------
         if lower_bounds is not None and lower_bounds.shape == (
             self.dimensions,
             1,
@@ -183,8 +187,21 @@ class Normal(Prior):
         """
         raise NotImplementedError("This function is not finished yet")
 
-    def post_update_hook(self):
-        raise NotImplementedError("This function is not finished yet")
+    def corrector(self, coordinates, momentum):
+        if self.lower_bounds is not None:
+            # Lower bound correction ---------------------------------------
+            too_low = coordinates < self.lower_bounds
+            coordinates[too_low] += 2 * (
+                self.lower_bounds[too_low] - coordinates[too_low]
+            )
+            momentum[too_low] *= -1.0
+        if self.upper_bounds is not None:
+            # Lower bound correction ---------------------------------------
+            too_high = coordinates > self.upper_bounds
+            coordinates[too_high] += 2 * (
+                self.upper_bounds[too_high] - coordinates[too_high]
+            )
+            momentum[too_high] *= -1.0
 
 
 class LogNormal(Prior):
