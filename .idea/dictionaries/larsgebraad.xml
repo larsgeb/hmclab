@@ -4,7 +4,9 @@
       <w>autocorrelation</w>
       <w>himmelblau</w>
       <w>lbfgs</w>
+      <w>pyplot</w>
       <w>termcolor</w>
+      <w>tqdm</w>
       <w>traceplot</w>
     </words>
   </dictionary>

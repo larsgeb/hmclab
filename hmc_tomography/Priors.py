@@ -44,6 +44,24 @@ class Prior(ABC):
     def corrector(self, coordinates: numpy.ndarray, momentum: numpy.ndarray):
         pass
 
+    def bounds_corrector(
+        self, coordinates: numpy.ndarray, momentum: numpy.ndarray
+    ):
+        if self.lower_bounds is not None:
+            # Lower bound correction ---------------------------------------
+            too_low = coordinates < self.lower_bounds
+            coordinates[too_low] += 2 * (
+                self.lower_bounds[too_low] - coordinates[too_low]
+            )
+            momentum[too_low] *= -1.0
+        if self.upper_bounds is not None:
+            # Lower bound correction ---------------------------------------
+            too_high = coordinates > self.upper_bounds
+            coordinates[too_high] += 2 * (
+                self.upper_bounds[too_high] - coordinates[too_high]
+            )
+            momentum[too_high] *= -1.0
+
 
 class Normal(Prior):
     """Normal distribution in model space.
@@ -188,20 +206,7 @@ class Normal(Prior):
         raise NotImplementedError("This function is not finished yet")
 
     def corrector(self, coordinates, momentum):
-        if self.lower_bounds is not None:
-            # Lower bound correction ---------------------------------------
-            too_low = coordinates < self.lower_bounds
-            coordinates[too_low] += 2 * (
-                self.lower_bounds[too_low] - coordinates[too_low]
-            )
-            momentum[too_low] *= -1.0
-        if self.upper_bounds is not None:
-            # Lower bound correction ---------------------------------------
-            too_high = coordinates > self.upper_bounds
-            coordinates[too_high] += 2 * (
-                self.upper_bounds[too_high] - coordinates[too_high]
-            )
-            momentum[too_high] *= -1.0
+        self.bounds_corrector(coordinates, momentum)
 
 
 class LogNormal(Prior):
@@ -214,6 +219,8 @@ class LogNormal(Prior):
         dimensions: int,
         means: numpy.ndarray = None,
         covariance: numpy.ndarray = None,
+        lower_bounds: numpy.ndarray = None,
+        upper_bounds: numpy.ndarray = None,
     ):
         """
 
@@ -267,6 +274,25 @@ class LogNormal(Prior):
         else:
             self.inverse_covariance = numpy.linalg.inv(self.covariance)
 
+        # Process optional bounds ----------------------------------------------
+        if lower_bounds is not None and lower_bounds.shape == (
+            self.dimensions,
+            1,
+        ):
+            self.lower_bounds = lower_bounds
+            self.bounded = True
+        elif lower_bounds is not None:
+            raise ValueError("Incorrect size of lower bounds vector.")
+
+        if upper_bounds is not None and upper_bounds.shape == (
+            self.dimensions,
+            1,
+        ):
+            self.upper_bounds = upper_bounds
+            self.bounded = True
+        elif upper_bounds is not None:
+            raise ValueError("Incorrect size of upper bounds vector.")
+
     def misfit(self, coordinates: numpy.ndarray) -> float:
         logarithmic_coordinates = numpy.log(coordinates)
         if self.diagonal:
@@ -303,8 +329,8 @@ class LogNormal(Prior):
     def generate(self) -> numpy.ndarray:
         raise NotImplementedError("This function is not finished yet")
 
-    def post_update_hook(self):
-        raise NotImplementedError("This function is not finished yet")
+    def corrector(self, coordinates, momentum):
+        self.bounds_corrector(coordinates, momentum)
 
 
 class UnboundedUniform(Prior):
@@ -344,7 +370,6 @@ class UnboundedUniform(Prior):
         """
         return numpy.zeros((self.dimensions, 1))
 
-    # noinspection PyTypeChecker
     def generate(self) -> numpy.ndarray:  # One shouldn't be able to do this
         """
 
@@ -354,16 +379,16 @@ class UnboundedUniform(Prior):
             "from it."
         )
 
-    def post_update_hook(self):
-        raise NotImplementedError("This function is not finished yet")
+    def corrector(self, coordinates: numpy.ndarray, momentum: numpy.ndarray):
+        pass
 
 
 class Uniform(Prior):
     def __init__(
         self,
         dimensions: int,
-        lower_bounds: numpy.ndarray,
-        upper_bounds: numpy.ndarray,
+        lower_bounds: numpy.ndarray = None,
+        upper_bounds: numpy.ndarray = None,
     ):
         """
 
@@ -373,13 +398,24 @@ class Uniform(Prior):
         """
         self.name = "uniform prior"
         self.dimensions = dimensions
-        if not lower_bounds.shape == upper_bounds.shape == (dimensions, 1):
+        if upper_bounds is None:
+            self.upper_bounds = numpy.ones((dimensions, 1))
+        else:
+            self.upper_bounds = upper_bounds or numpy.ones((dimensions, 1))
+        if lower_bounds is None:
+            self.lower_bounds = numpy.zeros((dimensions, 1))
+        else:
+            self.lower_bounds = lower_bounds
+        if (
+            not self.lower_bounds.shape
+            == self.upper_bounds.shape
+            == (dimensions, 1)
+        ):
             raise ValueError("Bounds vectors are of incorrect size.")
-        self.lower_bounds = lower_bounds
-        self.widths = upper_bounds - lower_bounds
+        self.widths = self.upper_bounds - self.lower_bounds
         if not numpy.all(self.widths > 0.0):
             raise ValueError("Some upper bounds are below lower bounds.")
-        self._misfit = -numpy.sum(numpy.log(self.widths))
+        self._misfit = -numpy.sum(numpy.log(self.widths)).item()
 
     def misfit(self, coordinates: numpy.ndarray) -> float:
         """
@@ -407,7 +443,6 @@ class Uniform(Prior):
         """
         return numpy.zeros((self.dimensions, 1))
 
-    # noinspection PyTypeChecker
     def generate(self) -> numpy.ndarray:  # One shouldn't be able to do this
         """
 
@@ -416,8 +451,8 @@ class Uniform(Prior):
             self.dimensions, 1
         )
 
-    def post_update_hook(self):
-        raise NotImplementedError("This function is not finished yet")
+    def corrector(self, coordinates, momentum):
+        self.bounds_corrector(coordinates, momentum)
 
 
 def make_spd_matrix(dim):
