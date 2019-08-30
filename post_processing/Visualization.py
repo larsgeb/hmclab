@@ -4,7 +4,9 @@ import numpy
 from post_processing import Processing
 
 
-def visualize_2_dimensions(samples, dim1: int = 0, dim2: int = 1):
+def visualize_2_dimensions(
+    samples, dim1: int = 0, dim2: int = 1, bins: int = 25
+):
     figure_analysis = pyplot.figure(figsize=(16, 8))
     axis_2d_histogram = figure_analysis.add_axes([0.025, 0.52, 0.2, 0.4])
 
@@ -32,9 +34,9 @@ def visualize_2_dimensions(samples, dim1: int = 0, dim2: int = 1):
         ]
     )
 
-    axis_2d_histogram.hist2d(samples[dim1, :], samples[dim2, :], 100)
-    axis_1d_histogram_x.hist(samples[dim1, :], 100)
-    axis_1d_histogram_y.hist(samples[dim2, :], 100, orientation="horizontal")
+    axis_2d_histogram.hist2d(samples[dim1, :], samples[dim2, :], bins)
+    axis_1d_histogram_x.hist(samples[dim1, :], bins)
+    axis_1d_histogram_y.hist(samples[dim2, :], bins, orientation="horizontal")
     axis_1d_traceplot.plot(samples[dim2, :], "--")
     axis_1d_traceplot.set_xlim([0, samples[dim2, :].size])
     axis_autocorrelation.plot(

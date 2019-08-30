@@ -47,15 +47,15 @@ def main(dimensions=50, indent=0):
                 + f"yet, won't fail test.\r\n",
                 "yellow",
             )
-        except Exception as e:
-            exit_code = 1
-            cprint(
-                prefix + f"Test unsuccessful for {prior.name}. Traceback with "
-                "exception:",
-                "red",
-            )
-            tb1 = traceback.TracebackException.from_exception(e)
-            print("".join(tb1.format()), "\r\n")
+        # except Exception as e:
+        #     exit_code = 1
+        #     cprint(
+        #         prefix + f"Test unsuccessful for {prior.name}. Traceback with "
+        #         "exception:",
+        #         "red",
+        #     )
+        #     tb1 = traceback.TracebackException.from_exception(e)
+        #     print("".join(tb1.format()), "\r\n")
 
     if exit_code == 0:
         cprint(
