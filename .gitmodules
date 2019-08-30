@@ -1,0 +1,3 @@
+[submodule "SalvusWrap"]
+	path = SalvusWrap
+	url = git@github.com:larsgeb/SalvusWrap.git
