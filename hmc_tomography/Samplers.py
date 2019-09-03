@@ -92,6 +92,7 @@ class HMC(Sampler):
         time_step: float = 0.1,
         randomize_integration_steps: bool = True,
         randomize_time_step: bool = True,
+        initial_model: numpy.ndarray = None,
     ) -> int:
         """
 
@@ -115,7 +116,11 @@ class HMC(Sampler):
         accepted = 0
 
         # Initial model
-        coordinates = numpy.ones((self.dimensions, 1))
+        if initial_model is None:
+            coordinates = numpy.ones((self.dimensions, 1))
+        else:
+            assert initial_model.shape == (self.dimensions, 1)
+            coordinates = initial_model
 
         # Create RAM buffer for samples
         self.sample_ram_buffer = numpy.empty(
@@ -173,7 +178,7 @@ class HMC(Sampler):
 
         # Start sampling, but catch CTRL+C (SIGINT) ----------------------------
         try:
-            for proposal in proposals_total:
+            for proposal in tqdm.tqdm(proposals_total):
 
                 # Compute initial Hamiltonian
                 potential: float = self.target.misfit(
@@ -197,14 +202,25 @@ class HMC(Sampler):
                 )
                 new_hamiltonian: float = new_potential + new_kinetic
 
+                print("")
+                print("Proposal:")
+                print("X old: %7.5e" % potential)
+                print("K old: %7.5e" % kinetic)
+                print("H old: %7.5e" % hamiltonian)
+                print("X new: %7.5e" % new_potential)
+                print("K new: %7.5e" % new_kinetic)
+                print("H new: %7.5e" % new_hamiltonian)
+                print("accep: %7.5e" % numpy.exp(hamiltonian - new_hamiltonian))
+
                 # Evaluate acceptance criterion
                 if numpy.exp(
                     hamiltonian - new_hamiltonian
                 ) > numpy.random.uniform(0, 1):
                     accepted += 1
                     coordinates = new_coordinates.copy()
+                    print("accepted")
                 else:
-                    pass
+                    print("rejected")
 
                 # On-line thinning and  writing samples to disk ----------------
                 if proposal % online_thinning == 0:
@@ -301,6 +317,9 @@ class HMC(Sampler):
                 coordinates
             ) + self.prior.gradient(coordinates)
             momentum -= time_step * potential_gradient
+
+            print("Kinetic: %7.5e" % self.mass_matrix.kinetic_energy(momentum))
+
             coordinates += time_step * self.mass_matrix.kinetic_energy_gradient(
                 momentum
             )

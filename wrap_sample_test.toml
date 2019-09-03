@@ -1,0 +1,35 @@
+
+# Mesh file including background model.
+mesh-file = "/home/larsgebraad/Documents/Python Projects/SalvusWrap/Models/background_model_first_order.h5"
+
+# Basis function to use.
+basis-type = "GLLAbsolute"
+gll-extent = [[0, 1000], [-800, -100]]
+
+# Simulation files
+simulation-tomls = ["SalvusWrap/tomls/Simulations/input_simulation_0.toml",
+                    "SalvusWrap/tomls/Simulations/input_simulation_1.toml",
+                    "SalvusWrap/tomls/Simulations/input_simulation_2.toml",
+                    ]
+simulation-adj-tomls = ["SalvusWrap/tomls/Simulations/input_simulation_0_adjoint.toml",
+                        "SalvusWrap/tomls/Simulations/input_simulation_1_adjoint.toml",
+                        "SalvusWrap/tomls/Simulations/input_simulation_2_adjoint.toml",
+                        ]
+
+# Receiver geometry
+receivers-toml = "SalvusWrap/tomls/Simulations/receivers.toml"
+
+# Observed data, as recorded on receiver geometry.
+data-h5s = ["/home/larsgebraad/Documents/Python Projects/SalvusWrap/bin/Observed data/receivers_0.h5",
+            "/home/larsgebraad/Documents/Python Projects/SalvusWrap/bin/Observed data/receivers_1.h5",
+            "/home/larsgebraad/Documents/Python Projects/SalvusWrap/bin/Observed data/receivers_2.h5",
+            ]
+
+working-directory = "bin"
+
+# Need not exist yet, as it is created after forward run
+#adjoint-sources-path = "Simulations/"
+
+# Salvus run options
+site-name = "pop_os_precision"
+ranks = 10
