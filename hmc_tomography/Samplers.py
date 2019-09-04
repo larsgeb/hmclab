@@ -93,7 +93,7 @@ class HMC(_AbstractSampler):
         time_step: float = 0.1,
         randomize_integration_steps: bool = True,
         randomize_time_step: bool = True,
-        initial_model: numpy.ndarray = None,
+        initial_model: _numpy.ndarray = None,
     ) -> int:
         """
 
@@ -118,7 +118,7 @@ class HMC(_AbstractSampler):
 
         # Initial model
         if initial_model is None:
-            coordinates = numpy.ones((self.dimensions, 1))
+            coordinates = _numpy.ones((self.dimensions, 1))
         else:
             assert initial_model.shape == (self.dimensions, 1)
             coordinates = initial_model
@@ -211,7 +211,7 @@ class HMC(_AbstractSampler):
                 print("X new: %7.5e" % new_potential)
                 print("K new: %7.5e" % new_kinetic)
                 print("H new: %7.5e" % new_hamiltonian)
-                print("accep: %7.5e" % numpy.exp(hamiltonian - new_hamiltonian))
+                print("accep: %7.5e" % _numpy.exp(hamiltonian - new_hamiltonian))
 
                 # Evaluate acceptance criterion
                 if _numpy.exp(
