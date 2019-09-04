@@ -19,20 +19,20 @@ def main(dimensions=50, indent=0):
     prefix = indent * "\t"
     cprint(
         prefix
-        + f"Starting kinetic_energy_gradient test for all mass matrices with\r\n"
+        + f"Starting kinetic_energy test for all mass matrices with\r\n"
         + prefix
         + f"{dimensions} dimensions...\r\n",
         "blue",
         attrs=["bold"],
     )
     momentum = numpy.ones((dimensions, 1))
-    for mass_matrix_class in MassMatrices.MassMatrix.__subclasses__():
+    for mass_matrix_class in MassMatrices._AbstractMassMatrix.__subclasses__():
         try:
             print(prefix + f"Mass matrix name: {mass_matrix_class.__name__}")
-            mass_matrix: MassMatrices.MassMatrix = mass_matrix_class(dimensions)
+            mass_matrix: MassMatrices._AbstractMassMatrix = mass_matrix_class(dimensions)
 
             # Actual test ------------------------------------------------------
-            mass_matrix.kinetic_energy_gradient(momentum)
+            mass_matrix.kinetic_energy(momentum)
             # ------------------------------------------------------------------
 
             cprint(prefix + f"Test successful.\r\n", "green")
@@ -55,13 +55,13 @@ def main(dimensions=50, indent=0):
 
     if exit_code == 0:
         cprint(
-            prefix + "All kinetic_energy_gradient tests successful.\r\n",
+            prefix + "All kinetic_energy tests successful.\r\n",
             "green",
             attrs=["bold"],
         )
     else:
         cprint(
-            prefix + "Not all kinetic_energy_gradient tests successful.\r\n",
+            prefix + "Not all kinetic_energy tests successful.\r\n",
             "red",
             attrs=["bold"],
         )

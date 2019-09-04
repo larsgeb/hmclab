@@ -1,13 +1,9 @@
 """
 Test which encompasses all aspects of sampling.
 """
-import sys
-import matplotlib.pyplot as pyplot
 import numpy
 
-sys.path.append("..")
 from hmc_tomography import Samplers, Targets, MassMatrices, Priors
-from post_processing import Visualization
 
 print("\r\nStarting sampling test ...\r\n")
 

@@ -3,3 +3,6 @@ docs
 .idea/other.xml
 venv-hmc-tomography/
 output*
+build
+dist
+hmc_tomography_*

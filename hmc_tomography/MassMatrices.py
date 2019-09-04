@@ -1,8 +1,9 @@
-from abc import ABC, abstractmethod
-import numpy
+from abc import ABC as _ABC
+from abc import abstractmethod as _abstractmethod
+import numpy as _numpy
 
 
-class MassMatrix(ABC):
+class _AbstractMassMatrix(_ABC):
     """Abstract base class for mass matrix. Defines all required methods for
     derived classes.
 
@@ -14,8 +15,8 @@ class MassMatrix(ABC):
     def full_name(self) -> str:
         return self.name
 
-    @abstractmethod
-    def kinetic_energy(self, momentum: numpy.ndarray) -> float:
+    @_abstractmethod
+    def kinetic_energy(self, momentum: _numpy.ndarray) -> float:
         """Abstract method for computing kinetic energy for a given momentum.
 
         Parameters
@@ -24,8 +25,10 @@ class MassMatrix(ABC):
         """
         float()
 
-    @abstractmethod
-    def kinetic_energy_gradient(self, momentum: numpy.ndarray) -> numpy.ndarray:
+    @_abstractmethod
+    def kinetic_energy_gradient(
+        self, momentum: _numpy.ndarray
+    ) -> _numpy.ndarray:
         """Abstract method for computing kinetic energy gradient for a given
         momentum.
 
@@ -33,14 +36,14 @@ class MassMatrix(ABC):
         ----------
         momentum
         """
-        return numpy.ndarray(())
+        return _numpy.ndarray(())
 
-    @abstractmethod
-    def generate_momentum(self) -> numpy.ndarray:
-        return numpy.ndarray(())
+    @_abstractmethod
+    def generate_momentum(self) -> _numpy.ndarray:
+        return _numpy.ndarray(())
 
 
-class Unit(MassMatrix):
+class Unit(_AbstractMassMatrix):
     def __init__(self, dimensions: int):
         """Constructor for unit mass matrices
 
@@ -48,7 +51,7 @@ class Unit(MassMatrix):
         self.name = "unit mass matrix"
         self.dimensions = dimensions
 
-    def kinetic_energy(self, momentum: numpy.ndarray) -> float:
+    def kinetic_energy(self, momentum: _numpy.ndarray) -> float:
         """
 
         Parameters
@@ -66,7 +69,9 @@ class Unit(MassMatrix):
             )
         return 0.5 * (momentum.T @ momentum).item(0)
 
-    def kinetic_energy_gradient(self, momentum: numpy.ndarray) -> numpy.ndarray:
+    def kinetic_energy_gradient(
+        self, momentum: _numpy.ndarray
+    ) -> _numpy.ndarray:
         """
 
         Parameters
@@ -79,28 +84,28 @@ class Unit(MassMatrix):
         """
         return momentum
 
-    def generate_momentum(self) -> numpy.ndarray:
+    def generate_momentum(self) -> _numpy.ndarray:
         """
 
         Returns
         -------
 
         """
-        return numpy.random.randn(self.dimensions, 1)
+        return _numpy.random.randn(self.dimensions, 1)
 
     @property
-    def matrix(self) -> numpy.ndarray:
+    def matrix(self) -> _numpy.ndarray:
         """
 
         Returns
         -------
 
         """
-        return numpy.eye(self.dimensions)
+        return _numpy.eye(self.dimensions)
 
 
-class Diagonal(MassMatrix):
-    def __init__(self, dimensions: int, diagonal: numpy.ndarray = None):
+class Diagonal(_AbstractMassMatrix):
+    def __init__(self, dimensions: int, diagonal: _numpy.ndarray = None):
         """Constructor for diagonal mass matrices.
 
         """
@@ -108,7 +113,7 @@ class Diagonal(MassMatrix):
         self.dimensions = dimensions
 
         if diagonal is None:
-            self.diagonal = numpy.ones((self.dimensions, 1))
+            self.diagonal = _numpy.ones((self.dimensions, 1))
         else:
             if diagonal.shape != (self.dimensions, 1):
                 raise ValueError(
@@ -118,7 +123,7 @@ class Diagonal(MassMatrix):
             self.diagonal = diagonal
         self.inverse_diagonal = 1.0 / self.diagonal
 
-    def kinetic_energy(self, momentum: numpy.ndarray) -> float:
+    def kinetic_energy(self, momentum: _numpy.ndarray) -> float:
         """
 
         Parameters
@@ -131,7 +136,9 @@ class Diagonal(MassMatrix):
         """
         return 0.5 * (momentum.T @ (self.inverse_diagonal * momentum)).item(0)
 
-    def kinetic_energy_gradient(self, momentum: numpy.ndarray) -> numpy.ndarray:
+    def kinetic_energy_gradient(
+        self, momentum: _numpy.ndarray
+    ) -> _numpy.ndarray:
         """
 
         Parameters
@@ -144,23 +151,23 @@ class Diagonal(MassMatrix):
         """
         return self.inverse_diagonal * momentum
 
-    def generate_momentum(self) -> numpy.ndarray:
+    def generate_momentum(self) -> _numpy.ndarray:
         """
 
         Returns
         -------
 
         """
-        return numpy.sqrt(self.diagonal) * numpy.random.randn(
+        return _numpy.sqrt(self.diagonal) * _numpy.random.randn(
             self.dimensions, 1
         )
 
     @property
-    def matrix(self) -> numpy.ndarray:
-        return numpy.diagflat(self.diagonal)
+    def matrix(self) -> _numpy.ndarray:
+        return _numpy.diagflat(self.diagonal)
 
 
-class LBFGS(MassMatrix):
+class LBFGS(_AbstractMassMatrix):
     def __init__(self, dimensions: int):
         """Constructor for LBFGS-style mass matrices.
 
@@ -168,11 +175,13 @@ class LBFGS(MassMatrix):
         self.name = "LBFGS-style mass matrix"
         self.dimensions = dimensions
 
-    def kinetic_energy(self, momentum: numpy.ndarray) -> float:
+    def kinetic_energy(self, momentum: _numpy.ndarray) -> float:
         raise NotImplementedError("This function is not finished yet")
 
-    def kinetic_energy_gradient(self, momentum: numpy.ndarray) -> numpy.ndarray:
+    def kinetic_energy_gradient(
+        self, momentum: _numpy.ndarray
+    ) -> _numpy.ndarray:
         raise NotImplementedError("This function is not finished yet")
 
-    def generate_momentum(self) -> numpy.ndarray:
+    def generate_momentum(self) -> _numpy.ndarray:
         raise NotImplementedError("This function is not finished yet")

@@ -25,11 +25,11 @@ def main(dimensions=50, indent=0):
         "blue",
         attrs=["bold"],
     )
-    for prior_class in Priors.Prior.__subclasses__():
+    for prior_class in Priors._AbstractPrior.__subclasses__():
         try:
             print(prefix + f"Prior name: {prior_class.__name__}")
 
-            prior: Priors.Prior = prior_class(dimensions)
+            prior: Priors._AbstractPrior = prior_class(dimensions)
 
             # Actual test ------------------------------------------------------
             coordinates = numpy.ones((dimensions, 1))

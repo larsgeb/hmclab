@@ -1,8 +1,5 @@
-import sys
 from termcolor import cprint
-
-sys.path.append("..")
-from tests.mass_matrix import (
+from hmc_tomography.tests.mass_matrix import (
     kinetic_energy,
     kinetic_energy_gradient,
     generate_momentum,

@@ -18,7 +18,7 @@ def main() -> int:
 
     dimensions = 10
 
-    for mass_matrix_object in MassMatrices.MassMatrix.__subclasses__():
+    for mass_matrix_object in MassMatrices._AbstractMassMatrix.__subclasses__():
 
         if mass_matrix_object is MassMatrices.Diagonal:
             mass_matrix: MassMatrices = mass_matrix_object(

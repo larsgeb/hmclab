@@ -18,12 +18,15 @@ install:
 
   - pip install -r requirements.txt
   - conda env create -f environment.yml
+  - python3 setup.py sdist bdist_wheel
+  - pip install dist/hmc_tomography_lars_gebraad-0.0.1-py3-none-any.whl --force-reinstall
   - source activate hmc-tomography
+  - pip install dist/hmc_tomography_lars_gebraad-0.0.1-py3-none-any.whl --force-reinstall
 
 script:
   - cd bin
   - which python
-  - python3 ../tests/test_all.py
-  - source deactivate
+  - python3 ../hmc_tomography/tests/test_all.py
+  - conda deactivate
   - which python
-  - python3 ../tests/test_all.py
+  - python3 ../hmc_tomography/tests/test_all.py

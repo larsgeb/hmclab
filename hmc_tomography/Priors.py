@@ -1,52 +1,42 @@
 """
 Prior distributions available to the HMC sampler.
 """
-from abc import ABC, abstractmethod
+from abc import ABC as _ABC
+from abc import abstractmethod as _abstractmethod
 
-import numpy
-from termcolor import cprint
+import numpy as _numpy
+from termcolor import cprint as _cprint
 
 
-class Prior(ABC):
+class _AbstractPrior(_ABC):
 
     name: str = ""
     dimensions: int = -1
     bounded: bool = False
 
-    @abstractmethod
-    def misfit(self, coordinates: numpy.ndarray) -> float:
-        """
+    @_abstractmethod
+    def misfit(self, coordinates: _numpy.ndarray) -> float:
 
-        Parameters
-        ----------
-        coordinates
-        """
         pass
 
-    @abstractmethod
-    def gradient(self, coordinates: numpy.ndarray) -> numpy.ndarray:
-        """
+    @_abstractmethod
+    def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
 
-        Parameters
-        ----------
-        coordinates
-        """
         pass
 
-    @abstractmethod
-    def generate(self) -> numpy.ndarray:
-        """
-
-        """
+    @_abstractmethod
+    def generate(self) -> _numpy.ndarray:
         pass
 
-    @abstractmethod
-    def corrector(self, coordinates: numpy.ndarray, momentum: numpy.ndarray):
+    @_abstractmethod
+    def corrector(self, coordinates: _numpy.ndarray, momentum: _numpy.ndarray):
+
         pass
 
     def bounds_corrector(
-        self, coordinates: numpy.ndarray, momentum: numpy.ndarray
+        self, coordinates: _numpy.ndarray, momentum: _numpy.ndarray
     ):
+
         if self.lower_bounds is not None:
             # Lower bound correction ---------------------------------------
             too_low = coordinates < self.lower_bounds
@@ -63,42 +53,34 @@ class Prior(ABC):
             momentum[too_high] *= -1.0
 
 
-class Normal(Prior):
-    """Normal distribution in model space.
+class Normal(_AbstractPrior):
+    """Normal distribution in model space."""
 
-    """
-
-    lower_bounds: numpy.ndarray = None
-    upper_bounds: numpy.ndarray = None
+    lower_bounds: _numpy.ndarray = None
+    upper_bounds: _numpy.ndarray = None
 
     def __init__(
         self,
         dimensions: int,
-        means: numpy.ndarray = None,
-        covariance: numpy.ndarray = None,
-        lower_bounds: numpy.ndarray = None,
-        upper_bounds: numpy.ndarray = None,
+        means: _numpy.ndarray = None,
+        covariance: _numpy.ndarray = None,
+        lower_bounds: _numpy.ndarray = None,
+        upper_bounds: _numpy.ndarray = None,
     ):
-        """
 
-        Parameters
-        ----------
-        means
-        covariance
-        """
         self.name = "Gaussian prior"
         self.dimensions = dimensions
         self.diagonal: bool = False  # whether or not Gaussian is uncorrelated
 
         if means is None and covariance is None:
             # Neither means nor covariance is provided -------------------------
-            cprint(
+            _cprint(
                 "Neither means or covariance matrix provided. Generating "
                 "random means and variances.",
                 "yellow",
             )
-            self.means = numpy.random.rand(dimensions, 1)
-            self.covariance = make_spd_matrix(self.dimensions)
+            self.means = _numpy.random.rand(dimensions, 1)
+            self.covariance = _make_spd_matrix(self.dimensions)
 
         elif means is None or covariance is None:
             # Only one of means or covariance is provided ----------------------
@@ -111,14 +93,14 @@ class Normal(Prior):
             # Parse means
             if means.shape != (self.dimensions, 1):
                 raise ValueError("Incorrect size of means vector.")
-            self.means: numpy.ndarray = means
+            self.means: _numpy.ndarray = means
 
             # Parse covariance
             if covariance.shape == (means.size, means.size):
                 self.diagonal = False
             elif covariance.shape == (means.size, 1):
                 self.diagonal = True
-                cprint(
+                _cprint(
                     "Seem that you only passed a vector as the covariance "
                     "matrix. It will be used as the covariance diagonal.",
                     "yellow",
@@ -129,7 +111,7 @@ class Normal(Prior):
         if self.diagonal:
             self.inverse_covariance = 1.0 / self.covariance
         else:
-            self.inverse_covariance = numpy.linalg.inv(self.covariance)
+            self.inverse_covariance = _numpy.linalg.inv(self.covariance)
 
         # Process optional bounds ----------------------------------------------
         if lower_bounds is not None and lower_bounds.shape == (
@@ -150,26 +132,16 @@ class Normal(Prior):
         elif upper_bounds is not None:
             raise ValueError("Incorrect size of upper bounds vector.")
 
-    def misfit(self, coordinates: numpy.ndarray) -> float:
-        """
-
-        Parameters
-        ----------
-        coordinates
-
-        Returns
-        -------
-
-        """
+    def misfit(self, coordinates: _numpy.ndarray) -> float:
         if self.bounded:
-            if self.lower_bounds is not None and not numpy.all(
+            if self.lower_bounds is not None and not _numpy.all(
                 coordinates > self.lower_bounds
             ):
-                return numpy.inf
-            if self.upper_bounds is not None and not numpy.all(
+                return _numpy.inf
+            if self.upper_bounds is not None and not _numpy.all(
                 coordinates < self.upper_bounds
             ):
-                return numpy.inf
+                return _numpy.inf
 
         if self.diagonal:
             return 0.5 * (
@@ -183,51 +155,57 @@ class Normal(Prior):
                 @ (self.means - coordinates)
             ).item(0)
 
-    def gradient(self, coordinates: numpy.ndarray) -> numpy.ndarray:
-        """
+    def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
 
-        Parameters
-        ----------
-        coordinates
-
-        Returns
-        -------
-
-        """
         if self.diagonal:
             return -self.inverse_covariance * (self.means - coordinates)
         else:
             return -self.inverse_covariance @ (self.means - coordinates)
 
-    def generate(self) -> numpy.ndarray:
+    def generate(self) -> _numpy.ndarray:
         """
+
+        Returns
+        -------
 
         """
         raise NotImplementedError("This function is not finished yet")
 
     def corrector(self, coordinates, momentum):
+        """
+
+        Parameters
+        ----------
+        coordinates
+        momentum
+
+        Returns
+        -------
+
+        """
         self.bounds_corrector(coordinates, momentum)
 
 
-class LogNormal(Prior):
-    """Normal distribution in logarithmic model space.
-
-    """
+class LogNormal(_AbstractPrior):
+    """Normal distribution in logarithmic model space."""
 
     def __init__(
         self,
         dimensions: int,
-        means: numpy.ndarray = None,
-        covariance: numpy.ndarray = None,
-        lower_bounds: numpy.ndarray = None,
-        upper_bounds: numpy.ndarray = None,
+        means: _numpy.ndarray = None,
+        covariance: _numpy.ndarray = None,
+        lower_bounds: _numpy.ndarray = None,
+        upper_bounds: _numpy.ndarray = None,
     ):
         """
 
         Parameters
         ----------
+        dimensions
         means
         covariance
+        lower_bounds
+        upper_bounds
         """
         self.name = "log normal (logarithmic Gaussian) prior"
         self.dimensions = dimensions
@@ -235,13 +213,13 @@ class LogNormal(Prior):
 
         if means is None and covariance is None:
             # Neither means nor covariance is provided
-            cprint(
+            _cprint(
                 "Neither means or covariance matrix provided. Generating "
                 "random means and variances.",
                 "yellow",
             )
-            self.means = numpy.random.rand(dimensions, 1)
-            self.covariance = make_spd_matrix(self.dimensions)
+            self.means = _numpy.random.rand(dimensions, 1)
+            self.covariance = _make_spd_matrix(self.dimensions)
 
         elif means is None or covariance is None:
             # Only one of means or covariance is provided
@@ -254,25 +232,25 @@ class LogNormal(Prior):
             # Parse means
             if means.shape != (self.dimensions, 1):
                 raise ValueError("Incorrect size of means vector.")
-            self.means: numpy.ndarray = means
+            self.means: _numpy.ndarray = means
 
             # Parse covariance
             if covariance.shape == (means.size, means.size):
                 self.diagonal = False
             elif covariance.shape == (means.size, 1):
                 self.diagonal = True
-                cprint(
+                _cprint(
                     "Seem that you only passed a vector as the covariance "
                     "matrix. It will be used as the covariance diagonal.",
                     "yellow",
                 )
             else:
                 raise ValueError("Incorrect size of covariance matrix.")
-            self.covariance: numpy.ndarray = covariance
+            self.covariance: _numpy.ndarray = covariance
         if self.diagonal:
             self.inverse_covariance = 1.0 / self.covariance
         else:
-            self.inverse_covariance = numpy.linalg.inv(self.covariance)
+            self.inverse_covariance = _numpy.linalg.inv(self.covariance)
 
         # Process optional bounds ----------------------------------------------
         if lower_bounds is not None and lower_bounds.shape == (
@@ -293,10 +271,10 @@ class LogNormal(Prior):
         elif upper_bounds is not None:
             raise ValueError("Incorrect size of upper bounds vector.")
 
-    def misfit(self, coordinates: numpy.ndarray) -> float:
-        logarithmic_coordinates = numpy.log(coordinates)
+    def misfit(self, coordinates: _numpy.ndarray) -> float:
+        logarithmic_coordinates = _numpy.log(coordinates)
         if self.diagonal:
-            return numpy.sum(logarithmic_coordinates).item(0) + 0.5 * (
+            return _numpy.sum(logarithmic_coordinates).item(0) + 0.5 * (
                 (self.means - logarithmic_coordinates).T
                 @ (
                     self.inverse_covariance
@@ -304,36 +282,36 @@ class LogNormal(Prior):
                 )
             ).item(0)
         else:
-            return numpy.sum(logarithmic_coordinates).item(0) + 0.5 * (
+            return _numpy.sum(logarithmic_coordinates).item(0) + 0.5 * (
                 (self.means - logarithmic_coordinates).T
                 @ self.inverse_covariance
                 @ (self.means - logarithmic_coordinates)
             ).item(0)
 
-    def gradient(self, coordinates: numpy.ndarray) -> numpy.ndarray:
+    def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
         # ! Not sure about these formulas!
-        logarithmic_coordinates = numpy.log(coordinates)
+        logarithmic_coordinates = _numpy.log(coordinates)
         if self.diagonal:
             return (
                 -self.inverse_covariance
                 * (self.means - logarithmic_coordinates)
                 / coordinates
-            ) + numpy.sum(1.0 / coordinates)
+            ) + _numpy.sum(1.0 / coordinates)
         else:
             return (
                 -self.inverse_covariance
                 @ (self.means - logarithmic_coordinates)
                 / coordinates
-            ) + numpy.sum(1.0 / coordinates)
+            ) + _numpy.sum(1.0 / coordinates)
 
-    def generate(self) -> numpy.ndarray:
+    def generate(self) -> _numpy.ndarray:
         raise NotImplementedError("This function is not finished yet")
 
     def corrector(self, coordinates, momentum):
         self.bounds_corrector(coordinates, momentum)
 
 
-class UnboundedUniform(Prior):
+class UnboundedUniform(_AbstractPrior):
     def __init__(self, dimensions: int):
         """
 
@@ -344,7 +322,7 @@ class UnboundedUniform(Prior):
         self.name = "unbounded uniform prior"
         self.dimensions = dimensions
 
-    def misfit(self, coordinates: numpy.ndarray) -> float:
+    def misfit(self, coordinates: _numpy.ndarray) -> float:
         """
 
         Parameters
@@ -357,7 +335,7 @@ class UnboundedUniform(Prior):
         """
         return 0.0
 
-    def gradient(self, coordinates: numpy.ndarray) -> numpy.ndarray:
+    def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
         """
 
         Parameters
@@ -368,42 +346,44 @@ class UnboundedUniform(Prior):
         -------
 
         """
-        return numpy.zeros((self.dimensions, 1))
+        return _numpy.zeros((self.dimensions, 1))
 
-    def generate(self) -> numpy.ndarray:  # One shouldn't be able to do this
-        """
-
-        """
+    def generate(self) -> _numpy.ndarray:  # One shouldn't be able to do this
         raise TypeError(
             "This prior is unbounded, so it is impossible to generate samples"
             "from it."
         )
 
-    def corrector(self, coordinates: numpy.ndarray, momentum: numpy.ndarray):
+    def corrector(self, coordinates: _numpy.ndarray, momentum: _numpy.ndarray):
+        """
+        Args:
+            coordinates (_numpy.ndarray):
+            momentum (_numpy.ndarray):
+        """
         pass
 
 
-class Uniform(Prior):
+class Uniform(_AbstractPrior):
     def __init__(
         self,
         dimensions: int,
-        lower_bounds: numpy.ndarray = None,
-        upper_bounds: numpy.ndarray = None,
+        lower_bounds: _numpy.ndarray = None,
+        upper_bounds: _numpy.ndarray = None,
     ):
         """
-
-        Parameters
-        ----------
-        dimensions
+        Args:
+            dimensions (int):
+            lower_bounds (_numpy.ndarray):
+            upper_bounds (_numpy.ndarray):
         """
         self.name = "uniform prior"
         self.dimensions = dimensions
         if upper_bounds is None:
-            self.upper_bounds = numpy.ones((dimensions, 1))
+            self.upper_bounds = _numpy.ones((dimensions, 1))
         else:
-            self.upper_bounds = upper_bounds or numpy.ones((dimensions, 1))
+            self.upper_bounds = upper_bounds or _numpy.ones((dimensions, 1))
         if lower_bounds is None:
-            self.lower_bounds = numpy.zeros((dimensions, 1))
+            self.lower_bounds = _numpy.zeros((dimensions, 1))
         else:
             self.lower_bounds = lower_bounds
         if (
@@ -413,11 +393,11 @@ class Uniform(Prior):
         ):
             raise ValueError("Bounds vectors are of incorrect size.")
         self.widths = self.upper_bounds - self.lower_bounds
-        if not numpy.all(self.widths > 0.0):
+        if not _numpy.all(self.widths > 0.0):
             raise ValueError("Some upper bounds are below lower bounds.")
-        self._misfit = -numpy.sum(numpy.log(self.widths)).item()
+        self._misfit = -_numpy.sum(_numpy.log(self.widths)).item()
 
-    def misfit(self, coordinates: numpy.ndarray) -> float:
+    def misfit(self, coordinates: _numpy.ndarray) -> float:
         """
 
         Parameters
@@ -430,7 +410,7 @@ class Uniform(Prior):
         """
         return self._misfit
 
-    def gradient(self, coordinates: numpy.ndarray) -> numpy.ndarray:
+    def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
         """
 
         Parameters
@@ -441,13 +421,13 @@ class Uniform(Prior):
         -------
 
         """
-        return numpy.zeros((self.dimensions, 1))
+        return _numpy.zeros((self.dimensions, 1))
 
-    def generate(self) -> numpy.ndarray:  # One shouldn't be able to do this
+    def generate(self) -> _numpy.ndarray:  # One shouldn't be able to do this
         """
 
         """
-        return self.lower_bounds + self.widths * numpy.random.rand(
+        return self.lower_bounds + self.widths * _numpy.random.rand(
             self.dimensions, 1
         )
 
@@ -455,7 +435,7 @@ class Uniform(Prior):
         self.bounds_corrector(coordinates, momentum)
 
 
-def make_spd_matrix(dim):
+def _make_spd_matrix(dim):
     """Generate a random symmetric, positive-definite matrix.
 
     Parameters
@@ -470,8 +450,10 @@ def make_spd_matrix(dim):
 
     """
     # Create random matrix
-    a = numpy.random.rand(dim, dim)
+    a = _numpy.random.rand(dim, dim)
     # Create random PD matrix and extract correlation structure
-    u, _, v = numpy.linalg.svd(numpy.dot(a.T, a))
+    u, _, v = _numpy.linalg.svd(_numpy.dot(a.T, a))
     # Reconstruct a new matrix with random variances.
-    return numpy.dot(numpy.dot(u, 1.0 + numpy.diag(numpy.random.rand(dim))), v)
+    return _numpy.dot(
+        _numpy.dot(u, 1.0 + _numpy.diag(_numpy.random.rand(dim))), v
+    )

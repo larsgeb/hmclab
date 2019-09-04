@@ -1,8 +1,5 @@
-import sys
 from termcolor import cprint
-
-sys.path.append("..")
-from tests.prior import misfit, gradient, generate
+from hmc_tomography.tests.prior import misfit, gradient, generate
 
 
 def test_all(dimensions=50, indent=0):
