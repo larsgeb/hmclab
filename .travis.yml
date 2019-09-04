@@ -23,7 +23,7 @@ install:
 script:
   - cd bin
   - which python
-  - python3 ../tests/test_all.py
+  - python3 ../hmc_tomography/tests/test_all.py
   - source deactivate
   - which python
-  - python3 ../tests/test_all.py
+  - python3 ../hmc_tomography/tests/test_all.py
