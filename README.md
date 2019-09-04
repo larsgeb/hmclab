@@ -14,6 +14,11 @@ To make the code run machine independent, we use a virtual environment. This mak
 
 ## Installing the package from source
 
+Directly to your environment:
+```
+pip install -e git+git@github.com:larsgeb/hmc-tomography.git@master#egg=hmc_tomography&subdirectory=hmc_tomography
+```
+
 From the base directory:
 
 ```
