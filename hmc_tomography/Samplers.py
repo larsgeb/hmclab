@@ -90,7 +90,7 @@ class HMC(_AbstractSampler):
         online_thinning: int = 1,
         sample_ram_buffer_size: int = 1000,
         integration_steps: int = 10,
-        _time_step: float = 0.1,
+        time_step: float = 0.1,
         randomize_integration_steps: bool = True,
         randomize_time_step: bool = True,
     ) -> int:
@@ -103,7 +103,7 @@ class HMC(_AbstractSampler):
         online_thinning
         sample_ram_buffer_size
         integration_steps
-        _time_step
+        time_step
         randomize_integration_steps
         randomize_time_step
 
@@ -130,10 +130,10 @@ class HMC(_AbstractSampler):
         # Set attributes of the dataset to correspond to sampling settings
         self.sample_hdf5_dataset.attrs["proposals"] = proposals
         self.sample_hdf5_dataset.attrs["online_thinning"] = online_thinning
-        self.sample_hdf5_dataset.attrs["_time_step"] = _time_step
+        self.sample_hdf5_dataset.attrs["time_step"] = time_step
         self.sample_hdf5_dataset.attrs["integration_steps"] = integration_steps
         self.sample_hdf5_dataset.attrs[
-            "randomize_time_step"
+            "randomizetime_step"
         ] = randomize_time_step
         self.sample_hdf5_dataset.attrs[
             "randomize_iterations"
@@ -164,13 +164,13 @@ class HMC(_AbstractSampler):
 
         if randomize_time_step:
 
-            def _time_step():
-                return float(_time_step * (0.5 + _numpy.random.rand()))
+            def time_step():
+                return float(time_step * (0.5 + _numpy.random.rand()))
 
         else:
 
-            def _time_step():
-                return _time_step
+            def time_step():
+                return time_step
 
         # Start sampling, but catch CTRL+C (SIGINT) ----------------------------
         try:
@@ -186,7 +186,7 @@ class HMC(_AbstractSampler):
 
                 # Propagate using the numerical integrator
                 new_coordinates, new_momentum = propagate(
-                    coordinates, momentum, _iterations(), _time_step()
+                    coordinates, momentum, _iterations(), time_step()
                 )
 
                 # Compute resulting Hamiltonian
@@ -268,7 +268,7 @@ class HMC(_AbstractSampler):
         coordinates: _numpy.ndarray,
         momentum: _numpy.ndarray,
         iterations: int,
-        _time_step: float,
+        time_step: float,
     ) -> _Tuple[_numpy.ndarray, _numpy.ndarray]:
         """
 
@@ -277,7 +277,7 @@ class HMC(_AbstractSampler):
         coordinates
         momentum
         iterations
-        _time_step
+        time_step
 
         Returns
         -------
@@ -291,7 +291,7 @@ class HMC(_AbstractSampler):
         # Leapfrog integration -------------------------------------------------
         # Coordinates half step before loop
         coordinates += (
-            0.5 * _time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
+            0.5 * time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
         )
         if self.prior.bounded:  # Correct if the distribution is bounded
             self.prior.corrector(coordinates, momentum)
@@ -301,8 +301,8 @@ class HMC(_AbstractSampler):
             potential_gradient = self.target.gradient(
                 coordinates
             ) + self.prior.gradient(coordinates)
-            momentum -= _time_step * potential_gradient
-            coordinates += _time_step * self.mass_matrix.kinetic_energy_gradient(
+            momentum -= time_step * potential_gradient
+            coordinates += time_step * self.mass_matrix.kinetic_energy_gradient(
                 momentum
             )
             if self.prior.bounded:  # Correct if the distribution is bounded
@@ -312,9 +312,9 @@ class HMC(_AbstractSampler):
         potential_gradient = self.target.gradient(
             coordinates
         ) + self.prior.gradient(coordinates)
-        momentum -= _time_step * potential_gradient
+        momentum -= time_step * potential_gradient
         coordinates += (
-            0.5 * _time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
+            0.5 * time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
         )
         if self.prior.bounded:  # Correct if the distribution is bounded
             self.prior.corrector(coordinates, momentum)
