@@ -1,7 +1,4 @@
-import sys
 from termcolor import cprint
-
-sys.path.append("..")
 from hmc_tomography.tests.target import misfit, gradient
 
 
