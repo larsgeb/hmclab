@@ -90,7 +90,7 @@ class HMC(_AbstractSampler):
         online_thinning: int = 1,
         sample_ram_buffer_size: int = 1000,
         integration_steps: int = 10,
-        _time_step: float = 0.1,
+        time_step: float = 0.1,
         randomize_integration_steps: bool = True,
         randomize_time_step: bool = True,
         initial_model: numpy.ndarray = None,
@@ -104,7 +104,7 @@ class HMC(_AbstractSampler):
         online_thinning
         sample_ram_buffer_size
         integration_steps
-        _time_step
+        time_step
         randomize_integration_steps
         randomize_time_step
 
@@ -138,7 +138,7 @@ class HMC(_AbstractSampler):
         self.sample_hdf5_dataset.attrs["time_step"] = time_step
         self.sample_hdf5_dataset.attrs["integration_steps"] = integration_steps
         self.sample_hdf5_dataset.attrs[
-            "randomize_time_step"
+            "randomizetime_step"
         ] = randomize_time_step
         self.sample_hdf5_dataset.attrs[
             "randomize_iterations"
@@ -174,7 +174,7 @@ class HMC(_AbstractSampler):
 
         else:
 
-            def time_step():
+            def _time_step():
                 return time_step
 
         # Start sampling, but catch CTRL+C (SIGINT) ----------------------------
