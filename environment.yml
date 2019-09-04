@@ -6,5 +6,6 @@ dependencies:
 - h5py
 - termcolor
 - tqdm
+- matplotlib
 - numpydoc # everything here on onwards are development / documentation packages and not strictly required.
 - sphinx_rtd_theme

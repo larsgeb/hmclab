@@ -27,6 +27,6 @@ script:
   - cd bin
   - which python
   - python3 ../hmc_tomography/tests/test_all.py
-  - source deactivate
+  - conda deactivate
   - which python
   - python3 ../hmc_tomography/tests/test_all.py
