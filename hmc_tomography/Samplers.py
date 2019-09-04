@@ -1,34 +1,35 @@
 """
 Sampler classes and associated methods.
 """
-import sys
-from abc import ABC, abstractmethod
+import sys as _sys
+from abc import ABC as _ABC
+from abc import abstractmethod as _abstractmethod
 
-import h5py
-import numpy
-import time
-import tqdm as tqdm
-from typing import Tuple
+import h5py as _h5py
+import numpy as _numpy
+import time as _time
+import tqdm as _tqdm
+from typing import Tuple as _Tuple
 
-from hmc_tomography.Priors import Prior
-from hmc_tomography.MassMatrices import MassMatrix
-from hmc_tomography.Targets import Target
+from hmc_tomography.Priors import _AbstractPrior
+from hmc_tomography.MassMatrices import _AbstractMassMatrix
+from hmc_tomography.Targets import _AbstractTarget
 
 
-class Sampler(ABC):
+class _AbstractSampler(_ABC):
     """Monte Carlo Sampler base class
 
     """
 
     name: str = "Monte Carlo sampler abstract base class"
     dimensions: int = -1
-    prior: Prior
-    target: Target
+    prior: _AbstractPrior
+    target: _AbstractTarget
     sample_hdf5_file = None
     sample_hdf5_dataset = None
-    sample_ram_buffer: numpy.ndarray
+    sample_ram_buffer: _numpy.ndarray
 
-    @abstractmethod
+    @_abstractmethod
     def sample(
         self,
         samples_filename: str,
@@ -48,15 +49,15 @@ class Sampler(ABC):
         pass
 
 
-class HMC(Sampler):
+class HMC(_AbstractSampler):
     """Hamiltonian Monte Carlo class.
 
     """
 
     name = "Hamiltonian Monte Carlo sampler"
-    mass_matrix: MassMatrix
+    mass_matrix: _AbstractMassMatrix
 
-    def __init__(self, target: Target, mass_matrix: MassMatrix, prior: Prior):
+    def _init_(self, target: _AbstractTarget, mass_matrix: _AbstractMassMatrix, prior: _AbstractPrior):
         """
 
         Parameters
@@ -89,7 +90,7 @@ class HMC(Sampler):
         online_thinning: int = 1,
         sample_ram_buffer_size: int = 1000,
         integration_steps: int = 10,
-        time_step: float = 0.1,
+        _time_step: float = 0.1,
         randomize_integration_steps: bool = True,
         randomize_time_step: bool = True,
     ) -> int:
@@ -102,7 +103,7 @@ class HMC(Sampler):
         online_thinning
         sample_ram_buffer_size
         integration_steps
-        time_step
+        _time_step
         randomize_integration_steps
         randomize_time_step
 
@@ -115,10 +116,10 @@ class HMC(Sampler):
         accepted = 0
 
         # Initial model
-        coordinates = numpy.ones((self.dimensions, 1))
+        coordinates = _numpy.ones((self.dimensions, 1))
 
         # Create RAM buffer for samples
-        self.sample_ram_buffer = numpy.empty(
+        self.sample_ram_buffer = _numpy.empty(
             (self.dimensions + 1, sample_ram_buffer_size)
         )
 
@@ -129,7 +130,7 @@ class HMC(Sampler):
         # Set attributes of the dataset to correspond to sampling settings
         self.sample_hdf5_dataset.attrs["proposals"] = proposals
         self.sample_hdf5_dataset.attrs["online_thinning"] = online_thinning
-        self.sample_hdf5_dataset.attrs["time_step"] = time_step
+        self.sample_hdf5_dataset.attrs["_time_step"] = _time_step
         self.sample_hdf5_dataset.attrs["integration_steps"] = integration_steps
         self.sample_hdf5_dataset.attrs[
             "randomize_time_step"
@@ -139,11 +140,11 @@ class HMC(Sampler):
         ] = randomize_integration_steps
 
         # Flush output (works best if followed by sleep() )
-        sys.stdout.flush()
-        time.sleep(0.001)
+        _sys.stdout.flush()
+        _time.sleep(0.001)
 
         # Create progress bar
-        proposals_total = tqdm.trange(
+        proposals_total = _tqdm.trange(
             proposals, desc="Sampling. Acceptance rate:", leave=True
         )
 
@@ -154,7 +155,7 @@ class HMC(Sampler):
         if randomize_integration_steps:
 
             def _iterations():
-                return int(integration_steps * (0.5 + numpy.random.rand()))
+                return int(integration_steps * (0.5 + _numpy.random.rand()))
 
         else:
 
@@ -164,12 +165,12 @@ class HMC(Sampler):
         if randomize_time_step:
 
             def _time_step():
-                return float(time_step * (0.5 + numpy.random.rand()))
+                return float(_time_step * (0.5 + _numpy.random.rand()))
 
         else:
 
             def _time_step():
-                return time_step
+                return _time_step
 
         # Start sampling, but catch CTRL+C (SIGINT) ----------------------------
         try:
@@ -198,9 +199,9 @@ class HMC(Sampler):
                 new_hamiltonian: float = new_potential + new_kinetic
 
                 # Evaluate acceptance criterion
-                if numpy.exp(
+                if _numpy.exp(
                     hamiltonian - new_hamiltonian
-                ) > numpy.random.uniform(0, 1):
+                ) > _numpy.random.uniform(0, 1):
                     accepted += 1
                     coordinates = new_coordinates.copy()
                 else:
@@ -234,7 +235,7 @@ class HMC(Sampler):
                         self.flush_samples(start, end, self.sample_ram_buffer)
 
         except KeyboardInterrupt:  # Catch SIGINT ------------------------------
-            # Close tqdm progressbar
+            # Close _tqdm progressbar
             proposals_total.close()
             # Flush the last samples
         finally:  # Write out samples still in the buffer ----------------------
@@ -257,18 +258,18 @@ class HMC(Sampler):
                 )
 
         # Flush output
-        sys.stdout.flush()
-        time.sleep(0.001)
+        _sys.stdout.flush()
+        _time.sleep(0.001)
 
         return 0
 
     def propagate_leapfrog(
         self,
-        coordinates: numpy.ndarray,
-        momentum: numpy.ndarray,
+        coordinates: _numpy.ndarray,
+        momentum: _numpy.ndarray,
         iterations: int,
-        time_step: float,
-    ) -> Tuple[numpy.ndarray, numpy.ndarray]:
+        _time_step: float,
+    ) -> _Tuple[_numpy.ndarray, _numpy.ndarray]:
         """
 
         Parameters
@@ -276,7 +277,7 @@ class HMC(Sampler):
         coordinates
         momentum
         iterations
-        time_step
+        _time_step
 
         Returns
         -------
@@ -290,7 +291,7 @@ class HMC(Sampler):
         # Leapfrog integration -------------------------------------------------
         # Coordinates half step before loop
         coordinates += (
-            0.5 * time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
+            0.5 * _time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
         )
         if self.prior.bounded:  # Correct if the distribution is bounded
             self.prior.corrector(coordinates, momentum)
@@ -300,8 +301,8 @@ class HMC(Sampler):
             potential_gradient = self.target.gradient(
                 coordinates
             ) + self.prior.gradient(coordinates)
-            momentum -= time_step * potential_gradient
-            coordinates += time_step * self.mass_matrix.kinetic_energy_gradient(
+            momentum -= _time_step * potential_gradient
+            coordinates += _time_step * self.mass_matrix.kinetic_energy_gradient(
                 momentum
             )
             if self.prior.bounded:  # Correct if the distribution is bounded
@@ -311,9 +312,9 @@ class HMC(Sampler):
         potential_gradient = self.target.gradient(
             coordinates
         ) + self.prior.gradient(coordinates)
-        momentum -= time_step * potential_gradient
+        momentum -= _time_step * potential_gradient
         coordinates += (
-            0.5 * time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
+            0.5 * _time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
         )
         if self.prior.bounded:  # Correct if the distribution is bounded
             self.prior.corrector(coordinates, momentum)
@@ -321,13 +322,13 @@ class HMC(Sampler):
         return coordinates, momentum
 
     def open_hdf5(self, name: str, length: int, dtype: str = "f8"):
-        self.sample_hdf5_file = h5py.File(name, "a")
-        _time = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+        self.sample_hdf5_file = _h5py.File(name, "a")
+        time = _time.strf_time("%Y-%m-%d %H:%M:%S", _time.gm_time())
         self.sample_hdf5_dataset = self.sample_hdf5_file.create_dataset(
-            f"samples {_time}", (self.dimensions + 1, length), dtype=dtype
+            f"samples {time}", (self.dimensions + 1, length), dtype=dtype
         )
         self.sample_hdf5_dataset.attrs["sampler"] = "HMC"
 
-    def flush_samples(self, start: int, end: int, data: numpy.ndarray):
+    def flush_samples(self, start: int, end: int, data: _numpy.ndarray):
         self.sample_hdf5_dataset.attrs["end_of_samples"] = end + 1
         self.sample_hdf5_dataset[:, start : end + 1] = data

@@ -12,6 +12,15 @@ This repository is meant to be an introduction to Bayesian tomography using Hami
 
 To make the code run machine independent, we use a virtual environment. This makes sure that everyone uses the same Python version and packages. We offer two environment options, Conda and VirtualEnv.
 
+## Installing the package from source
+
+From the base directory:
+
+```
+python3 setup.py sdist bdist_wheel 
+pip install dist/hmc_tomography_lars_gebraad-0.0.1-py3-none-any.whl --force-reinstall
+```
+
 ## Using Anaconda/Miniconda
 Anaconda or Miniconda are both supported. Make sure that you have one of these installed: 
 

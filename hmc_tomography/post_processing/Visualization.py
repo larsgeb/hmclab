@@ -1,13 +1,12 @@
-import matplotlib.pyplot as pyplot
-import numpy
+import matplotlib.pyplot as _plt
 
-from post_processing import Processing
+from hmc_tomography.post_processing import Processing as _Processing
 
 
 def visualize_2_dimensions(
     samples, dim1: int = 0, dim2: int = 1, bins: int = 25
 ):
-    figure_analysis = pyplot.figure(figsize=(16, 8))
+    figure_analysis = _plt.figure(figsize=(16, 8))
     axis_2d_histogram = figure_analysis.add_axes([0.025, 0.52, 0.2, 0.4])
 
     axis_1d_histogram_x = figure_analysis.add_axes(
@@ -40,12 +39,12 @@ def visualize_2_dimensions(
     axis_1d_traceplot.plot(samples[dim2, :], "--")
     axis_1d_traceplot.set_xlim([0, samples[dim2, :].size])
     axis_autocorrelation.plot(
-        Processing.autocorrelation(samples[dim1, :]),
+        _Processing.autocorrelation(samples[dim1, :]),
         "r",
         label=f"Dimension {dim1}",
     )
     axis_autocorrelation.plot(
-        Processing.autocorrelation(samples[dim2, :]),
+        _Processing.autocorrelation(samples[dim2, :]),
         "k",
         label=f"Dimension {dim2}",
     )

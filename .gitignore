@@ -2,3 +2,6 @@ docs
 .idea/workspace.xml
 .idea/other.xml
 venv-hmc-tomography/
+build
+dist
+hmc_tomography_*

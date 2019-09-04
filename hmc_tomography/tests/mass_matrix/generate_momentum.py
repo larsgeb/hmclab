@@ -24,10 +24,10 @@ def main(dimensions=50, indent=0):
         "blue",
         attrs=["bold"],
     )
-    for mass_matrix_class in MassMatrices.MassMatrix.__subclasses__():
+    for mass_matrix_class in MassMatrices._AbstractMassMatrix.__subclasses__():
         try:
             print(prefix + f"Mass matrix name: {mass_matrix_class.__name__}")
-            mass_matrix: MassMatrices.MassMatrix = mass_matrix_class(dimensions)
+            mass_matrix: MassMatrices._AbstractMassMatrix = mass_matrix_class(dimensions)
 
             # Actual test ------------------------------------------------------
             mass_matrix.generate_momentum()

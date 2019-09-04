@@ -1,45 +1,45 @@
 import sys
-import traceback
 import numpy
+import traceback
 from termcolor import cprint
 
 sys.path.append("..")
-from hmc_tomography import Targets
+from hmc_tomography import MassMatrices
 
 
 def main(dimensions=50, indent=0):
     """
 
-        Parameters
-        ----------
-        indent
-        dimensions
-        """
+    Parameters
+    ----------
+    indent
+    dimensions
+    """
     exit_code = 0
     prefix = indent * "\t"
     cprint(
         prefix
-        + f"Starting gradient test for all targets using\r\n"
+        + f"Starting kinetic_energy_gradient test for all mass matrices with\r\n"
         + prefix
         + f"{dimensions} dimensions...\r\n",
         "blue",
         attrs=["bold"],
     )
-    for target_class in Targets.Target.__subclasses__():
+    momentum = numpy.ones((dimensions, 1))
+    for mass_matrix_class in MassMatrices._AbstractMassMatrix.__subclasses__():
         try:
-            print(prefix + f"Target name: {target_class.__name__}")
-            target: Targets.Target = target_class(dimensions)
+            print(prefix + f"Mass matrix name: {mass_matrix_class.__name__}")
+            mass_matrix: MassMatrices._AbstractMassMatrix = mass_matrix_class(dimensions)
 
             # Actual test ------------------------------------------------------
-            coordinates = numpy.ones((target.dimensions, 1))
-            target.gradient(coordinates)
+            mass_matrix.kinetic_energy_gradient(momentum)
             # ------------------------------------------------------------------
 
             cprint(prefix + f"Test successful.\r\n", "green")
         except NotImplementedError:
             cprint(
                 prefix
-                + f"Target {target_class.__name__} not implemented"
+                + f"Mass matrix {mass_matrix_class.__name__} not implemented"
                 + "\r\n"
                 + prefix
                 + f"yet, won't fail test.\r\n",
@@ -55,13 +55,13 @@ def main(dimensions=50, indent=0):
 
     if exit_code == 0:
         cprint(
-            prefix + "All gradient tests successful.\r\n",
+            prefix + "All kinetic_energy_gradient tests successful.\r\n",
             "green",
             attrs=["bold"],
         )
     else:
         cprint(
-            prefix + "Not all gradient tests successful.\r\n",
+            prefix + "Not all kinetic_energy_gradient tests successful.\r\n",
             "red",
             attrs=["bold"],
         )
