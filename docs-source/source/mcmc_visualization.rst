@@ -1,5 +1,5 @@
-Markov chain Monte Carlo visualization module
-=============================================
+MCMC Post processing module
+===========================
 
-.. automodule:: mcmc_visualization
+.. automodule:: hmc_tomography.PostProcessing
     :members:
