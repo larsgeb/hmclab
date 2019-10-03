@@ -1,0 +1,647 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>hmc_tomography.Priors &mdash; HMC Tom  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> HMC Tom
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../hmc_tomography.html">HMC Tomography sampling module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mcmc_visualization.html">MCMC Post processing module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tests.html">Unit tests</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">HMC Tom</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>hmc_tomography.Priors</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for hmc_tomography.Priors</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">ABC</span> <span class="k">as</span> <span class="n">_ABC</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">abstractmethod</span> <span class="k">as</span> <span class="n">_abstractmethod</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">_numpy</span>
+<span class="kn">from</span> <span class="nn">termcolor</span> <span class="k">import</span> <span class="n">cprint</span> <span class="k">as</span> <span class="n">_cprint</span>
+
+
+<div class="viewcode-block" id="_AbstractPrior"><a class="viewcode-back" href="../../hmc_tomography.priors.html#hmc_tomography.Priors._AbstractPrior">[docs]</a><span class="k">class</span> <span class="nc">_AbstractPrior</span><span class="p">(</span><span class="n">_ABC</span><span class="p">):</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">bounded</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="nd">@_abstractmethod</span>
+    <span class="k">def</span> <span class="nf">misfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+
+        <span class="k">pass</span>
+
+    <span class="nd">@_abstractmethod</span>
+    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+
+        <span class="k">pass</span>
+
+    <span class="nd">@_abstractmethod</span>
+    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@_abstractmethod</span>
+    <span class="k">def</span> <span class="nf">corrector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">momentum</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">bounds_corrector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">momentum</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Lower bound correction ---------------------------------------</span>
+            <span class="n">too_low</span> <span class="o">=</span> <span class="n">coordinates</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span>
+            <span class="n">coordinates</span><span class="p">[</span><span class="n">too_low</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span><span class="p">[</span><span class="n">too_low</span><span class="p">]</span> <span class="o">-</span> <span class="n">coordinates</span><span class="p">[</span><span class="n">too_low</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">momentum</span><span class="p">[</span><span class="n">too_low</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mf">1.0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Lower bound correction ---------------------------------------</span>
+            <span class="n">too_high</span> <span class="o">=</span> <span class="n">coordinates</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span>
+            <span class="n">coordinates</span><span class="p">[</span><span class="n">too_high</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span><span class="p">[</span><span class="n">too_high</span><span class="p">]</span> <span class="o">-</span> <span class="n">coordinates</span><span class="p">[</span><span class="n">too_high</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">momentum</span><span class="p">[</span><span class="n">too_high</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mf">1.0</span></div>
+
+
+<div class="viewcode-block" id="Normal"><a class="viewcode-back" href="../../hmc_tomography.priors.html#hmc_tomography.Priors.Normal">[docs]</a><span class="k">class</span> <span class="nc">Normal</span><span class="p">(</span><span class="n">_AbstractPrior</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Normal distribution in model space.&quot;&quot;&quot;</span>
+
+    <span class="n">lower_bounds</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">upper_bounds</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">means</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">covariance</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">lower_bounds</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upper_bounds</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Gaussian prior&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">dimensions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># whether or not Gaussian is uncorrelated</span>
+
+        <span class="k">if</span> <span class="n">means</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">covariance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Neither means nor covariance is provided -------------------------</span>
+            <span class="n">_cprint</span><span class="p">(</span>
+                <span class="s2">&quot;Neither means or covariance matrix provided. Generating &quot;</span>
+                <span class="s2">&quot;random means and variances.&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;yellow&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">covariance</span> <span class="o">=</span> <span class="n">_make_spd_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">means</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">covariance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Only one of means or covariance is provided ----------------------</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;No means or covariance matrix provided. Not sure what to do!&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Both means and covariance are provided ---------------------------</span>
+
+            <span class="c1"># Parse means</span>
+            <span class="k">if</span> <span class="n">means</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Incorrect size of means vector.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">means</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">means</span>
+
+            <span class="c1"># Parse covariance</span>
+            <span class="k">if</span> <span class="n">covariance</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">means</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">means</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">elif</span> <span class="n">covariance</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">means</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">_cprint</span><span class="p">(</span>
+                    <span class="s2">&quot;Seem that you only passed a vector as the covariance &quot;</span>
+                    <span class="s2">&quot;matrix. It will be used as the covariance diagonal.&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;yellow&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Incorrect size of covariance matrix.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">covariance</span> <span class="o">=</span> <span class="n">covariance</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inverse_covariance</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">covariance</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inverse_covariance</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">covariance</span><span class="p">)</span>
+
+        <span class="c1"># Process optional bounds ----------------------------------------------</span>
+        <span class="k">if</span> <span class="n">lower_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">lower_bounds</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span> <span class="o">=</span> <span class="n">lower_bounds</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bounded</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">lower_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Incorrect size of lower bounds vector.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">upper_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">upper_bounds</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span> <span class="o">=</span> <span class="n">upper_bounds</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bounded</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">upper_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Incorrect size of upper bounds vector.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">misfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounded</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">all</span><span class="p">(</span>
+                <span class="n">coordinates</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span>
+            <span class="p">):</span>
+                <span class="k">return</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">inf</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">all</span><span class="p">(</span>
+                <span class="n">coordinates</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span>
+            <span class="p">):</span>
+                <span class="k">return</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">inf</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">coordinates</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+                <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inverse_covariance</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">coordinates</span><span class="p">))</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">coordinates</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+                <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse_covariance</span>
+                <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">coordinates</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span><span class="p">:</span>
+            <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inverse_covariance</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">coordinates</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inverse_covariance</span> <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">coordinates</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Normal.generate"><a class="viewcode-back" href="../../hmc_tomography.priors.html#hmc_tomography.Priors.Normal.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This function is not finished yet&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Normal.corrector"><a class="viewcode-back" href="../../hmc_tomography.priors.html#hmc_tomography.Priors.Normal.corrector">[docs]</a>    <span class="k">def</span> <span class="nf">corrector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        coordinates</span>
+<span class="sd">        momentum</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds_corrector</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="LogNormal"><a class="viewcode-back" href="../../hmc_tomography.priors.html#hmc_tomography.Priors.LogNormal">[docs]</a><span class="k">class</span> <span class="nc">LogNormal</span><span class="p">(</span><span class="n">_AbstractPrior</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Normal distribution in logarithmic model space.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">means</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">covariance</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">lower_bounds</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upper_bounds</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dimensions</span>
+<span class="sd">        means</span>
+<span class="sd">        covariance</span>
+<span class="sd">        lower_bounds</span>
+<span class="sd">        upper_bounds</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;log normal (logarithmic Gaussian) prior&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">dimensions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># whether or not Gaussian is uncorrelated</span>
+
+        <span class="k">if</span> <span class="n">means</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">covariance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Neither means nor covariance is provided</span>
+            <span class="n">_cprint</span><span class="p">(</span>
+                <span class="s2">&quot;Neither means or covariance matrix provided. Generating &quot;</span>
+                <span class="s2">&quot;random means and variances.&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;yellow&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">covariance</span> <span class="o">=</span> <span class="n">_make_spd_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">means</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">covariance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Only one of means or covariance is provided</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;No means or covariance matrix provided. Not sure what to do!&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Both means and covariance are provided</span>
+
+            <span class="c1"># Parse means</span>
+            <span class="k">if</span> <span class="n">means</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Incorrect size of means vector.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">means</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">means</span>
+
+            <span class="c1"># Parse covariance</span>
+            <span class="k">if</span> <span class="n">covariance</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">means</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">means</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">elif</span> <span class="n">covariance</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">means</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">_cprint</span><span class="p">(</span>
+                    <span class="s2">&quot;Seem that you only passed a vector as the covariance &quot;</span>
+                    <span class="s2">&quot;matrix. It will be used as the covariance diagonal.&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;yellow&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Incorrect size of covariance matrix.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">covariance</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">covariance</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inverse_covariance</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">covariance</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inverse_covariance</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">covariance</span><span class="p">)</span>
+
+        <span class="c1"># Process optional bounds ----------------------------------------------</span>
+        <span class="k">if</span> <span class="n">lower_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">lower_bounds</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span> <span class="o">=</span> <span class="n">lower_bounds</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bounded</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">lower_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Incorrect size of lower bounds vector.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">upper_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">upper_bounds</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span> <span class="o">=</span> <span class="n">upper_bounds</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bounded</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">upper_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Incorrect size of upper bounds vector.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">misfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">logarithmic_coordinates</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">logarithmic_coordinates</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">logarithmic_coordinates</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+                <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inverse_covariance</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">logarithmic_coordinates</span><span class="p">))</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">logarithmic_coordinates</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">logarithmic_coordinates</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+                <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse_covariance</span>
+                <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">logarithmic_coordinates</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="c1"># ! Not sure about these formulas!</span>
+        <span class="n">logarithmic_coordinates</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inverse_covariance</span>
+                <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">logarithmic_coordinates</span><span class="p">)</span>
+                <span class="o">/</span> <span class="n">coordinates</span>
+            <span class="p">)</span> <span class="o">+</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">coordinates</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inverse_covariance</span>
+                <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">logarithmic_coordinates</span><span class="p">)</span>
+                <span class="o">/</span> <span class="n">coordinates</span>
+            <span class="p">)</span> <span class="o">+</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">coordinates</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This function is not finished yet&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">corrector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds_corrector</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="UnboundedUniform"><a class="viewcode-back" href="../../hmc_tomography.priors.html#hmc_tomography.Priors.UnboundedUniform">[docs]</a><span class="k">class</span> <span class="nc">UnboundedUniform</span><span class="p">(</span><span class="n">_AbstractPrior</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dimensions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;unbounded uniform prior&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">dimensions</span>
+
+<div class="viewcode-block" id="UnboundedUniform.misfit"><a class="viewcode-back" href="../../hmc_tomography.priors.html#hmc_tomography.Priors.UnboundedUniform.misfit">[docs]</a>    <span class="k">def</span> <span class="nf">misfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        coordinates</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mf">0.0</span></div>
+
+<div class="viewcode-block" id="UnboundedUniform.gradient"><a class="viewcode-back" href="../../hmc_tomography.priors.html#hmc_tomography.Priors.UnboundedUniform.gradient">[docs]</a>    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        coordinates</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span></div>
+
+    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>  <span class="c1"># One shouldn&#39;t be able to do this</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s2">&quot;This prior is unbounded, so it is impossible to generate samples&quot;</span>
+            <span class="s2">&quot;from it.&quot;</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="UnboundedUniform.corrector"><a class="viewcode-back" href="../../hmc_tomography.priors.html#hmc_tomography.Priors.UnboundedUniform.corrector">[docs]</a>    <span class="k">def</span> <span class="nf">corrector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">momentum</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            coordinates (_numpy.ndarray):</span>
+<span class="sd">            momentum (_numpy.ndarray):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div></div>
+
+
+<span class="k">class</span> <span class="nc">Uniform</span><span class="p">(</span><span class="n">_AbstractPrior</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">lower_bounds</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upper_bounds</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            dimensions (int):</span>
+<span class="sd">            lower_bounds (_numpy.ndarray):</span>
+<span class="sd">            upper_bounds (_numpy.ndarray):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;uniform prior&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">dimensions</span>
+        <span class="k">if</span> <span class="n">upper_bounds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span> <span class="o">=</span> <span class="n">upper_bounds</span> <span class="ow">or</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">lower_bounds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span> <span class="o">=</span> <span class="n">lower_bounds</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Bounds vectors are of incorrect size.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widths</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Some upper bounds are below lower bounds.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_misfit</span> <span class="o">=</span> <span class="o">-</span><span class="n">_numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">_numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widths</span><span class="p">))</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">misfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        coordinates</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_misfit</span>
+
+    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        coordinates</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>  <span class="c1"># One shouldn&#39;t be able to do this</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">widths</span> <span class="o">*</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">corrector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds_corrector</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">CompositePrior</span><span class="p">(</span><span class="n">_AbstractPrior</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">list_of_priors</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">_AbstractPrior</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;composite prior&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">separate_priors</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">_AbstractPrior</span><span class="p">]</span> <span class="o">=</span> <span class="n">list_of_priors</span>
+
+        <span class="c1"># Assert that the passed priors actually do represent the correct amount of dimensions</span>
+        <span class="n">computed_dimensions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">prior</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">separate_priors</span><span class="p">:</span>
+            <span class="n">computed_dimensions</span> <span class="o">+=</span> <span class="n">prior</span><span class="o">.</span><span class="n">dimensions</span>
+        <span class="k">assert</span> <span class="n">computed_dimensions</span> <span class="o">==</span> <span class="n">dimensions</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">dimensions</span>
+
+    <span class="k">def</span> <span class="nf">misfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">corrector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">momentum</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">_make_spd_matrix</span><span class="p">(</span><span class="n">dim</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate a random symmetric, positive-definite matrix.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dim : int</span>
+<span class="sd">        The matrix dimension.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    x : array of shape [n_dim, n_dim]</span>
+<span class="sd">        The random symmetric, positive-definite matrix.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Create random matrix</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span>
+    <span class="c1"># Create random PD matrix and extract correlation structure</span>
+    <span class="n">u</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">_numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">a</span><span class="p">))</span>
+    <span class="c1"># Reconstruct a new matrix with random variances.</span>
+    <span class="k">return</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">_numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">dim</span><span class="p">))),</span> <span class="n">v</span><span class="p">)</span>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Andrea Zunino, Andreas Fichtner, Lars Gebraad
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

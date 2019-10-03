@@ -112,7 +112,7 @@ jQuery.fn.highlightText = function(text, className) {
     highlight(this, addItems);
   });
   for (var i = 0; i < addItems.length; ++i) {
-    jQuery(addItems[i].parent).before(addItems[i].target);
+    jQuery(addItems[i].parent).before(addItems[i].test_all);
   }
   return result;
 };
