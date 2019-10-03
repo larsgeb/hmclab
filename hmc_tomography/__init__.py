@@ -3,11 +3,11 @@ HMC Tomography module. Provides all classes and methods to perform HMC sampling 
 does not supply the physics.
 """
 name = "hmc_tomography"
-__all__ = ["MassMatrices", "Priors", "Samplers", "Targets", "post_processing"]
+__all__ = ["MassMatrices", "Priors", "Samplers", "Targets", "PostProcessing"]
 from hmc_tomography import (
     MassMatrices,
     Priors,
     Samplers,
     Targets,
-    post_processing,
+    PostProcessing,
 )

@@ -1,15 +1,12 @@
-"""
-Prior distributions available to the HMC sampler.
-"""
 from abc import ABC as _ABC
 from abc import abstractmethod as _abstractmethod
+from typing import List
 
 import numpy as _numpy
 from termcolor import cprint as _cprint
 
 
 class _AbstractPrior(_ABC):
-
     name: str = ""
     dimensions: int = -1
     bounded: bool = False
@@ -30,13 +27,9 @@ class _AbstractPrior(_ABC):
 
     @_abstractmethod
     def corrector(self, coordinates: _numpy.ndarray, momentum: _numpy.ndarray):
-
         pass
 
-    def bounds_corrector(
-        self, coordinates: _numpy.ndarray, momentum: _numpy.ndarray
-    ):
-
+    def bounds_corrector(self, coordinates: _numpy.ndarray, momentum: _numpy.ndarray):
         if self.lower_bounds is not None:
             # Lower bound correction ---------------------------------------
             too_low = coordinates < self.lower_bounds
@@ -114,19 +107,13 @@ class Normal(_AbstractPrior):
             self.inverse_covariance = _numpy.linalg.inv(self.covariance)
 
         # Process optional bounds ----------------------------------------------
-        if lower_bounds is not None and lower_bounds.shape == (
-            self.dimensions,
-            1,
-        ):
+        if lower_bounds is not None and lower_bounds.shape == (self.dimensions, 1):
             self.lower_bounds = lower_bounds
             self.bounded = True
         elif lower_bounds is not None:
             raise ValueError("Incorrect size of lower bounds vector.")
 
-        if upper_bounds is not None and upper_bounds.shape == (
-            self.dimensions,
-            1,
-        ):
+        if upper_bounds is not None and upper_bounds.shape == (self.dimensions, 1):
             self.upper_bounds = upper_bounds
             self.bounded = True
         elif upper_bounds is not None:
@@ -253,19 +240,13 @@ class LogNormal(_AbstractPrior):
             self.inverse_covariance = _numpy.linalg.inv(self.covariance)
 
         # Process optional bounds ----------------------------------------------
-        if lower_bounds is not None and lower_bounds.shape == (
-            self.dimensions,
-            1,
-        ):
+        if lower_bounds is not None and lower_bounds.shape == (self.dimensions, 1):
             self.lower_bounds = lower_bounds
             self.bounded = True
         elif lower_bounds is not None:
             raise ValueError("Incorrect size of lower bounds vector.")
 
-        if upper_bounds is not None and upper_bounds.shape == (
-            self.dimensions,
-            1,
-        ):
+        if upper_bounds is not None and upper_bounds.shape == (self.dimensions, 1):
             self.upper_bounds = upper_bounds
             self.bounded = True
         elif upper_bounds is not None:
@@ -276,10 +257,7 @@ class LogNormal(_AbstractPrior):
         if self.diagonal:
             return _numpy.sum(logarithmic_coordinates).item(0) + 0.5 * (
                 (self.means - logarithmic_coordinates).T
-                @ (
-                    self.inverse_covariance
-                    * (self.means - logarithmic_coordinates)
-                )
+                @ (self.inverse_covariance * (self.means - logarithmic_coordinates))
             ).item(0)
         else:
             return _numpy.sum(logarithmic_coordinates).item(0) + 0.5 * (
@@ -386,11 +364,7 @@ class Uniform(_AbstractPrior):
             self.lower_bounds = _numpy.zeros((dimensions, 1))
         else:
             self.lower_bounds = lower_bounds
-        if (
-            not self.lower_bounds.shape
-            == self.upper_bounds.shape
-            == (dimensions, 1)
-        ):
+        if not self.lower_bounds.shape == self.upper_bounds.shape == (dimensions, 1):
             raise ValueError("Bounds vectors are of incorrect size.")
         self.widths = self.upper_bounds - self.lower_bounds
         if not _numpy.all(self.widths > 0.0):
@@ -427,12 +401,36 @@ class Uniform(_AbstractPrior):
         """
 
         """
-        return self.lower_bounds + self.widths * _numpy.random.rand(
-            self.dimensions, 1
-        )
+        return self.lower_bounds + self.widths * _numpy.random.rand(self.dimensions, 1)
 
     def corrector(self, coordinates, momentum):
         self.bounds_corrector(coordinates, momentum)
+
+
+class CompositePrior(_AbstractPrior):
+    def __init__(self, dimensions: int, list_of_priors: List[_AbstractPrior]):
+        self.name = "composite prior"
+        self.separate_priors: List[_AbstractPrior] = list_of_priors
+
+        # Assert that the passed priors actually do represent the correct amount of dimensions
+        computed_dimensions: int = 0
+        for prior in self.separate_priors:
+            computed_dimensions += prior.dimensions
+        assert computed_dimensions == dimensions
+
+        self.dimensions = dimensions
+
+    def misfit(self, coordinates: _numpy.ndarray) -> float:
+        raise NotImplementedError()
+
+    def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
+        raise NotImplementedError()
+
+    def generate(self) -> _numpy.ndarray:
+        raise NotImplementedError()
+
+    def corrector(self, coordinates: _numpy.ndarray, momentum: _numpy.ndarray):
+        raise NotImplementedError()
 
 
 def _make_spd_matrix(dim):
@@ -454,6 +452,5 @@ def _make_spd_matrix(dim):
     # Create random PD matrix and extract correlation structure
     u, _, v = _numpy.linalg.svd(_numpy.dot(a.T, a))
     # Reconstruct a new matrix with random variances.
-    return _numpy.dot(
-        _numpy.dot(u, 1.0 + _numpy.diag(_numpy.random.rand(dim))), v
-    )
+    return _numpy.dot(_numpy.dot(u, 1.0 + _numpy.diag(_numpy.random.rand(dim))), v)
+

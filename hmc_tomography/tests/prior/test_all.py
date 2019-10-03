@@ -19,10 +19,7 @@ def test_all(dimensions=50, indent=0):
     else:
         cprint(prefix + "Not all prior successful.", "red", attrs=["bold"])
 
-    if prior_errors == 0:
-        return 0
-    else:
-        return 1
+    return prior_errors
 
 
 if __name__ == "__main__":

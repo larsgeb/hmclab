@@ -29,7 +29,22 @@ def main(dimensions=50, indent=0):
         try:
             print(prefix + f"Prior name: {prior_class.__name__}")
 
-            prior: Priors._AbstractPrior = prior_class(dimensions)
+            # Take care of special constructors which do not have the base pattern
+            if prior_class == Priors.CompositePrior:
+                # If constructing a composite prior
+
+                # Use only one prior if dimension is 1
+                if dimensions < 2:
+                    list_of_priors = [Priors.Normal(dimensions)]
+                else:  # Construct two priors if dimension is larger than 1
+                    list_of_priors = [Priors.Normal(dimensions - 1), Priors.Uniform(1)]
+
+                prior: Priors._AbstractPrior = Priors.CompositePrior(
+                    dimensions, list_of_priors
+                )
+
+            else:
+                prior: Priors._AbstractPrior = prior_class(dimensions)
 
             # Actual test ------------------------------------------------------
             coordinates = numpy.ones((dimensions, 1))
