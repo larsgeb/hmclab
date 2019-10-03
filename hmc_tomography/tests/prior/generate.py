@@ -15,7 +15,7 @@ def main(dimensions=50, indent=0):
         indent
         dimensions
         """
-    exit_code = 0
+    generate_errors = 0
     prefix = indent * "\t"
     cprint(
         prefix
@@ -57,7 +57,7 @@ def main(dimensions=50, indent=0):
                 "yellow",
             )
         except Exception as e:
-            exit_code = 1
+            generate_errors += 1
             cprint(
                 prefix + f"Test unsuccessful for {prior.name}. Traceback with "
                 "exception:",
@@ -66,11 +66,9 @@ def main(dimensions=50, indent=0):
             tb1 = traceback.TracebackException.from_exception(e)
             print("".join(tb1.format()), "\r\n")
 
-    if exit_code == 0:
+    if generate_errors == 0:
         cprint(
-            prefix + "All prior generate tests successful.\r\n",
-            "green",
-            attrs=["bold"],
+            prefix + "All prior generate tests successful.\r\n", "green", attrs=["bold"]
         )
     else:
         cprint(
@@ -79,7 +77,7 @@ def main(dimensions=50, indent=0):
             attrs=["bold"],
         )
 
-    return exit_code
+    return generate_errors
 
 
 if __name__ == "__main__":

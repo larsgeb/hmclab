@@ -1,7 +1,10 @@
 docs
-.idea/workspace.xml
-.idea/other.xml
+.idea
+.vscode
 venv-hmc-tomography/
+output*
 build
 dist
 hmc_tomography_*
+*.egg-info
+*__pycache__

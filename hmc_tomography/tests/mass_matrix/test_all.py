@@ -14,9 +14,7 @@ def test_all(dimensions=50, indent=0):
     cprint(prefix + "Running all mass matrix tests.", "blue", attrs=["bold"])
 
     # Tests
-    mass_matrix_errors += kinetic_energy.main(
-        dimensions=dimensions, indent=indent + 1
-    )
+    mass_matrix_errors += kinetic_energy.main(dimensions=dimensions, indent=indent + 1)
     mass_matrix_errors += kinetic_energy_gradient.main(
         dimensions=dimensions, indent=indent + 1
     )
@@ -25,22 +23,11 @@ def test_all(dimensions=50, indent=0):
     )
 
     if mass_matrix_errors == 0:
-        cprint(
-            prefix + "All mass matrix tests successful.",
-            "green",
-            attrs=["bold"],
-        )
+        cprint(prefix + "All mass matrix tests successful.", "green", attrs=["bold"])
     else:
-        cprint(
-            prefix + "Not all mass matrix tests successful.",
-            "red",
-            attrs=["bold"],
-        )
+        cprint(prefix + "Not all mass matrix tests successful.", "red", attrs=["bold"])
 
-    if mass_matrix_errors == 0:
-        return 0
-    else:
-        return 1
+    return mass_matrix_errors
 
 
 if __name__ == "__main__":

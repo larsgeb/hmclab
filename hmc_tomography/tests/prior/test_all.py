@@ -17,9 +17,7 @@ def test_all(dimensions=50, indent=0):
     if prior_errors == 0:
         cprint(prefix + "All prior successful.", "green", attrs=["bold"])
     else:
-        cprint(
-            prefix + "Not all prior successful.", "red", attrs=["bold"]
-        )
+        cprint(prefix + "Not all prior successful.", "red", attrs=["bold"])
 
     if prior_errors == 0:
         return 0

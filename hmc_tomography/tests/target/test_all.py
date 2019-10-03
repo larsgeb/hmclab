@@ -16,14 +16,9 @@ def test_all(dimensions=50, indent=0):
     if target_errors == 0:
         cprint(prefix + "All target tests successful.", "green", attrs=["bold"])
     else:
-        cprint(
-            prefix + "Not all target tests successful.", "red", attrs=["bold"]
-        )
+        cprint(prefix + "Not all target tests successful.", "red", attrs=["bold"])
 
-    if target_errors == 0:
-        return 0
-    else:
-        return 1
+    return target_errors
 
 
 if __name__ == "__main__":

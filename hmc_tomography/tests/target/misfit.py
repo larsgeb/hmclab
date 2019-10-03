@@ -1,9 +1,7 @@
-import sys
 import traceback
 import numpy
 from termcolor import cprint
 
-sys.path.append("..")
 from hmc_tomography import Targets
 
 
@@ -15,7 +13,7 @@ def main(dimensions=50, indent=0):
         indent
         dimensions
         """
-    exit_code = 0
+    misfit_errors = 0
     prefix = indent * "\t"
     cprint(
         prefix
@@ -46,27 +44,17 @@ def main(dimensions=50, indent=0):
                 "yellow",
             )
         except Exception as e:
-            exit_code = 1
-            cprint(
-                prefix + f"Test unsuccessful. Traceback with exception:", "red"
-            )
+            misfit_errors += 1
+            cprint(prefix + f"Test unsuccessful. Traceback with exception:", "red")
             tb1 = traceback.TracebackException.from_exception(e)
             print("".join(tb1.format()), "\r\n")
 
-    if exit_code == 0:
-        cprint(
-            prefix + "All misfit tests successful.\r\n",
-            "green",
-            attrs=["bold"],
-        )
+    if misfit_errors == 0:
+        cprint(prefix + "All misfit tests successful.\r\n", "green", attrs=["bold"])
     else:
-        cprint(
-            prefix + "Not all misfit tests successful.\r\n",
-            "red",
-            attrs=["bold"],
-        )
+        cprint(prefix + "Not all misfit tests successful.\r\n", "red", attrs=["bold"])
 
-    return exit_code
+    return misfit_errors
 
 
 if __name__ == "__main__":

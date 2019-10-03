@@ -1,6 +1,6 @@
 import matplotlib.pyplot as _plt
 
-from hmc_tomography.post_processing import Processing as _Processing
+from hmc_tomography.PostProcessing import Processing as _Processing
 
 
 def visualize_2_dimensions(

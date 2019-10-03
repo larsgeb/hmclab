@@ -15,7 +15,7 @@ def main(dimensions=50, indent=0):
         indent
         dimensions
         """
-    exit_code = 0
+    misfit_errors = 0
     prefix = indent * "\t"
     cprint(
         prefix
@@ -47,30 +47,26 @@ def main(dimensions=50, indent=0):
                 + f"yet, won't fail test.\r\n",
                 "yellow",
             )
-        # except Exception as e:
-        #     exit_code = 1
-        #     cprint(
-        #         prefix + f"Test unsuccessful for {prior.name}. Traceback with "
-        #         "exception:",
-        #         "red",
-        #     )
-        #     tb1 = traceback.TracebackException.from_exception(e)
-        #     print("".join(tb1.format()), "\r\n")
+        except Exception as e:
+            misfit_errors += 1
+            cprint(
+                prefix + f"Test unsuccessful for {prior.name}. Traceback with "
+                "exception:",
+                "red",
+            )
+            tb1 = traceback.TracebackException.from_exception(e)
+            print("".join(tb1.format()), "\r\n")
 
-    if exit_code == 0:
+    if misfit_errors == 0:
         cprint(
-            prefix + "All prior misfit tests successful.\r\n",
-            "green",
-            attrs=["bold"],
+            prefix + "All prior misfit tests successful.\r\n", "green", attrs=["bold"]
         )
     else:
         cprint(
-            prefix + "Not all prior misfit tests successful.\r\n",
-            "red",
-            attrs=["bold"],
+            prefix + "Not all prior misfit tests successful.\r\n", "red", attrs=["bold"]
         )
 
-    return exit_code
+    return misfit_errors
 
 
 if __name__ == "__main__":

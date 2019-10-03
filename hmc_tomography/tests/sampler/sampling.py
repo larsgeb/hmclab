@@ -5,6 +5,8 @@ import numpy
 
 from hmc_tomography import Samplers, Targets, MassMatrices, Priors
 
+raise NotImplementedError("This test is not finished yet")
+
 print("\r\nStarting sampling test ...\r\n")
 
 # target = Targets.Himmelblau(annealing=100)

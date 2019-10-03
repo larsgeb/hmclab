@@ -15,7 +15,7 @@ def main(dimensions=50, indent=0):
     indent
     dimensions
     """
-    exit_code = 0
+    kinetic_energy_gradient_errors = 0
     prefix = indent * "\t"
     cprint(
         prefix
@@ -29,7 +29,19 @@ def main(dimensions=50, indent=0):
     for mass_matrix_class in MassMatrices._AbstractMassMatrix.__subclasses__():
         try:
             print(prefix + f"Mass matrix name: {mass_matrix_class.__name__}")
-            mass_matrix: MassMatrices._AbstractMassMatrix = mass_matrix_class(dimensions)
+
+            if mass_matrix_class == MassMatrices.LBFGS:
+                mass_matrix: MassMatrices._AbstractMassMatrix = MassMatrices.LBFGS(
+                    dimensions,
+                    10,
+                    numpy.zeros((dimensions, 1)),
+                    numpy.ones((dimensions, 1)),
+                    1e-2,
+                )
+            else:
+                mass_matrix: MassMatrices._AbstractMassMatrix = mass_matrix_class(
+                    dimensions
+                )
 
             # Actual test ------------------------------------------------------
             mass_matrix.kinetic_energy_gradient(momentum)
@@ -46,14 +58,12 @@ def main(dimensions=50, indent=0):
                 "yellow",
             )
         except Exception as e:
-            exit_code = 1
-            cprint(
-                prefix + f"Test unsuccessful. Traceback with exception:", "red"
-            )
+            kinetic_energy_gradient_errors += 1
+            cprint(prefix + f"Test unsuccessful. Traceback with exception:", "red")
             tb1 = traceback.TracebackException.from_exception(e)
             print("".join(tb1.format()), "\r\n")
 
-    if exit_code == 0:
+    if kinetic_energy_gradient_errors == 0:
         cprint(
             prefix + "All kinetic_energy_gradient tests successful.\r\n",
             "green",
@@ -66,7 +76,7 @@ def main(dimensions=50, indent=0):
             attrs=["bold"],
         )
 
-    return exit_code
+    return kinetic_energy_gradient_errors
 
 
 if __name__ == "__main__":
