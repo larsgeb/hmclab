@@ -36,7 +36,6 @@ matrix:
       python: 3.7
     - name: "Python 3.6.8 on Windows"
       os: windows
-      env: OS_PY=windows36
       language: shell
       before_install:
         - choco install python --version 3.6.8
@@ -44,10 +43,11 @@ matrix:
         - python -m pip install --upgrade pip
         - pip3 install --upgrade pytest
         - pip3 install codecov
-      env: PATH=/c/Python36:/c/Python36/Scripts:$PATH
+      env: 
+        - OS_PY=windows36
+        - PATH=/c/Python36:/c/Python36/Scripts:$PATH
     - name: "Python 3.7.4 on Windows"
       os: windows
-      env: OS_PY=windows37
       language: shell
       before_install:
         - choco install python --version 3.7.4
@@ -55,7 +55,9 @@ matrix:
         - python -m pip install --upgrade pip
         - pip3 install --upgrade pytest
         - pip3 install codecov
-      env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
+      env: 
+        - OS_PY=windows37
+        - PATH=/c/Python37:/c/Python37/Scripts:$PATH
 
 install:
   - pip install -e .
