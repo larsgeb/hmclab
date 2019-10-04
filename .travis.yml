@@ -63,9 +63,5 @@ install:
   - pip install -e .
 
 script:
-  - which python3
-  - which python
-  - python3 --version
-  - python --version
   - echo $OS_PY
   - if [ "$OS_PY" == "windows36" ] || [ "$OS_PY" == "windows37" ]; then python hmc_tomography test; else python3 hmc_tomography test; fi
