@@ -1,35 +1,51 @@
 language: python
 
+
+env:
+  - BADGE=linux36
+  - BADGE=osx36
+  - BADGE=windows36
+  - BADGE=linux37
+  - BADGE=osx37
+  - BADGE=windows37
+
 matrix:
   include:
     - name: "Python 3.6.5 on macOS (xcode9.4)"
       os: osx
+      env: BADGE=osx36
       osx_image: xcode9.4
       language: shell
       before_install:
+        - python --version
         - python3 --version
         - pip3 install -U pip
         - pip3 install -U pytest
         - pip3 install codecov
     - name: "Python 3.7.3 on macOS (xcode10.2)"
       os: osx
+      env: BADGE=osx37
       osx_image: xcode10.2
       language: shell
       before_install:
+        - python --version
         - python3 --version
         - pip3 install -U pip
         - pip3 install -U pytest
         - pip3 install codecov
     - name: "Python 3.6 on Linux"
       os: linux
+      env: BADGE=linux36
       language: python
       python: 3.6
     - name: "Python 3.7 on Linux"
       os: linux
+      env: BADGE=linux37
       language: python
       python: 3.7
     - name: "Python 3.6.8 on Windows"
       os: windows
+      env: BADGE=windows36
       language: shell
       before_install:
         - choco install python --version 3.6.8
@@ -40,6 +56,7 @@ matrix:
       env: PATH=/c/Python36:/c/Python36/Scripts:$PATH
     - name: "Python 3.7.4 on Windows"
       os: windows
+      env: BADGE=windows37
       language: shell
       before_install:
         - choco install python --version 3.7.4
@@ -56,3 +73,4 @@ script:
   - which python3
   - python3 --version
   - python3 -m hmc_tomography test
+  - if [( "$TRAVIS_OS_NAME" == "windows" )]; then python hmc_tomography test
