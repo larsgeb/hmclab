@@ -65,4 +65,5 @@ script:
   - which python
   - python3 --version
   - python --version
-  - if ["$TRAVIS_OS_NAME" == "windows"]; then python hmc_tomography test; else python3 hmc_tomography test; fi
+  - echo $BADGE
+  - if ["$BADGE" == "windows36"]; then python hmc_tomography test; else python3 hmc_tomography test; fi
