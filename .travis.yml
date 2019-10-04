@@ -4,7 +4,7 @@ matrix:
   include:
     - name: "Python 3.6.5 on macOS (xcode9.4)"
       os: osx
-      env: BADGE=osx36
+      env: OS_PY=osx36
       osx_image: xcode9.4
       language: shell
       before_install:
@@ -15,7 +15,7 @@ matrix:
         - pip3 install codecov
     - name: "Python 3.7.3 on macOS (xcode10.2)"
       os: osx
-      env: BADGE=osx37
+      env: OS_PY=osx37
       osx_image: xcode10.2
       language: shell
       before_install:
@@ -26,17 +26,17 @@ matrix:
         - pip3 install codecov
     - name: "Python 3.6 on Linux"
       os: linux
-      env: BADGE=linux36
+      env: OS_PY=linux36
       language: python
       python: 3.6
     - name: "Python 3.7 on Linux"
       os: linux
-      env: BADGE=linux37
+      env: OS_PY=linux37
       language: python
       python: 3.7
     - name: "Python 3.6.8 on Windows"
       os: windows
-      env: BADGE=windows36
+      env: OS_PY=windows36
       language: shell
       before_install:
         - choco install python --version 3.6.8
@@ -47,7 +47,7 @@ matrix:
       env: PATH=/c/Python36:/c/Python36/Scripts:$PATH
     - name: "Python 3.7.4 on Windows"
       os: windows
-      env: BADGE=windows37
+      env: OS_PY=windows37
       language: shell
       before_install:
         - choco install python --version 3.7.4
@@ -65,5 +65,5 @@ script:
   - which python
   - python3 --version
   - python --version
-  - echo $BADGE
-  - if ["$BADGE" == "windows36"]; then python hmc_tomography test; else python3 hmc_tomography test; fi
+  - echo $OS_PY
+  - if [ "$OS_PY" == "windows36" ] || [ "$OS_PY" == "windows37" ]; then python hmc_tomography test; else python3 hmc_tomography test; fi
