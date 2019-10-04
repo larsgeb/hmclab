@@ -1,6 +1,24 @@
-dist: xenial
-
 language: python
+
+matrix:
+  include:
+    - name: "Python 3.6 on macOS"
+      os: osx
+      language: shell  # 'language: python' is an error on Travis CI macOS
+      python: 3.6
+    - name: "Python 3.7 on macOS"
+      os: osx
+      language: shell  # 'language: python' is an error on Travis CI macOS
+      python: 3.7
+    - name: "Python 3.6 on Linux"
+      os: linux
+      language: python
+      python: 3.6
+    - name: "Python 3.7 on Linux"
+      os: linux
+      language: python
+      python: 3.7
+
 python:
   - "3.6"
   - "3.7"
