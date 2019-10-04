@@ -1,9 +1,7 @@
-import sys
 import numpy
 import traceback
 from termcolor import cprint
 
-sys.path.append("..")
 from hmc_tomography import MassMatrices
 
 

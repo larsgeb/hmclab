@@ -1,5 +1,5 @@
 from termcolor import cprint
-from hmc_tomography.tests.mass_matrix import (
+from hmc_tomography.Tests.mass_matrix import (
     kinetic_energy,
     kinetic_energy_gradient,
     generate_momentum,

@@ -1,5 +1,5 @@
 from termcolor import cprint
-from hmc_tomography.tests.target import misfit, gradient
+from hmc_tomography.Tests.target import misfit, gradient
 
 
 def test_all(dimensions=50, indent=0):

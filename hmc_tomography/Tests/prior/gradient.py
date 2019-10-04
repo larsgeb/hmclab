@@ -1,9 +1,7 @@
-import sys
 import traceback
 import numpy
 from termcolor import cprint
 
-sys.path.append("..")
 from hmc_tomography import Priors
 
 
@@ -15,11 +13,11 @@ def main(dimensions=50, indent=0):
         indent
         dimensions
         """
-    misfit_errors = 0
+    gradient_errors = 0
     prefix = indent * "\t"
     cprint(
         prefix
-        + f"Starting misfit test for all priors using\r\n"
+        + f"Starting gradient test for all priors using\r\n"
         + prefix
         + f"{dimensions} dimensions...\r\n",
         "blue",
@@ -39,15 +37,18 @@ def main(dimensions=50, indent=0):
                 else:  # Construct two priors if dimension is larger than 1
                     list_of_priors = [Priors.Normal(dimensions - 1), Priors.Uniform(1)]
 
-                prior: Priors._AbstractPrior = Priors.CompositePrior(dimensions, list_of_priors)
+                prior: Priors._AbstractPrior = Priors.CompositePrior(
+                    dimensions, list_of_priors
+                )
 
             else:
                 prior: Priors._AbstractPrior = prior_class(dimensions)
 
             # Actual test ------------------------------------------------------
             coordinates = numpy.ones((dimensions, 1))
-            result = prior.misfit(coordinates)
-            assert type(result) == float
+            result = prior.gradient(coordinates)
+            assert type(result) == numpy.ndarray
+            assert result.shape == (prior.dimensions, 1)
             # ------------------------------------------------------------------
 
             cprint(prefix + f"Test successful.\r\n", "green")
@@ -61,7 +62,7 @@ def main(dimensions=50, indent=0):
                 "yellow",
             )
         except Exception as e:
-            misfit_errors += 1
+            gradient_errors += 1
             cprint(
                 prefix + f"Test unsuccessful for {prior.name}. Traceback with "
                 "exception:",
@@ -70,16 +71,18 @@ def main(dimensions=50, indent=0):
             tb1 = traceback.TracebackException.from_exception(e)
             print("".join(tb1.format()), "\r\n")
 
-    if misfit_errors == 0:
+    if gradient_errors == 0:
         cprint(
-            prefix + "All prior misfit tests successful.\r\n", "green", attrs=["bold"]
+            prefix + "All prior gradient tests successful.\r\n", "green", attrs=["bold"]
         )
     else:
         cprint(
-            prefix + "Not all prior misfit tests successful.\r\n", "red", attrs=["bold"]
+            prefix + "Not all prior gradient tests successful.\r\n",
+            "red",
+            attrs=["bold"],
         )
 
-    return misfit_errors
+    return gradient_errors
 
 
 if __name__ == "__main__":

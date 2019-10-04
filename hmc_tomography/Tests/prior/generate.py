@@ -1,9 +1,7 @@
-import sys
 import traceback
 import numpy
 from termcolor import cprint
 
-sys.path.append("..")
 from hmc_tomography import Priors
 
 
