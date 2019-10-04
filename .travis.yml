@@ -16,10 +16,10 @@ before_install:
 
 install:
 
+  - pip install -e .
   - conda env create hmc-tomography
-  - pip install -e . --force-reinstall
-  - conda activate hmc-tomography
-  - pip install -e . --force-reinstall
+  - source activate hmc-tomography
+  - pip install -e .
 
 script:
   - cd bin
