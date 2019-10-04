@@ -1,14 +1,5 @@
 language: python
 
-
-env:
-  - BADGE=linux36
-  - BADGE=osx36
-  - BADGE=windows36
-  - BADGE=linux37
-  - BADGE=osx37
-  - BADGE=windows37
-
 matrix:
   include:
     - name: "Python 3.6.5 on macOS (xcode9.4)"
