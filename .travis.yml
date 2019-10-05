@@ -24,13 +24,51 @@ matrix:
         - pip3 install -U pip
         - pip3 install -U pytest
         - pip3 install codecov
-    - name: "Python 3.6 on Linux"
+    - name: "Python 3.6 on Bionic"
       os: linux
+      dist: bionic
       env: OS_PY=linux36
       language: python
       python: 3.6
-    - name: "Python 3.7 on Linux"
+    - name: "Python 3.7 on Bionic"
       os: linux
+      dist: bionic
+      env: OS_PY=linux37
+      language: python
+      python: 3.7
+    - name: "Python 3.6 on Xenial"
+      os: linux
+      dist: xenial
+      env: OS_PY=linux36
+      language: python
+      python: 3.6
+    - name: "Python 3.7 on Xenial"
+      os: linux
+      dist: xenial
+      env: OS_PY=linux37
+      language: python
+      python: 3.7
+    - name: "Python 3.6 on Trusty"
+      os: linux
+      dist: trusty
+      env: OS_PY=linux36
+      language: python
+      python: 3.6
+    - name: "Python 3.7 on Trusty"
+      os: linux
+      dist: trusty
+      env: OS_PY=linux37
+      language: python
+      python: 3.7
+    - name: "Python 3.6 on Precise"
+      os: linux
+      dist: precise
+      env: OS_PY=linux36
+      language: python
+      python: 3.6
+    - name: "Python 3.7 on Precise"
+      os: linux
+      dist: precise
       env: OS_PY=linux37
       language: python
       python: 3.7
@@ -65,3 +103,5 @@ install:
 script:
   - echo $OS_PY
   - if [ "$OS_PY" == "windows36" ] || [ "$OS_PY" == "windows37" ]; then python hmc_tomography test; else python3 hmc_tomography test; fi
+
+
