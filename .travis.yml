@@ -36,12 +36,6 @@ matrix:
       env: OS_PY=bionic37
       language: python
       python: 3.7
-    # - name: "Python 3.8-dev on Bionic"
-    #   os: linux
-    #   dist: bionic
-    #   env: OS_PY=linux38
-    #   language: python
-    #   python: 3.8-dev
     - name: "Python 3.6 on Xenial"
       os: linux
       dist: xenial
@@ -54,36 +48,18 @@ matrix:
       env: OS_PY=xenial37
       language: python
       python: 3.7
-    # - name: "Python 3.8-dev on Xenial"
-    #   os: linux
-    #   dist: xenial
-    #   env: OS_PY=linux38
-    #   language: python
-    #   python: 3.8-dev
     - name: "Python 3.6 on Trusty"
       os: linux
       dist: trusty
       env: OS_PY=trusty36
       language: python
       python: 3.6
-    # - name: "Python 3.7 on Trusty"
-    #   os: linux
-    #   dist: trusty
-    #   env: OS_PY=linux37
-    #   language: python
-    #   python: 3.7
     - name: "Python 3.6 on Precise"
       os: linux
       dist: precise
       env: OS_PY=precise36
       language: python
       python: 3.6
-    # - name: "Python 3.7 on Precise"
-    #   os: linux
-    #   dist: precise
-    #   env: OS_PY=linux37
-    #   language: python
-    #   python: 3.7
     - name: "Python 3.6.8 on Windows"
       os: windows
       language: shell

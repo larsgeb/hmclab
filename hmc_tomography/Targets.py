@@ -28,6 +28,7 @@ class _AbstractTarget(_ABC):
 
 class Himmelblau(_AbstractTarget):
     """Himmelblau's 2-dimensional function."""
+
     name = "Himmelblau's function"
     dimensions = 2
     annealing = 1
@@ -56,6 +57,7 @@ class Himmelblau(_AbstractTarget):
 
 class Empty(_AbstractTarget):
     """Empty target function. Has zero misfit and gradient for all parameters everywhere."""
+
     def __init__(self, dimensions: int):
 
         self.name = "empty target"
