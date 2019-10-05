@@ -29,4 +29,5 @@ setuptools.setup(
         "h5py",
         "pyyaml",
     ],  # This does not include development packages (e.g. Sphinx)
+    extras_require={"dev": ["black", "pre-commit", "sphinx", "numpydoc"]},
 )
