@@ -1,7 +1,6 @@
 # HMC Tomography
 
-TravisCI unit test status: 
-[![Build Status](https://travis-ci.com/larsgeb/hmc-tomography.svg?token=G43u7wF834znRn3jm2mR&branch=master)](https://travis-ci.com/larsgeb/hmc-tomography)
+[![Build Status](https://travis-ci.com/larsgeb/hmc-tomography.svg?token=G43u7wF834znRn3jm2mR&branch=master)](https://travis-ci.com/larsgeb/hmc-tomography) [![codecov](https://codecov.io/gh/larsgeb/hmc-tomography/branch/master/graph/badge.svg?token=6svV9YDRhd)](https://codecov.io/gh/larsgeb/hmc-tomography) ![license](https://img.shields.io/github/license/larsgeb/hmc-tomography)
 
 Manual:
 https://larsgeb.github.io/hmc-tomography/
@@ -10,76 +9,53 @@ https://larsgeb.github.io/hmc-tomography/
 
 This repository is meant to be an introduction to Bayesian tomography using Hamiltonian Monte Carlo. We designed a general Monte Carlo sampler that is applied to multiple tomographic problems.
 
-To make the code run machine independent, we use a virtual environment. This makes sure that everyone uses the same Python version and packages. We offer two environment options, Conda and VirtualEnv.
-
-## Installing the package from source
+## Installing the packge
 
 Directly to your environment:
-```
-pip install -e git+git@github.com:larsgeb/hmc-tomography.git@master#egg=hmc_tomography&subdirectory=hmc_tomography
-```
-
-From the base directory:
 
 ```
-python3 setup.py sdist bdist_wheel 
-pip install dist/hmc_tomography_lars_gebraad-0.0.1-py3-none-any.whl --force-reinstall
+pip install -e git+git@github.com:larsgeb/hmc-tomography.git@master#egg=hmc_tomography
 ```
 
-## Using Anaconda/Miniconda
-Anaconda or Miniconda are both supported. Make sure that you have one of these installed: 
+From the project root directory:
 
-1.  https://www.anaconda.com/distribution/;
-2.  https://docs.conda.io/en/latest/miniconda.html.
-
-Also, make sure that you can activate anaconda environments ([i.e. add the executable to your PATH](https://support.anaconda.com/customer/en/portal/articles/2621189-conda-%22command-not-found%22-error)). 
-
-For new Conda users, you might not want to automatically start Anaconda every time you open a command line shell. You can do that by using the following from the shell:
 ```
-$ conda config --set auto_activate_base false
+pip install -e .
 ```
 
-Then, find a suitable folder on your machine for the code. Git clone and change your directory to the newly cloned code.:
+### Development dependencies
+
+If you want to develop within this repo, we recommend a few extra packages. They can also be installed using pip.
+
+In Bash:
 ```
-$ git clone https://github.com/larsgeb/hmc-tomography.git
-$ cd hmc-tomography
-```
-Create the Conda environment. It will be called `hmc-tomography`.
-```
-$ conda env create -f environment.yml
-```
-Initialize it:
-```
-$ source activate hmc-tomography
+pip install -e git+git@github.com:larsgeb/hmc-tomography.git@master#egg=hmc_tomography[dev] # from github repo
+pip install -e .[dev] # from local clone
 ```
 
-To be sure, you can check whether or not the ```python``` or ```python3``` command gives the correct result: 
-```bash
-$ which python                                                         
-[conda installation location]/anaconda3/envs/hmc-tomography/bin/python3
+... or Zsh (which requires escapes for brackets):
+
+```
+pip install -e git+git@github.com:larsgeb/hmc-tomography.git@master#egg=hmc_tomography\[dev\] # from github repo
+pip install -e .\[dev\] # from local clone
 ```
 
-You can now start running the codes! They are all designed to run from the bin folder.
+## Integration tests
 
-## Using VirtualEnv
+We test our code using TravisCI on as many platforms and Python versions as possible. Currently, we are testing the following configurations:
 
-Make sure that you have VirtualEnv installed through Pip in your interpreter of choice: https://virtualenv.pypa.io/en/latest/installation/ . Also make sure the ```virtualenv``` command is in your path.
+| Testing environments | Python 3.6                      | Python 3.7     |
+|----------------------|---------------------------------|----------------|
+| Windows              | 1803                            | 1803           |
+| Ubuntu               | Bionic, Xenial, Trusty, Precise | Bionic, Xenial |
+| macOS                | xcode9.4                        | xcode10.2      |
 
-To make a new environment for the project:
+## Code coverage
 
-```bash
-$ virtualenv venv-hmc-tomography
-```
+We test our code tests for coverage using codecov. The project apge can be found [here](https://codecov.io/gh/larsgeb/hmc-tomography).
 
-Activate it:
+Codecov graph follows below. An interactive version can be found on the codecov project page.
 
-```bash
-$ source venv-hmc-tomography/bin/activate
-```
+![codecov graph](https://codecov.io/gh/larsgeb/hmc-tomography/commit/eeeb67f2229ce22a7491a9341100c66ce75e38f9/graphs/sunburst.svg?token=6svV9YDRhd)
 
-To be sure, you can check whether or not the ```python``` or ```python3``` command gives the correct result: 
-```bash
-$ which python                                                            
-[your repo clone location]/hmc-tomography/venv-hmc-tomography/bin/python
-```
-Now, to install all the required packages:
+> The inner-most circle is the entire project, moving away from the center are folders then, finally, a single file. The size and color of each slice is representing the number of statements and the coverage, respectively. 
