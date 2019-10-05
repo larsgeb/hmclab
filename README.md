@@ -46,19 +46,9 @@ We test our code using TravisCI on as many platforms and Python versions as poss
 
 | Testing environments | Python 3.6                      | Python 3.7     |
 |----------------------|---------------------------------|----------------|
-| Windows              | 1803                            | 1803           |
-| Ubuntu               | Bionic, Xenial, Trusty, Precise | Bionic, Xenial |
-| macOS                | xcode9.4                        | xcode10.2      |
-
-Current testing status:
-
-![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=osx36&label=macOS%20-%20xcode9.4%20-%20Python%203.6) ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=osx37&label=macOS%20-%20xcode10.2%20-%20Python%203.7) 
-
-![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=bionic36&label=Bionic%20-%20Python%203.6) ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=xenial36&label=Xenial%20-%20Python%203.6) ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=trusty36&label=Trusty%20-%20Python%203.6) ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=precise36&label=Precise%20-%20Python%203.6) 
-
-![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=bionic37&label=Bionic%20-%20Python%203.7) ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=xenial37&label=Xenial%20-%20Python%203.7) ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=trusty37&label=Trusty%20-%20Python%203.7) ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=precise37&label=Precise%20-%20Python%203.7) 
-
-![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=windows36&label=Windows%20-%20Python%203.6) ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=windows37&label=Windows%20-%20Python%203.7) 
+| Windows              | ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=windows36&label=Windows%20-%20Python%203.6)                            | ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=windows37&label=Windows%20-%20Python%203.7)           |
+| Ubuntu               | ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=bionic36&label=Bionic%20-%20Python%203.6) <br> ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=xenial36&label=Xenial%20-%20Python%203.6) <br> ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=trusty36&label=Trusty%20-%20Python%203.6) <br> ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=precise36&label=Precise%20-%20Python%203.6)  | ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=bionic37&label=Bionic%20-%20Python%203.7) <br> ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=xenial37&label=Xenial%20-%20Python%203.7) |
+| macOS                | ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=osx36&label=macOS%20-%20xcode9.4%20-%20Python%203.6)                        | ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=osx37&label=macOS%20-%20xcode10.2%20-%20Python%203.7)      |
 
 ## Code coverage
 
