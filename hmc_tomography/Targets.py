@@ -17,28 +17,45 @@ class _AbstractTarget(_ABC):
 
     @_abstractmethod
     def misfit(self, coordinates: _numpy.ndarray) -> float:
-        """Returns the misfit at the given coordinates. This is equal to the negative logarithm of the likelihood function: :math:`\chi(m) = - \log L(m)= - \log p(m|d)`."""
+        """Returns the misfit at the given coordinates. This is equal to the negative
+        logarithm of the likelihood function: :math:`\\chi(m) = - \\log L(m)=
+        - \\log p(m|d)`."""
         pass
 
     @_abstractmethod
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
-        """Returns the gradient of the misfit at the given coordinates: :math:`∇_m \chi(m) = - ∇_m \log L(m)= - ∇_m \log p(m|d)`."""
+        """Returns the gradient of the misfit at the given coordinates: :math:`∇_m
+        \\chi(m) = - ∇_m \\log L(m)= - ∇_m \\log p(m|d)`."""
         pass
 
 
 class Himmelblau(_AbstractTarget):
-    """Himmelblau's 2-dimensional function."""
+    """Himmelblau's 2-dimensional function.
 
-    name = "Himmelblau's function"
-    dimensions = 2
-    annealing = 1
+    Himmelblau's function is defined as:
+
+    .. math::
+
+        f(x,y)=(x^{2}+y-11)^{2}+(x+y^{2}-7)^{2}
+    """
+
+    name: str = "Himmelblau's function"
+    dimensions: int = 2
+    annealing: float = 1
+    """Float representing the annealing (:math:`T`) of Himmelblau's function.
+    
+    Alters the misfit function in the following way:
+
+    .. math::
+
+        f(x,y)_T=\\frac{f(x,y)}{T}
+    """
 
     def __init__(self, dimensions: int = -1, annealing: float = 1):
-
         self.annealing = annealing
 
     def misfit(self, coordinates: _numpy.ndarray) -> float:
-        """Returns the value of Himmelblau's function at the given coordinates: :math:`f(x,y)=(x^{2}+y-11)^{2}+(x+y^{2}-7)^{2}`."""
+        """Returns the value of Himmelblau's function at the given coordinates."""
         if coordinates.shape != (self.dimensions, 1):
             raise ValueError()
         x = coordinates[0, 0]
@@ -46,7 +63,8 @@ class Himmelblau(_AbstractTarget):
         return ((x ** 2 + y - 11) ** 2 + (x + y ** 2 - 7) ** 2) / self.annealing
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
-        """Returns the gradient of Himmelblau's function at the given coordinates."""
+        """Returns a numpy.ndarray shaped as (dimensions, 1) containing the gradient of
+        Himmelblau's function at the given coordinates."""
         x = coordinates[0]
         y = coordinates[1]
         gradient = _numpy.zeros((self.dimensions, 1))
@@ -56,10 +74,20 @@ class Himmelblau(_AbstractTarget):
 
 
 class Empty(_AbstractTarget):
-    """Empty target function. Has zero misfit and gradient for all parameters everywhere."""
+    """Null target function.
+
+
+    Has zero misfit and gradient for all parameters
+    everywhere. Defined as:
+
+    .. math::
+
+        f(\\mathbf{m})=0
+
+
+    """
 
     def __init__(self, dimensions: int):
-
         self.name = "empty target"
         self.dimensions = dimensions
 

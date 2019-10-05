@@ -72,9 +72,7 @@ class HMC(_AbstractSampler):
         prior
         """
         # Sanity check on the dimensions of passed objects ---------------------
-        if not (
-            target.dimensions == prior.dimensions == mass_matrix.dimensions
-        ):
+        if not (target.dimensions == prior.dimensions == mass_matrix.dimensions):
             raise ValueError(
                 "Incompatible target/prior/mass matrix.\r\n"
                 f"Target dimensions:\t\t{target.dimensions}.\r\n"
@@ -102,6 +100,7 @@ class HMC(_AbstractSampler):
         randomize_time_step: bool = True,
         initial_model: _numpy.ndarray = None,
         ignore_update_hook_mass: bool = False,
+        suppress_warnings: bool = True,
     ) -> int:
         """
 
@@ -123,12 +122,18 @@ class HMC(_AbstractSampler):
 
         """
 
+        # If suppress warnings
+        if suppress_warnings:
+            import warnings as _warnings
+
+            _warnings.filterwarnings("ignore", category=RuntimeWarning)
+
         # Prepare sampling -----------------------------------------------------
         accepted = 0
 
         # Initial model
         if initial_model is None:
-            coordinates = _numpy.ones((self.dimensions, 1))
+            coordinates = _numpy.zeros((self.dimensions, 1))
         else:
             assert initial_model.shape == (self.dimensions, 1)
             coordinates = initial_model
@@ -147,9 +152,7 @@ class HMC(_AbstractSampler):
         self.sample_hdf5_dataset.attrs["online_thinning"] = online_thinning
         self.sample_hdf5_dataset.attrs["time_step"] = time_step
         self.sample_hdf5_dataset.attrs["integration_steps"] = integration_steps
-        self.sample_hdf5_dataset.attrs[
-            "randomizetime_step"
-        ] = randomize_time_step
+        self.sample_hdf5_dataset.attrs["randomizetime_step"] = randomize_time_step
         self.sample_hdf5_dataset.attrs[
             "randomize_iterations"
         ] = randomize_integration_steps
@@ -192,9 +195,9 @@ class HMC(_AbstractSampler):
             for proposal in proposals_total:
 
                 # Compute initial Hamiltonian
-                potential: float = self.target.misfit(
+                potential: float = self.target.misfit(coordinates) + self.prior.misfit(
                     coordinates
-                ) + self.prior.misfit(coordinates)
+                )
                 momentum = self.mass_matrix.generate_momentum()
                 kinetic: float = self.mass_matrix.kinetic_energy(momentum)
                 hamiltonian: float = potential + kinetic
@@ -208,15 +211,13 @@ class HMC(_AbstractSampler):
                 new_potential: float = self.target.misfit(
                     new_coordinates
                 ) + self.prior.misfit(new_coordinates)
-                new_kinetic: float = self.mass_matrix.kinetic_energy(
-                    new_momentum
-                )
+                new_kinetic: float = self.mass_matrix.kinetic_energy(new_momentum)
                 new_hamiltonian: float = new_potential + new_kinetic
 
                 # Evaluate acceptance criterion
-                if _numpy.exp(
-                    hamiltonian - new_hamiltonian
-                ) > _numpy.random.uniform(0, 1):
+                if _numpy.exp(hamiltonian - new_hamiltonian) > _numpy.random.uniform(
+                    0, 1
+                ):
                     accepted += 1
                     coordinates = new_coordinates.copy()
                 else:
@@ -233,14 +234,10 @@ class HMC(_AbstractSampler):
                     buffer_location: int = int(
                         (proposal / online_thinning) % sample_ram_buffer_size
                     )
-                    self.sample_ram_buffer[:-1, buffer_location] = coordinates[
-                        :, 0
-                    ]
-                    self.sample_ram_buffer[
-                        -1, buffer_location
-                    ] = self.target.misfit(coordinates) + self.prior.misfit(
+                    self.sample_ram_buffer[:-1, buffer_location] = coordinates[:, 0]
+                    self.sample_ram_buffer[-1, buffer_location] = self.target.misfit(
                         coordinates
-                    )
+                    ) + self.prior.misfit(coordinates)
                     proposals_total.set_description(
                         f"Average acceptance rate: {accepted/(proposal+1):.2f}."
                         "Progress"
@@ -248,9 +245,7 @@ class HMC(_AbstractSampler):
                     # Write out to disk when at the end of the buffer
                     if buffer_location == sample_ram_buffer_size - 1:
                         start = int(
-                            (proposal / online_thinning)
-                            - sample_ram_buffer_size
-                            + 1
+                            (proposal / online_thinning) - sample_ram_buffer_size + 1
                         )
                         end = int((proposal / online_thinning))
                         self.flush_samples(start, end, self.sample_ram_buffer)
@@ -258,7 +253,7 @@ class HMC(_AbstractSampler):
         except KeyboardInterrupt:  # Catch SIGINT ------------------------------
             # Close tqdm progressbar
             proposals_total.close()
-            # Flush the last samples
+            # TODO delete all non-written entries in hdf5 file
         finally:  # Write out samples still in the buffer ----------------------
             buffer_location: int = int(
                 (proposal / online_thinning) % sample_ram_buffer_size
@@ -267,16 +262,14 @@ class HMC(_AbstractSampler):
                 int((proposal / online_thinning) / sample_ram_buffer_size)
                 * sample_ram_buffer_size
             )
-            end = (
-                int(proposal / online_thinning) - 1
-            )  # Write out one less to be sure
-            if (
-                end - start + 1 > 0
-                and buffer_location != sample_ram_buffer_size - 1
-            ):
+            end = int(proposal / online_thinning) - 1  # Write out one less to be sure
+            if end - start + 1 > 0 and buffer_location != sample_ram_buffer_size - 1:
                 self.flush_samples(
                     start, end, self.sample_ram_buffer[:, :buffer_location]
                 )
+
+        if suppress_warnings:
+            _warnings.filterwarnings("default", category=RuntimeWarning)
 
         # Flush output
         _sys.stdout.flush()
@@ -330,9 +323,9 @@ class HMC(_AbstractSampler):
                 self.prior.corrector(coordinates, momentum)
 
         # Full momentum and half step coordinates after loop
-        potential_gradient = self.target.gradient(
+        potential_gradient = self.target.gradient(coordinates) + self.prior.gradient(
             coordinates
-        ) + self.prior.gradient(coordinates)
+        )
 
         # For the update
         update_coordinates = _numpy.copy(coordinates)
