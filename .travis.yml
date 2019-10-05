@@ -36,12 +36,12 @@ matrix:
       env: OS_PY=linux37
       language: python
       python: 3.7
-    - name: "Python 3.8-dev on Bionic"
-      os: linux
-      dist: bionic
-      env: OS_PY=linux38
-      language: python
-      python: 3.8-dev
+    # - name: "Python 3.8-dev on Bionic"
+    #   os: linux
+    #   dist: bionic
+    #   env: OS_PY=linux38
+    #   language: python
+    #   python: 3.8-dev
     - name: "Python 3.6 on Xenial"
       os: linux
       dist: xenial
@@ -54,12 +54,12 @@ matrix:
       env: OS_PY=linux37
       language: python
       python: 3.7
-    - name: "Python 3.8-dev on Xenial"
-      os: linux
-      dist: xenial
-      env: OS_PY=linux38
-      language: python
-      python: 3.8-dev
+    # - name: "Python 3.8-dev on Xenial"
+    #   os: linux
+    #   dist: xenial
+    #   env: OS_PY=linux38
+    #   language: python
+    #   python: 3.8-dev
     - name: "Python 3.6 on Trusty"
       os: linux
       dist: trusty
@@ -110,10 +110,14 @@ matrix:
         - PATH=/c/Python37:/c/Python37/Scripts:$PATH
 
 install:
-  - pip install -e .
+  - pip install -e .[dev]
 
 script:
   - echo $OS_PY
   - if [ "$OS_PY" == "windows36" ] || [ "$OS_PY" == "windows37" ]; then python hmc_tomography test; else python3 hmc_tomography test; fi
+  - coverage run hmc_tomography test
+
+after_success:
+  - codecov
 
 
