@@ -8,3 +8,4 @@ dist
 hmc_tomography_*
 *.egg-info
 *__pycache__
+.coverage
