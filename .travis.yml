@@ -27,13 +27,13 @@ matrix:
     - name: "Python 3.6 on Bionic"
       os: linux
       dist: bionic
-      env: OS_PY=linux36
+      env: OS_PY=bionic36
       language: python
       python: 3.6
     - name: "Python 3.7 on Bionic"
       os: linux
       dist: bionic
-      env: OS_PY=linux37
+      env: OS_PY=bionic37
       language: python
       python: 3.7
     # - name: "Python 3.8-dev on Bionic"
@@ -45,13 +45,13 @@ matrix:
     - name: "Python 3.6 on Xenial"
       os: linux
       dist: xenial
-      env: OS_PY=linux36
+      env: OS_PY=xenial36
       language: python
       python: 3.6
     - name: "Python 3.7 on Xenial"
       os: linux
       dist: xenial
-      env: OS_PY=linux37
+      env: OS_PY=xenial37
       language: python
       python: 3.7
     # - name: "Python 3.8-dev on Xenial"
@@ -63,7 +63,7 @@ matrix:
     - name: "Python 3.6 on Trusty"
       os: linux
       dist: trusty
-      env: OS_PY=linux36
+      env: OS_PY=trusty36
       language: python
       python: 3.6
     # - name: "Python 3.7 on Trusty"
@@ -75,7 +75,7 @@ matrix:
     - name: "Python 3.6 on Precise"
       os: linux
       dist: precise
-      env: OS_PY=linux36
+      env: OS_PY=precise36
       language: python
       python: 3.6
     # - name: "Python 3.7 on Precise"
