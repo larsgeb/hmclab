@@ -1,15 +1,14 @@
-HMC Tomography sampling module
-==============================
+Sampling reference
+==================
 
 .. automodule:: hmc_tomography
     :members:
 
-
 .. toctree::
-   :maxdepth: 2
-   :caption: Objects within hmc_tomography:
+   :maxdepth: 3
+   :caption: Essential classes:
 
-   hmc_tomography.structure
-   hmc_tomography.sampler
    hmc_tomography.priors
    hmc_tomography.targets
+   hmc_tomography.massmatrices
+   hmc_tomography.sampler

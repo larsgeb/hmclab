@@ -15,34 +15,40 @@ Avialable priors:
                  hmc_tomography.Priors.CompositePrior
 
 
-.. _PriorABC-label:
-
 What are priors?
 """"""""""""""""
 
 Prior ABC
 """""""""
 
-This class is the abstract base class. Our package does not **require** you to 
+This class is the abstract base class. Our package does not **require** you to
 inherit from this class, but it makes checking for required methods easier.
 
-Creating a new class based upon this ABC in a separate file is done as follows::
+Implementing your own Prior
+***************************
+
+Creating a new class based upon this ABC in a separate file is done as
+follows::
 
     from hmc_tomography.Priors import _AbstractPrior
-    class newPrior(_AbstractPrior): 
-        pass 
+    class newPrior(_AbstractPrior):
+        pass
 
 However, when one would try to instantiate this object::
-    
+
     prior = newPrior()
 
-a `TypeError` is raised; because the abstract (read: required) methods are 
+a `TypeError` is raised; because the abstract (read: required) methods are
 not implemented yet:
 
-``TypeError: Can't instantiate abstract class newPrior with abstract methods [..]``
+``TypeError: Can't instantiate abstract class newPrior with abstract methods
+[..]``
+
+Prior ABC reference
+*******************
 
 .. autoclass:: hmc_tomography.Priors._AbstractPrior
-    :inherited-members:
+    :members:
 
 Prior distributions reference
 """""""""""""""""""""""""""""

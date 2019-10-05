@@ -3,13 +3,15 @@ HMC Tomography
 ##############
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 1
+    :caption: Contents:
 
-   hmc_tomography
-   mcmc_visualization
-   tests
-
+    setup
+    tour
+    hmc_tomography
+    mcmc_visualization
+    tests
+    references
 
 Indices and tables
 ------------------

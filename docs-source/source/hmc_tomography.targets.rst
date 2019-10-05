@@ -1,29 +1,39 @@
-##############
-Target objects
-##############
+###########################
+Target (likelihood) objects
+###########################
 
-Targets or likelihood distributions for reference. Your own target class should
-inherit from the :ref:`TargetABC-label`.
+Available targets:
 
-Implementing your own targets
-"""""""""""""""""""""""""""""
+.. autosummary:: hmc_tomography.Targets._AbstractTarget
+                 hmc_tomography.Targets.Himmelblau
+                 hmc_tomography.Targets.Empty
 
-.. _TargetABC-label:
+What are targets?
+"""""""""""""""""
 
 Target ABC
 """"""""""
 
+Implementing your own Prior
+***************************
+
+Target ABC reference
+********************
+
 .. autoclass:: hmc_tomography.Targets._AbstractTarget
-    :inherited-members:
+    :members:
 
-Target classes
-""""""""""""""
+Target objects reference
+""""""""""""""""""""""""
 
-Simple likelihood distributions available to the HMC sampler, all based on
-the :ref:`TargetABC-label`.
+Two-dimensional Himmelblau function
+***********************************
 
 .. autoclass:: hmc_tomography.Targets.Himmelblau
    :members:
+
+Null function
+*************
 
 .. autoclass:: hmc_tomography.Targets.Empty
    :members:
