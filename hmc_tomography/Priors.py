@@ -1,3 +1,5 @@
+"""Prior classes and associated methods.
+"""
 from abc import ABC as _ABC
 from abc import abstractmethod as _abstractmethod
 from typing import List as _List
@@ -197,7 +199,7 @@ class Normal(_AbstractPrior):
         if means is None and covariance is None:
             # Neither means nor covariance is provided ---------------------------------
             _cprint(
-                "Neither means or covariance matrix provided. Generating random means"
+                "Neither means or covariance matrix provided. Generating random means "
                 "and variances.",
                 "yellow",
             )
@@ -225,7 +227,7 @@ class Normal(_AbstractPrior):
                 # Supplied a diagonal of a covariance matrix
                 self.diagonal = True
                 _cprint(
-                    "Seem that you only passed a vector as the covariance matrix. It"
+                    "Seem that you only passed a vector as the covariance matrix. It "
                     "will be used as the covariance diagonal.",
                     "yellow",
                 )
@@ -286,6 +288,27 @@ class Normal(_AbstractPrior):
 
     def corrector(self, coordinates, momentum):
         self.bounds_corrector(coordinates, momentum)
+
+
+class Sparse(_AbstractPrior):
+    def __init__(self, dimensions):
+        self.dimensions = dimensions
+
+    def misfit(self, coordinates):
+        return _numpy.sum(_numpy.abs(coordinates))
+
+    def gradient(self, coordinates):
+        grad = _numpy.ones_like(coordinates)
+
+        grad[coordinates < 0] = -1
+
+        return grad
+
+    def corrector(self, coordinates: _numpy.ndarray, momentum: _numpy.ndarray):
+        pass
+
+    def generate(self):
+        raise NotImplementedError()
 
 
 class LogNormal(_AbstractPrior):
@@ -495,7 +518,7 @@ class Uniform(_AbstractPrior):
         if upper_bounds is None:
             self.upper_bounds = _numpy.ones((dimensions, 1))
         else:
-            self.upper_bounds = upper_bounds or _numpy.ones((dimensions, 1))
+            self.upper_bounds = upper_bounds
         if lower_bounds is None:
             self.lower_bounds = _numpy.zeros((dimensions, 1))
         else:
@@ -508,7 +531,12 @@ class Uniform(_AbstractPrior):
         self._misfit = -_numpy.sum(_numpy.log(self.widths)).item()
 
     def misfit(self, coordinates: _numpy.ndarray) -> float:
-        return self._misfit
+        if _numpy.any(coordinates < self.lower_bounds) or _numpy.any(
+            coordinates > self.upper_bounds
+        ):
+            return _numpy.inf
+        else:
+            return self._misfit
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
         return _numpy.zeros((self.dimensions, 1))

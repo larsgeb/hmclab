@@ -1,5 +1,4 @@
-"""
-Sampler classes and associated methods.
+"""Sampler classes and associated methods.
 """
 import sys as _sys
 from abc import ABC as _ABC
@@ -319,8 +318,9 @@ class HMC(_AbstractSampler):
             coordinates += time_step * self.mass_matrix.kinetic_energy_gradient(
                 momentum
             )
-            if self.prior.bounded:  # Correct if the distribution is bounded
-                self.prior.corrector(coordinates, momentum)
+
+            # Correct bounds
+            self.prior.corrector(coordinates, momentum)
 
         # Full momentum and half step coordinates after loop
         potential_gradient = self.target.gradient(coordinates) + self.prior.gradient(
@@ -342,6 +342,7 @@ class HMC(_AbstractSampler):
         return coordinates, momentum, update_coordinates, update_gradient
 
     def open_hdf5(self, name: str, length: int, dtype: str = "f8"):
+        # TODO add overwrite dialog
         self.sample_hdf5_file = _h5py.File(name, "w")
         time = 0
         # time = _time.strftime("%Y-%m-%d %H:%M:%S", _time.gmtime())

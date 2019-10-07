@@ -1,6 +1,11 @@
+"""Target (likelihood) classes and associated methods.
+"""
 from abc import ABC as _ABC
 from abc import abstractmethod as _abstractmethod
 import numpy as _numpy
+from typing import Union as _Union
+import scipy as _scipy
+import warnings as _warnings
 
 
 class _AbstractTarget(_ABC):
@@ -27,6 +32,79 @@ class _AbstractTarget(_ABC):
         """Returns the gradient of the misfit at the given coordinates: :math:`∇_m
         \\chi(m) = - ∇_m \\log L(m)= - ∇_m \\log p(m|d)`."""
         pass
+
+
+class LinearMatrix(_AbstractTarget):
+    """Target model based on a linear forward model given as
+    :math:`G \\mathbf{m} = \\mathbf{d}`
+    """
+
+    def __init__(
+        self,
+        dimensions: int,
+        G: _Union[_numpy.ndarray, _scipy.sparse.spmatrix] = None,
+        d: _numpy.ndarray = None,
+        data_covariance: _Union[float, _numpy.ndarray, _scipy.sparse.spmatrix] = None,
+    ):
+        """Constructor for linear forward model target.
+
+        Parameters
+        ==========
+        dimensions : int
+            Dimension of the model space.
+        G : numpy.ndarray or scipy.sparse.spmatrix
+            Numpy ndarray or scipy sparse matrix sized as (datapoints, dimensions)
+            containing the linear forward model. Defaults to unit matrix.
+        d : numpy.ndarray
+            Numpy ndarray shaped as (datapoints, 1) containing observed datapoints.
+            Defaults to a vector of zeros.
+        data_covariance : float or numpy.ndarray or scipy.sparse.spmatrix
+            Optional object representing either scalar data variance, a diagonal data
+            variance matrix [numpy.ndarray shaped as (datapoints, 1)], a full data
+            covariance matrix [numpy.ndarray shaped as (datapoints, datapoints)] or a
+            sparse data covariance matrix [scipy.sparse.spmatrix shaped as
+            (datapoints, datapoints)].
+        """
+        self.dimensions = dimensions
+
+        # Parse forward model matrix ---------------------------------------------------
+        if G is None:
+            _warnings.warn(
+                f"No forward model was supplied. Defaulting to a unit matrix.", Warning
+            )
+            self.G = _numpy.eye(dimensions)
+        elif type(G) == _numpy.ndarray or issubclass(type(G), _scipy.sparse.spmatrix):
+
+            # Assert that the second dimension of the matrix corresponds to model space
+            # dimension.
+            assert G.shape[1] == dimensions
+
+            self.G = G
+        else:
+            raise ValueError("The forward model matrix type was not understood.")
+
+        # Parse data vector ------------------------------------------------------------
+        if d is None:
+            _warnings.warn(
+                f"No data was supplied. Defaulting to a zero vector.", Warning
+            )
+            self.d = _numpy.ones((G.shape[0], 1))
+        elif type(d) == _numpy.ndarray:
+
+            # Assert that the data vector is compatible with the matrix.
+            assert d.shape == (G.shape[0], 1)
+
+            self.d = d
+        else:
+            ValueError("The data vector type was not understood.")
+
+    def misfit(self, coordinates: _numpy.ndarray) -> float:
+        return (
+            (self.G @ coordinates - self.d).T @ (self.G @ coordinates - self.d)
+        ).item(0)
+
+    def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
+        return self.G.T @ (self.G @ coordinates - self.d)
 
 
 class Himmelblau(_AbstractTarget):

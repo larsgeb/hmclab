@@ -1,7 +1,10 @@
+"""Mass matrix classes and associated methods.
+"""
 from abc import ABC as _ABC
 from abc import abstractmethod as _abstractmethod
 import numpy as _numpy
 from scipy.sparse.linalg import spsolve as _spsolve
+import warnings as _warnings
 
 
 class _AbstractMassMatrix(_ABC):
@@ -164,14 +167,25 @@ class LBFGS(_AbstractMassMatrix):
     def __init__(
         self,
         dimensions: int,
-        number_of_vectors: int,
-        starting_position: _numpy.ndarray,
-        starting_gradient: _numpy.ndarray,
-        max_determinant_change: float,
+        number_of_vectors: int = 10,
+        starting_position: _numpy.ndarray = None,
+        starting_gradient: _numpy.ndarray = None,
+        max_determinant_change: float = 0.1,
     ):
         """Constructor for LBFGS-style mass matrices.
 
         """
+
+        if starting_position is None or starting_gradient is None:
+            _warnings.warn(
+                f"The LBFGS-style mass matrix did either not receive a starting "
+                f"coordinate or a starting gradient. We will use a random initial "
+                f"point and gradient.",
+                Warning,
+            )
+            starting_gradient = _numpy.ones(dimensions)
+            starting_position = _numpy.ones(dimensions)
+
         self.name = "LBFGS-style mass matrix"
         self.dimensions = dimensions
         self.number_of_vectors = number_of_vectors
