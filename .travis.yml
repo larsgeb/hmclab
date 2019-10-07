@@ -91,7 +91,7 @@ install:
 script:
   - echo $OS_PY
   - if [ "$OS_PY" == "windows36" ] || [ "$OS_PY" == "windows37" ]; then pytest; else pytest; fi
-  - coverage run pytest
+  - coverage run -m pytest
 
 after_success:
   - codecov
