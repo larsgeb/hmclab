@@ -10,3 +10,6 @@ hmc_tomography_*
 *__pycache__
 .coverage
 *.h5
+*.npy
+*.npz
+examples/medical_imaging
