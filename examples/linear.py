@@ -7,7 +7,7 @@ G[0, 1] = 0.9
 
 G *= 5
 
-m_true = numpy.zeros((200,1))
+m_true = numpy.zeros((200, 1))
 
 d = G @ m_true
 

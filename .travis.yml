@@ -90,8 +90,8 @@ install:
 
 script:
   - echo $OS_PY
-  - if [ "$OS_PY" == "windows36" ] || [ "$OS_PY" == "windows37" ]; then python hmc_tomography test; else python3 hmc_tomography test; fi
-  - coverage run hmc_tomography test
+  - if [ "$OS_PY" == "windows36" ] || [ "$OS_PY" == "windows37" ]; then pytest; else pytest; fi
+  - coverage run pytest
 
 after_success:
   - codecov

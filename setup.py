@@ -29,6 +29,6 @@ setuptools.setup(
         "h5py",
         "pyyaml",
     ],
-    extras_require={"dev": ["black", "pre-commit", "sphinx", "numpydoc", "codecov"]},
+    extras_require={"dev": ["black", "pre-commit", "sphinx", "numpydoc", "codecov", "pytest"]},
     entry_points={"console_scripts": ["hmc_tomography=hmc_tomography.__main__:cli"]},
 )
