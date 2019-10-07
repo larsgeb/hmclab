@@ -12,7 +12,6 @@ Avialable priors:
 .. autosummary:: hmc_tomography.Priors._AbstractPrior
                  hmc_tomography.Priors.Normal
                  hmc_tomography.Priors.LogNormal
-                 hmc_tomography.Priors.UnboundedUniform
                  hmc_tomography.Priors.Uniform
                  hmc_tomography.Priors.CompositePrior
 
@@ -77,16 +76,6 @@ Composite distribution
 **********************
 
 .. autoclass:: hmc_tomography.Priors.CompositePrior
-    :members:
-
-Unbounded uniform distribution
-******************************
-
-The distribution below is not well-behaved. A Markov chain over such
-distributions without any other regularization could 'walk away' to
-infinity at some point, or generate other unforeseen problems.
-
-.. autoclass:: hmc_tomography.Priors.UnboundedUniform
     :members:
 
 

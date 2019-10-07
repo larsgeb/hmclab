@@ -16,6 +16,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath("../../"))
+sys.path.insert(0, os.path.abspath("../../hmc_tomography/Tests"))
 
 # - Custom configuration -----------------------------------------------------
 
@@ -38,7 +39,7 @@ author = "Andrea Zunino, Andreas Fichtner, Lars Gebraad"
 # The short X.Y version
 version = "0.1"
 # The full version, including alpha/beta/rc tags
-release = "0.1.0"
+release = "0.1.1"
 
 
 # -- General configuration ---------------------------------------------------
@@ -149,7 +150,7 @@ latex_documents = [
     (
         master_doc,
         "HMCTom.tex",
-        "HMC Tom Documentation",
+        "HMC Tomography Documentation",
         "Andrea Zunino, Andreas Fichtner, Lars Gebraad",
         "manual",
     )
