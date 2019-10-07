@@ -2,9 +2,12 @@
 Target (likelihood) objects
 ###########################
 
+.. module:: hmc_tomography.Targets
+
 Available targets:
 
 .. autosummary:: hmc_tomography.Targets._AbstractTarget
+                 hmc_tomography.Targets.LinearMatrix
                  hmc_tomography.Targets.Himmelblau
                  hmc_tomography.Targets.Empty
 
@@ -25,6 +28,14 @@ Target ABC reference
 
 Target objects reference
 """"""""""""""""""""""""
+
+Linear forward model target
+***************************
+
+.. autoclass:: hmc_tomography.Targets.LinearMatrix
+   :members:
+
+    .. automethod:: __init__
 
 Two-dimensional Himmelblau function
 ***********************************

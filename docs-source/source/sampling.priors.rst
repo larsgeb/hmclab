@@ -2,6 +2,8 @@
 Prior objects
 #############
 
+.. module:: hmc_tomography.Priors
+
 Prior objects encode prior information on parameters. They are tyically
 in the form of normalizable distributions (with some exceptions).
 

@@ -6,16 +6,12 @@ HMC Tomography
     :maxdepth: 1
     :caption: Contents:
 
+    self
     setup
     tour
-    hmc_tomography
-    mcmc_visualization
+    sampling
+    post
     tests
     references
-
-Indices and tables
-------------------
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+    py-modindex
+    genindex

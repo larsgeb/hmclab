@@ -21,19 +21,13 @@ sys.path.insert(0, os.path.abspath("../../"))
 
 autodoc_member_order = "bysource"
 
-
-html_context = {
-    "css_files": ["_static/theme_overrides.css"]  # override wide tables in RTD theme
-}
+# override wide tables in RTD theme
+html_context = {"css_files": ["_static/theme_overrides.css"]}
 
 autodoc_inherit_docstrings = False
+autodoc_default_flags = ["members", "undoc-members", "show-inheritance"]
 
-
-autodoc_default_flags = [
-    "members",
-    "undoc-members",
-    "show-inheritance",
-]
+html_logo = "../hmctom.png"
 
 # -- Project information -----------------------------------------------------
 
@@ -64,6 +58,8 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.githubpages",
     "sphinx.ext.napoleon",
+    "IPython.sphinxext.ipython_console_highlighting",
+    "IPython.sphinxext.ipython_directive",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
