@@ -96,15 +96,41 @@ class LinearMatrix(_AbstractTarget):
 
             self.d = d
         else:
-            ValueError("The data vector type was not understood.")
+            raise ValueError("The data vector type was not understood.")
+
+        # Parse data covariance --------------------------------------------------------
+        if data_covariance is None:
+            pass
+        elif (
+            type(data_covariance) is float
+        ):  # TODO implement OR for all other possibilities
+            self.data_covariance = data_covariance
+        else:
+            raise ValueError("The data covariance type was not understood.")
 
     def misfit(self, coordinates: _numpy.ndarray) -> float:
-        return (
-            (self.G @ coordinates - self.d).T @ (self.G @ coordinates - self.d)
-        ).item(0)
+        """
+        """
+        if type(self.data_covariance) is float:
+            # Data covariance is a single scalar, so we move the data covariance
+            # operation out of the matrix-vector products
+            return (
+                _numpy.linalg.norm((self.G @ coordinates - self.d), ord=2) ** 2
+                / self.data_covariance
+            )
+        else:
+            # TODO implement other cases
+            raise NotImplementedError("This class is not production ready.")
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
-        return self.G.T @ (self.G @ coordinates - self.d)
+        """
+        """
+        if type(self.data_covariance) is float:
+            # Data covariance is a single scalar, so we move the data covariance
+            # operation out of the matrix-vector products
+            return self.G.T @ (self.G @ coordinates - self.d) / self.data_covariance
+        else:
+            raise NotImplementedError("This class is not production ready.")
 
 
 class Himmelblau(_AbstractTarget):

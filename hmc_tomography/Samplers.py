@@ -165,6 +165,9 @@ class HMC(_AbstractSampler):
             proposals, desc="Sampling. Acceptance rate:", leave=True
         )
 
+        # Sampling acceptance history
+        acceptance_history = _numpy.zeros((100,))
+
         # Selection of integrator ----------------------------------------------
         propagate = self.propagate_leapfrog
 
@@ -189,7 +192,7 @@ class HMC(_AbstractSampler):
             def _time_step():
                 return time_step
 
-        # Start sampling, but catch CTRL+C (SIGINT) ----------------------------
+        # Start sampling, but catch CTRL+C / COMMAND + . (SIGINT) ----------------------
         try:
             for proposal in proposals_total:
 
@@ -219,8 +222,9 @@ class HMC(_AbstractSampler):
                 ):
                     accepted += 1
                     coordinates = new_coordinates.copy()
+                    acceptance_history = _numpy.append([1], acceptance_history[0:-1])
                 else:
-                    pass
+                    acceptance_history = _numpy.append([0], acceptance_history[0:-1])
 
                 if (
                     callable(self.mass_matrix_update_hook)
@@ -238,7 +242,9 @@ class HMC(_AbstractSampler):
                         coordinates
                     ) + self.prior.misfit(coordinates)
                     proposals_total.set_description(
-                        f"Average acceptance rate: {accepted/(proposal+1):.2f}."
+                        f"Tot. acc rate: {accepted/(proposal+1):.2f}. "
+                        f"Last 100 acc rate: "
+                        f"{_numpy.sum(acceptance_history)/100.:.2f}. "
                         "Progress"
                     )
                     # Write out to disk when at the end of the buffer
@@ -249,11 +255,12 @@ class HMC(_AbstractSampler):
                         end = int((proposal / online_thinning))
                         self.flush_samples(start, end, self.sample_ram_buffer)
 
-        except KeyboardInterrupt:  # Catch SIGINT ------------------------------
+        except KeyboardInterrupt:  # Catch SIGINT --------------------------------------
             # Close tqdm progressbar
             proposals_total.close()
-            # TODO delete all non-written entries in hdf5 file
-        finally:  # Write out samples still in the buffer ----------------------
+            # optional TODO delete all non-written entries in hdf5 file. This is also
+            # taken care of in plotting
+        finally:  # Write out samples still in the buffer ------------------------------
             buffer_location: int = int(
                 (proposal / online_thinning) % sample_ram_buffer_size
             )
@@ -306,8 +313,7 @@ class HMC(_AbstractSampler):
         coordinates += (
             0.5 * time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
         )
-        if self.prior.bounded:  # Correct if the distribution is bounded
-            self.prior.corrector(coordinates, momentum)
+        self.prior.corrector(coordinates, momentum)
 
         # Integration loop
         for i in range(iterations - 1):
@@ -336,8 +342,7 @@ class HMC(_AbstractSampler):
             0.5 * time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
         )
 
-        if self.prior.bounded:  # Correct if the distribution is bounded
-            self.prior.corrector(coordinates, momentum)
+        self.prior.corrector(coordinates, momentum)
 
         return coordinates, momentum, update_coordinates, update_gradient
 

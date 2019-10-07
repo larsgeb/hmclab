@@ -171,6 +171,7 @@ class LBFGS(_AbstractMassMatrix):
         starting_position: _numpy.ndarray = None,
         starting_gradient: _numpy.ndarray = None,
         max_determinant_change: float = 0.1,
+        update_interval: int = 1,
     ):
         """Constructor for LBFGS-style mass matrices.
 
@@ -194,6 +195,9 @@ class LBFGS(_AbstractMassMatrix):
         self.current_position = starting_position
         self.current_gradient = starting_gradient
 
+        self.update_attempt = 0
+        self.update_interval = update_interval
+
         self.s = _numpy.empty((dimensions, number_of_vectors))
         self.y = _numpy.empty((dimensions, number_of_vectors))
         self.u = _numpy.empty((dimensions, number_of_vectors))
@@ -212,7 +216,13 @@ class LBFGS(_AbstractMassMatrix):
         return self.S(_numpy.random.randn(self.dimensions, 1))
 
     def update(self, m, g):
-        if self.current_number_of_gradients == self.number_of_vectors:
+
+        self.update_attempt += 1
+
+        if (
+            self.current_number_of_gradients == self.number_of_vectors
+            or self.update_attempt % self.update_interval
+        ):
             return
 
         s = m - self.current_position
@@ -344,7 +354,7 @@ class SparseDecomposed(_AbstractMassMatrix):
 
     def kinetic_energy_gradient(self, momentum: _numpy.ndarray) -> _numpy.ndarray:
         raise NotImplementedError("This class is not production ready")
-        return spsolve(self.decomposition, momentum)[:, _numpy.newaxis]
+        return _spsolve(self.decomposition, momentum)[:, _numpy.newaxis]
 
     def generate_momentum(self) -> _numpy.ndarray:
         raise NotImplementedError("This class is not production ready")
