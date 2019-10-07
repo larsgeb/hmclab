@@ -1,3 +1,5 @@
+"""A module with assorted samples processing functions.
+"""
 import numpy as _numpy
 
 
@@ -8,4 +10,4 @@ def autocorrelation(x):
 
 def crosscorrelation(x, y):
     result = _numpy.correlate(x - _numpy.mean(x), y - _numpy.mean(y), mode="full")
-    return result[int(result.size / 2) :] / _numpy.max(result)
+    return result[int(result.size / 2) :] / _numpy.max(_numpy.abs(result))
