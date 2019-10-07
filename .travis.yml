@@ -48,18 +48,6 @@ matrix:
       env: OS_PY=xenial37
       language: python
       python: 3.7
-    - name: "Python 3.6 on Trusty"
-      os: linux
-      dist: trusty
-      env: OS_PY=trusty36
-      language: python
-      python: 3.6
-    - name: "Python 3.6 on Precise"
-      os: linux
-      dist: precise
-      env: OS_PY=precise36
-      language: python
-      python: 3.6
     - name: "Python 3.6.8 on Windows"
       os: windows
       language: shell
@@ -84,6 +72,19 @@ matrix:
       env: 
         - OS_PY=windows37
         - PATH=/c/Python37:/c/Python37/Scripts:$PATH
+  allow_failures:
+    - name: "Python 3.6 on Trusty"
+      os: linux
+      dist: trusty
+      env: OS_PY=trusty36
+      language: python
+      python: 3.6
+    - name: "Python 3.6 on Precise"
+      os: linux
+      dist: precise
+      env: OS_PY=precise36
+      language: python
+      python: 3.6
 
 install:
   - pip install -e .[dev]
