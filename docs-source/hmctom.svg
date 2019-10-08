@@ -10,15 +10,30 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="134.94687mm"
-   height="197.86449mm"
-   viewBox="0 0 134.94687 197.86449"
+   width="513.38068mm"
+   height="213.5246mm"
+   viewBox="0 0 513.3807 213.5246"
    version="1.1"
    id="svg8270"
    sodipodi:docname="hmctom.svg"
-   inkscape:version="0.92.4 (5da689c313, 2019-01-14)">
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+   inkscape:export-filename="/home/larsgebraad/Documents/Hamiltonian Monte Carlo/hmc-tomography/docs-source/hmctom.png"
+   inkscape:export-xdpi="9.8999996"
+   inkscape:export-ydpi="9.8999996">
   <defs
      id="defs8264">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient914">
+      <stop
+         style="stop-color:#c65171;stop-opacity:1;"
+         offset="0"
+         id="stop910" />
+      <stop
+         style="stop-color:#95314c;stop-opacity:1"
+         offset="1"
+         id="stop912" />
+    </linearGradient>
     <linearGradient
        inkscape:collect="always"
        id="linearGradient9218">
@@ -69,6 +84,60 @@
          id="path862"
          inkscape:connector-curvature="0" />
     </clipPath>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient914"
+       id="linearGradient918"
+       x1="591.38318"
+       y1="484.90262"
+       x2="2622.9832"
+       y2="484.90262"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient914"
+       id="linearGradient920"
+       gradientUnits="userSpaceOnUse"
+       x1="591.38318"
+       y1="484.90262"
+       x2="2622.9832"
+       y2="484.90262" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient914"
+       id="linearGradient922"
+       gradientUnits="userSpaceOnUse"
+       x1="591.38318"
+       y1="484.90262"
+       x2="2622.9832"
+       y2="484.90262" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient914"
+       id="linearGradient924"
+       gradientUnits="userSpaceOnUse"
+       x1="591.38318"
+       y1="484.90262"
+       x2="2622.9832"
+       y2="484.90262" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient914"
+       id="linearGradient926"
+       gradientUnits="userSpaceOnUse"
+       x1="591.38318"
+       y1="484.90262"
+       x2="2622.9832"
+       y2="484.90262" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient914"
+       id="linearGradient928"
+       gradientUnits="userSpaceOnUse"
+       x1="591.38318"
+       y1="484.90262"
+       x2="2622.9832"
+       y2="484.90262" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -77,9 +146,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.45254834"
-     inkscape:cx="358.29129"
-     inkscape:cy="243.45783"
+     inkscape:zoom="0.225"
+     inkscape:cx="705.46082"
+     inkscape:cy="457.25283"
      inkscape:document-units="mm"
      inkscape:current-layer="g844"
      showgrid="false"
@@ -91,7 +160,7 @@
      fit-margin-top="0"
      fit-margin-left="0"
      fit-margin-right="0"
-     fit-margin-bottom="0" />
+     fit-margin-bottom="-0.1" />
   <metadata
      id="metadata8267">
     <rdf:RDF>
@@ -139,7 +208,26 @@
      id="g844"
      inkscape:groupmode="layer"
      inkscape:label="Layer 1 copy"
-     transform="translate(-31.588521,-35.065519)" />
+     transform="translate(-31.588521,-35.065519)">
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot37"
+       style="font-style:normal;font-weight:normal;font-size:192px;line-height:1;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:url(#linearGradient918);fill-opacity:1;stroke:none"
+       transform="matrix(0.18421802,0,0,0.18421802,61.768444,103.61949)"><flowRegion
+         id="flowRegion39"
+         style="font-size:192px;line-height:1;fill:url(#linearGradient922);fill-opacity:1"><rect
+           id="rect41"
+           width="2109.6938"
+           height="901.10339"
+           x="587.78253"
+           y="150.83501"
+           style="font-size:192px;line-height:1;fill:url(#linearGradient920);fill-opacity:1" /></flowRegion><flowPara
+         id="flowPara43"
+         style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:condensed;font-size:400px;line-height:0.69999999;font-family:'Fira Sans Condensed';-inkscape-font-specification:'Fira Sans Condensed, Medium Condensed';opacity:0;fill:url(#linearGradient924);fill-opacity:1">HMC</flowPara><flowPara
+         id="flowPara45"
+         style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:condensed;font-size:400px;line-height:0.69999999;font-family:'Fira Sans Condensed';-inkscape-font-specification:'Fira Sans Condensed, Medium Condensed';fill:url(#linearGradient928);fill-opacity:1"><flowSpan
+   style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:condensed;font-size:400px;line-height:0.69999999;font-family:'Fira Sans Condensed';-inkscape-font-specification:'Fira Sans Condensed, Medium Condensed';opacity:0;fill:url(#linearGradient926);fill-opacity:1"
+   id="flowSpan852">Tomograp</flowSpan>hy</flowPara></flowRoot>  </g>
   <g
      inkscape:groupmode="layer"
      id="layer2"

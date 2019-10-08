@@ -13,3 +13,6 @@ hmc_tomography_*
 *.npy
 *.npz
 examples/medical_imaging
+*_movie
+docs-source/source/examples
+*.ipynb_checkpoints
