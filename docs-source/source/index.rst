@@ -9,6 +9,7 @@ HMC Tomography
     self
     setup
     tour
+    examples
     sampling
     post
     tests
