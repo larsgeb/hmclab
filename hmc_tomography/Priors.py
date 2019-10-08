@@ -337,9 +337,9 @@ class Normal(_AbstractPrior):
 
 
 class Sparse(_AbstractPrior):
-    """L1 prior.
+    """Laplace distribution in model space.
 
-    Least absolute deviations, Laplace distribution, LASSO
+    Least absolute deviations, Laplace distribution, LASSO, L1
 
     TODO: Implement distribution's location other than the 0-vector.
     """
@@ -370,6 +370,43 @@ class Sparse(_AbstractPrior):
         # of x.
         return (
             self.misfit_bounds(coordinates) + _numpy.sign(coordinates) / self.dispersion
+        )
+
+    def generate(self):
+        raise NotImplementedError()
+
+
+class L05(_AbstractPrior):
+    """L05
+
+    TODO: Implement distribution's location other than the 0-vector.
+    """
+
+    def __init__(
+        self,
+        dimensions: int,
+        dispersion: float = 1,
+        lower_bounds: _numpy.ndarray = None,
+        upper_bounds: _numpy.ndarray = None,
+    ):
+        self.dimensions = dimensions
+        self.dispersion = dispersion
+        self.update_bounds(lower_bounds, upper_bounds)
+
+    def misfit(self, coordinates) -> float:
+        """Method to compute the misfit of a L1 prior distribution.
+        """
+        return self.misfit_bounds(coordinates) + _numpy.sum(
+            _numpy.abs(coordinates / self.dispersion) ** 0.5
+        )
+
+    def gradient(self, coordinates):
+        """Method to compute the gradient of a L1 prior distribution.
+        """
+        # The derivative of the function |x| is simply 1 or -1, depending on the sign
+        # of x.
+        return self.misfit_bounds(coordinates) + _numpy.sign(coordinates) * 0.5 / (
+            _numpy.abs(coordinates / self.dispersion) ** 0.5
         )
 
     def generate(self):
@@ -572,7 +609,6 @@ class CompositePrior(_AbstractPrior):
             computed_dimensions += prior.dimensions
             self.enumerated_dimensions[i_prior] = prior.dimensions
 
-        print(computed_dimensions)
         assert computed_dimensions == dimensions
 
         self.enumerated_dimensions_cumulative: _numpy.ndarray = _numpy.cumsum(

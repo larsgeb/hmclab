@@ -44,7 +44,7 @@ class LinearMatrix(_AbstractTarget):
         dimensions: int,
         G: _Union[_numpy.ndarray, _scipy.sparse.spmatrix] = None,
         d: _numpy.ndarray = None,
-        data_covariance: _Union[float, _numpy.ndarray, _scipy.sparse.spmatrix] = None,
+        data_covariance: _Union[float, _numpy.ndarray, _scipy.sparse.spmatrix] = 1.0,
     ):
         """Constructor for linear forward model target.
 

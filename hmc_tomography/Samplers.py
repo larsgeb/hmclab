@@ -273,6 +273,7 @@ class HMC(_AbstractSampler):
                 self.flush_samples(
                     start, end, self.sample_ram_buffer[:, :buffer_location]
                 )
+            self.sample_hdf5_file.close()
 
         if suppress_warnings:
             _warnings.filterwarnings("default", category=RuntimeWarning)

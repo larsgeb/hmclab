@@ -11,6 +11,7 @@ Avialable priors:
 
 .. autosummary:: hmc_tomography.Priors._AbstractPrior
                  hmc_tomography.Priors.Normal
+                 hmc_tomography.Priors.Sparse
                  hmc_tomography.Priors.LogNormal
                  hmc_tomography.Priors.Uniform
                  hmc_tomography.Priors.CompositePrior
@@ -58,6 +59,12 @@ Normal distribution
 *******************
 
 .. autoclass:: hmc_tomography.Priors.Normal
+    :members:
+
+Laplace distribution
+********************
+
+.. autoclass:: hmc_tomography.Priors.Sparse
     :members:
 
 Logarithmic normal distribution
