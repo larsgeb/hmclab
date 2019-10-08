@@ -97,6 +97,12 @@ class Samples:
             # Access multiple samples
             return self.raw_samples[key1, key2]
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.file_handle.close()
+
     @property
     def raw_samples(self):
         return self.file_handle[self.datasetname]
