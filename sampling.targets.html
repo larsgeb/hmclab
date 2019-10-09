@@ -229,7 +229,7 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#hmc_tomography.Targets.LinearMatrix" title="hmc_tomography.Targets.LinearMatrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmc_tomography.Targets.LinearMatrix</span></code></a>(dimensions)</p></td>
 <td><p>Target model based on a linear forward model given as <span class="math notranslate nohighlight">\(G \mathbf{m} = \mathbf{d}\)</span></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#hmc_tomography.Targets.Himmelblau" title="hmc_tomography.Targets.Himmelblau"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmc_tomography.Targets.Himmelblau</span></code></a>([…])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hmc_tomography.Targets.Himmelblau" title="hmc_tomography.Targets.Himmelblau"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmc_tomography.Targets.Himmelblau</span></code></a>(dimensions)</p></td>
 <td><p>Himmelblau’s 2-dimensional function.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#hmc_tomography.Targets.Empty" title="hmc_tomography.Targets.Empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmc_tomography.Targets.Empty</span></code></a>(dimensions)</p></td>
@@ -294,14 +294,14 @@ logarithm of the likelihood function: <span class="math notranslate nohighlight"
 <h3>Linear forward model target<a class="headerlink" href="#linear-forward-model-target" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="hmc_tomography.Targets.LinearMatrix">
-<em class="property">class </em><code class="sig-prename descclassname">hmc_tomography.Targets.</code><code class="sig-name descname">LinearMatrix</code><span class="sig-paren">(</span><em class="sig-param">dimensions: int</em>, <em class="sig-param">G: Union[numpy.ndarray</em>, <em class="sig-param">scipy.sparse.base.spmatrix] = None</em>, <em class="sig-param">d: numpy.ndarray = None</em>, <em class="sig-param">data_covariance: Union[float</em>, <em class="sig-param">numpy.ndarray</em>, <em class="sig-param">scipy.sparse.base.spmatrix] = 1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hmc_tomography/Targets.html#LinearMatrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Targets.LinearMatrix" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">hmc_tomography.Targets.</code><code class="sig-name descname">LinearMatrix</code><span class="sig-paren">(</span><em class="sig-param">dimensions: int</em>, <em class="sig-param">G: Union[numpy.ndarray</em>, <em class="sig-param">scipy.sparse.base.spmatrix] = None</em>, <em class="sig-param">d: numpy.ndarray = None</em>, <em class="sig-param">data_covariance: Union[float</em>, <em class="sig-param">numpy.ndarray</em>, <em class="sig-param">scipy.sparse.base.spmatrix] = None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hmc_tomography/Targets.html#LinearMatrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Targets.LinearMatrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#hmc_tomography.Targets._AbstractTarget" title="hmc_tomography.Targets._AbstractTarget"><code class="xref py py-class docutils literal notranslate"><span class="pre">hmc_tomography.Targets._AbstractTarget</span></code></a></p>
 <p>Target model based on a linear forward model given as
 <span class="math notranslate nohighlight">\(G \mathbf{m} = \mathbf{d}\)</span></p>
 <blockquote>
 <div><dl class="method">
 <dt id="hmc_tomography.Targets.LinearMatrix.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">dimensions: int</em>, <em class="sig-param">G: Union[numpy.ndarray</em>, <em class="sig-param">scipy.sparse.base.spmatrix] = None</em>, <em class="sig-param">d: numpy.ndarray = None</em>, <em class="sig-param">data_covariance: Union[float</em>, <em class="sig-param">numpy.ndarray</em>, <em class="sig-param">scipy.sparse.base.spmatrix] = 1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hmc_tomography/Targets.html#LinearMatrix.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Targets.LinearMatrix.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">dimensions: int</em>, <em class="sig-param">G: Union[numpy.ndarray</em>, <em class="sig-param">scipy.sparse.base.spmatrix] = None</em>, <em class="sig-param">d: numpy.ndarray = None</em>, <em class="sig-param">data_covariance: Union[float</em>, <em class="sig-param">numpy.ndarray</em>, <em class="sig-param">scipy.sparse.base.spmatrix] = None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hmc_tomography/Targets.html#LinearMatrix.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Targets.LinearMatrix.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructor for linear forward model target.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -322,6 +322,12 @@ sparse data covariance matrix [scipy.sparse.spmatrix shaped as
 </dd></dl>
 
 </div></blockquote>
+<dl class="attribute">
+<dt id="hmc_tomography.Targets.LinearMatrix.data_covariance_matrix">
+<code class="sig-name descname">data_covariance_matrix</code><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Targets.LinearMatrix.data_covariance_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attribute to determine which misfit/gradient formula is needed.</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="hmc_tomography.Targets.LinearMatrix.misfit">
 <code class="sig-name descname">misfit</code><span class="sig-paren">(</span><em class="sig-param">coordinates: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/hmc_tomography/Targets.html#LinearMatrix.misfit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Targets.LinearMatrix.misfit" title="Permalink to this definition">¶</a></dt>
@@ -339,7 +345,7 @@ sparse data covariance matrix [scipy.sparse.spmatrix shaped as
 <h3>Two-dimensional Himmelblau function<a class="headerlink" href="#two-dimensional-himmelblau-function" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="hmc_tomography.Targets.Himmelblau">
-<em class="property">class </em><code class="sig-prename descclassname">hmc_tomography.Targets.</code><code class="sig-name descname">Himmelblau</code><span class="sig-paren">(</span><em class="sig-param">dimensions: int = -1</em>, <em class="sig-param">annealing: float = 1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hmc_tomography/Targets.html#Himmelblau"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Targets.Himmelblau" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">hmc_tomography.Targets.</code><code class="sig-name descname">Himmelblau</code><span class="sig-paren">(</span><em class="sig-param">dimensions: int</em>, <em class="sig-param">annealing: float = 1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hmc_tomography/Targets.html#Himmelblau"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Targets.Himmelblau" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#hmc_tomography.Targets._AbstractTarget" title="hmc_tomography.Targets._AbstractTarget"><code class="xref py py-class docutils literal notranslate"><span class="pre">hmc_tomography.Targets._AbstractTarget</span></code></a></p>
 <p>Himmelblau’s 2-dimensional function.</p>
 <p>Himmelblau’s function is defined as:</p>

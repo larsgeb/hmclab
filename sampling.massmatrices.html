@@ -111,7 +111,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#unit-mass-matrix">Unit mass matrix</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#diagonal-mass-matrix">Diagonal mass matrix</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#lbfgs-style-adaptive-mass-matrix">LBFGS-style adaptive mass matrix</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#sparse-decomposed-mass-matrix">Sparse decomposed mass matrix</a></li>
 </ul>
 </li>
 </ul>
@@ -234,9 +233,6 @@
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#hmc_tomography.MassMatrices.LBFGS" title="hmc_tomography.MassMatrices.LBFGS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmc_tomography.MassMatrices.LBFGS</span></code></a>(dimensions)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#hmc_tomography.MassMatrices.SparseDecomposed" title="hmc_tomography.MassMatrices.SparseDecomposed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmc_tomography.MassMatrices.SparseDecomposed</span></code></a>(…)</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -445,30 +441,6 @@ momentum.</p>
 <dl class="method">
 <dt id="hmc_tomography.MassMatrices.LBFGS.logdet">
 <code class="sig-name descname">logdet</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/hmc_tomography/MassMatrices.html#LBFGS.logdet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.MassMatrices.LBFGS.logdet" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="sparse-decomposed-mass-matrix">
-<h3>Sparse decomposed mass matrix<a class="headerlink" href="#sparse-decomposed-mass-matrix" title="Permalink to this headline">¶</a></h3>
-<dl class="class">
-<dt id="hmc_tomography.MassMatrices.SparseDecomposed">
-<em class="property">class </em><code class="sig-prename descclassname">hmc_tomography.MassMatrices.</code><code class="sig-name descname">SparseDecomposed</code><span class="sig-paren">(</span><em class="sig-param">decomposition</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hmc_tomography/MassMatrices.html#SparseDecomposed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.MassMatrices.SparseDecomposed" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#hmc_tomography.MassMatrices._AbstractMassMatrix" title="hmc_tomography.MassMatrices._AbstractMassMatrix"><code class="xref py py-class docutils literal notranslate"><span class="pre">hmc_tomography.MassMatrices._AbstractMassMatrix</span></code></a></p>
-<dl class="method">
-<dt id="hmc_tomography.MassMatrices.SparseDecomposed.kinetic_energy">
-<code class="sig-name descname">kinetic_energy</code><span class="sig-paren">(</span><em class="sig-param">momentum: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/hmc_tomography/MassMatrices.html#SparseDecomposed.kinetic_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.MassMatrices.SparseDecomposed.kinetic_energy" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="hmc_tomography.MassMatrices.SparseDecomposed.kinetic_energy_gradient">
-<code class="sig-name descname">kinetic_energy_gradient</code><span class="sig-paren">(</span><em class="sig-param">momentum: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="_modules/hmc_tomography/MassMatrices.html#SparseDecomposed.kinetic_energy_gradient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.MassMatrices.SparseDecomposed.kinetic_energy_gradient" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="hmc_tomography.MassMatrices.SparseDecomposed.generate_momentum">
-<code class="sig-name descname">generate_momentum</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="_modules/hmc_tomography/MassMatrices.html#SparseDecomposed.generate_momentum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.MassMatrices.SparseDecomposed.generate_momentum" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>

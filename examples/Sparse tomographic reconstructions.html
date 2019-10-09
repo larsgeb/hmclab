@@ -99,7 +99,18 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../examples.html">Examples and tutorials</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Himmelblau sampling.html">Himmelblau sampling example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Separate priors per dimension.html">Separate priors per dimension</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Sparse tomographic reconstructions</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Sparse tomographic reconstructions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Creating-our-experiment-set-up-and-true-model">Creating our experiment set-up and true model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Investigating-the-data-and-coverage">Investigating the data and coverage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Small-steps:-deterministic-straight-ray-tomography">Small steps: deterministic straight ray tomography</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#A-first-attempt-at-Bayesian-tomography">A first attempt at Bayesian tomography</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#A-crude-assesment-of-convergence">A crude assesment of convergence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Statistics-on-Gaussian-prior-samples">Statistics on Gaussian-prior samples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#A-better-approach-for-sparse-models:-Lasso-ing">A better approach for sparse models: Lasso-ing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Statistics-on-Laplace-prior-samples">Statistics on Laplace-prior samples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Model-imprint">Model imprint</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="Continuous inverse problems on FEM meshes.html">Continuous inverse problems on FEM meshes</a></li>
 </ul>
 </li>
@@ -399,31 +410,33 @@ div.rendered_html tbody tr:hover {
 </style>
 <div class="section" id="Sparse-tomographic-reconstructions">
 <h1>Sparse tomographic reconstructions<a class="headerlink" href="#Sparse-tomographic-reconstructions" title="Permalink to this headline">¶</a></h1>
+<p>In this notebook we will see how using specific well-suited priors can benefit tomographic inference. We will use straight-ray physics, but the described method should work as well for any inverse problem.</p>
+<p>The key to this ‘trick’ is recognizing that in <em>some</em> basis, the models we seek are sparse. That means, many of the model parameters are zero. In real world problems, recognizing in what basis a model would be sparse (if in any) is already very hard a priori. Once we have recognized this property in the appropriate basis function, the idea is to use Laplace distributions as priors.</p>
+<p>Let’s first import all the necessary tools! The two files from the <code class="docutils literal notranslate"><span class="pre">linear_tomography</span></code> module can be found in the package Github repo, in the examples folder. Note that if you want to import files from a diiffrent folder than in which your running your code, you need both the <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> file from the <code class="docutils literal notranslate"><span class="pre">linear_tomography</span></code> folder, as well as it being discoverable in your path. If you simply download the <code class="docutils literal notranslate"><span class="pre">hmc_tomography</span></code> code, this notebook will run straight away.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">linear_tomography.helper_xrayTomography</span> <span class="kn">as</span> <span class="nn">xrt</span>
 <span class="kn">import</span> <span class="nn">linear_tomography.helper_generate_rays</span> <span class="kn">as</span> <span class="nn">pth</span>
 <span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">sparse</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">scipy.sparse.linalg</span>
 <span class="kn">import</span> <span class="nn">hmc_tomography</span>
 </pre></div>
 </div>
 </div>
-<p>Define the problem</p>
+<div class="section" id="Creating-our-experiment-set-up-and-true-model">
+<h2>Creating our experiment set-up and true model<a class="headerlink" href="#Creating-our-experiment-set-up-and-true-model" title="Permalink to this headline">¶</a></h2>
+<p>Right, that seems to take care of all our prerequisites! Now let’s take care of forward problem. We start off with defining our true model and domain:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">resample</span> <span class="o">=</span> <span class="bp">False</span>
-<span class="n">plot_rays</span> <span class="o">=</span> <span class="bp">False</span>
-
-<span class="c1"># Create a &#39;true model&#39; (we can use realtive slowness, because the forward problem is</span>
-<span class="c1"># linear)</span>
+<span></span><span class="c1"># Create a &#39;true model&#39;</span>
 <span class="n">logo</span> <span class="o">=</span> <span class="p">[</span>
     <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
     <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
@@ -435,9 +448,14 @@ div.rendered_html tbody tr:hover {
     <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
     <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
 <span class="p">]</span>
+
 <span class="n">true_slowness</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">fliplr</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">logo</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+
 <span class="n">nx</span> <span class="o">=</span> <span class="n">true_slowness</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">ny</span> <span class="o">=</span> <span class="n">true_slowness</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="c1"># The dimensions of the inverse problem</span>
+<span class="n">dimensionality</span> <span class="o">=</span> <span class="n">nx</span> <span class="o">*</span> <span class="n">ny</span>
 
 <span class="c1"># Compute domain size</span>
 <span class="n">xmin</span> <span class="o">=</span> <span class="mf">0.0</span>
@@ -448,95 +466,160 @@ div.rendered_html tbody tr:hover {
 <span class="n">xlength</span> <span class="o">=</span> <span class="n">xmax</span> <span class="o">-</span> <span class="n">xmin</span>
 <span class="n">ylength</span> <span class="o">=</span> <span class="n">ymax</span> <span class="o">-</span> <span class="n">ymin</span>
 
-<span class="c1"># The aspect ratio of the cells has to be 1</span>
+<span class="c1"># The aspect ratio of the cells has to be 1 for xrt to work!</span>
 <span class="k">assert</span> <span class="n">xlength</span> <span class="o">/</span> <span class="n">ylength</span> <span class="o">==</span> <span class="n">nx</span> <span class="o">/</span> <span class="n">ny</span>
 </pre></div>
 </div>
 </div>
-<p>Create the forward model matrix G and inspect the true model</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<p>For our specific set-up, we have a domain. However, we need to investigate this domain with something! In straight ray tomography, we require our forward problem to written as follows:</p>
+<dl class="simple">
+<dt>:nbsphinx-math:<a href="#id1"><span class="problematic" id="id2">`</span></a>begin{align}</dt><dd><p>text{data},(text{model}) = int_text{path} text{model}(x), dx</p>
+</dd>
+</dl>
+<p>end{align}`</p>
+<p>This forms is encountered in multiple applications. When we would like to infer velocity, <span class="math notranslate nohighlight">\(\text{model}(x)\)</span> is slowness. When doing x-ray tomography, <span class="math notranslate nohighlight">\(\text{model}(x)\)</span> could stand for slowness.</p>
+<p>We can also see that this form is linear, because the following two identities are true:</p>
+<dl class="simple">
+<dt>:nbsphinx-math:<a href="#id3"><span class="problematic" id="id4">`</span></a>begin{align}</dt><dd><p>int_text{path} a cdot text{model}(x), dx &amp;=
+a cdot int_text{path} text{model}(x), dx, \ \
+int_text{path} text{model}_1(x), + text{model}_2(x), dx &amp;=
+int_text{path} text{model}_1(x), dx + int_text{path} text{model}_2(x), dx .</p>
+</dd>
+</dl>
+<p>end{align}`</p>
+<p>We need a way to evaluate these integrals. But because this is a linear model, we can get away with only evaluating them once, and storing the model matrix operator <span class="math notranslate nohighlight">\(G\)</span>, which maps a model <span class="math notranslate nohighlight">\(\mathbf{m}\)</span>, to data <span class="math notranslate nohighlight">\(\mathbf{d}\)</span>:</p>
+<dl class="simple">
+<dt>:nbsphinx-math:<a href="#id5"><span class="problematic" id="id6">`</span></a>begin{align}</dt><dd><p>mathbf{d} = G , mathbf{m}.</p>
+</dd>
+</dl>
+<p>end{align}`</p>
+<p>We have graciously provided with an algorithm by Andrew Valentine and Malcolm Sambridge that computes the model matrix G given some parametrization, but what it needs is some paths to sample along! We generate these randomly (but repeatedly, by setting a random generator seed):</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="c1"># Generate source-receiver setup randomly (but repeatedly)</span>
-<span class="n">paths</span> <span class="o">=</span> <span class="n">pth</span><span class="o">.</span><span class="n">generate_rays</span><span class="p">(</span><span class="n">extent</span><span class="p">,</span> <span class="n">n_rays</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
-
-<span class="c1"># Create forward model matrix and data</span>
-<span class="n">d</span><span class="p">,</span> <span class="n">G</span> <span class="o">=</span> <span class="n">xrt</span><span class="o">.</span><span class="n">tracer</span><span class="p">(</span><span class="n">true_slowness</span><span class="p">,</span> <span class="n">paths</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">)</span>
-
-<span class="c1"># Add some noise to the data</span>
-<span class="n">d</span> <span class="o">+=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">50.0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">d</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;True model&quot;</span><span class="p">)</span>
+<span class="n">paths</span> <span class="o">=</span> <span class="n">pth</span><span class="o">.</span><span class="n">generate_rays</span><span class="p">(</span><span class="n">extent</span><span class="p">,</span> <span class="n">n_rays</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Let’s first take a look at our true model and the first 10 rays:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;True model&quot;</span><span class="p">)</span>
 <span class="n">xrt</span><span class="o">.</span><span class="n">displayModel</span><span class="p">(</span>
-    <span class="n">true_slowness</span><span class="p">,</span> <span class="n">paths</span><span class="o">=</span><span class="n">paths</span><span class="p">[:</span><span class="mi">5</span><span class="p">],</span> <span class="n">clim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span> <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">seismic</span>
+    <span class="n">true_slowness</span><span class="p">,</span>
+    <span class="n">paths</span><span class="o">=</span><span class="n">paths</span><span class="p">[:</span><span class="mi">10</span><span class="p">],</span>
+    <span class="n">clim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span>
+    <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">seismic</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_Sparse_tomographic_reconstructions_10_0.png" src="../_images/examples_Sparse_tomographic_reconstructions_10_0.png" />
+</div>
+</div>
+<p>Alright, that seems to work well. What a beautiful model</p>
+</div>
+<div class="section" id="Investigating-the-data-and-coverage">
+<h2>Investigating the data and coverage<a class="headerlink" href="#Investigating-the-data-and-coverage" title="Permalink to this headline">¶</a></h2>
+<p>Let’s now create the forward model matrix G and inspect the data. We could learn something about the inverse problem that will be useful later on.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[61]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Create forward model matrix and data</span>
+<span class="n">_</span><span class="p">,</span> <span class="n">G</span> <span class="o">=</span> <span class="n">xrt</span><span class="o">.</span><span class="n">tracer</span><span class="p">(</span><span class="n">true_slowness</span><span class="p">,</span> <span class="n">paths</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">)</span>
+
+<span class="n">d</span> <span class="o">=</span> <span class="n">G</span> <span class="err">@</span> <span class="n">true_slowness</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">dimensionality</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Plot the data</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;data anomaly&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;data anomaly&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;count&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluating paths: 100%|██████████| 500/500 [00:00&lt;00:00, 9842.04it/s]
+Evaluating paths: 100%|██████████| 200/200 [00:00&lt;00:00, 6393.66it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_Sparse_tomographic_reconstructions_5_1.png" src="../_images/examples_Sparse_tomographic_reconstructions_5_1.png" />
+<img alt="../_images/examples_Sparse_tomographic_reconstructions_14_1.png" src="../_images/examples_Sparse_tomographic_reconstructions_14_1.png" />
 </div>
 </div>
-<p>Inspecting a few rays and their entries in G</p>
+<p>Many of our cells seem to have 0 data anomaly, with some negative outliers and many positive outliers. We can’t directly infer much from this, because we might be sampling fast and slow regions along a single path.</p>
+<p>To get a feeling of ray coverage, we could investigate the matrix <span class="math notranslate nohighlight">\(G\)</span>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[101]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">for</span> <span class="n">i_path</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">paths</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]):</span>
-    <span class="n">xrt</span><span class="o">.</span><span class="n">displayModel</span><span class="p">(</span>
-        <span class="n">G</span><span class="p">[</span><span class="n">i_path</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">]),</span>
-        <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">hot_r</span><span class="p">,</span>
-        <span class="n">paths</span><span class="o">=</span><span class="p">[</span><span class="n">path</span><span class="p">],</span>
-        <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">hot_r</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;forward model matrix G&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
 </pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/examples_Sparse_tomographic_reconstructions_7_0.png" src="../_images/examples_Sparse_tomographic_reconstructions_7_0.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_Sparse_tomographic_reconstructions_7_1.png" src="../_images/examples_Sparse_tomographic_reconstructions_7_1.png" />
+<img alt="../_images/examples_Sparse_tomographic_reconstructions_16_0.png" src="../_images/examples_Sparse_tomographic_reconstructions_16_0.png" />
 </div>
 </div>
-<p>Solve the forward problem using sparse damped least squares</p>
+<p>Wow, that’s a lot of information to digest! Let’s think about how we could simplify the interpretation.</p>
+<p>One option is to actually analytically compute the model resolution matrix, and extracts its diagonal. This value (depending on prior knowledge) is intricately related to posterior covariance / uncertainty of single cells, but we won’t do any formal derivations here. Additionally, we’ll plot a few rays single rays, and their contribution to the model matrix <span class="math notranslate nohighlight">\(G\)</span>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[62]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">model_recovered</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lsmr</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">damp</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;LSMR recovery&quot;</span><span class="p">)</span>
+<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="n">resolution_diagonal</span> <span class="o">=</span> <span class="p">(</span><span class="n">G</span><span class="o">.</span><span class="n">T</span> <span class="err">@</span> <span class="n">G</span><span class="p">)</span><span class="o">.</span><span class="n">diagonal</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Approximate ray coverage per cell&quot;</span><span class="p">)</span>
 <span class="n">xrt</span><span class="o">.</span><span class="n">displayModel</span><span class="p">(</span>
-    <span class="n">model_recovered</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">]),</span>
-    <span class="c1"># paths=paths,</span>
-    <span class="n">clim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span>
-    <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span>
-    <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">seismic</span><span class="p">,</span>
+    <span class="n">resolution_diagonal</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">]),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">hot_r</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">extent</span>
 <span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="n">zeros</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">resolution_diagonal</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;All rays&quot;</span><span class="p">)</span>
+<span class="n">xrt</span><span class="o">.</span><span class="n">displayModel</span><span class="p">(</span>
+    <span class="n">zeros</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">]),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">hot_r</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span> <span class="n">paths</span><span class="o">=</span><span class="n">paths</span><span class="p">,</span> <span class="n">clim</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">)</span>
+
+
+<span class="k">for</span> <span class="n">i_path</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">paths</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">i_path</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;contribution to G for ray {i_path}&quot;</span><span class="p">)</span>
+    <span class="n">xrt</span><span class="o">.</span><span class="n">displayModel</span><span class="p">(</span>
+        <span class="n">G</span><span class="p">[</span><span class="n">i_path</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">]),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">hot_r</span><span class="p">,</span> <span class="n">paths</span><span class="o">=</span><span class="p">[</span><span class="n">path</span><span class="p">],</span> <span class="n">extent</span><span class="o">=</span><span class="n">extent</span>
+    <span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -544,84 +627,68 @@ Evaluating paths: 100%|██████████| 500/500 [00:00&lt;00:00, 
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_Sparse_tomographic_reconstructions_9_0.png" src="../_images/examples_Sparse_tomographic_reconstructions_9_0.png" />
+<img alt="../_images/examples_Sparse_tomographic_reconstructions_18_0.png" src="../_images/examples_Sparse_tomographic_reconstructions_18_0.png" />
 </div>
 </div>
-<p>Solve the problem probabilistically, but naively</p>
+<p>That seems interesting. For most cells in the middle, we have relatively many rays passing through. Can you guess for which cells solution is the most certain?</p>
+<p>Now, we don’t want to commit an <code class="docutils literal notranslate"><span class="pre">inverse</span> <span class="pre">crime</span></code>! 👻 We need to make sure that our solution can’t be perfect, otherwise both the theoreticians and the realists will complain. We need to add some <strong>noise</strong> to the data.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[77]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Target from G, d, and data covariance</span>
-<span class="n">target</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Targets</span><span class="o">.</span><span class="n">LinearMatrix</span><span class="p">(</span>
-    <span class="n">true_slowness</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">G</span><span class="p">,</span> <span class="n">d</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">],</span> <span class="mf">50.0</span> <span class="o">**</span> <span class="mi">2</span>
-<span class="p">)</span>
+<span></span><span class="n">data_covariance</span> <span class="o">=</span> <span class="mf">50.0</span>
 
-<span class="c1"># Gaussian prior</span>
-<span class="n">prior_gauss</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Priors</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span>
-    <span class="n">true_slowness</span><span class="o">.</span><span class="n">size</span><span class="p">,</span>
-    <span class="n">lower_bounds</span><span class="o">=-</span><span class="mi">200</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">true_slowness</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
-    <span class="n">upper_bounds</span><span class="o">=</span><span class="mi">200</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">true_slowness</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
-    <span class="n">means</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">true_slowness</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
-    <span class="n">covariance</span><span class="o">=</span><span class="mi">20</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">true_slowness</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
-<span class="p">)</span>
+<span class="c1"># we recompute the data, otherwise re-evaluating the cell on it&#39;s own breaks reproducibility</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">G</span> <span class="err">@</span> <span class="n">true_slowness</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">dimensionality</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="c1"># Add some noise to the data</span>
+<span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">d</span> <span class="o">+=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">data_covariance</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">d</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 
-<span class="n">mass_matrix</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">MassMatrices</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="n">true_slowness</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
-
-<span class="c1"># Sample the Normal-conditioned posterior</span>
-<span class="n">sampler</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">HMC</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">mass_matrix</span><span class="p">,</span> <span class="n">prior_gauss</span><span class="p">)</span>
+<span class="c1"># Plot the data again</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;data anomaly&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;data anomaly&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;count&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[77]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Text(0, 0.5, &#39;count&#39;)
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/home/larsgebraad/Documents/Hamiltonian Monte Carlo/hmc-tomography/hmc_tomography/Priors.py:293: Warning: Seems that you only passed a vector as the covariance matrix. It will be used as the covariance diagonal.
-  Warning,
-</pre></div></div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_Sparse_tomographic_reconstructions_21_1.png" src="../_images/examples_Sparse_tomographic_reconstructions_21_1.png" />
 </div>
-<p>Sample</p>
+</div>
+</div>
+<div class="section" id="Small-steps:-deterministic-straight-ray-tomography">
+<h2>Small steps: deterministic straight ray tomography<a class="headerlink" href="#Small-steps:-deterministic-straight-ray-tomography" title="Permalink to this headline">¶</a></h2>
+<p>Okay, let’s first see how we could tackle this problem with a deterministic approach. Since the system might be partially underdetermined and partially overdetermined, we will damp the system using Tikhonov regularization (ridge regression), and perform a least squares matrix inverse.</p>
+<p>This is built in in SciPy, so the implentation is both fast and straightforward. We show here the influence of the damping factor by varying it over orders of magnitude. Damping is performed towards <span class="math notranslate nohighlight">\(0\)</span>. This means that in cells with too little information, the algorithm automatically pulls the cell value towards zero.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[84]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;samples_linear_tomography.h5&quot;</span>
-<span class="n">sampler</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
-    <span class="n">filename</span><span class="p">,</span>
-    <span class="n">proposals</span><span class="o">=</span><span class="mi">400000</span><span class="p">,</span>
-    <span class="n">online_thinning</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-    <span class="n">time_step</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
-    <span class="n">initial_model</span><span class="o">=</span><span class="n">model_recovered</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">],</span>
-<span class="p">);</span>
-<span class="n">sampler</span><span class="o">.</span><span class="n">sample_hdf5_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-Tot. acc rate: 0.31. Last 100 acc rate: 0.27. Progress:   1%|          | 4822/400000 [00:13&lt;18:31, 355.64it/s]
-</pre></div></div>
-</div>
-<p>Visualize</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">sampler</span><span class="o">.</span><span class="n">sample_hdf5_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-<span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
-    <span class="n">mean</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">samples</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">std</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">samples</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># We will use this later</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Bayesian recovery&quot;</span><span class="p">)</span>
+<span></span><span class="n">dampings</span> <span class="o">=</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">i_damping</span><span class="p">,</span> <span class="n">damping</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dampings</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">i_damping</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">model_recovered</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lsmr</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">damp</span><span class="o">=</span><span class="n">damping</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;LSMR recovery, damping: {damping}&quot;</span><span class="p">)</span>
     <span class="n">xrt</span><span class="o">.</span><span class="n">displayModel</span><span class="p">(</span>
-        <span class="n">mean</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">]),</span>
+        <span class="n">model_recovered</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">]),</span>
         <span class="n">clim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span>
         <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span>
         <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">seismic</span><span class="p">,</span>
@@ -633,65 +700,461 @@ Tot. acc rate: 0.31. Last 100 acc rate: 0.27. Progress:   1%|          | 4822/40
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_Sparse_tomographic_reconstructions_15_0.png" src="../_images/examples_Sparse_tomographic_reconstructions_15_0.png" />
+<img alt="../_images/examples_Sparse_tomographic_reconstructions_24_0.png" src="../_images/examples_Sparse_tomographic_reconstructions_24_0.png" />
 </div>
 </div>
-<p>This is much worse than the linear recovery! How can that be when we threw (relatively) massive amounts of computation at the problem?</p>
-<p>Of course, spending more resources on a problem won’t magically make the result any better (at least in inverse problems) Why is this result worse? One obvious reason I could come up with is the ‘regularisation’. In the deterministic case, the solution was ‘damped’ towards zero. THis was also done in this result. However, the damping turned out to be stronger in this case, probably because we chose our prior variance relatively small. One solution would be to increase prior variance.</p>
+<p>That looks pretty good! We definitely see the structure of the target (if we choose the damping appropriately). We however do not have any indication of uncertainty using this method.</p>
+</div>
+<div class="section" id="A-first-attempt-at-Bayesian-tomography">
+<h2>A first attempt at Bayesian tomography<a class="headerlink" href="#A-first-attempt-at-Bayesian-tomography" title="Permalink to this headline">¶</a></h2>
+<p>Let’s try it in a Bayesian fashion. We will, of course, use HMC to assess the posterior.</p>
+<p>Because we will need to evaluate the model many times, we should think of ways to optimize data computation. You might have realized that when we plotted the matrix G, there were many zero-valued entries, i.e. G is very sparse. To exploit sparsity in model evaluations, we can convert the matrix to a sparse variant using scipy.</p>
+<p>The class <code class="docutils literal notranslate"><span class="pre">hmc_tomography.Targets.LinearMatrix</span></code> is designed for exactly the inverse problem described in this tutorial. It takes in the forward model matrix <span class="math notranslate nohighlight">\(G\)</span>, the observed data <span class="math notranslate nohighlight">\(\mathbf{d}\)</span>, and the data covariance. The data covariance can be in many shapes, but they all assume that the data errors are normally distributed. In this case, we use a single value to describe the data errors. This is appropriate as we generated the data using only one data error variance, but in
+practice this need not be true, data errors might evolve in time, or be seismic-station dependent.</p>
+<p>The class <code class="docutils literal notranslate"><span class="pre">hmc_tomography.Targets.LinearMatrix</span></code> automatically recognizes whether a matrix is sparse or not, and exploits the sparsity in data computation.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[232]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">sG</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+
+<span class="n">target</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Targets</span><span class="o">.</span><span class="n">LinearMatrix</span><span class="p">(</span>
+    <span class="n">true_slowness</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">sG</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">data_covariance</span><span class="o">=</span><span class="n">data_covariance</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Now, in a classical Bayesian inverse problem, we need to choose a prior. Although you might get away a few times with choosing an unbounded uniform prior, at some point somebody will say that choosing a prior as such is already injecting knowledge into the inverse problem.</p>
+<p>To make the inverse problem nice-behaved (that solutions stay bounded), when the forward problem might be ill-posed, we need to choose a prior that enforces well-posedness. Perhaps the most common and well known prior is a Gaussian distribution.</p>
+<p>We will generate two of these priors (multivariate Gaussian) with varying covariance to assess prior influence on the inverse problem. We additionally truncate the Gaussians between <span class="math notranslate nohighlight">\([-200, 200]\)</span>, to make our problem even easier. The Gaussian will both be centered at zero, and have zero correlation.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[233]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">ones</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">dimensionality</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="n">zeros</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">dimensionality</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+<span class="n">prior_gauss_wide</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Priors</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span>
+    <span class="n">true_slowness</span><span class="o">.</span><span class="n">size</span><span class="p">,</span>
+    <span class="n">lower_bounds</span><span class="o">=-</span><span class="mi">200</span> <span class="o">*</span> <span class="n">ones</span><span class="p">,</span>
+    <span class="n">upper_bounds</span><span class="o">=</span><span class="mi">200</span> <span class="o">*</span> <span class="n">ones</span><span class="p">,</span>
+    <span class="n">means</span><span class="o">=</span><span class="n">zeros</span><span class="p">,</span>
+    <span class="n">covariance</span><span class="o">=</span><span class="mi">100</span> <span class="o">*</span> <span class="n">ones</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">prior_gauss_narrow</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Priors</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span>
+    <span class="n">true_slowness</span><span class="o">.</span><span class="n">size</span><span class="p">,</span>
+    <span class="n">lower_bounds</span><span class="o">=-</span><span class="mi">200</span> <span class="o">*</span> <span class="n">ones</span><span class="p">,</span>
+    <span class="n">upper_bounds</span><span class="o">=</span><span class="mi">200</span> <span class="o">*</span> <span class="n">ones</span><span class="p">,</span>
+    <span class="n">means</span><span class="o">=</span><span class="n">zeros</span><span class="p">,</span>
+    <span class="n">covariance</span><span class="o">=</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ones</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/larsgebraad/Documents/Hamiltonian Monte Carlo/hmc-tomography/hmc_tomography/Priors.py:295: Warning: Seems that you only passed a vector as the covariance matrix. It will be used as the covariance diagonal.
+  Warning,
+</pre></div></div>
+</div>
+<p>For Hamiltonian Monte Carlo, we additionally need a mass matrix. Don’t worry, we’ll use the trivial mass matrix, and later get back to what would be a much better choice.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[234]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">mass_matrix</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">MassMatrices</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="n">dimensionality</span><span class="p">)</span>
+
+<span class="c1"># mass_matrix = hmc_tomography.MassMatrices.Diagonal(</span>
+<span class="c1">#     true_slowness.size, diagonal=resolution_diagonal[:, None]</span>
+<span class="c1"># )</span>
+
+<span class="c1"># Sample the Normal-conditioned posterior</span>
+<span class="c1"># sampler = hmc_tomography.Samplers.HMC(target, mass_matrix, prior_gauss)</span>
+</pre></div>
+</div>
+</div>
+<p>Now we compile everything into sampler objects:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[236]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">sampler_gaussian_wide</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">HMC</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">mass_matrix</span><span class="p">,</span> <span class="n">prior_gauss_wide</span><span class="p">)</span>
+<span class="n">sampler_gaussian_narrow</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">HMC</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">mass_matrix</span><span class="p">,</span> <span class="n">prior_gauss_narrow</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>And sample away!</p>
+<p>The settings used for sampling might seem a little arbitrary, but some general guidelines we found helpful are:</p>
+<ul class="simple">
+<li><p>Acceptance rates should be between 0.0 - 1.0. A rate of 0.0 means we are going nowhere, and 1.0 means we are taking no risk and thus exploring very slowly. Literature (Neal, 2011) suggests an optimal value of 0.64 <strong>for quadratic/Gaussian posteriors</strong>. Acceptance rate should be tuned first using <code class="docutils literal notranslate"><span class="pre">time_step</span></code>, and possibly using <code class="docutils literal notranslate"><span class="pre">integration_steps</span></code>.</p></li>
+<li><p>Online thinning can be beneficial for speed if you are writing out many samples per second. It means that only every n-th sample is written out. When some parameters are strongly autocorrelated in a Markov chain, we do not gaing much information by storing every sample. In those cases online thinning can be helpful.</p></li>
+<li><p>If we don’t have an optimized mass matrix, we can assume that some dimensions are more strongly autocorrelated than others. E.g. for a unit mass matrix, the dimension with the strongest posterior curvature controls maximum <code class="docutils literal notranslate"><span class="pre">time_step</span></code> and <code class="docutils literal notranslate"><span class="pre">integration_steps</span></code>. But because all dimensions oscillate according to the mass matrix, and a unit mass matrix was chosen, the dimension with the weakest curvature will therefore suffer from high autocorrelations. These cases is where an optimized mass
+matrix will be beneficial.</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[237]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">sampler_gaussian_wide</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+    <span class="s2">&quot;samples_linear_tomography_gaussian_wide.h5&quot;</span><span class="p">,</span>
+    <span class="n">overwrite_samples</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">proposals</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+    <span class="n">online_thinning</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">time_step</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">integration_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">initial_model</span><span class="o">=</span><span class="n">model_recovered</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">],</span>
+<span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+sys:1: Warning:
+Silently overwriting samples file (samples_linear_tomography_gaussian_wide.h5) if it exists.
+Tot. acc rate: 0.34. Last 100 acc rate: 0.34. Progress: 100%|█████████▉| 9977/10000 [00:17&lt;00:00, 585.06it/s]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[238]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">sampler_gaussian_narrow</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+    <span class="s2">&quot;samples_linear_tomography_gaussian_narrow.h5&quot;</span><span class="p">,</span>
+    <span class="n">overwrite_samples</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">proposals</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+    <span class="n">online_thinning</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">time_step</span><span class="o">=</span><span class="mf">0.0025</span><span class="p">,</span>
+    <span class="n">integration_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">initial_model</span><span class="o">=</span><span class="n">model_recovered</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">],</span>
+<span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+sys:1: Warning:
+Silently overwriting samples file (samples_linear_tomography_gaussian_narrow.h5) if it exists.
+Tot. acc rate: 1.00. Last 100 acc rate: 1.00. Progress: 100%|█████████▉| 9989/10000 [00:17&lt;00:00, 620.80it/s]
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="A-crude-assesment-of-convergence">
+<h2>A crude assesment of convergence<a class="headerlink" href="#A-crude-assesment-of-convergence" title="Permalink to this headline">¶</a></h2>
+<p>So our chains rain for a few seconds / minutes. How do we say, enough is enough, and start interpreting the results? There are many ways to do this, and there is not a single agreed method for multivariate posteriors. A few crude indicators might be detecting trends in sampling. Is a parameter apparently moving through model space in a single direction? That might indicate the model parameter is not converged yet. Let’s look at 2 dimensions of both chains.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[240]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+    <span class="n">sampler_gaussian_wide</span><span class="o">.</span><span class="n">samples_filename</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">750</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">samples_wide</span><span class="p">,</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+    <span class="n">sampler_gaussian_narrow</span><span class="o">.</span><span class="n">samples_filename</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">750</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">samples_narrow</span><span class="p">:</span>
+    <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Visualization</span><span class="o">.</span><span class="n">visualize_2_dimensions</span><span class="p">(</span><span class="n">samples_wide</span><span class="p">,</span> <span class="n">dim1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dim2</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+    <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Visualization</span><span class="o">.</span><span class="n">visualize_2_dimensions</span><span class="p">(</span><span class="n">samples_narrow</span><span class="p">,</span> <span class="n">dim1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dim2</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_Sparse_tomographic_reconstructions_40_0.png" src="../_images/examples_Sparse_tomographic_reconstructions_40_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_Sparse_tomographic_reconstructions_40_1.png" src="../_images/examples_Sparse_tomographic_reconstructions_40_1.png" />
+</div>
+</div>
+<p>Oh no! It looks like our second chain did not properly converge yet. We might have seen this coming, as the time step was rather small, and acceptance rate quite high. Let’s try to fix it:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[166]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">sampler_gaussian_2</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+    <span class="s2">&quot;samples_linear_tomography_gaussian_2.h5&quot;</span><span class="p">,</span>
+    <span class="n">overwrite_samples</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">proposals</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+    <span class="n">online_thinning</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">time_step</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">integration_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">initial_model</span><span class="o">=</span><span class="n">model_recovered</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+sys:1: Warning:
+Silently overwriting samples file (samples_linear_tomography_gaussian_2.h5) if it exists.
+Tot. acc rate: 0.87. Last 100 acc rate: 1.00. Progress: 100%|██████████| 10000/10000 [00:16&lt;00:00, 600.48it/s]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[167]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+    <span class="n">sampler_gaussian_2</span><span class="o">.</span><span class="n">samples_filename</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">750</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">samples_2</span><span class="p">:</span>
+    <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Visualization</span><span class="o">.</span><span class="n">visualize_2_dimensions</span><span class="p">(</span><span class="n">samples_2</span><span class="p">,</span> <span class="n">dim1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dim2</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_Sparse_tomographic_reconstructions_43_0.png" src="../_images/examples_Sparse_tomographic_reconstructions_43_0.png" />
+</div>
+</div>
+<p>That looks a lot better. Let’s see what the posteriors tell us.</p>
+</div>
+<div class="section" id="Statistics-on-Gaussian-prior-samples">
+<h2>Statistics on Gaussian-prior samples<a class="headerlink" href="#Statistics-on-Gaussian-prior-samples" title="Permalink to this headline">¶</a></h2>
+<p>Let’s first visualize the average model generated during our Markov chains.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[168]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+    <span class="n">sampler_gaussian_1</span><span class="o">.</span><span class="n">samples_filename</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">750</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">samples_1</span><span class="p">,</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+    <span class="n">sampler_gaussian_2</span><span class="o">.</span><span class="n">samples_filename</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">750</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">samples_2</span><span class="p">:</span>
+    <span class="n">mean_1</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">samples_1</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">mean_2</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">samples_2</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Bayesian recovery</span><span class="se">\n</span><span class="s2">Wide Gaussian&quot;</span><span class="p">)</span>
+    <span class="n">xrt</span><span class="o">.</span><span class="n">displayModel</span><span class="p">(</span>
+        <span class="n">mean_1</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">]),</span> <span class="n">clim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span> <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">seismic</span>
+    <span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Bayesian recovery</span><span class="se">\n</span><span class="s2">Narrow Gaussian&quot;</span><span class="p">)</span>
+    <span class="n">xrt</span><span class="o">.</span><span class="n">displayModel</span><span class="p">(</span>
+        <span class="n">mean_2</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">]),</span> <span class="n">clim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span> <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">seismic</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_Sparse_tomographic_reconstructions_47_0.png" src="../_images/examples_Sparse_tomographic_reconstructions_47_0.png" />
+</div>
+</div>
+<p><em>One might think</em>, that’s completely the same as linear recovery! How can that be when we threw (relatively) massive amounts of computation at the problem?</p>
+<p>Of course, spending more resources on a problem won’t magically make the result any better (at least in inverse problems) Why is this result so similar? This is mainly the ‘regularisation’. In the deterministic case, the solution was ‘damped’ towards zero. Gaussian priors do basically the same, with ‘damping’ strength being controlled by Gaussian variance.</p>
+<p>One obvious benefit is that we can now do statistics on all the single generated models. Many properties can be investigated, but in this example we’ll limit ourselves to posterior standard deviations.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[242]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+    <span class="n">sampler_gaussian_1</span><span class="o">.</span><span class="n">samples_filename</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">750</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">samples_1</span><span class="p">,</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+    <span class="n">sampler_gaussian_2</span><span class="o">.</span><span class="n">samples_filename</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">750</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">samples_2</span><span class="p">:</span>
+    <span class="n">std_1</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">samples_1</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">std_2</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">samples_2</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">max_std</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">std_1</span><span class="p">,</span> <span class="n">std_2</span><span class="p">])</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Posterior covariance (uncertainty)</span><span class="se">\n</span><span class="s2">Wide Gaussian&quot;</span><span class="p">)</span>
+    <span class="n">xrt</span><span class="o">.</span><span class="n">displayModel</span><span class="p">(</span>
+        <span class="n">std_1</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">]),</span> <span class="n">clim</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_std</span><span class="p">),</span> <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">hot_r</span>
+    <span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Posterior covariance (uncertainty)</span><span class="se">\n</span><span class="s2">Narrow Gaussian&quot;</span><span class="p">)</span>
+    <span class="n">xrt</span><span class="o">.</span><span class="n">displayModel</span><span class="p">(</span>
+        <span class="n">std_2</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">]),</span> <span class="n">clim</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_std</span><span class="p">),</span> <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">hot_r</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_Sparse_tomographic_reconstructions_49_0.png" src="../_images/examples_Sparse_tomographic_reconstructions_49_0.png" />
+</div>
+</div>
+<p>The standard deviations observed when using the wide Gaussian strongly resemble the ray coverage we saw earlier, with high coverage corresponding to low uncertainty. This also means that we could have use the computed ray coverage as a good estimate of the mass matrix to optimise sampling.</p>
+<p>On the other hand, using a narrow Gaussian gives us a much lower uncertainty. You might think, this is great, we are much more certain of our result! Of course that is the case, but this is only because our result is in much greater part due to our own injection of knowledge (the prior).</p>
+<p>An important things to note here are that: covariance is not influenced by the true model. Using a Gaussian prior in conjuction with a linear forward model results in a quadratic posterior, with curvature solely determined by the forward model matrix <span class="math notranslate nohighlight">\(G\)</span>, the data covariance, and the prior covariance. The two maps visualized above will be constant, independent of true model.</p>
+</div>
+<div class="section" id="A-better-approach-for-sparse-models:-Lasso-ing">
+<h2>A better approach for sparse models: Lasso-ing<a class="headerlink" href="#A-better-approach-for-sparse-models:-Lasso-ing" title="Permalink to this headline">¶</a></h2>
 <p>However, a better solution would be to utilize the fact that the model consists of many zero entries. If we are able to come up with a prior that encodes this belief, our appraisal of reality might improve.</p>
+<p>The easiest way to do this is by using Laplace distributions for the prior. These do not ‘penalize’ the RMS deviation from the mean, but rather the L1-norm. Let’s see what we can do with these distributions. As before, we’ll generate two priors, and appraise the target.</p>
 <div class="admonition note">
 <p class="admonition-title fa fa-exclamation-circle"><strong>Note:</strong></p>
 <p>The benefit of using sparsity is not uniquely applied in Bayesian inference. It is well understood and used in the machine learning community under the acronym LASSO. It is also regularly applied in deterministic inverse problems, where it works just as well. However, the deterministic implementation is not as straightforward as calling a few simple numpy routines. Therefore, it is ommitted in this notebook.</p>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[192]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Laplace prior</span>
-<span class="n">prior_laplace</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Priors</span><span class="o">.</span><span class="n">Sparse</span><span class="p">(</span>
-    <span class="n">true_slowness</span><span class="o">.</span><span class="n">size</span><span class="p">,</span>
-    <span class="n">lower_bounds</span><span class="o">=-</span><span class="mi">200</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">true_slowness</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
-    <span class="n">upper_bounds</span><span class="o">=</span><span class="mi">200</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">true_slowness</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
-    <span class="n">dispersion</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span></span><span class="n">prior_laplace_narrow</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Priors</span><span class="o">.</span><span class="n">Sparse</span><span class="p">(</span>
+    <span class="n">dimensionality</span><span class="p">,</span> <span class="n">lower_bounds</span><span class="o">=-</span><span class="mi">200</span><span class="o">*</span><span class="n">ones</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="o">=</span><span class="mi">200</span><span class="o">*</span><span class="n">ones</span><span class="p">,</span> <span class="n">dispersion</span><span class="o">=</span><span class="mf">0.1</span>
 <span class="p">)</span>
 
-<span class="c1"># Construct the Laplace-conditioned posterior</span>
-<span class="n">sampler_laplace</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">HMC</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">mass_matrix</span><span class="p">,</span> <span class="n">prior_laplace</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">filename_laplace</span> <span class="o">=</span> <span class="s2">&quot;samples_linear_tomography_laplace.h5&quot;</span>
-<span class="n">sampler_laplace</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
-    <span class="n">filename_laplace</span><span class="p">,</span>
-    <span class="n">proposals</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span>
-    <span class="n">online_thinning</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-    <span class="n">time_step</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
-    <span class="n">initial_model</span><span class="o">=</span><span class="mi">100</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">true_slowness</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
-<span class="p">);</span>
+<span class="n">prior_laplace_wide</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Priors</span><span class="o">.</span><span class="n">Sparse</span><span class="p">(</span>
+    <span class="n">dimensionality</span><span class="p">,</span> <span class="n">lower_bounds</span><span class="o">=-</span><span class="mi">200</span><span class="o">*</span><span class="n">ones</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="o">=</span><span class="mi">200</span><span class="o">*</span><span class="n">ones</span><span class="p">,</span> <span class="n">dispersion</span><span class="o">=</span><span class="mf">10.0</span>
+<span class="p">)</span>
+
+<span class="n">sampler_laplace_narrow</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">HMC</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">mass_matrix</span><span class="p">,</span> <span class="n">prior_laplace_narrow</span><span class="p">)</span>
+<span class="n">sampler_laplace_wide</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">HMC</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">mass_matrix</span><span class="p">,</span> <span class="n">prior_laplace_wide</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[200]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">filename_laplace</span> <span class="o">=</span> <span class="s2">&quot;samples_linear_tomography_laplace.h5&quot;</span>
-<span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span><span class="n">filename_laplace</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
-    <span class="n">mean_laplace</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">samples</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">std_laplace</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">samples</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># We will use this later</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Bayesian recovery (Laplace prior)&quot;</span><span class="p">)</span>
+<span></span><span class="n">sampler_laplace_narrow</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+    <span class="s2">&quot;samples_linear_tomography_laplace_narrow.h5&quot;</span><span class="p">,</span>
+    <span class="n">overwrite_samples</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">proposals</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+    <span class="n">online_thinning</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">time_step</span><span class="o">=</span><span class="mf">0.025</span><span class="p">,</span>
+    <span class="n">integration_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">initial_model</span><span class="o">=</span><span class="n">model_recovered</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">],</span>
+<span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+sys:1: Warning:
+Silently overwriting samples file (samples_linear_tomography_laplace_narrow.h5) if it exists.
+Tot. acc rate: 0.42. Last 100 acc rate: 0.40. Progress:  99%|█████████▉| 9947/10000 [00:17&lt;00:00, 602.37it/s]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[201]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">sampler_laplace_wide</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+    <span class="s2">&quot;samples_linear_tomography_laplace_wide.h5&quot;</span><span class="p">,</span>
+    <span class="n">overwrite_samples</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">proposals</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+    <span class="n">online_thinning</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">time_step</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+    <span class="n">integration_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">initial_model</span><span class="o">=</span><span class="n">model_recovered</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">],</span>
+<span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+sys:1: Warning:
+Silently overwriting samples file (samples_linear_tomography_laplace_wide.h5) if it exists.
+Tot. acc rate: 0.53. Last 100 acc rate: 0.52. Progress:  99%|█████████▉| 9945/10000 [00:17&lt;00:00, 603.80it/s]
+</pre></div></div>
+</div>
+<p>Let’s look at convergence again.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[204]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+    <span class="n">sampler_laplace_narrow</span><span class="o">.</span><span class="n">samples_filename</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">750</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">samples_1</span><span class="p">,</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+    <span class="n">sampler_laplace_wide</span><span class="o">.</span><span class="n">samples_filename</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">750</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">samples_2</span><span class="p">:</span>
+    <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Visualization</span><span class="o">.</span><span class="n">visualize_2_dimensions</span><span class="p">(</span><span class="n">samples_1</span><span class="p">,</span> <span class="n">dim1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dim2</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+    <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Visualization</span><span class="o">.</span><span class="n">visualize_2_dimensions</span><span class="p">(</span><span class="n">samples_2</span><span class="p">,</span> <span class="n">dim1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dim2</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_Sparse_tomographic_reconstructions_58_0.png" src="../_images/examples_Sparse_tomographic_reconstructions_58_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_Sparse_tomographic_reconstructions_58_1.png" src="../_images/examples_Sparse_tomographic_reconstructions_58_1.png" />
+</div>
+</div>
+<p>Seems fine for our purposes. But, do pay attention to strongly varying autocorrelation. This means that variances are likely to be very different for different model parameters.</p>
+</div>
+<div class="section" id="Statistics-on-Laplace-prior-samples">
+<h2>Statistics on Laplace-prior samples<a class="headerlink" href="#Statistics-on-Laplace-prior-samples" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[203]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+    <span class="n">sampler_laplace_narrow</span><span class="o">.</span><span class="n">samples_filename</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">750</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">samples_1</span><span class="p">,</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+    <span class="n">sampler_laplace_wide</span><span class="o">.</span><span class="n">samples_filename</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">750</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">samples_2</span><span class="p">:</span>
+    <span class="n">mean_1</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">samples_1</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">mean_2</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">samples_2</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Bayesian recovery</span><span class="se">\n</span><span class="s2">Narrow Laplace&quot;</span><span class="p">)</span>
     <span class="n">xrt</span><span class="o">.</span><span class="n">displayModel</span><span class="p">(</span>
-        <span class="n">mean_laplace</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">]),</span>
-        <span class="n">clim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span>
-        <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span>
-        <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">seismic</span><span class="p">,</span>
+        <span class="n">mean_1</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">]),</span> <span class="n">clim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span> <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">seismic</span>
+    <span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Bayesian recovery</span><span class="se">\n</span><span class="s2">Wide Laplace&quot;</span><span class="p">)</span>
+    <span class="n">xrt</span><span class="o">.</span><span class="n">displayModel</span><span class="p">(</span>
+        <span class="n">mean_2</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">]),</span> <span class="n">clim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span> <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">seismic</span>
     <span class="p">)</span>
 </pre></div>
 </div>
@@ -700,35 +1163,83 @@ Tot. acc rate: 0.31. Last 100 acc rate: 0.27. Progress:   1%|          | 4822/40
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_Sparse_tomographic_reconstructions_21_0.png" src="../_images/examples_Sparse_tomographic_reconstructions_21_0.png" />
+<img alt="../_images/examples_Sparse_tomographic_reconstructions_61_0.png" src="../_images/examples_Sparse_tomographic_reconstructions_61_0.png" />
 </div>
 </div>
-<p><em>Wow!</em></p>
+<p><em>Wow!</em> It seems that the injection of our knowledge on the sparsity really helped with this inversion. I can’t stress enough that this is only through the fact that we knew it was sparse a-priori. Using Laplace distributions as priors is not a golden bullet in general.</p>
+<p>Let’s also have a look at the standard deviations of these results.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[207]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+    <span class="n">sampler_laplace_narrow</span><span class="o">.</span><span class="n">samples_filename</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">750</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">samples_1</span><span class="p">,</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+    <span class="n">sampler_laplace_wide</span><span class="o">.</span><span class="n">samples_filename</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">750</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">samples_2</span><span class="p">:</span>
+    <span class="n">std_1</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">samples_1</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">std_2</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">samples_2</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-<span class="n">max_std</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">std_laplace</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">std</span><span class="o">.</span><span class="n">max</span><span class="p">()])</span>
+    <span class="n">max_std</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">std_1</span><span class="p">,</span> <span class="n">std_2</span><span class="p">])</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Bayesian recovery</span><span class="se">\n</span><span class="s2">(Gaussian prior)&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Posterior covariance (uncertainty)</span><span class="se">\n</span><span class="s2">Narrow Laplace&quot;</span><span class="p">)</span>
+    <span class="n">xrt</span><span class="o">.</span><span class="n">displayModel</span><span class="p">(</span>
+        <span class="n">std_1</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">]),</span> <span class="n">clim</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_std</span><span class="p">),</span> <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">hot_r</span>
+    <span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Posterior covariance (uncertainty)</span><span class="se">\n</span><span class="s2">Wide Laplace&quot;</span><span class="p">)</span>
+    <span class="n">xrt</span><span class="o">.</span><span class="n">displayModel</span><span class="p">(</span>
+        <span class="n">std_2</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">]),</span> <span class="n">clim</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_std</span><span class="p">),</span> <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">hot_r</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_Sparse_tomographic_reconstructions_63_0.png" src="../_images/examples_Sparse_tomographic_reconstructions_63_0.png" />
+</div>
+</div>
+<p>Interesting! Although the data are exactly the same, the prior assumptions on the model weigh heavily on uncertainty quantification. Especially in the case where the algorithm is exploring strong sparsity conditions (Narrow Laplace) we see non-linear behaviour. The ray coverage imprint seems to be mostly gone in this case. What we see now is an imprint of the actual target model. This is because our posterior is no longer quadratic.</p>
+<p>When we relax the non-linear part (Wide Laplace), we see the imprint of the ray coverage coming back.</p>
+<p>Some people might argue that the Narrow Laplace inference is not as correct, because our data is relatively less important. But by using the conjunction of appropriate prior knowledge and data we were actually able to reduce uncertainty and model fit <em>across the board</em>.</p>
+</div>
+<div class="section" id="Model-imprint">
+<h2>Model imprint<a class="headerlink" href="#Model-imprint" title="Permalink to this headline">¶</a></h2>
+<p>As a closing demonstration, let’s see what happens if we use a different target model.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[216]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Create a &#39;true model&#39;</span>
+<span class="n">model</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+<span class="p">]</span>
+
+<span class="n">true_slowness_alternate</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">fliplr</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;True model&quot;</span><span class="p">)</span>
 <span class="n">xrt</span><span class="o">.</span><span class="n">displayModel</span><span class="p">(</span>
-    <span class="n">std</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">]),</span>
-    <span class="n">clim</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_std</span><span class="p">),</span>
+    <span class="n">true_slowness_alternate</span><span class="p">,</span>
+    <span class="n">paths</span><span class="o">=</span><span class="n">paths</span><span class="p">[:</span><span class="mi">10</span><span class="p">],</span>
+    <span class="n">clim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span>
     <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span>
     <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">seismic</span><span class="p">,</span>
 <span class="p">)</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Bayesian recovery</span><span class="se">\n</span><span class="s2">(Laplace prior)&quot;</span><span class="p">)</span>
-<span class="n">xrt</span><span class="o">.</span><span class="n">displayModel</span><span class="p">(</span>
-    <span class="n">std_laplace</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">]),</span> <span class="n">clim</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_std</span><span class="p">),</span> <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">seismic</span>
-<span class="p">)</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -737,56 +1248,147 @@ Tot. acc rate: 0.31. Last 100 acc rate: 0.27. Progress:   1%|          | 4822/40
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_Sparse_tomographic_reconstructions_23_0.png" src="../_images/examples_Sparse_tomographic_reconstructions_23_0.png" />
+<img alt="../_images/examples_Sparse_tomographic_reconstructions_66_0.png" src="../_images/examples_Sparse_tomographic_reconstructions_66_0.png" />
 </div>
 </div>
-<p>Interesting! Although the data is exactly the same, the assumptions on the model weigh heavily on uncertainty quantification.</p>
-<p>Let’s investigate some priors of the Laplacian!</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[217]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">dimensions</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="n">ny</span> <span class="o">*</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span>
-    <span class="n">ny</span> <span class="o">*</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span>
-    <span class="n">ny</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span>
-    <span class="n">ny</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span>
-<span class="p">]</span>
-<span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span><span class="n">filename_laplace</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
-    <span class="k">print</span><span class="p">(</span><span class="n">samples</span><span class="o">.</span><span class="n">raw_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-    <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Visualization</span><span class="o">.</span><span class="n">marginal_grid</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">)</span>
+<span></span><span class="c1"># we recompute the data, otherwise re-evaluating the cell on it&#39;s own breaks reproducibility</span>
+<span class="n">d_alt</span> <span class="o">=</span> <span class="n">G</span> <span class="err">@</span> <span class="n">true_slowness_alternate</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">dimensionality</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="c1"># Add some noise to the data</span>
+<span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">d_alt</span> <span class="o">+=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">data_covariance</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">d_alt</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+<span class="c1"># Plot the data again</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;data anomaly&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">d_alt</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;data anomaly&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;count&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[217]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Text(0, 0.5, &#39;count&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_Sparse_tomographic_reconstructions_67_1.png" src="../_images/examples_Sparse_tomographic_reconstructions_67_1.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[223]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">target_alt</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Targets</span><span class="o">.</span><span class="n">LinearMatrix</span><span class="p">(</span>
+    <span class="n">true_slowness_alternate</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">sG</span><span class="p">,</span> <span class="n">d_alt</span><span class="p">,</span> <span class="n">data_covariance</span><span class="o">=</span><span class="n">data_covariance</span>
+<span class="p">)</span>
+
+<span class="n">starting_model</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lsmr</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">d_alt</span><span class="p">,</span> <span class="n">damp</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[224]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">sampler_gaussian_wide_alt</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">HMC</span><span class="p">(</span><span class="n">target_alt</span><span class="p">,</span> <span class="n">mass_matrix</span><span class="p">,</span> <span class="n">prior_gauss_wide</span><span class="p">)</span>
+<span class="n">sampler_gaussian_wide_alt</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+    <span class="s2">&quot;samples_linear_tomography_gaussian_wide_alt.h5&quot;</span><span class="p">,</span>
+    <span class="n">overwrite_samples</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">proposals</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+    <span class="n">online_thinning</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">time_step</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">integration_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">initial_model</span><span class="o">=</span><span class="n">starting_model</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">],</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
+<div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-(136, 10000)
+sys:1: Warning:
+Silently overwriting samples file (samples_linear_tomography_gaussian_wide_alt.h5) if it exists.
+Tot. acc rate: 0.35. Last 100 acc rate: 0.36. Progress:  99%|█████████▉| 9943/10000 [00:17&lt;00:00, 584.45it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[224]:
+</pre></div>
 </div>
-<div class="output_area docutils container">
-<img alt="../_images/examples_Sparse_tomographic_reconstructions_26_1.png" src="../_images/examples_Sparse_tomographic_reconstructions_26_1.png" />
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>0
+</pre></div>
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[225]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">dimensions</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="n">ny</span> <span class="o">*</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span>
-    <span class="n">ny</span> <span class="o">*</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span>
-    <span class="n">ny</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span>
-    <span class="n">ny</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span>
-<span class="p">]</span>
-<span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
-    <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Visualization</span><span class="o">.</span><span class="n">marginal_grid</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">)</span>
+<span></span><span class="n">sampler_laplace_narrow_alt</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">HMC</span><span class="p">(</span><span class="n">target_alt</span><span class="p">,</span> <span class="n">mass_matrix</span><span class="p">,</span> <span class="n">prior_laplace_narrow</span><span class="p">)</span>
+<span class="n">sampler_laplace_narrow_alt</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+    <span class="s2">&quot;samples_linear_tomography_laplace_narrow_alt.h5&quot;</span><span class="p">,</span>
+    <span class="n">overwrite_samples</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">proposals</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+    <span class="n">online_thinning</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">time_step</span><span class="o">=</span><span class="mf">0.025</span><span class="p">,</span>
+    <span class="n">integration_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">initial_model</span><span class="o">=</span><span class="n">starting_model</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">],</span>
+<span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+sys:1: Warning:
+Silently overwriting samples file (samples_linear_tomography_laplace_narrow_alt.h5) if it exists.
+Tot. acc rate: 0.40. Last 100 acc rate: 0.30. Progress: 100%|█████████▉| 9985/10000 [00:17&lt;00:00, 524.23it/s]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[228]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+    <span class="n">sampler_laplace_narrow_alt</span><span class="o">.</span><span class="n">samples_filename</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">750</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">samples_1</span><span class="p">,</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+    <span class="n">sampler_gaussian_wide_alt</span><span class="o">.</span><span class="n">samples_filename</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">750</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">samples_2</span><span class="p">:</span>
+    <span class="n">mean_1</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">samples_1</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">mean_2</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">samples_2</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Bayesian recovery</span><span class="se">\n</span><span class="s2">Narrow Laplace&quot;</span><span class="p">)</span>
+    <span class="n">xrt</span><span class="o">.</span><span class="n">displayModel</span><span class="p">(</span>
+        <span class="n">mean_1</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">]),</span> <span class="n">clim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span> <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">seismic</span>
+    <span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Bayesian recovery</span><span class="se">\n</span><span class="s2">Wide Gaussian&quot;</span><span class="p">)</span>
+    <span class="n">xrt</span><span class="o">.</span><span class="n">displayModel</span><span class="p">(</span>
+        <span class="n">mean_2</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">]),</span> <span class="n">clim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span> <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">seismic</span>
+    <span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -794,26 +1396,47 @@ Tot. acc rate: 0.31. Last 100 acc rate: 0.27. Progress:   1%|          | 4822/40
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_Sparse_tomographic_reconstructions_27_0.png" src="../_images/examples_Sparse_tomographic_reconstructions_27_0.png" />
+<img alt="../_images/examples_Sparse_tomographic_reconstructions_71_0.png" src="../_images/examples_Sparse_tomographic_reconstructions_71_0.png" />
 </div>
 </div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[226]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+    <span class="n">sampler_laplace_narrow_alt</span><span class="o">.</span><span class="n">samples_filename</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">750</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">samples_1</span><span class="p">,</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+    <span class="n">sampler_gaussian_wide_alt</span><span class="o">.</span><span class="n">samples_filename</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">750</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">samples_2</span><span class="p">:</span>
+    <span class="n">std_1</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">samples_1</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">std_2</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">samples_2</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">max_std</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">std_1</span><span class="p">,</span> <span class="n">std_2</span><span class="p">])</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Posterior covariance (uncertainty)</span><span class="se">\n</span><span class="s2">Narrow Laplace&quot;</span><span class="p">)</span>
+    <span class="n">xrt</span><span class="o">.</span><span class="n">displayModel</span><span class="p">(</span>
+        <span class="n">std_1</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">]),</span> <span class="n">clim</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_std</span><span class="p">),</span> <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">hot_r</span>
+    <span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Posterior covariance (uncertainty)</span><span class="se">\n</span><span class="s2">Wide Gaussian&quot;</span><span class="p">)</span>
+    <span class="n">xrt</span><span class="o">.</span><span class="n">displayModel</span><span class="p">(</span>
+        <span class="n">std_2</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">]),</span> <span class="n">clim</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_std</span><span class="p">),</span> <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">hot_r</span>
+    <span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span>
-</pre></div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_Sparse_tomographic_reconstructions_72_0.png" src="../_images/examples_Sparse_tomographic_reconstructions_72_0.png" />
 </div>
+</div>
+<p>Yet again, if the model is sparse, recovery is great. The uncertainty map from the wide Gaussian looks like a carbon copy of the previous example, while that of the narrow Laplacian is much decreased and model dependent.</p>
 </div>
 </div>
 

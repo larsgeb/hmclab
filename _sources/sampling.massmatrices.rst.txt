@@ -10,7 +10,6 @@ Available mass matrices:
                  hmc_tomography.MassMatrices.Unit
                  hmc_tomography.MassMatrices.Diagonal
                  hmc_tomography.MassMatrices.LBFGS
-                 hmc_tomography.MassMatrices.SparseDecomposed
 
 
 What are mass matrices?
@@ -53,8 +52,3 @@ LBFGS-style adaptive mass matrix
 .. autoclass:: hmc_tomography.MassMatrices.LBFGS
     :members:
 
-Sparse decomposed mass matrix
-*****************************
-
-.. autoclass:: hmc_tomography.MassMatrices.SparseDecomposed
-    :members:

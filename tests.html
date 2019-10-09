@@ -256,35 +256,35 @@ as well as allowing <code class="docutils literal notranslate"><span class="pre"
 26
 27
 28
-29</pre></div></td><td class="code"><div class="highlight"><pre><span></span>    <span class="sd">&quot;&quot;&quot;</span>
+29</pre></div></td><td class="code"><div class="highlight"><pre><span></span>
+    <span class="c1"># Create the object</span>
+    <span class="n">mass_matrix</span><span class="p">:</span> <span class="n">_MassMatrices</span><span class="o">.</span><span class="n">_AbstractMassMatrix</span> <span class="o">=</span> <span class="n">mmclass</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)</span>
 
-<span class="sd">    # Create the object</span>
-<span class="sd">    mass_matrix: _MassMatrices._AbstractMassMatrix = mmclass(dimensions)</span>
+    <span class="c1"># Check if a subtype of mass matrices</span>
+    <span class="k">assert</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">mass_matrix</span><span class="p">),</span> <span class="n">_MassMatrices</span><span class="o">.</span><span class="n">_AbstractMassMatrix</span><span class="p">)</span>
 
-<span class="sd">    # Check if a subtype of mass matrices</span>
-<span class="sd">    assert issubclass(type(mass_matrix), _MassMatrices._AbstractMassMatrix)</span>
+    <span class="c1"># Check if the right amount of dimensions</span>
+    <span class="k">assert</span> <span class="n">mass_matrix</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">==</span> <span class="n">dimensions</span>
 
-<span class="sd">    # Check if the right amount of dimensions</span>
-<span class="sd">    assert mass_matrix.dimensions == dimensions</span>
-
-<span class="sd">    return True</span>
-
-
-<span class="sd">@_pytest.mark.xfail(raises=NotImplementedError)</span>
-<span class="sd">@_pytest.mark.parametrize(&quot;mmclass&quot;, _MassMatrices._AbstractMassMatrix.__subclasses__())</span>
-<span class="sd">@_pytest.mark.parametrize(&quot;dimensions&quot;, [1, 10, 100, 1000])</span>
-<span class="sd">def test_generate(mmclass: _MassMatrices._AbstractMassMatrix, dimensions: int):</span>
-<span class="sd">    &quot;&quot;&quot;</span><span class="n">Test</span> <span class="k">for</span> <span class="n">the</span> <span class="n">generation</span> <span class="n">of</span> <span class="n">momenta</span> <span class="kn">from</span> <span class="nn">mass</span> <span class="nn">matrices.</span>
-
-    <span class="n">Parameters</span>
-    <span class="o">==========</span>
-    <span class="n">mmclass</span> <span class="p">:</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">MassMatrices</span><span class="o">.</span><span class="n">_AbstractMassMatrix</span>
-        <span class="n">A</span> <span class="n">mass</span> <span class="n">matrix</span> <span class="n">class</span><span class="o">.</span>
-    <span class="n">dimensions</span> <span class="p">:</span> <span class="nb">int</span>
-        <span class="n">Dimensions</span> <span class="n">to</span> <span class="n">check</span> <span class="n">the</span> <span class="n">mass</span> <span class="n">matrix</span><span class="o">.</span>
+    <span class="k">return</span> <span class="bp">True</span>
 
 
-    <span class="n">This</span> <span class="n">test</span> <span class="n">checks</span> <span class="k">if</span> <span class="n">we</span> <span class="n">can</span> <span class="n">generate</span> <span class="n">momentum</span> <span class="kn">from</span> <span class="nn">a</span> <span class="nn">given</span> <span class="nn">mass</span> <span class="nn">matrix.</span> <span class="nn">Using</span> <span class="nn">pytest</span><span class="p">,</span>
+<span class="nd">@_pytest.mark.parametrize</span><span class="p">(</span><span class="s2">&quot;mmclass&quot;</span><span class="p">,</span> <span class="n">_MassMatrices</span><span class="o">.</span><span class="n">_AbstractMassMatrix</span><span class="o">.</span><span class="n">__subclasses__</span><span class="p">())</span>
+<span class="nd">@_pytest.mark.parametrize</span><span class="p">(</span><span class="s2">&quot;dimensions&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">test_generate</span><span class="p">(</span><span class="n">mmclass</span><span class="p">:</span> <span class="n">_MassMatrices</span><span class="o">.</span><span class="n">_AbstractMassMatrix</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="s2">&quot;&quot;&quot;Test for the generation of momenta from mass matrices.</span>
+
+<span class="s2">    Parameters</span>
+<span class="s2">    ==========</span>
+<span class="s2">    mmclass : hmc_tomography.MassMatrices._AbstractMassMatrix</span>
+<span class="s2">        A mass matrix class.</span>
+<span class="s2">    dimensions : int</span>
+<span class="s2">        Dimensions to check the mass matrix.</span>
+
+
+<span class="s2">    This test checks if we can generate momentum from a given mass matrix. Using pytest,</span>
+<span class="s2">    it will loop over all available subclasses of the mass matrix, with variable amount</span>
+<span class="s2">    of dimensions.</span>
 </pre></div>
 </td></tr></table></div>
 </div>
@@ -427,6 +427,27 @@ interactive way:</p>
 </div>
 <p>Getting test descriptions …</p>
 <div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [8]: </span>tests.test_mass_matrices.test_generate<span class="o">?</span>
+<span class="go">Signature:</span>
+<span class="go">tests.test_mass_matrices.test_generate(</span>
+<span class="go">    mmclass: hmc_tomography.MassMatrices._AbstractMassMatrix,</span>
+<span class="go">    dimensions: int,</span>
+<span class="go">)</span>
+<span class="go">Docstring:</span>
+<span class="go">Test for the generation of momenta from mass matrices.</span>
+
+<span class="go">Parameters</span>
+<span class="go">==========</span>
+<span class="go">mmclass : hmc_tomography.MassMatrices._AbstractMassMatrix</span>
+<span class="go">    A mass matrix class.</span>
+<span class="go">dimensions : int</span>
+<span class="go">    Dimensions to check the mass matrix.</span>
+
+
+<span class="go">This test checks if we can generate momentum from a given mass matrix. Using pytest,</span>
+<span class="go">it will loop over all available subclasses of the mass matrix, with variable amount</span>
+<span class="go">of dimensions.</span>
+<span class="go">File:      ~/Documents/Hamiltonian Monte Carlo/hmc-tomography/hmc_tomography/Tests/test_mass_matrices.py</span>
+<span class="go">Type:      function</span>
 </pre></div>
 </div>
 </div>

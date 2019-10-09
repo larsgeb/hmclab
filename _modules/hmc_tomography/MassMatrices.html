@@ -506,28 +506,28 @@
         <span class="k">return</span> <span class="n">logdet</span></div></div>
 
 
-<div class="viewcode-block" id="SparseDecomposed"><a class="viewcode-back" href="../../sampling.massmatrices.html#hmc_tomography.MassMatrices.SparseDecomposed">[docs]</a><span class="k">class</span> <span class="nc">SparseDecomposed</span><span class="p">(</span><span class="n">_AbstractMassMatrix</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decomposition</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This class is not production ready&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">decomposition</span> <span class="o">=</span> <span class="n">decomposition</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decomposition</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="c1"># class SparseDecomposed(_AbstractMassMatrix):</span>
+<span class="c1">#     def __init__(self, decomposition):</span>
+<span class="c1">#         raise NotImplementedError(&quot;This class is not production ready&quot;)</span>
+<span class="c1">#         self.decomposition = decomposition</span>
+<span class="c1">#         self.dimensions = self.decomposition.shape[0]</span>
 
-<div class="viewcode-block" id="SparseDecomposed.kinetic_energy"><a class="viewcode-back" href="../../sampling.massmatrices.html#hmc_tomography.MassMatrices.SparseDecomposed.kinetic_energy">[docs]</a>    <span class="k">def</span> <span class="nf">kinetic_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">momentum</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This class is not production ready&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">(</span>
-            <span class="mf">0.5</span> <span class="o">*</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">_spsolve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decomposition</span><span class="p">,</span> <span class="n">momentum</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span></div>
+<span class="c1">#     def kinetic_energy(self, momentum: _numpy.ndarray) -&gt; float:</span>
+<span class="c1">#         raise NotImplementedError(&quot;This class is not production ready&quot;)</span>
+<span class="c1">#         return (</span>
+<span class="c1">#             0.5 * _numpy.linalg.norm(_spsolve(self.decomposition, momentum)) ** 2</span>
+<span class="c1">#         ).item()</span>
 
-<div class="viewcode-block" id="SparseDecomposed.kinetic_energy_gradient"><a class="viewcode-back" href="../../sampling.massmatrices.html#hmc_tomography.MassMatrices.SparseDecomposed.kinetic_energy_gradient">[docs]</a>    <span class="k">def</span> <span class="nf">kinetic_energy_gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">momentum</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This class is not production ready&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_spsolve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decomposition</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)[:,</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span></div>
+<span class="c1">#     def kinetic_energy_gradient(self, momentum: _numpy.ndarray) -&gt; _numpy.ndarray:</span>
+<span class="c1">#         raise NotImplementedError(&quot;This class is not production ready&quot;)</span>
+<span class="c1">#         return _spsolve(self.decomposition, momentum)[:, _numpy.newaxis]</span>
 
-<div class="viewcode-block" id="SparseDecomposed.generate_momentum"><a class="viewcode-back" href="../../sampling.massmatrices.html#hmc_tomography.MassMatrices.SparseDecomposed.generate_momentum">[docs]</a>    <span class="k">def</span> <span class="nf">generate_momentum</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This class is not production ready&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">decomposition</span>
-            <span class="o">@</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decomposition</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])[:,</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
-        <span class="p">)</span></div></div>
+<span class="c1">#     def generate_momentum(self) -&gt; _numpy.ndarray:</span>
+<span class="c1">#         raise NotImplementedError(&quot;This class is not production ready&quot;)</span>
+<span class="c1">#         return (</span>
+<span class="c1">#             self.decomposition</span>
+<span class="c1">#             @ _numpy.random.randn(self.decomposition.shape[0])[:, _numpy.newaxis]</span>
+<span class="c1">#         )</span>
 </pre></div>
 
            </div>

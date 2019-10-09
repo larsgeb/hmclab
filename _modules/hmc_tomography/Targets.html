@@ -210,7 +210,7 @@
         <span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">G</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">_scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">spmatrix</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">d</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">data_covariance</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">_scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">spmatrix</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">data_covariance</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">_scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">spmatrix</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Constructor for linear forward model target.</span>
 
@@ -233,65 +233,106 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">dimensions</span>
 
-        <span class="c1"># Parse forward model matrix ---------------------------------------------------</span>
-        <span class="k">if</span> <span class="n">G</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Make sure something was passed, or generate randomly if nothing was passed --</span>
+        <span class="k">if</span> <span class="n">G</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">d</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">_warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="n">f</span><span class="s2">&quot;No forward model was supplied. Defaulting to a unit matrix.&quot;</span><span class="p">,</span> <span class="ne">Warning</span>
+                <span class="n">f</span><span class="s2">&quot;No forward model and data was supplied. &quot;</span>
+                <span class="n">f</span><span class="s2">&quot;Defaulting to a unit matrix with zero data. &quot;</span><span class="p">,</span>
+                <span class="ne">Warning</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">G</span><span class="p">)</span> <span class="o">==</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="ow">or</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">G</span><span class="p">),</span> <span class="n">_scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">spmatrix</span><span class="p">):</span>
+            <span class="n">G</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">G</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">G</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">d</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Either no forward model matrix or data was passed. Not sure what to do.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Parse forward model matrix ---------------------------------------------------</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">G</span><span class="p">)</span> <span class="o">==</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="ow">or</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">G</span><span class="p">),</span> <span class="n">_scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">spmatrix</span><span class="p">):</span>
 
             <span class="c1"># Assert that the second dimension of the matrix corresponds to model space</span>
             <span class="c1"># dimension.</span>
             <span class="k">assert</span> <span class="n">G</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">dimensions</span>
-
             <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">G</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The forward model matrix type was not understood.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Parse data vector ------------------------------------------------------------</span>
-        <span class="k">if</span> <span class="n">d</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">_warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="n">f</span><span class="s2">&quot;No data was supplied. Defaulting to a zero vector.&quot;</span><span class="p">,</span> <span class="ne">Warning</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">G</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>
-        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">==</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">==</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
             <span class="c1"># Assert that the data vector is compatible with the matrix.</span>
             <span class="k">assert</span> <span class="n">d</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">G</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
-
             <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">=</span> <span class="n">d</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The data vector type was not understood.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Parse data covariance --------------------------------------------------------</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_covariance_matrix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&quot;&quot;&quot;Attribute to determine which misfit/gradient formula is needed.&quot;&quot;&quot;</span>
+
         <span class="k">if</span> <span class="n">data_covariance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">pass</span>
-        <span class="k">elif</span> <span class="p">(</span>
-            <span class="nb">type</span><span class="p">(</span><span class="n">data_covariance</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">float</span>
-        <span class="p">):</span>  <span class="c1"># TODO implement OR for all other possibilities</span>
+            <span class="c1"># No given data covariance</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_covariance</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">data_covariance</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">float</span><span class="p">:</span>
+            <span class="c1"># Single data covariance float paased</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data_covariance</span> <span class="o">=</span> <span class="n">data_covariance</span>
+
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">data_covariance</span><span class="p">)</span> <span class="ow">is</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+            <span class="c1"># Numpy array passed</span>
+
+            <span class="k">if</span> <span class="n">data_covariance</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="c1"># Diagonal of a data covariance matrix passed</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data_covariance</span> <span class="o">=</span> <span class="n">data_covariance</span>
+
+            <span class="k">elif</span> <span class="n">data_covariance</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+                <span class="c1"># Full data covariance matrix passed</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data_covariance_matrix</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data_covariance</span> <span class="o">=</span> <span class="n">data_covariance</span>
+                <span class="c1"># TODO implement inverse</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                    <span class="s2">&quot;Full data covariance matrix is not implemented yet.&quot;</span>
+                <span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Something else passed?</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">data_covariance</span><span class="p">),</span> <span class="n">_scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">spmatrix</span><span class="p">):</span>
+            <span class="c1"># Sparse matrix passed</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_covariance_matrix</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">if</span> <span class="n">data_covariance</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+                <span class="c1"># Sparse data covariance matrix</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                    <span class="s2">&quot;Sparse data covariance matrix is not implemented yet.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Something else passed?</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;The sparse data covariance&quot;</span> <span class="s2">&quot;matrix was not understood.&quot;</span>
+                <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Not a supported type</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The data covariance type was not understood.&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="LinearMatrix.misfit"><a class="viewcode-back" href="../../sampling.targets.html#hmc_tomography.Targets.LinearMatrix.misfit">[docs]</a>    <span class="k">def</span> <span class="nf">misfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_covariance</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">float</span><span class="p">:</span>
-            <span class="c1"># Data covariance is a single scalar, so we move the data covariance</span>
-            <span class="c1"># operation out of the matrix-vector products</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_covariance_matrix</span><span class="p">:</span>
+            <span class="c1"># Data covariance is a single scalar or a diagonal, so we move the data</span>
+            <span class="c1"># covariance operation out of the matrix-vector products</span>
             <span class="k">return</span> <span class="p">(</span>
-                <span class="n">_numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">@</span> <span class="n">coordinates</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">),</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+                <span class="mf">0.5</span> <span class="o">*</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">@</span> <span class="n">coordinates</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">),</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
                 <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_covariance</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># TODO implement other cases</span>
+            <span class="c1"># TODO implement other case</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This class is not production ready.&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="LinearMatrix.gradient"><a class="viewcode-back" href="../../sampling.targets.html#hmc_tomography.Targets.LinearMatrix.gradient">[docs]</a>    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_covariance</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_covariance_matrix</span><span class="p">:</span>
             <span class="c1"># Data covariance is a single scalar, so we move the data covariance</span>
             <span class="c1"># operation out of the matrix-vector products</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">@</span> <span class="n">coordinates</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_covariance</span>
@@ -321,7 +362,11 @@
 <span class="sd">        f(x,y)_T=\\frac{f(x,y)}{T}</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">annealing</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">annealing</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">dimensions</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="n">f</span><span class="s2">&quot;The Himmelblau function is not defined for </span><span class="si">{dimensions}</span><span class="s2"> parameters&quot;</span>
+            <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">annealing</span> <span class="o">=</span> <span class="n">annealing</span>
 
 <div class="viewcode-block" id="Himmelblau.misfit"><a class="viewcode-back" href="../../sampling.targets.html#hmc_tomography.Targets.Himmelblau.misfit">[docs]</a>    <span class="k">def</span> <span class="nf">misfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>

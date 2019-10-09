@@ -263,7 +263,10 @@
 
 <div class="viewcode-block" id="test_gradient"><a class="viewcode-back" href="../../../tests.reference.html#hmc_tomography.Tests.test_priors.test_gradient">[docs]</a><span class="nd">@_pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s2">&quot;pclass&quot;</span><span class="p">,</span> <span class="n">_Priors</span><span class="o">.</span><span class="n">_AbstractPrior</span><span class="o">.</span><span class="n">__subclasses__</span><span class="p">())</span>
 <span class="nd">@_pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s2">&quot;dimensions&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">])</span>
-<span class="k">def</span> <span class="nf">test_gradient</span><span class="p">(</span><span class="n">pclass</span><span class="p">:</span> <span class="n">_Priors</span><span class="o">.</span><span class="n">_AbstractPrior</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="nd">@_pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s2">&quot;stepsize_delta&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mf">1e-10</span><span class="p">,</span> <span class="mf">1e-5</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">,</span> <span class="o">-</span><span class="mf">1e-10</span><span class="p">,</span> <span class="o">-</span><span class="mf">1e-5</span><span class="p">,</span> <span class="o">-</span><span class="mf">1e-3</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">test_gradient</span><span class="p">(</span>
+    <span class="n">pclass</span><span class="p">:</span> <span class="n">_Priors</span><span class="o">.</span><span class="n">_AbstractPrior</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">stepsize_delta</span><span class="p">:</span> <span class="nb">float</span>
+<span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Test for the computation of prior gradients.</span>
 
 <span class="sd">    Parameters</span>
@@ -283,12 +286,22 @@
     <span class="n">prior</span><span class="p">:</span> <span class="n">_Priors</span><span class="o">.</span><span class="n">_AbstractPrior</span> <span class="o">=</span> <span class="n">pclass</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)</span>
 
     <span class="n">location</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-
     <span class="n">gradient</span> <span class="o">=</span> <span class="n">prior</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">location</span><span class="p">)</span>
 
     <span class="k">assert</span> <span class="n">gradient</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;float&quot;</span><span class="p">)</span>
-
     <span class="k">assert</span> <span class="n">gradient</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">location</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="c1"># Gradient test</span>
+    <span class="n">dot_product</span> <span class="o">=</span> <span class="p">(</span><span class="n">gradient</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">location</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">misfit_1</span> <span class="o">=</span> <span class="n">prior</span><span class="o">.</span><span class="n">misfit</span><span class="p">(</span><span class="n">location</span><span class="p">)</span>
+    <span class="n">misfit_2</span> <span class="o">=</span> <span class="n">prior</span><span class="o">.</span><span class="n">misfit</span><span class="p">(</span><span class="n">location</span> <span class="o">+</span> <span class="n">stepsize_delta</span> <span class="o">*</span> <span class="n">location</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">misfit_2</span> <span class="o">-</span> <span class="n">misfit_1</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">relative_error</span> <span class="o">=</span> <span class="p">(</span><span class="n">misfit_2</span> <span class="o">-</span> <span class="n">misfit_1</span> <span class="o">-</span> <span class="n">dot_product</span> <span class="o">*</span> <span class="n">stepsize_delta</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+            <span class="n">misfit_2</span> <span class="o">-</span> <span class="n">misfit_1</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="n">relative_error</span> <span class="o">&lt;</span> <span class="mf">1e-2</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">gradient</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="kc">True</span></div>
 
