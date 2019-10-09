@@ -3,17 +3,27 @@ HMC Tomography
 ##############
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 1
+    :caption: Contents:
 
-   hmc_tomography
-   mcmc_visualization
-   tests
+    self
+    setup
+    tour
+    examples
+    sampling
+    post
+    tests
+    references
+    py-modindex
+    genindex
 
 
-Indices and tables
-------------------
+.. note::
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   This documentation is far from complete. Please let us know if you miss something.
+
+.. warning::
+
+    We provide no guarantee that the implementation in this package is correct.
+
+.. centered:: Andrea Zunino, Andreas Fichtner, Lars Gebraad

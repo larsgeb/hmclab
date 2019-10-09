@@ -1,0 +1,735 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Prior objects &mdash; HMC Tom 0.1.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Target (likelihood) objects" href="sampling.targets.html" />
+    <link rel="prev" title="Sampling reference" href="sampling.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> HMC Tom
+          
+
+          
+            
+            <img src="_static/hmctom.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">HMC Tomography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tour.html">A tour of hmc_tomography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples and tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="sampling.html">Sampling reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Prior objects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#what-are-priors">What are priors?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prior-abc">Prior ABC</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#implementing-your-own-prior">Implementing your own Prior</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#prior-abc-reference">Prior ABC reference</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#prior-distributions-reference">Prior distributions reference</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#normal-distribution">Normal distribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#laplace-distribution">Laplace distribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#logarithmic-normal-distribution">Logarithmic normal distribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uniform-distribution">Uniform distribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#composite-distribution">Composite distribution</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sampling.targets.html">Target (likelihood) objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sampling.massmatrices.html">Mass matrix objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sampling.sampler.html">Sampler objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sampling.html#available-submodules">Available submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="post.html">Post-sampling reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Development and testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="py-modindex.html">Module index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Alphabetic index</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">HMC Tom</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="sampling.html">Sampling reference</a> &raquo;</li>
+        
+      <li>Prior objects</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/sampling.priors.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-hmc_tomography.Priors">
+<span id="prior-objects"></span><h1>Prior objects<a class="headerlink" href="#module-hmc_tomography.Priors" title="Permalink to this headline">¶</a></h1>
+<p>Prior objects encode prior information on parameters. They are tyically
+in the form of normalizable distributions (with some exceptions).</p>
+<p>Avialable priors:</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hmc_tomography.Priors._AbstractPrior" title="hmc_tomography.Priors._AbstractPrior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmc_tomography.Priors._AbstractPrior</span></code></a></p></td>
+<td><p>Prior abstract base class</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hmc_tomography.Priors.Normal" title="hmc_tomography.Priors.Normal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmc_tomography.Priors.Normal</span></code></a>(dimensions[, …])</p></td>
+<td><p>Normal distribution in model space.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hmc_tomography.Priors.Sparse" title="hmc_tomography.Priors.Sparse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmc_tomography.Priors.Sparse</span></code></a>(dimensions[, …])</p></td>
+<td><p>Laplace distribution in model space.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hmc_tomography.Priors.LogNormal" title="hmc_tomography.Priors.LogNormal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmc_tomography.Priors.LogNormal</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Normal distribution in logarithmic model space.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hmc_tomography.Priors.Uniform" title="hmc_tomography.Priors.Uniform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmc_tomography.Priors.Uniform</span></code></a>(dimensions[, …])</p></td>
+<td><p>Uniform bounded or unbouded prior in model space.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hmc_tomography.Priors.CompositePrior" title="hmc_tomography.Priors.CompositePrior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmc_tomography.Priors.CompositePrior</span></code></a>(dimensions)</p></td>
+<td><p>Prior distribution combined from multiple unconditional distributions.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="what-are-priors">
+<h2>What are priors?<a class="headerlink" href="#what-are-priors" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="prior-abc">
+<h2>Prior ABC<a class="headerlink" href="#prior-abc" title="Permalink to this headline">¶</a></h2>
+<p>This class is the abstract base class. Our package does not <strong>require</strong> you to
+inherit from this class, but it makes checking for required methods easier.</p>
+<div class="section" id="implementing-your-own-prior">
+<h3>Implementing your own Prior<a class="headerlink" href="#implementing-your-own-prior" title="Permalink to this headline">¶</a></h3>
+<p>Creating a new class based upon this ABC in a separate file is done as
+follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hmc_tomography.Priors</span> <span class="k">import</span> <span class="n">_AbstractPrior</span>
+<span class="k">class</span> <span class="nc">newPrior</span><span class="p">(</span><span class="n">_AbstractPrior</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p>However, when one would try to instantiate this object:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">prior</span> <span class="o">=</span> <span class="n">newPrior</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>a <cite>TypeError</cite> is raised; because the abstract (read: required) methods are
+not implemented yet:</p>
+<p><code class="docutils literal notranslate"><span class="pre">TypeError:</span> <span class="pre">Can't</span> <span class="pre">instantiate</span> <span class="pre">abstract</span> <span class="pre">class</span> <span class="pre">newPrior</span> <span class="pre">with</span> <span class="pre">abstract</span> <span class="pre">methods</span>
+<span class="pre">[..]</span></code></p>
+</div>
+<div class="section" id="prior-abc-reference">
+<h3>Prior ABC reference<a class="headerlink" href="#prior-abc-reference" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="hmc_tomography.Priors._AbstractPrior">
+<em class="property">class </em><code class="sig-prename descclassname">hmc_tomography.Priors.</code><code class="sig-name descname">_AbstractPrior</code><a class="reference internal" href="_modules/hmc_tomography/Priors.html#_AbstractPrior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors._AbstractPrior" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Prior abstract base class</p>
+<dl class="attribute">
+<dt id="hmc_tomography.Priors._AbstractPrior.name">
+<code class="sig-name descname">name</code><em class="property"> = 'abstract prior'</em><a class="headerlink" href="#hmc_tomography.Priors._AbstractPrior.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the prior.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="hmc_tomography.Priors._AbstractPrior.dimensions">
+<code class="sig-name descname">dimensions</code><em class="property"> = -1</em><a class="headerlink" href="#hmc_tomography.Priors._AbstractPrior.dimensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model space dimension of the prior.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="hmc_tomography.Priors._AbstractPrior.lower_bounds">
+<code class="sig-name descname">lower_bounds</code><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Priors._AbstractPrior.lower_bounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lower bounds for every parameter. If initialized to None, no bounds are used.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="hmc_tomography.Priors._AbstractPrior.upper_bounds">
+<code class="sig-name descname">upper_bounds</code><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Priors._AbstractPrior.upper_bounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upper bounds for every parameter. If initialized to None, no bounds are used.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hmc_tomography.Priors._AbstractPrior.misfit">
+<em class="property">abstract </em><code class="sig-name descname">misfit</code><span class="sig-paren">(</span><em class="sig-param">coordinates: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/hmc_tomography/Priors.html#_AbstractPrior.misfit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors._AbstractPrior.misfit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the misfit of the prior at the given coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>coordinates</strong> (<em>numpy.ndarray</em>) – Numpy array shaped as (dimensions, 1) representing a column vector
+containing the coordinates <span class="math notranslate nohighlight">\(\mathbf{m}\)</span>.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>misfit</strong> – The prior misfit <span class="math notranslate nohighlight">\(\chi\)</span>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+<p>The prior misfit is related to the prior probability density as:</p>
+<div class="math notranslate nohighlight">
+\[\chi_\text{prior} (\mathbf{m}) = -\log p(\mathbf{m}).\]</div>
+<p>This method is called many times in an HMC appraisal. It is therefore
+beneficial to optimize the implementation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hmc_tomography.Priors._AbstractPrior.gradient">
+<em class="property">abstract </em><code class="sig-name descname">gradient</code><span class="sig-paren">(</span><em class="sig-param">coordinates: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="_modules/hmc_tomography/Priors.html#_AbstractPrior.gradient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors._AbstractPrior.gradient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the misfit gradient of the prior at the given coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>coordinates</strong> (<em>numpy.ndarray</em>) – Numpy array shaped as (dimensions, 1) representing a column vector
+containing the coordinates <span class="math notranslate nohighlight">\(\mathbf{m}\)</span>.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>gradient</strong> – The prior misfit gradient <span class="math notranslate nohighlight">\(\nabla_\mathbf{m}\chi\)</span>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+<p>The prior misfit gradient is related to the prior probability density
+as:</p>
+<div class="math notranslate nohighlight">
+\[\nabla_\mathbf{m} \chi_\text{prior} (\mathbf{m}) = -
+\nabla_\mathbf{m} \log p(\mathbf{m}).\]</div>
+<p>This method is called many times in an HMC appraisal. It is therefore
+beneficial to optimize the implementation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hmc_tomography.Priors._AbstractPrior.generate">
+<em class="property">abstract </em><code class="sig-name descname">generate</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="_modules/hmc_tomography/Priors.html#_AbstractPrior.generate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors._AbstractPrior.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to draw samples from the prior.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>sample</strong> – A numpy array shaped as (dimensions, 1) containing a sample of the prior.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>TypeError</strong> – If the prior does not allow generation of samples.</p>
+</dd>
+</dl>
+<p>This method is mostly a convenience class. The algorithm itself does not
+require the implementation. Therefore an implementation as such will suffice:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This function is not implemented.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="hmc_tomography.Priors._AbstractPrior.corrector">
+<code class="sig-name descname">corrector</code><span class="sig-paren">(</span><em class="sig-param">coordinates: numpy.ndarray</em>, <em class="sig-param">momentum: numpy.ndarray</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hmc_tomography/Priors.html#_AbstractPrior.corrector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors._AbstractPrior.corrector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to correct an HMC particle, which is called after every time
+integration step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coordinates</strong> (<em>numpy.ndarray</em>) – Numpy array shaped as (dimensions, 1) representing a column vector
+containing the coordinates <span class="math notranslate nohighlight">\(\mathbf{m}\)</span> upon which to operate by
+reference.</p></li>
+<li><p><strong>momentum</strong> (<em>numpy.ndarray</em>) – Numpy array shaped as (dimensions, 1) representing a column vector
+containing the momenta <span class="math notranslate nohighlight">\(\mathbf{p}\)</span> upon which to operate by
+reference.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="hmc_tomography.Priors._AbstractPrior.update_bounds">
+<code class="sig-name descname">update_bounds</code><span class="sig-paren">(</span><em class="sig-param">lower_bounds: Optional[numpy.ndarray], upper_bounds: Optional[numpy.ndarray]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hmc_tomography/Priors.html#_AbstractPrior.update_bounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors._AbstractPrior.update_bounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to update bounds of a prior distribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lower_bounds</strong> (numpy.ndarray or <cite>None</cite>) – Either an array shaped as (dimensions, 1) with floats for the lower bounds,
+or <cite>None</cite> for no bounds. If some dimensions should be bounded, while others
+should not, use <code class="docutils literal notranslate"><span class="pre">-numpy.inf</span></code> within the vector as needed.</p></li>
+<li><p><strong>upper_bounds</strong> (numpy.ndarray or <cite>None</cite>) – Either an array shaped as (dimensions, 1) with floats for the upper bounds,
+or <cite>None</cite> for no bounds. If some dimensions should be bounded, while others
+should not, use <code class="docutils literal notranslate"><span class="pre">numpy.inf</span></code> within the vector as needed.</p></li>
+</ul>
+</dd>
+</dl>
+<p>This method updates the bounds of a distribution. Note that invocating it,
+requires both bounds to be passed. If only one is to be updated, simply pass
+the current object of the other bound:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">prior</span><span class="o">.</span><span class="n">update_bounds</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">prior</span><span class="o">.</span><span class="n">upper_bounds</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If both vectors are passed, ensure that all upper bounds are above the
+corresponding lower bounds.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hmc_tomography.Priors._AbstractPrior.misfit_bounds">
+<code class="sig-name descname">misfit_bounds</code><span class="sig-paren">(</span><em class="sig-param">coordinates: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/hmc_tomography/Priors.html#_AbstractPrior.misfit_bounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors._AbstractPrior.misfit_bounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to compute the misfit associated with the truncated part of the prior.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="prior-distributions-reference">
+<h2>Prior distributions reference<a class="headerlink" href="#prior-distributions-reference" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="normal-distribution">
+<h3>Normal distribution<a class="headerlink" href="#normal-distribution" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="hmc_tomography.Priors.Normal">
+<em class="property">class </em><code class="sig-prename descclassname">hmc_tomography.Priors.</code><code class="sig-name descname">Normal</code><span class="sig-paren">(</span><em class="sig-param">dimensions: int</em>, <em class="sig-param">means: numpy.ndarray = None</em>, <em class="sig-param">covariance: numpy.ndarray = None</em>, <em class="sig-param">lower_bounds: numpy.ndarray = None</em>, <em class="sig-param">upper_bounds: numpy.ndarray = None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hmc_tomography/Priors.html#Normal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors.Normal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#hmc_tomography.Priors._AbstractPrior" title="hmc_tomography.Priors._AbstractPrior"><code class="xref py py-class docutils literal notranslate"><span class="pre">hmc_tomography.Priors._AbstractPrior</span></code></a></p>
+<p>Normal distribution in model space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dimensions</strong> (<em>int</em>) – Dimension of the distribution.</p></li>
+<li><p><strong>means</strong> (<em>numpy.ndarray</em>) – Numpy array shaped as (dimensions, 1) containing the means of the distribution.</p></li>
+<li><p><strong>covariance</strong> (<em>numpy.ndarray</em>) – Numpy array shaped as either as (dimensions, dimensions) or (dimensions, 1).
+This array represents either the full covariance matrix for a multivariate
+Gaussian, or an column vector with variances for <cite>dimensions</cite> separate
+uncorrelated Gaussians.</p></li>
+<li><p><strong>lower_bounds</strong> (<em>numpy.ndarray</em>) – Numpy array of shape (dimensions, 1) that contains the lower limits of each
+parameter.</p></li>
+<li><p><strong>upper_bounds</strong> (<em>numpy.ndarray</em>) – Numpy array of shape (dimensions, 1) that contains the upper limits of each
+parameter.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="hmc_tomography.Priors.Normal.means">
+<code class="sig-name descname">means</code><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Priors.Normal.means" title="Permalink to this definition">¶</a></dt>
+<dd><p>Means in model space.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="hmc_tomography.Priors.Normal.diagonal">
+<code class="sig-name descname">diagonal</code><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Priors.Normal.diagonal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicator whether or not the covariance matrix is diagonal, i.e. if the
+distribution is uncorrelated.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="hmc_tomography.Priors.Normal.covariance">
+<code class="sig-name descname">covariance</code><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Priors.Normal.covariance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Covariance matrix in model space.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hmc_tomography.Priors.Normal.misfit">
+<code class="sig-name descname">misfit</code><span class="sig-paren">(</span><em class="sig-param">coordinates: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/hmc_tomography/Priors.html#Normal.misfit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors.Normal.misfit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to compute the misfit of a Normal prior distribution.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hmc_tomography.Priors.Normal.gradient">
+<code class="sig-name descname">gradient</code><span class="sig-paren">(</span><em class="sig-param">coordinates: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="_modules/hmc_tomography/Priors.html#Normal.gradient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors.Normal.gradient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to compute the gradient of a Normal prior distribution.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hmc_tomography.Priors.Normal.generate">
+<code class="sig-name descname">generate</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="_modules/hmc_tomography/Priors.html#Normal.generate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors.Normal.generate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="laplace-distribution">
+<h3>Laplace distribution<a class="headerlink" href="#laplace-distribution" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="hmc_tomography.Priors.Sparse">
+<em class="property">class </em><code class="sig-prename descclassname">hmc_tomography.Priors.</code><code class="sig-name descname">Sparse</code><span class="sig-paren">(</span><em class="sig-param">dimensions: int</em>, <em class="sig-param">dispersion: float = 1</em>, <em class="sig-param">lower_bounds: numpy.ndarray = None</em>, <em class="sig-param">upper_bounds: numpy.ndarray = None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hmc_tomography/Priors.html#Sparse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors.Sparse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#hmc_tomography.Priors._AbstractPrior" title="hmc_tomography.Priors._AbstractPrior"><code class="xref py py-class docutils literal notranslate"><span class="pre">hmc_tomography.Priors._AbstractPrior</span></code></a></p>
+<p>Laplace distribution in model space.</p>
+<p>Least absolute deviations, Laplace distribution, LASSO, L1</p>
+<p>TODO: Implement distribution’s location other than the 0-vector.</p>
+<dl class="method">
+<dt id="hmc_tomography.Priors.Sparse.misfit">
+<code class="sig-name descname">misfit</code><span class="sig-paren">(</span><em class="sig-param">coordinates</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/hmc_tomography/Priors.html#Sparse.misfit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors.Sparse.misfit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to compute the misfit of a L1 prior distribution.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hmc_tomography.Priors.Sparse.gradient">
+<code class="sig-name descname">gradient</code><span class="sig-paren">(</span><em class="sig-param">coordinates</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hmc_tomography/Priors.html#Sparse.gradient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors.Sparse.gradient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to compute the gradient of a L1 prior distribution.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hmc_tomography.Priors.Sparse.generate">
+<code class="sig-name descname">generate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/hmc_tomography/Priors.html#Sparse.generate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors.Sparse.generate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="logarithmic-normal-distribution">
+<h3>Logarithmic normal distribution<a class="headerlink" href="#logarithmic-normal-distribution" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="hmc_tomography.Priors.LogNormal">
+<em class="property">class </em><code class="sig-prename descclassname">hmc_tomography.Priors.</code><code class="sig-name descname">LogNormal</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hmc_tomography/Priors.html#LogNormal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors.LogNormal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#hmc_tomography.Priors.Normal" title="hmc_tomography.Priors.Normal"><code class="xref py py-class docutils literal notranslate"><span class="pre">hmc_tomography.Priors.Normal</span></code></a></p>
+<p>Normal distribution in logarithmic model space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dimensions</strong> (<em>int</em>) – Dimension of the distribution.</p></li>
+<li><p><strong>means</strong> (<em>numpy.ndarray</em>) – Numpy array shaped as (dimensions, 1) containing the means of the distribution
+in logarithmic model space.</p></li>
+<li><p><strong>covariance</strong> (<em>numpy.ndarray</em>) – Numpy array shaped as either as (dimensions, dimensions) or (dimensions, 1).
+This array represents either the full covariance matrix for a multivariate
+Gaussian, or an column vector with variances for <cite>dimensions</cite> separate
+uncorrelated Gaussians, all in logarithmic model space.</p></li>
+<li><p><strong>lower_bounds</strong> (<em>numpy.ndarray</em>) – Numpy array of shape (dimensions, 1) that contains the lower limits of each
+parameter.</p></li>
+<li><p><strong>upper_bounds</strong> (<em>numpy.ndarray</em>) – Numpy array of shape (dimensions, 1) that contains the upper limits of each
+parameter.</p></li>
+</ul>
+</dd>
+</dl>
+<p>TODO Validate this class’ methods.</p>
+<dl class="method">
+<dt id="hmc_tomography.Priors.LogNormal.misfit">
+<code class="sig-name descname">misfit</code><span class="sig-paren">(</span><em class="sig-param">coordinates: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/hmc_tomography/Priors.html#LogNormal.misfit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors.LogNormal.misfit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to compute the misfit of a log Normal prior distribution.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hmc_tomography.Priors.LogNormal.gradient">
+<code class="sig-name descname">gradient</code><span class="sig-paren">(</span><em class="sig-param">coordinates: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="_modules/hmc_tomography/Priors.html#LogNormal.gradient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors.LogNormal.gradient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to compute the gradient of a log Normal prior distribution.</p>
+<p>TODO Verify these formulas!</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hmc_tomography.Priors.LogNormal.generate">
+<code class="sig-name descname">generate</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="_modules/hmc_tomography/Priors.html#LogNormal.generate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors.LogNormal.generate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="uniform-distribution">
+<h3>Uniform distribution<a class="headerlink" href="#uniform-distribution" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="hmc_tomography.Priors.Uniform">
+<em class="property">class </em><code class="sig-prename descclassname">hmc_tomography.Priors.</code><code class="sig-name descname">Uniform</code><span class="sig-paren">(</span><em class="sig-param">dimensions: int</em>, <em class="sig-param">lower_bounds: numpy.ndarray = None</em>, <em class="sig-param">upper_bounds: numpy.ndarray = None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hmc_tomography/Priors.html#Uniform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors.Uniform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#hmc_tomography.Priors._AbstractPrior" title="hmc_tomography.Priors._AbstractPrior"><code class="xref py py-class docutils literal notranslate"><span class="pre">hmc_tomography.Priors._AbstractPrior</span></code></a></p>
+<p>Uniform bounded or unbouded prior in model space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dimensions</strong> (<em>int</em>) – Dimension of the distribution.</p></li>
+<li><p><strong>lower_bounds</strong> (<em>numpy.ndarray</em><em> or </em><em>None</em>) – Numpy array of shape (dimensions, 1) that contains the lower limits of each
+parameter.</p></li>
+<li><p><strong>upper_bounds</strong> (<em>numpy.ndarray</em><em> or </em><em>None</em>) – Numpy array of shape (dimensions, 1) that contains the upper limits of each
+parameter.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="hmc_tomography.Priors.Uniform.misfit">
+<code class="sig-name descname">misfit</code><span class="sig-paren">(</span><em class="sig-param">coordinates: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/hmc_tomography/Priors.html#Uniform.misfit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors.Uniform.misfit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to compute the misfit of a uniform distribution.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hmc_tomography.Priors.Uniform.gradient">
+<code class="sig-name descname">gradient</code><span class="sig-paren">(</span><em class="sig-param">coordinates: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="_modules/hmc_tomography/Priors.html#Uniform.gradient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors.Uniform.gradient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to compute the gradient of a uniform distribution.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hmc_tomography.Priors.Uniform.generate">
+<code class="sig-name descname">generate</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="_modules/hmc_tomography/Priors.html#Uniform.generate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors.Uniform.generate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="composite-distribution">
+<h3>Composite distribution<a class="headerlink" href="#composite-distribution" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="hmc_tomography.Priors.CompositePrior">
+<em class="property">class </em><code class="sig-prename descclassname">hmc_tomography.Priors.</code><code class="sig-name descname">CompositePrior</code><span class="sig-paren">(</span><em class="sig-param">dimensions: int</em>, <em class="sig-param">list_of_priors: List[hmc_tomography.Priors._AbstractPrior] = None</em>, <em class="sig-param">lower_bounds: numpy.ndarray = None</em>, <em class="sig-param">upper_bounds: numpy.ndarray = None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hmc_tomography/Priors.html#CompositePrior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors.CompositePrior" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#hmc_tomography.Priors._AbstractPrior" title="hmc_tomography.Priors._AbstractPrior"><code class="xref py py-class docutils literal notranslate"><span class="pre">hmc_tomography.Priors._AbstractPrior</span></code></a></p>
+<p>Prior distribution combined from multiple unconditional distributions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dimensions</strong> (<em>int</em>) – Combined dimension of all the separate distributions</p></li>
+<li><p><strong>list_of_priors</strong> (<em>List</em><em>[</em><a class="reference internal" href="#hmc_tomography.Priors._AbstractPrior" title="hmc_tomography.Priors._AbstractPrior"><em>_AbstractPrior</em></a><em>]</em>) – List of all separate priors.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – Raised if the passed dimensions do not correspond to the sum of the separate
+    dimensions of each prior.</p>
+</dd>
+</dl>
+<p>This class can be used when two or more sets of coordinates should be described by
+different priors, e.g. when one set requires a Normal distribution and another a
+uniform distribution.</p>
+<dl class="attribute">
+<dt id="hmc_tomography.Priors.CompositePrior.enumerated_dimensions">
+<code class="sig-name descname">enumerated_dimensions</code><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Priors.CompositePrior.enumerated_dimensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>This object describes how many dimensions each prior has, ordered according
+to <code class="docutils literal notranslate"><span class="pre">CompositePrior.separate_priors</span></code>. Sums to <code class="docutils literal notranslate"><span class="pre">CompositePrior.dimesions</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="hmc_tomography.Priors.CompositePrior.enumerated_dimensions_cumulative">
+<code class="sig-name descname">enumerated_dimensions_cumulative</code><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Priors.CompositePrior.enumerated_dimensions_cumulative" title="Permalink to this definition">¶</a></dt>
+<dd><p>This object describes each separate prior index in combined model space. Invoking
+<code class="docutils literal notranslate"><span class="pre">numpy.split(m,</span> <span class="pre">CompositePrior.enumerated_dimensions_cumulative)[:-1])</span></code>
+splits a vector appropriately for all separate priors.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hmc_tomography.Priors.CompositePrior.misfit">
+<code class="sig-name descname">misfit</code><span class="sig-paren">(</span><em class="sig-param">coordinates: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/hmc_tomography/Priors.html#CompositePrior.misfit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors.CompositePrior.misfit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="hmc_tomography.Priors.CompositePrior.gradient">
+<code class="sig-name descname">gradient</code><span class="sig-paren">(</span><em class="sig-param">coordinates: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="_modules/hmc_tomography/Priors.html#CompositePrior.gradient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors.CompositePrior.gradient" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="hmc_tomography.Priors.CompositePrior.generate">
+<code class="sig-name descname">generate</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="_modules/hmc_tomography/Priors.html#CompositePrior.generate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors.CompositePrior.generate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="hmc_tomography.Priors.CompositePrior.corrector">
+<code class="sig-name descname">corrector</code><span class="sig-paren">(</span><em class="sig-param">coordinates: numpy.ndarray</em>, <em class="sig-param">momentum: numpy.ndarray</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hmc_tomography/Priors.html#CompositePrior.corrector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Priors.CompositePrior.corrector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override method to correct an HMC particle for composite prior, which is
+called after every time integration step. Calls all sub-correctors</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coordinates</strong> (<em>numpy.ndarray</em>) – Numpy array shaped as (dimensions, 1) representing a column vector
+containing the coordinates <span class="math notranslate nohighlight">\(\mathbf{m}\)</span> upon which to operate by
+reference.</p></li>
+<li><p><strong>momentum</strong> (<em>numpy.ndarray</em>) – Numpy array shaped as (dimensions, 1) representing a column vector
+containing the momenta <span class="math notranslate nohighlight">\(\mathbf{p}\)</span> upon which to operate by
+reference.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="sampling.targets.html" class="btn btn-neutral float-right" title="Target (likelihood) objects" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="sampling.html" class="btn btn-neutral float-left" title="Sampling reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Andrea Zunino, Andreas Fichtner, Lars Gebraad
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

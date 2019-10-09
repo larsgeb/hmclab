@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Search &mdash; HMC Tom 0.1.1 documentation</title>
+  <title>Visualization module &mdash; HMC Tom 0.1.1 documentation</title>
   
 
   
@@ -28,7 +28,6 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
-        <script type="text/javascript" src="_static/searchtools.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -39,7 +38,9 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="#" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Development and testing" href="tests.html" />
+    <link rel="prev" title="Post processing module" href="post.processing.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -73,7 +74,7 @@
 
           
 <div role="search">
-  <form id="rtd-search-form" class="wy-form" action="#" method="get">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
@@ -91,13 +92,19 @@
             
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">HMC Tomography</a></li>
 <li class="toctree-l1"><a class="reference internal" href="setup.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tour.html">A tour of hmc_tomography</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples and tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sampling.html">Sampling reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="post.html">Post-sampling reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="post.html">Post-sampling reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="post.samples.html">Samples class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="post.processing.html">Post processing module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Visualization module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="post.html#available-submodules-classes">Available submodules / classes</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="tests.html">Development and testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
 <li class="toctree-l1"><a class="reference internal" href="py-modindex.html">Module index</a></li>
@@ -147,12 +154,16 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Search</li>
+          <li><a href="post.html">Post-sampling reference</a> &raquo;</li>
+        
+      <li>Visualization module</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
+            <a href="_sources/post.visualization.rst.txt" rel="nofollow"> View page source</a>
+          
         
       </li>
     
@@ -164,24 +175,78 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <noscript>
-  <div id="fallback" class="admonition warning">
-    <p class="last">
-      Please activate JavaScript to enable the search
-      functionality.
-    </p>
-  </div>
-  </noscript>
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
 
-  
-  <div id="search-results">
-  
-  </div>
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-hmc_tomography.Post.Visualization">
+<span id="visualization-module"></span><h1>Visualization module<a class="headerlink" href="#module-hmc_tomography.Post.Visualization" title="Permalink to this headline">¶</a></h1>
+<p>Available visualization methods:</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hmc_tomography.Post.Visualization.visualize_2_dimensions" title="hmc_tomography.Post.Visualization.visualize_2_dimensions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmc_tomography.Post.Visualization.visualize_2_dimensions</span></code></a>(samples)</p></td>
+<td><p>Method to jointly investigate 2 dimensions of a sampled posterior.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="hmc_tomography.Post.Visualization.visualize_2_dimensions">
+<code class="sig-prename descclassname">Visualization.</code><code class="sig-name descname">visualize_2_dimensions</code><span class="sig-paren">(</span><em class="sig-param">dim1: int = 0</em>, <em class="sig-param">dim2: int = 1</em>, <em class="sig-param">bins: int = 25</em>, <em class="sig-param">show: bool = True</em>, <em class="sig-param">colormap_2d=&lt;matplotlib.colors.LinearSegmentedColormap object&gt;</em>, <em class="sig-param">color_1d='black'</em><span class="sig-paren">)</span><a class="headerlink" href="#hmc_tomography.Post.Visualization.visualize_2_dimensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to jointly investigate 2 dimensions of a sampled posterior.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>samples</strong> (<a class="reference internal" href="post.samples.html#hmc_tomography.Post.Samples" title="hmc_tomography.Post.Samples"><em>hmc_tomography.Post.Samples</em></a>) – Samples object.</p></li>
+<li><p><strong>dim1</strong> (<em>int</em>) – First dimension to investigate.</p></li>
+<li><p><strong>dim2</strong> (<em>int</em>) – Second dimension to investigate.</p></li>
+<li><p><strong>bins</strong> (<em>int</em>) – Bins used for 1d and 2d histograms.</p></li>
+<li><p><strong>show</strong> (<em>bool</em>) – Whether or not to render the output. If false, the plot is only show after
+using <code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot.show()</span></code>. If true, plot is immediately shown.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
 
            </div>
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tests.html" class="btn btn-neutral float-right" title="Development and testing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="post.processing.html" class="btn btn-neutral float-left" title="Post processing module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
@@ -214,14 +279,7 @@
   
   
     
-  
-  <script type="text/javascript">
-    jQuery(function() { Search.loadIndex("searchindex.js"); });
-  </script>
-  
-  <script type="text/javascript" id="searchindexloader"></script>
    
-
 
 </body>
 </html>

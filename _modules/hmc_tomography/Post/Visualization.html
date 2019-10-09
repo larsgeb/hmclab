@@ -1,0 +1,420 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>hmc_tomography.Post.Visualization &mdash; HMC Tom 0.1.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> HMC Tom
+          
+
+          
+            
+            <img src="../../../_static/hmctom.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">HMC Tomography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../setup.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tour.html">A tour of hmc_tomography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples and tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../sampling.html">Sampling reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../post.html">Post-sampling reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tests.html">Development and testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../py-modindex.html">Module index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../genindex.html">Alphabetic index</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">HMC Tom</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>hmc_tomography.Post.Visualization</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for hmc_tomography.Post.Visualization</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;A module with assorted visualization functions.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">_plt</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">List</span> <span class="k">as</span> <span class="n">_List</span>
+
+<span class="kn">from</span> <span class="nn">hmc_tomography.Post</span> <span class="k">import</span> <span class="n">Processing</span> <span class="k">as</span> <span class="n">_Processing</span>
+<span class="kn">from</span> <span class="nn">hmc_tomography.Post</span> <span class="k">import</span> <span class="n">Samples</span> <span class="k">as</span> <span class="n">_Samples</span>
+<span class="kn">import</span> <span class="nn">matplotlib.gridspec</span> <span class="k">as</span> <span class="nn">_gridspec</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">_numpy</span>
+
+
+<span class="k">def</span> <span class="nf">marginal_grid</span><span class="p">(</span>
+    <span class="n">samples</span><span class="p">:</span> <span class="n">_Samples</span><span class="p">,</span>
+    <span class="n">dimensions_list</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">25</span><span class="p">,</span>
+    <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">colormap_2d</span><span class="o">=</span><span class="n">_plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s2">&quot;Greys&quot;</span><span class="p">),</span>
+    <span class="n">color_1d</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">number_of_plots</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dimensions_list</span><span class="p">)</span>
+
+    <span class="n">_plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+    <span class="n">gs1</span> <span class="o">=</span> <span class="n">_gridspec</span><span class="o">.</span><span class="n">GridSpec</span><span class="p">(</span><span class="n">number_of_plots</span><span class="p">,</span> <span class="n">number_of_plots</span><span class="p">)</span>
+    <span class="n">gs1</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">wspace</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>  <span class="c1"># set the spacing between axes.</span>
+
+    <span class="c1"># Get extent of every set</span>
+    <span class="n">dim_range</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i_dim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_plots</span><span class="p">):</span>
+        <span class="nb">min</span> <span class="o">=</span> <span class="n">samples</span><span class="p">[</span><span class="n">dimensions_list</span><span class="p">[</span><span class="n">i_dim</span><span class="p">],</span> <span class="p">:]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="nb">max</span> <span class="o">=</span> <span class="n">samples</span><span class="p">[</span><span class="n">dimensions_list</span><span class="p">[</span><span class="n">i_dim</span><span class="p">],</span> <span class="p">:]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="n">dim_range</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">i_plot</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_plots</span><span class="p">):</span>
+        <span class="c1"># print(i_plot, i_plot) # grid indices for diagonal</span>
+        <span class="n">axis</span> <span class="o">=</span> <span class="n">_plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs1</span><span class="p">[</span><span class="n">i_plot</span> <span class="o">+</span> <span class="p">(</span><span class="n">number_of_plots</span><span class="p">)</span> <span class="o">*</span> <span class="n">i_plot</span><span class="p">])</span>
+
+        <span class="c1"># Modify axes</span>
+        <span class="k">if</span> <span class="n">i_plot</span> <span class="o">!=</span> <span class="n">number_of_plots</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">axis</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([])</span>
+            <span class="n">axis</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">axis</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;dimension </span><span class="si">{dimensions_list[number_of_plots-1]}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">axis</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">([])</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">i_plot</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">axis</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;relative density&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Plot histogram on diagonal</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span>
+            <span class="n">samples</span><span class="p">[</span><span class="n">dimensions_list</span><span class="p">[</span><span class="n">i_plot</span><span class="p">],</span> <span class="p">:],</span>
+            <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span>
+            <span class="n">density</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="nb">range</span><span class="o">=</span><span class="n">dim_range</span><span class="p">[</span><span class="n">i_plot</span><span class="p">],</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">color_1d</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">j_plot</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i_plot</span><span class="p">):</span>
+            <span class="c1"># print(i_plot, j_plot) # grid indices for lower left</span>
+            <span class="n">axis</span> <span class="o">=</span> <span class="n">_plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs1</span><span class="p">[</span><span class="n">j_plot</span> <span class="o">+</span> <span class="p">(</span><span class="n">number_of_plots</span><span class="p">)</span> <span class="o">*</span> <span class="n">i_plot</span><span class="p">])</span>
+
+            <span class="c1"># Modify axes</span>
+            <span class="k">if</span> <span class="n">i_plot</span> <span class="o">!=</span> <span class="n">number_of_plots</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">axis</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([])</span>
+                <span class="n">axis</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">axis</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;dimension </span><span class="si">{dimensions_list[j_plot]}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">j_plot</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">axis</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">([])</span>
+                <span class="n">axis</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">axis</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;dimension </span><span class="si">{dimensions_list[i_plot]}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Plot 2d marginals</span>
+            <span class="n">axis</span><span class="o">.</span><span class="n">hist2d</span><span class="p">(</span>
+                <span class="n">samples</span><span class="p">[</span><span class="n">dimensions_list</span><span class="p">[</span><span class="n">j_plot</span><span class="p">],</span> <span class="p">:],</span>
+                <span class="n">samples</span><span class="p">[</span><span class="n">dimensions_list</span><span class="p">[</span><span class="n">i_plot</span><span class="p">],</span> <span class="p">:],</span>
+                <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span>
+                <span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="n">dim_range</span><span class="p">[</span><span class="n">j_plot</span><span class="p">],</span> <span class="n">dim_range</span><span class="p">[</span><span class="n">i_plot</span><span class="p">]],</span>
+                <span class="n">cmap</span><span class="o">=</span><span class="n">colormap_2d</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c1"># print(i_plot, j_plot) # grid indices for lower left</span>
+            <span class="n">axis</span> <span class="o">=</span> <span class="n">_plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs1</span><span class="p">[</span><span class="n">i_plot</span> <span class="o">+</span> <span class="p">(</span><span class="n">number_of_plots</span><span class="p">)</span> <span class="o">*</span> <span class="n">j_plot</span><span class="p">])</span>
+
+            <span class="n">axis</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([])</span>
+            <span class="n">axis</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">axis</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">([])</span>
+            <span class="n">axis</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="n">axis</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
+
+            <span class="n">correlation</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span>
+                <span class="n">samples</span><span class="p">[</span><span class="n">dimensions_list</span><span class="p">[</span><span class="n">j_plot</span><span class="p">],</span> <span class="p">:],</span> <span class="n">samples</span><span class="p">[</span><span class="n">dimensions_list</span><span class="p">[</span><span class="n">i_plot</span><span class="p">],</span> <span class="p">:]</span>
+            <span class="p">)[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">axis</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                <span class="mf">0.5</span><span class="p">,</span>
+                <span class="mf">0.5</span><span class="p">,</span>
+                <span class="n">f</span><span class="s2">&quot;</span><span class="si">{correlation:.2f}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">horizontalalignment</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span>
+                <span class="n">verticalalignment</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span>
+                <span class="n">fontsize</span><span class="o">=</span><span class="mi">40</span> <span class="o">*</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">correlation</span><span class="p">),</span>
+                <span class="n">transform</span><span class="o">=</span><span class="n">axis</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+        <span class="n">_plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">visualize_2_dimensions</span><span class="p">(</span>
+    <span class="n">samples</span><span class="p">:</span> <span class="n">_Samples</span><span class="p">,</span>
+    <span class="n">dim1</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">dim2</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">25</span><span class="p">,</span>
+    <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">colormap_2d</span><span class="o">=</span><span class="n">_plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s2">&quot;Greys&quot;</span><span class="p">),</span>
+    <span class="n">color_1d</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Method to jointly investigate 2 dimensions of a sampled posterior.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ==========</span>
+<span class="sd">    samples : hmc_tomography.Post.Samples</span>
+<span class="sd">        Samples object.</span>
+<span class="sd">    dim1 : int</span>
+<span class="sd">        First dimension to investigate.</span>
+<span class="sd">    dim2 : int</span>
+<span class="sd">        Second dimension to investigate.</span>
+<span class="sd">    bins : int</span>
+<span class="sd">        Bins used for 1d and 2d histograms.</span>
+<span class="sd">    show : bool</span>
+<span class="sd">        Whether or not to render the output. If false, the plot is only show after</span>
+<span class="sd">        using ``matplotlib.pyplot.show()``. If true, plot is immediately shown.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">figure_analysis</span> <span class="o">=</span> <span class="n">_plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+    <span class="n">axis_2d_histogram</span> <span class="o">=</span> <span class="n">figure_analysis</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="mf">0.07</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.45</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">])</span>
+
+    <span class="n">axis_1d_histogram_x</span> <span class="o">=</span> <span class="n">figure_analysis</span><span class="o">.</span><span class="n">add_axes</span><span class="p">(</span>
+        <span class="p">[</span><span class="mf">0.07</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.45</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">],</span> <span class="n">sharex</span><span class="o">=</span><span class="n">axis_2d_histogram</span>
+    <span class="p">)</span>
+    <span class="n">axis_1d_histogram_y</span> <span class="o">=</span> <span class="n">figure_analysis</span><span class="o">.</span><span class="n">add_axes</span><span class="p">(</span>
+        <span class="p">[</span><span class="mf">0.07</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="mf">0.45</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.45</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">],</span> <span class="n">sharey</span><span class="o">=</span><span class="n">axis_2d_histogram</span>
+    <span class="p">)</span>
+    <span class="n">axis_1d_traceplot</span> <span class="o">=</span> <span class="n">figure_analysis</span><span class="o">.</span><span class="n">add_axes</span><span class="p">(</span>
+        <span class="p">[</span><span class="mf">0.52</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.45</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">],</span> <span class="n">sharey</span><span class="o">=</span><span class="n">axis_2d_histogram</span>
+    <span class="p">)</span>
+    <span class="n">axis_autocorrelation</span> <span class="o">=</span> <span class="n">figure_analysis</span><span class="o">.</span><span class="n">add_axes</span><span class="p">(</span>
+        <span class="p">[</span><span class="mf">0.52</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.45</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">],</span> <span class="n">sharex</span><span class="o">=</span><span class="n">axis_1d_traceplot</span>
+    <span class="p">)</span>
+
+    <span class="n">axis_2d_histogram</span><span class="o">.</span><span class="n">hist2d</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="n">dim1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">samples</span><span class="p">[</span><span class="n">dim2</span><span class="p">,</span> <span class="p">:],</span> <span class="n">bins</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">colormap_2d</span><span class="p">)</span>
+    <span class="n">axis_1d_histogram_x</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="n">dim1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">bins</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color_1d</span><span class="p">)</span>
+    <span class="n">axis_1d_histogram_y</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span>
+        <span class="n">samples</span><span class="p">[</span><span class="n">dim2</span><span class="p">,</span> <span class="p">:],</span> <span class="n">bins</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;horizontal&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color_1d</span>
+    <span class="p">)</span>
+    <span class="n">axis_1d_traceplot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="n">dim2</span><span class="p">,</span> <span class="p">:],</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color_1d</span><span class="p">)</span>
+    <span class="n">axis_1d_traceplot</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">samples</span><span class="p">[</span><span class="n">dim2</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">size</span><span class="p">])</span>
+    <span class="n">axis_autocorrelation</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">_Processing</span><span class="o">.</span><span class="n">autocorrelation</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="n">dim1</span><span class="p">,</span> <span class="p">:]),</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">f</span><span class="s2">&quot;Dimension </span><span class="si">{dim1}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+    <span class="n">axis_autocorrelation</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">_Processing</span><span class="o">.</span><span class="n">autocorrelation</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="n">dim2</span><span class="p">,</span> <span class="p">:]),</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">f</span><span class="s2">&quot;Dimension </span><span class="si">{dim2}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+    <span class="n">axis_autocorrelation</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">_Processing</span><span class="o">.</span><span class="n">crosscorrelation</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="n">dim1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">samples</span><span class="p">[</span><span class="n">dim2</span><span class="p">,</span> <span class="p">:]),</span>
+        <span class="s2">&quot;k&quot;</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="n">f</span><span class="s2">&quot;Cross&quot;</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">color_1d</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">axis_autocorrelation</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+    <span class="n">axis_1d_histogram_x</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;count&quot;</span><span class="p">)</span>
+    <span class="n">axis_1d_histogram_y</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;count&quot;</span><span class="p">)</span>
+
+    <span class="n">axis_2d_histogram</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Dimension </span><span class="si">{dim1}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">axis_2d_histogram</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Dimension </span><span class="si">{dim2}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">axis_1d_traceplot</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;sample number&quot;</span><span class="p">)</span>
+    <span class="n">axis_autocorrelation</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;sample delay&quot;</span><span class="p">)</span>
+    <span class="n">axis_autocorrelation</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;correlation&quot;</span><span class="p">)</span>
+    <span class="n">axis_autocorrelation</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">tick_top</span><span class="p">()</span>
+    <span class="n">axis_autocorrelation</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_label_position</span><span class="p">(</span><span class="s2">&quot;top&quot;</span><span class="p">)</span>
+
+    <span class="n">axis_autocorrelation</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># Disabling ticks</span>
+    <span class="n">axis_1d_histogram_x</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span>
+        <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labelbottom</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">)</span>
+    <span class="n">axis_1d_histogram_y</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labelleft</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="c1"># axis_autocorrelation.tick_params(</span>
+    <span class="c1">#     axis=&quot;x&quot;, which=&quot;both&quot;, bottom=False, labelbottom=False</span>
+    <span class="c1"># )</span>
+    <span class="n">axis_1d_traceplot</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labelleft</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+        <span class="n">_plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">figure_analysis</span><span class="p">,</span>
+        <span class="p">(</span>
+            <span class="n">axis_2d_histogram</span><span class="p">,</span>
+            <span class="n">axis_1d_histogram_x</span><span class="p">,</span>
+            <span class="n">axis_1d_histogram_y</span><span class="p">,</span>
+            <span class="kc">None</span><span class="p">,</span>  <span class="c1"># For unused space</span>
+            <span class="n">axis_1d_traceplot</span><span class="p">,</span>
+            <span class="n">axis_autocorrelation</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Andrea Zunino, Andreas Fichtner, Lars Gebraad
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

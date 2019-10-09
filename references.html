@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>HMC Tomography sampling module &mdash; HMC Tom  documentation</title>
+  <title>References &mdash; HMC Tom 0.1.1 documentation</title>
   
 
   
@@ -25,7 +25,9 @@
         <script type="text/javascript" src="_static/underscore.js"></script>
         <script type="text/javascript" src="_static/doctools.js"></script>
         <script type="text/javascript" src="_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -34,10 +36,11 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="A note on the structure of classes" href="hmc_tomography.structure.html" />
-    <link rel="prev" title="HMC Tomography" href="index.html" /> 
+    <link rel="next" title="Module index" href="py-modindex.html" />
+    <link rel="prev" title="Test reference" href="tests.reference.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -55,10 +58,17 @@
           
 
           
+            
+            <img src="_static/hmctom.png" class="logo" alt="Logo"/>
+          
           </a>
 
           
             
+            
+              <div class="version">
+                0.1
+              </div>
             
           
 
@@ -83,15 +93,16 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">HMC Tomography sampling module</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="hmc_tomography.structure.html">A note on the structure of classes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hmc_tomography.sampler.html">Sampler object</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hmc_tomography.priors.html">Prior objects</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hmc_tomography.targets.html">Target objects</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="mcmc_visualization.html">MCMC Post processing module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tests.html">Unit tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html">HMC Tomography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tour.html">A tour of hmc_tomography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples and tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sampling.html">Sampling reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="post.html">Post-sampling reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Development and testing</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="py-modindex.html">Module index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Alphabetic index</a></li>
 </ul>
 
             
@@ -137,13 +148,13 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>HMC Tomography sampling module</li>
+      <li>References</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/hmc_tomography.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/references.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -156,29 +167,32 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-hmc_tomography">
-<span id="hmc-tomography-sampling-module"></span><h1>HMC Tomography sampling module<a class="headerlink" href="#module-hmc_tomography" title="Permalink to this headline">¶</a></h1>
-<p>HMC Tomography module. Provides all classes and methods to perform HMC sampling of tomographic inverse probles, but
-does not supply the physics.</p>
-<div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Objects within hmc_tomography:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="hmc_tomography.structure.html">A note on the structure of classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hmc_tomography.sampler.html">Sampler object</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hmc_tomography.priors.html">Prior objects</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="hmc_tomography.priors.html#prior-abc">Prior ABC</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hmc_tomography.priors.html#well-behaved-priors">Well behaved priors</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hmc_tomography.priors.html#ill-behaved-priors">Ill-behaved priors</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="hmc_tomography.targets.html">Target objects</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="hmc_tomography.targets.html#implementing-your-own-targets">Implementing your own targets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hmc_tomography.targets.html#target-abc">Target ABC</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hmc_tomography.targets.html#target-classes">Target classes</a></li>
-</ul>
-</li>
-</ul>
-</div>
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="references">
+<h1>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h1>
 </div>
 
 
@@ -189,10 +203,10 @@ does not supply the physics.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="hmc_tomography.structure.html" class="btn btn-neutral float-right" title="A note on the structure of classes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="py-modindex.html" class="btn btn-neutral float-right" title="Module index" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral float-left" title="HMC Tomography" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="tests.reference.html" class="btn btn-neutral float-left" title="Test reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

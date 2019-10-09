@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Search &mdash; HMC Tom 0.1.1 documentation</title>
+  <title>Samples class &mdash; HMC Tom 0.1.1 documentation</title>
   
 
   
@@ -28,7 +28,6 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
-        <script type="text/javascript" src="_static/searchtools.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -39,7 +38,9 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="#" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Post processing module" href="post.processing.html" />
+    <link rel="prev" title="Post-sampling reference" href="post.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -73,7 +74,7 @@
 
           
 <div role="search">
-  <form id="rtd-search-form" class="wy-form" action="#" method="get">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
@@ -91,13 +92,19 @@
             
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">HMC Tomography</a></li>
 <li class="toctree-l1"><a class="reference internal" href="setup.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tour.html">A tour of hmc_tomography</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples and tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sampling.html">Sampling reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="post.html">Post-sampling reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="post.html">Post-sampling reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Samples class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="post.processing.html">Post processing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="post.visualization.html">Visualization module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="post.html#available-submodules-classes">Available submodules / classes</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="tests.html">Development and testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
 <li class="toctree-l1"><a class="reference internal" href="py-modindex.html">Module index</a></li>
@@ -147,12 +154,16 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Search</li>
+          <li><a href="post.html">Post-sampling reference</a> &raquo;</li>
+        
+      <li>Samples class</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
+            <a href="_sources/post.samples.rst.txt" rel="nofollow"> View page source</a>
+          
         
       </li>
     
@@ -164,24 +175,70 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <noscript>
-  <div id="fallback" class="admonition warning">
-    <p class="last">
-      Please activate JavaScript to enable the search
-      functionality.
-    </p>
-  </div>
-  </noscript>
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
 
-  
-  <div id="search-results">
-  
-  </div>
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="samples-class">
+<h1>Samples class<a class="headerlink" href="#samples-class" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="hmc_tomography.Post.Samples">
+<em class="property">class </em><code class="sig-prename descclassname">hmc_tomography.Post.</code><code class="sig-name descname">Samples</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">burn_in: int = 0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hmc_tomography/Post/Samples.html#Samples"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Post.Samples" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class to handle generated samples files more easily.</p>
+<dl class="attribute">
+<dt id="hmc_tomography.Post.Samples.datasetname">
+<code class="sig-name descname">datasetname</code><em class="property"> = 'samples_0'</em><a class="headerlink" href="#hmc_tomography.Post.Samples.datasetname" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="hmc_tomography.Post.Samples.filename">
+<code class="sig-name descname">filename</code><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Post.Samples.filename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="hmc_tomography.Post.Samples.raw_samples">
+<em class="property">property </em><code class="sig-name descname">raw_samples</code><a class="headerlink" href="#hmc_tomography.Post.Samples.raw_samples" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
 
            </div>
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="post.processing.html" class="btn btn-neutral float-right" title="Post processing module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="post.html" class="btn btn-neutral float-left" title="Post-sampling reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
@@ -214,14 +271,7 @@
   
   
     
-  
-  <script type="text/javascript">
-    jQuery(function() { Search.loadIndex("searchindex.js"); });
-  </script>
-  
-  <script type="text/javascript" id="searchindexloader"></script>
    
-
 
 </body>
 </html>
