@@ -472,27 +472,21 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <p>For our specific set-up, we have a domain. However, we need to investigate this domain with something! In straight ray tomography, we require our forward problem to written as follows:</p>
-<dl class="simple">
-<dt>:nbsphinx-math:<a href="#id1"><span class="problematic" id="id2">`</span></a>begin{align}</dt><dd><p>text{data},(text{model}) = int_text{path} text{model}(x), dx</p>
-</dd>
-</dl>
-<p>end{align}`</p>
+<p><span class="math">\begin{align}
+\text{data}\,(\text{model}) = \int_\text{path} \text{model}(x)\, dx
+\end{align}</span></p>
 <p>This forms is encountered in multiple applications. When we would like to infer velocity, <span class="math notranslate nohighlight">\(\text{model}(x)\)</span> is slowness. When doing x-ray tomography, <span class="math notranslate nohighlight">\(\text{model}(x)\)</span> could stand for slowness.</p>
 <p>We can also see that this form is linear, because the following two identities are true:</p>
-<dl class="simple">
-<dt>:nbsphinx-math:<a href="#id3"><span class="problematic" id="id4">`</span></a>begin{align}</dt><dd><p>int_text{path} a cdot text{model}(x), dx &amp;=
-a cdot int_text{path} text{model}(x), dx, \ \
-int_text{path} text{model}_1(x), + text{model}_2(x), dx &amp;=
-int_text{path} text{model}_1(x), dx + int_text{path} text{model}_2(x), dx .</p>
-</dd>
-</dl>
-<p>end{align}`</p>
+<p><span class="math">\begin{align}
+\int_\text{path} a \cdot \text{model}(x)\, dx &=
+a \cdot \int_\text{path} \text{model}(x)\, dx, \\ \\
+\int_\text{path} \text{model}_1(x)\, + \text{model}_2(x)\, dx &=
+\int_\text{path} \text{model}_1(x)\, dx + \int_\text{path} \text{model}_2(x)\, dx .
+\end{align}</span></p>
 <p>We need a way to evaluate these integrals. But because this is a linear model, we can get away with only evaluating them once, and storing the model matrix operator <span class="math notranslate nohighlight">\(G\)</span>, which maps a model <span class="math notranslate nohighlight">\(\mathbf{m}\)</span>, to data <span class="math notranslate nohighlight">\(\mathbf{d}\)</span>:</p>
-<dl class="simple">
-<dt>:nbsphinx-math:<a href="#id5"><span class="problematic" id="id6">`</span></a>begin{align}</dt><dd><p>mathbf{d} = G , mathbf{m}.</p>
-</dd>
-</dl>
-<p>end{align}`</p>
+<p><span class="math">\begin{align}
+\mathbf{d} = G \, \mathbf{m}.
+\end{align}</span></p>
 <p>We have graciously provided with an algorithm by Andrew Valentine and Malcolm Sambridge that computes the model matrix G given some parametrization, but what it needs is some paths to sample along! We generate these randomly (but repeatedly, by setting a random generator seed):</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
