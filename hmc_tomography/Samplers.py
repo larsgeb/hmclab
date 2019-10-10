@@ -8,6 +8,7 @@ import h5py as _h5py
 import numpy as _numpy
 import time as _time
 import tqdm as _tqdm
+import warnings as _warnings
 from typing import Tuple as _Tuple
 
 from hmc_tomography.Priors import _AbstractPrior
@@ -27,6 +28,11 @@ class _AbstractSampler(_ABC):
     sample_hdf5_file = None
     sample_hdf5_dataset = None
     sample_ram_buffer: _numpy.ndarray
+
+    samples_filename: str = ""
+    """Variable to store the samples filename. This is stored because during sampling
+    the filename might be altered. This alteration is never done without user
+    interaction."""
 
     @_abstractmethod
     def sample(
@@ -84,7 +90,6 @@ class HMC(_AbstractSampler):
         self.prior = prior
         self.mass_matrix = mass_matrix
         self.target = target
-
         self.mass_matrix_update_hook = getattr(self.mass_matrix, "update", None)
 
     def sample(
@@ -100,6 +105,7 @@ class HMC(_AbstractSampler):
         initial_model: _numpy.ndarray = None,
         ignore_update_hook_mass: bool = False,
         suppress_warnings: bool = True,
+        overwrite_samples: bool = False,
     ) -> int:
         """
 
@@ -121,13 +127,11 @@ class HMC(_AbstractSampler):
 
         """
 
-        # If suppress warnings
+        # If suppress warnings ---------------------------------------------------------
         if suppress_warnings:
-            import warnings as _warnings
-
             _warnings.filterwarnings("ignore", category=RuntimeWarning)
 
-        # Prepare sampling -----------------------------------------------------
+        # Prepare sampling -------------------------------------------------------------
         accepted = 0
 
         # Initial model
@@ -144,9 +148,17 @@ class HMC(_AbstractSampler):
 
         # Create or open HDF5 file
         total_samples_to_be_generated = int((1.0 / online_thinning) * proposals)
-        self.open_hdf5(samples_filename, total_samples_to_be_generated)
+
+        # Open file, with some intricate logic
+
+        return_code = self.open_samples_hdf5(
+            samples_filename, total_samples_to_be_generated, overwrite=overwrite_samples
+        )
+        if return_code == 1:
+            return 1
 
         # Set attributes of the dataset to correspond to sampling settings
+        self.sample_hdf5_dataset.attrs["sampler"] = "HMC"
         self.sample_hdf5_dataset.attrs["proposals"] = proposals
         self.sample_hdf5_dataset.attrs["online_thinning"] = online_thinning
         self.sample_hdf5_dataset.attrs["time_step"] = time_step
@@ -155,6 +167,12 @@ class HMC(_AbstractSampler):
         self.sample_hdf5_dataset.attrs[
             "randomize_iterations"
         ] = randomize_integration_steps
+        self.sample_hdf5_dataset.attrs[
+            "randomize_iterations"
+        ] = randomize_integration_steps
+        self.sample_hdf5_dataset.attrs["start_time"] = _time.strftime(
+            "%Y-%m-%d %H:%M:%S", _time.gmtime()
+        )
 
         # Flush output (works best if followed by sleep() )
         _sys.stdout.flush()
@@ -194,6 +212,7 @@ class HMC(_AbstractSampler):
 
         # Start sampling, but catch CTRL+C / COMMAND + . (SIGINT) ----------------------
         try:
+            current_proposal = 0
             for proposal in proposals_total:
 
                 # Compute initial Hamiltonian
@@ -232,7 +251,7 @@ class HMC(_AbstractSampler):
                 ):
                     self.mass_matrix.update(update_m, update_g)
 
-                # On-line thinning and  writing samples to disk ----------------
+                # On-line thinning, progress bar and writing samples to disk -----------
                 if proposal % online_thinning == 0:
                     buffer_location: int = int(
                         (proposal / online_thinning) % sample_ram_buffer_size
@@ -241,10 +260,18 @@ class HMC(_AbstractSampler):
                     self.sample_ram_buffer[-1, buffer_location] = self.target.misfit(
                         coordinates
                     ) + self.prior.misfit(coordinates)
+
+                    # Total acceptance rate
+                    tot_acc = accepted / (proposal + 1)
+
+                    # Last 100 acceptance rate
+                    loc_acc = _numpy.sum(acceptance_history) / min(
+                        100.0, current_proposal
+                    )
+
                     proposals_total.set_description(
-                        f"Tot. acc rate: {accepted/(proposal+1):.2f}. "
-                        f"Last 100 acc rate: "
-                        f"{_numpy.sum(acceptance_history)/100.:.2f}. "
+                        f"Tot. acc rate: {tot_acc:.2f}. "
+                        f"Last 100 acc rate: {loc_acc:.2f}. "
                         "Progress"
                     )
                     # Write out to disk when at the end of the buffer
@@ -254,6 +281,7 @@ class HMC(_AbstractSampler):
                         )
                         end = int((proposal / online_thinning))
                         self.flush_samples(start, end, self.sample_ram_buffer)
+                current_proposal += 1
 
         except KeyboardInterrupt:  # Catch SIGINT --------------------------------------
             # Close tqdm progressbar
@@ -268,13 +296,21 @@ class HMC(_AbstractSampler):
                 int((proposal / online_thinning) / sample_ram_buffer_size)
                 * sample_ram_buffer_size
             )
-            end = int(proposal / online_thinning) - 1  # Write out one less to be sure
+
+            # Write out one less to be sure
+            end = int(proposal / online_thinning) - 1
             if end - start + 1 > 0 and buffer_location != sample_ram_buffer_size - 1:
                 self.flush_samples(
                     start, end, self.sample_ram_buffer[:, :buffer_location]
                 )
+
+            # Trim the dataset to have the shape of end_of_samples
+            self.sample_hdf5_dataset.resize((self.dimensions + 1, end + 1))
+
+            # Close the HDF file
             self.sample_hdf5_file.close()
 
+        # Re-enable warnings
         if suppress_warnings:
             _warnings.filterwarnings("default", category=RuntimeWarning)
 
@@ -347,16 +383,107 @@ class HMC(_AbstractSampler):
 
         return coordinates, momentum, update_coordinates, update_gradient
 
-    def open_hdf5(self, name: str, length: int, dtype: str = "f8"):
-        # TODO add overwrite dialog
-        self.sample_hdf5_file = _h5py.File(name, "w")
-        time = 0
-        # time = _time.strftime("%Y-%m-%d %H:%M:%S", _time.gmtime())
-        self.sample_hdf5_dataset = self.sample_hdf5_file.create_dataset(
-            f"samples {time}", (self.dimensions + 1, length), dtype=dtype
-        )
-        self.sample_hdf5_dataset.attrs["sampler"] = "HMC"
+    def open_samples_hdf5(
+        self,
+        name: str,
+        length: int,
+        dtype: str = "f8",
+        nested=False,
+        overwrite: bool = False,
+    ) -> int:
+
+        if not name.endswith(".h5"):
+            name += ".h5"
+
+        try:
+            if overwrite:
+                flag = "w"
+                _warnings.warn(
+                    f"\r\nSilently overwriting samples file ({name}) if it exists.",
+                    Warning,
+                    stacklevel=100,
+                )
+            else:
+                flag = "w-"
+
+            # Create file, fail if exists and flag == w-
+            self.sample_hdf5_file = _h5py.File(name, flag)
+
+            # Create dataset
+            self.sample_hdf5_dataset = self.sample_hdf5_file.create_dataset(
+                "samples_0", (self.dimensions + 1, length), dtype=dtype, chunks=True
+            )
+
+            # Update the filename in the sampler object for later retrieval
+            self.samples_filename = name
+
+            # Return the exit code upwards through the recursive functions
+            return 0
+        except OSError:
+            # If it exists, three options, abort, overwrite, or new filename
+            _warnings.warn(
+                f"\r\nIt seems that the samples file ({name}) already exists.",
+                Warning,
+                stacklevel=100,
+            )
+
+            # Keep track of user input
+            choice_made = False
+
+            # Keep trying until the user makes a valid choice
+            while not choice_made:
+
+                # Prompt the user
+                if nested:
+                    # If this is not the first time that this is called, also print the warning again
+                    input_choice = input(
+                        f"{name} also exists. (n)ew file name, (o)verwrite or (a)bort? >> "
+                    )
+                else:
+                    input_choice = input("(n)ew file name, (o)verwrite or (a)bort? >> ")
+
+                if input_choice == "n":
+                    # User wants a new file
+                    choice_made = True
+
+                    # Ask user for the new filename
+                    name = input("new file name? (adds missing .h5) >> ")
+
+                    # Call the current method again, with the new filename
+                    return_code = self.open_samples_hdf5(
+                        name, length, dtype=dtype, nested=True
+                    )
+
+                    # If the user chose abort in the recursive call, pass that on
+                    return return_code
+
+                elif input_choice == "o":
+                    # User wants to overwrite the file
+                    choice_made = True
+
+                    # Create file, truncate if exists. This should never give an
+                    # error on file exists, but could fail for other reasons. Therefore,
+                    # no try-catch block.
+                    self.sample_hdf5_file = _h5py.File(name, "w")
+
+                    # Create dataset
+                    self.sample_hdf5_dataset = self.sample_hdf5_file.create_dataset(
+                        "samples_0",
+                        (self.dimensions + 1, length),
+                        dtype=dtype,
+                        chunks=True,
+                    )
+
+                    # Update the filename in the sampler object for later retrieval
+                    self.samples_filename = name
+                    return 0
+
+                elif input_choice == "a":
+                    # User wants to abort sampling
+                    choice_made = True
+                    return 1
 
     def flush_samples(self, start: int, end: int, data: _numpy.ndarray):
         self.sample_hdf5_dataset.attrs["end_of_samples"] = end + 1
         self.sample_hdf5_dataset[:, start : end + 1] = data
+
