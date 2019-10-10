@@ -97,7 +97,10 @@ def test_misfit(pclass: _Priors._AbstractPrior, dimensions: int):
 
 @_pytest.mark.parametrize("pclass", _Priors._AbstractPrior.__subclasses__())
 @_pytest.mark.parametrize("dimensions", [1, 10, 100, 1000])
-def test_gradient(pclass: _Priors._AbstractPrior, dimensions: int):
+@_pytest.mark.parametrize("stepsize_delta", [1e-10, 1e-5, 1e-3, -1e-10, -1e-5, -1e-3])
+def test_gradient(
+    pclass: _Priors._AbstractPrior, dimensions: int, stepsize_delta: float
+):
     """Test for the computation of prior gradients.
 
     Parameters
@@ -117,12 +120,22 @@ def test_gradient(pclass: _Priors._AbstractPrior, dimensions: int):
     prior: _Priors._AbstractPrior = pclass(dimensions)
 
     location = _numpy.ones((dimensions, 1))
-
     gradient = prior.gradient(location)
 
     assert gradient.dtype == _numpy.dtype("float")
-
     assert gradient.shape == location.shape
+
+    # Gradient test
+    dot_product = (gradient.T @ location).item(0)
+    misfit_1 = prior.misfit(location)
+    misfit_2 = prior.misfit(location + stepsize_delta * location)
+    if (misfit_2 - misfit_1) != 0:
+        relative_error = (misfit_2 - misfit_1 - dot_product * stepsize_delta) / (
+            misfit_2 - misfit_1
+        )
+        assert relative_error < 1e-2
+    else:
+        assert _numpy.allclose(gradient, 0.0)
 
     return True
 

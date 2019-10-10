@@ -8,7 +8,7 @@ class Samples:
 
     filename: str = None
 
-    datasetname = "samples 0"
+    datasetname = "samples_0"
 
     def __init__(self, filename, burn_in: int = 0):
         self.filename = filename

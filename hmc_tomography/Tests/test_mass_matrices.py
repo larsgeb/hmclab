@@ -5,7 +5,6 @@ import pytest as _pytest
 import numpy as _numpy
 
 
-@_pytest.mark.xfail(raises=NotImplementedError)
 @_pytest.mark.parametrize("mmclass", _MassMatrices._AbstractMassMatrix.__subclasses__())
 @_pytest.mark.parametrize("dimensions", [1, 10, 100, 1000])
 def test_creation(mmclass: _MassMatrices._AbstractMassMatrix, dimensions: int):
@@ -36,7 +35,6 @@ def test_creation(mmclass: _MassMatrices._AbstractMassMatrix, dimensions: int):
     return True
 
 
-@_pytest.mark.xfail(raises=NotImplementedError)
 @_pytest.mark.parametrize("mmclass", _MassMatrices._AbstractMassMatrix.__subclasses__())
 @_pytest.mark.parametrize("dimensions", [1, 10, 100, 1000])
 def test_generate(mmclass: _MassMatrices._AbstractMassMatrix, dimensions: int):
@@ -70,7 +68,6 @@ def test_generate(mmclass: _MassMatrices._AbstractMassMatrix, dimensions: int):
     return True
 
 
-@_pytest.mark.xfail(raises=NotImplementedError)
 @_pytest.mark.parametrize("mmclass", _MassMatrices._AbstractMassMatrix.__subclasses__())
 @_pytest.mark.parametrize("dimensions", [1, 10, 100, 1000])
 def test_kinetic_energy(mmclass: _MassMatrices._AbstractMassMatrix, dimensions: int):
@@ -102,11 +99,11 @@ def test_kinetic_energy(mmclass: _MassMatrices._AbstractMassMatrix, dimensions: 
     return True
 
 
-@_pytest.mark.xfail(raises=NotImplementedError)
 @_pytest.mark.parametrize("mmclass", _MassMatrices._AbstractMassMatrix.__subclasses__())
 @_pytest.mark.parametrize("dimensions", [1, 10, 100, 1000])
+@_pytest.mark.parametrize("stepsize_delta", [1e-10, 1e-5, 1e-2, -1e-10, -1e-5, -1e-2])
 def test_kinetic_energy_gradient(
-    mmclass: _MassMatrices._AbstractMassMatrix, dimensions: int
+    mmclass: _MassMatrices._AbstractMassMatrix, dimensions: int, stepsize_delta: float
 ):
     """Test for the computation of kinetic energy gradient for a given momentum.
 
@@ -135,5 +132,18 @@ def test_kinetic_energy_gradient(
 
     # Assert float type
     assert kinetic_energy_gradient.dtype is _numpy.dtype("float")
+
+    # Gradient test
+    dot_product = (kinetic_energy_gradient.T @ momentum).item(0)
+
+    kinetic_1 = mass_matrix.kinetic_energy(momentum)
+    kinetic_2 = mass_matrix.kinetic_energy(momentum + stepsize_delta * momentum)
+    if (kinetic_2 - kinetic_1) != 0:
+        relative_error = (kinetic_2 - kinetic_1 - dot_product * stepsize_delta) / (
+            kinetic_2 - kinetic_1
+        )
+        assert relative_error < 1e-2
+    else:
+        assert _numpy.allclose(kinetic_energy_gradient, 0.0)
 
     return True

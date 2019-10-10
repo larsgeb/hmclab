@@ -166,7 +166,7 @@ def visualize_2_dimensions(
     axis_autocorrelation.plot(
         _Processing.crosscorrelation(samples[dim1, :], samples[dim2, :]),
         "k",
-        alpha=0.5,
+        alpha=0.25,
         label=f"Cross",
         color=color_1d,
     )
