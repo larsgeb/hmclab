@@ -3,7 +3,6 @@
 from abc import ABC as _ABC
 from abc import abstractmethod as _abstractmethod
 import numpy as _numpy
-from scipy.sparse.linalg import spsolve as _spsolve
 import warnings as _warnings
 
 
@@ -113,7 +112,12 @@ class Diagonal(_AbstractMassMatrix):
         self.dimensions = dimensions
 
         if diagonal is None:
-            self.diagonal = _numpy.ones((self.dimensions, 1))
+            _warnings.warn(
+                f"The diagonal mass matrix did not receive a diagonal. We will generate"
+                f"a linearly increasing diagonal (1, 2, 3, 4, ...) for the mass matrix.",
+                Warning,
+            )
+            self.diagonal = _numpy.arange(self.dimensions)[:, None] + 1
         else:
             if diagonal.shape != (self.dimensions, 1):
                 raise ValueError(
@@ -340,25 +344,25 @@ class LBFGS(_AbstractMassMatrix):
         return logdet
 
 
-class SparseDecomposed(_AbstractMassMatrix):
-    def __init__(self, decomposition):
-        raise NotImplementedError("This class is not production ready")
-        self.decomposition = decomposition
-        self.dimensions = self.decomposition.shape[0]
+# class SparseDecomposed(_AbstractMassMatrix):
+#     def __init__(self, decomposition):
+#         raise NotImplementedError("This class is not production ready")
+#         self.decomposition = decomposition
+#         self.dimensions = self.decomposition.shape[0]
 
-    def kinetic_energy(self, momentum: _numpy.ndarray) -> float:
-        raise NotImplementedError("This class is not production ready")
-        return (
-            0.5 * _numpy.linalg.norm(_spsolve(self.decomposition, momentum)) ** 2
-        ).item()
+#     def kinetic_energy(self, momentum: _numpy.ndarray) -> float:
+#         raise NotImplementedError("This class is not production ready")
+#         return (
+#             0.5 * _numpy.linalg.norm(_spsolve(self.decomposition, momentum)) ** 2
+#         ).item()
 
-    def kinetic_energy_gradient(self, momentum: _numpy.ndarray) -> _numpy.ndarray:
-        raise NotImplementedError("This class is not production ready")
-        return _spsolve(self.decomposition, momentum)[:, _numpy.newaxis]
+#     def kinetic_energy_gradient(self, momentum: _numpy.ndarray) -> _numpy.ndarray:
+#         raise NotImplementedError("This class is not production ready")
+#         return _spsolve(self.decomposition, momentum)[:, _numpy.newaxis]
 
-    def generate_momentum(self) -> _numpy.ndarray:
-        raise NotImplementedError("This class is not production ready")
-        return (
-            self.decomposition
-            @ _numpy.random.randn(self.decomposition.shape[0])[:, _numpy.newaxis]
-        )
+#     def generate_momentum(self) -> _numpy.ndarray:
+#         raise NotImplementedError("This class is not production ready")
+#         return (
+#             self.decomposition
+#             @ _numpy.random.randn(self.decomposition.shape[0])[:, _numpy.newaxis]
+#         )

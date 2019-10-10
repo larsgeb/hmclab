@@ -238,7 +238,7 @@ class Normal(_AbstractPrior):
         self,
         dimensions: int,
         means: _numpy.ndarray = None,
-        covariance: _numpy.ndarray = None,
+        covariance: _Union[_numpy.ndarray, float, None] = None,
         lower_bounds: _numpy.ndarray = None,
         upper_bounds: _numpy.ndarray = None,
     ):
@@ -265,7 +265,9 @@ class Normal(_AbstractPrior):
                 Warning,
             )
             self.means = _numpy.random.rand(dimensions, 1)
-            self.covariance = _make_spd_matrix(self.dimensions)
+            self.covariance = _make_spd_matrix(self.dimensions) + _numpy.eye(
+                self.dimensions
+            )
 
         elif means is None or covariance is None:
             # Only one of means or covariance is provided ------------------------------
@@ -290,6 +292,13 @@ class Normal(_AbstractPrior):
                 _warnings.warn(
                     "Seems that you only passed a vector as the covariance matrix. "
                     "It will be used as the covariance diagonal.",
+                    Warning,
+                )
+            elif type(covariance) == float:
+                self.diagonal = True
+                _warnings.warn(
+                    "Seems that you only passed a float as the covariance matrix. "
+                    "It will be used as a single covariance.",
                     Warning,
                 )
             else:

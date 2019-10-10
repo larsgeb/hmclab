@@ -5,6 +5,7 @@ from abc import abstractmethod as _abstractmethod
 import numpy as _numpy
 from typing import Union as _Union
 import scipy as _scipy
+import scipy.sparse
 import warnings as _warnings
 
 
@@ -44,7 +45,7 @@ class LinearMatrix(_AbstractTarget):
         dimensions: int,
         G: _Union[_numpy.ndarray, _scipy.sparse.spmatrix] = None,
         d: _numpy.ndarray = None,
-        data_covariance: _Union[float, _numpy.ndarray, _scipy.sparse.spmatrix] = 1.0,
+        data_covariance: _Union[float, _numpy.ndarray, _scipy.sparse.spmatrix] = None,
     ):
         """Constructor for linear forward model target.
 
@@ -67,65 +68,108 @@ class LinearMatrix(_AbstractTarget):
         """
         self.dimensions = dimensions
 
-        # Parse forward model matrix ---------------------------------------------------
-        if G is None:
+        # Make sure something was passed, or generate randomly if nothing was passed --
+        if G is None and d is None:
             _warnings.warn(
-                f"No forward model was supplied. Defaulting to a unit matrix.", Warning
+                f"No forward model and data was supplied. "
+                f"Defaulting to a unit matrix with zero data. ",
+                Warning,
             )
-            self.G = _numpy.eye(dimensions)
-        elif type(G) == _numpy.ndarray or issubclass(type(G), _scipy.sparse.spmatrix):
+            G = _numpy.eye(self.dimensions)
+            d = _numpy.zeros((G.shape[0], 1))
+        elif G is None or d is None:
+            raise ValueError(
+                "Either no forward model matrix or data was passed. Not sure what to do."
+            )
+
+        # Parse forward model matrix ---------------------------------------------------
+        if type(G) == _numpy.ndarray or issubclass(type(G), _scipy.sparse.spmatrix):
 
             # Assert that the second dimension of the matrix corresponds to model space
             # dimension.
             assert G.shape[1] == dimensions
-
             self.G = G
         else:
             raise ValueError("The forward model matrix type was not understood.")
 
         # Parse data vector ------------------------------------------------------------
-        if d is None:
-            _warnings.warn(
-                f"No data was supplied. Defaulting to a zero vector.", Warning
-            )
-            self.d = _numpy.ones((G.shape[0], 1))
-        elif type(d) == _numpy.ndarray:
-
+        if type(d) == _numpy.ndarray:
             # Assert that the data vector is compatible with the matrix.
             assert d.shape == (G.shape[0], 1)
-
             self.d = d
         else:
             raise ValueError("The data vector type was not understood.")
 
         # Parse data covariance --------------------------------------------------------
+        self.data_covariance_matrix: bool = False
+        """Attribute to determine which misfit/gradient formula is needed."""
+
         if data_covariance is None:
-            pass
-        elif (
-            type(data_covariance) is float
-        ):  # TODO implement OR for all other possibilities
+            # No given data covariance
+            self.data_covariance = 1.0
+
+        elif type(data_covariance) is float:
+            # Single data covariance float paased
             self.data_covariance = data_covariance
+
+        elif type(data_covariance) is _numpy.ndarray:
+            # Numpy array passed
+
+            if data_covariance.shape == (d.size, 1):
+                # Diagonal of a data covariance matrix passed
+                self.data_covariance = data_covariance
+
+            elif data_covariance.shape == (d.size, d.size):
+                # Full data covariance matrix passed
+                self.data_covariance_matrix = True
+                self.data_covariance = data_covariance
+                # TODO implement inverse
+                raise NotImplementedError(
+                    "Full data covariance matrix is not implemented yet."
+                )
+
+            else:
+                # Something else passed?
+                raise ValueError("")
+
+        elif issubclass(type(data_covariance), _scipy.sparse.spmatrix):
+            # Sparse matrix passed
+            self.data_covariance_matrix = True
+
+            if data_covariance.shape == (d.size, d.size):
+                # Sparse data covariance matrix
+                raise NotImplementedError(
+                    "Sparse data covariance matrix is not implemented yet."
+                )
+            else:
+                # Something else passed?
+                raise ValueError(
+                    "The sparse data covariance" "matrix was not understood."
+                )
         else:
+            # Not a supported type
             raise ValueError("The data covariance type was not understood.")
 
     def misfit(self, coordinates: _numpy.ndarray) -> float:
         """
         """
-        if type(self.data_covariance) is float:
-            # Data covariance is a single scalar, so we move the data covariance
-            # operation out of the matrix-vector products
+        if not self.data_covariance_matrix:
+            # Data covariance is a single scalar or a diagonal, so we move the data
+            # covariance operation out of the matrix-vector products
             return (
-                _numpy.linalg.norm((self.G @ coordinates - self.d), ord=2) ** 2
+                0.5
+                * _numpy.linalg.norm((self.G @ coordinates - self.d), ord=2) ** 2
                 / self.data_covariance
             )
+
         else:
-            # TODO implement other cases
+            # TODO implement other case
             raise NotImplementedError("This class is not production ready.")
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
         """
         """
-        if type(self.data_covariance) is float:
+        if not self.data_covariance_matrix:
             # Data covariance is a single scalar, so we move the data covariance
             # operation out of the matrix-vector products
             return self.G.T @ (self.G @ coordinates - self.d) / self.data_covariance
@@ -155,7 +199,11 @@ class Himmelblau(_AbstractTarget):
         f(x,y)_T=\\frac{f(x,y)}{T}
     """
 
-    def __init__(self, dimensions: int = -1, annealing: float = 1):
+    def __init__(self, dimensions: int, annealing: float = 1):
+        if dimensions != 2:
+            raise NotImplementedError(
+                f"The Himmelblau function is not defined for {dimensions} parameters"
+            )
         self.annealing = annealing
 
     def misfit(self, coordinates: _numpy.ndarray) -> float:
