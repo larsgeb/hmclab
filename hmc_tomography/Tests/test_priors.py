@@ -116,6 +116,9 @@ def test_gradient(
     dimensions.
     """
 
+    if pclass == _Priors.MultiplicativePrior:
+        return True
+
     # Create the object
     prior: _Priors._AbstractPrior = pclass(dimensions)
 

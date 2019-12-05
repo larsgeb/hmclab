@@ -598,7 +598,8 @@ class CompositePrior(_AbstractPrior):
                 Warning,
             )
             available_priors = _AbstractPrior.__subclasses__()
-            available_priors.remove(CompositePrior)
+            for prior_to_remove in [CompositePrior, AdditivePrior, MultiplicativePrior]:
+                available_priors.remove(prior_to_remove)
             selected_classes = _numpy.random.choice(available_priors, dimensions)
             self.separate_priors = [
                 selected_class(1) for selected_class in selected_classes
@@ -666,9 +667,15 @@ class CompositePrior(_AbstractPrior):
     def generate(self) -> _numpy.ndarray:
         raise NotImplementedError("This function is not implemented yet.")
 
+    def collapse_bounds(self):
+        """Method to restructure all composite bounds into top level object.
+        """
+        raise NotImplementedError()
+
     def corrector(self, coordinates: _numpy.ndarray, momentum: _numpy.ndarray):
         """Override method to correct an HMC particle for composite prior, which is
-        called after every time integration step. Calls all sub-correctors
+        called after every time integration step. Calls all sub-correctors only if the
+        object does not have bounds itself.
 
         Parameters
         ----------
@@ -698,28 +705,287 @@ class CompositePrior(_AbstractPrior):
             )
             momentum[too_high] *= -1.0
 
-        # Split coordinates and momenta for all sub-priors -----------------------------
-        split_coordinates = _numpy.split(
-            coordinates, self.enumerated_dimensions_cumulative
-        )
-        split_momenta = _numpy.split(momentum, self.enumerated_dimensions_cumulative)
+        # If they are not set, check subpriors.
+        if self.lower_bounds is None and self.upper_bounds is None:
+            # Split coordinates and momenta for all sub-priors -------------------------
+            split_coordinates = _numpy.split(
+                coordinates, self.enumerated_dimensions_cumulative
+            )
+            split_momenta = _numpy.split(
+                momentum, self.enumerated_dimensions_cumulative
+            )
 
+            # And loop over separate priors to check bounds
+            for i_prior, prior in enumerate(self.separate_priors):
+
+                if prior.lower_bounds is not None:
+                    # Lower bound correction
+                    too_low = split_coordinates[i_prior] < prior.lower_bounds
+                    split_coordinates[i_prior][too_low] += 2 * (
+                        prior.lower_bounds[too_low]
+                        - split_coordinates[i_prior][too_low]
+                    )
+                    split_momenta[i_prior][too_low] *= -1.0
+                if prior.upper_bounds is not None:
+                    # Upper bound correction
+                    too_high = split_coordinates[i_prior] > prior.upper_bounds
+                    split_coordinates[i_prior][too_high] += 2 * (
+                        prior.upper_bounds[too_high]
+                        - split_coordinates[i_prior][too_high]
+                    )
+                    split_momenta[i_prior][too_high] *= -1.0
+
+
+class AdditivePrior(_AbstractPrior):
+    def __init__(
+        self,
+        dimensions: int,
+        list_of_priors: _List[_AbstractPrior] = None,
+        lower_bounds: _numpy.ndarray = None,
+        upper_bounds: _numpy.ndarray = None,
+    ):
+        self.name = "additive prior"
+
+        if list_of_priors is not None:
+            self.separate_priors: _List[_AbstractPrior] = list_of_priors
+        else:
+            _warnings.warn(
+                f"No subpriors were passed, generating 3 random subpriors.", Warning
+            )
+            available_priors = _AbstractPrior.__subclasses__()
+            for prior_to_remove in [CompositePrior, AdditivePrior, MultiplicativePrior]:
+                available_priors.remove(prior_to_remove)
+            selected_classes = _numpy.random.choice(available_priors, 3)
+            self.separate_priors = [
+                selected_class(dimensions) for selected_class in selected_classes
+            ]
+
+        # Assert that the passed priors are of the right dimension
         for i_prior, prior in enumerate(self.separate_priors):
+            assert prior.dimensions == dimensions
 
-            if prior.lower_bounds is not None:
-                # Lower bound correction
-                too_low = split_coordinates[i_prior] < prior.lower_bounds
-                split_coordinates[i_prior][too_low] += 2 * (
-                    prior.lower_bounds[too_low] - split_coordinates[i_prior][too_low]
-                )
-                split_momenta[i_prior][too_low] *= -1.0
-            if prior.upper_bounds is not None:
-                # Upper bound correction
-                too_high = split_coordinates[i_prior] > prior.upper_bounds
-                split_coordinates[i_prior][too_high] += 2 * (
-                    prior.upper_bounds[too_high] - split_coordinates[i_prior][too_high]
-                )
-                split_momenta[i_prior][too_high] *= -1.0
+        self.dimensions = dimensions
+
+    def misfit(self, coordinates: _numpy.ndarray) -> float:
+        misfit = 0.0
+
+        # Loop over priors and add misfit ----------------------------------------------
+        for i_prior, prior in enumerate(self.separate_priors):
+            misfit += prior.misfit(coordinates)
+
+        return misfit + self.misfit_bounds(coordinates)
+
+    def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
+        gradient = _numpy.zeros((self.dimensions, 1))
+
+        # Loop over priors and compute gradient ----------------------------------------
+        for i_prior, prior in enumerate(self.separate_priors):
+            gradient += prior.gradient(coordinates)
+
+        assert gradient.shape == coordinates.shape
+
+        return gradient + self.misfit_bounds(coordinates)
+
+    def generate(self) -> _numpy.ndarray:
+        raise NotImplementedError("This function is not implemented yet.")
+
+    def collapse_bounds(self):
+        """Method to restructure all composite bounds into top level object.
+        """
+        raise NotImplementedError()
+
+    def corrector(self, coordinates: _numpy.ndarray, momentum: _numpy.ndarray):
+        """Override method to correct an HMC particle for additive prior, which is
+        called after every time integration step. Calls all sub-correctors only if the
+        object does not have bounds itself.
+
+        Parameters
+        ----------
+        coordinates : numpy.ndarray
+            Numpy array shaped as (dimensions, 1) representing a column vector
+            containing the coordinates :math:`\\mathbf{m}` upon which to operate by
+            reference.
+        momentum : numpy.ndarray
+            Numpy array shaped as (dimensions, 1) representing a column vector
+            containing the momenta :math:`\\mathbf{p}` upon which to operate by
+            reference.
+
+        """
+        # Start with bounds of CompositePrior ------------------------------------------
+        if self.lower_bounds is not None:
+            # Lower bound correction
+            too_low = coordinates < self.lower_bounds
+            coordinates[too_low] += 2 * (
+                self.lower_bounds[too_low] - coordinates[too_low]
+            )
+            momentum[too_low] *= -1.0
+        if self.upper_bounds is not None:
+            # Upper bound correction
+            too_high = coordinates > self.upper_bounds
+            coordinates[too_high] += 2 * (
+                self.upper_bounds[too_high] - coordinates[too_high]
+            )
+            momentum[too_high] *= -1.0
+
+        # If they are not set, check subpriors.
+        if self.lower_bounds is None and self.upper_bounds is None:
+            # Split coordinates and momenta for all sub-priors -------------------------
+            split_coordinates = _numpy.split(
+                coordinates, self.enumerated_dimensions_cumulative
+            )
+            split_momenta = _numpy.split(
+                momentum, self.enumerated_dimensions_cumulative
+            )
+
+            # And loop over separate priors to check bounds
+            for i_prior, prior in enumerate(self.separate_priors):
+
+                if prior.lower_bounds is not None:
+                    # Lower bound correction
+                    too_low = split_coordinates[i_prior] < prior.lower_bounds
+                    split_coordinates[i_prior][too_low] += 2 * (
+                        prior.lower_bounds[too_low]
+                        - split_coordinates[i_prior][too_low]
+                    )
+                    split_momenta[i_prior][too_low] *= -1.0
+                if prior.upper_bounds is not None:
+                    # Upper bound correction
+                    too_high = split_coordinates[i_prior] > prior.upper_bounds
+                    split_coordinates[i_prior][too_high] += 2 * (
+                        prior.upper_bounds[too_high]
+                        - split_coordinates[i_prior][too_high]
+                    )
+                    split_momenta[i_prior][too_high] *= -1.0
+
+
+class MultiplicativePrior(_AbstractPrior):
+    """Multiplicative prior"""
+
+    def __init__(
+        self,
+        dimensions: int,
+        list_of_priors: _List[_AbstractPrior] = None,
+        lower_bounds: _numpy.ndarray = None,
+        upper_bounds: _numpy.ndarray = None,
+    ):
+        self.name = "multiplicative prior"
+
+        if list_of_priors is not None:
+            self.separate_priors: _List[_AbstractPrior] = list_of_priors
+        else:
+            _warnings.warn(
+                f"No subpriors were passed, generating 3 random subpriors.", Warning
+            )
+            available_priors = _AbstractPrior.__subclasses__()
+            for prior_to_remove in [CompositePrior, AdditivePrior, MultiplicativePrior]:
+                available_priors.remove(prior_to_remove)
+            selected_classes = _numpy.random.choice(available_priors, 3)
+            self.separate_priors = [
+                selected_class(dimensions) for selected_class in selected_classes
+            ]
+
+        # Assert that the passed priors are of the right dimension
+        for i_prior, prior in enumerate(self.separate_priors):
+            assert prior.dimensions == dimensions
+
+        self.dimensions = dimensions
+
+    def misfit(self, coordinates: _numpy.ndarray) -> float:
+        misfit = 1.0
+
+        # Loop over priors and multiply misfit -----------------------------------------
+        for i_prior, prior in enumerate(self.separate_priors):
+            misfit *= prior.misfit(coordinates)
+
+        return misfit + self.misfit_bounds(coordinates)
+
+    def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
+        """Gradient of a multiplicative prior implemented as:
+
+
+        .. math::
+            {\\displaystyle {\\frac {d}{dx}}\\left[\\prod _{i=1}^{k}f_{i}(x)\\right]=
+            \\sum _{i=1}^{k}\\left(\\left({\\frac {d}{dx}}f_{i}(x)\\right)
+            \\prod _{j\\neq i}f_{j}(x)\\right)=\\left(\\prod _{i=1}^{k}f_{i}(x)\\right)
+            \\left(\\sum _{i=1}^{k}{\\frac {f'_{i}(x)}{f_{i}(x)}}\\right).}
+
+        """
+        gradient = _numpy.zeros((self.dimensions, 1))
+        scalar = 1.0
+
+        # Loop over priors and compute misfits and gradients ---------------------------
+        for i_prior, prior in enumerate(self.separate_priors):
+            misfit = prior.misfit(coordinates)
+            scalar *= misfit
+            gradient += prior.gradient(coordinates) / misfit
+
+        gradient *= scalar
+
+        # Use product rule to construct the gradient of the multiplicative prior -------
+        assert gradient.shape == coordinates.shape
+
+        return gradient + self.misfit_bounds(coordinates)
+
+    def generate(self):
+        raise NotImplementedError()
+
+    def collapse_bounds(self):
+        """Method to restructure all composite bounds into top level object.
+        """
+        raise NotImplementedError()
+
+    def corrector(self, coordinates: _numpy.ndarray, momentum: _numpy.ndarray):
+        """Override method to correct an HMC particle for multiplicative prior, which is
+        called after every time integration step. Calls all sub-correctors only if the
+        object does not have bounds itself.
+
+        Parameters
+        ----------
+        coordinates : numpy.ndarray
+            Numpy array shaped as (dimensions, 1) representing a column vector
+            containing the coordinates :math:`\\mathbf{m}` upon which to operate by
+            reference.
+        momentum : numpy.ndarray
+            Numpy array shaped as (dimensions, 1) representing a column vector
+            containing the momenta :math:`\\mathbf{p}` upon which to operate by
+            reference.
+
+        """
+        # Start with bounds of CompositePrior ------------------------------------------
+        if self.lower_bounds is not None:
+            # Lower bound correction
+            too_low = coordinates < self.lower_bounds
+            coordinates[too_low] += 2 * (
+                self.lower_bounds[too_low] - coordinates[too_low]
+            )
+            momentum[too_low] *= -1.0
+        if self.upper_bounds is not None:
+            # Upper bound correction
+            too_high = coordinates > self.upper_bounds
+            coordinates[too_high] += 2 * (
+                self.upper_bounds[too_high] - coordinates[too_high]
+            )
+            momentum[too_high] *= -1.0
+
+        # If they are not set, check subpriors.
+        if self.lower_bounds is None and self.upper_bounds is None:
+            # And loop over separate priors to check bounds
+            for i_prior, prior in enumerate(self.separate_priors):
+
+                if prior.lower_bounds is not None:
+                    # Lower bound correction
+                    too_low = coordinates < prior.lower_bounds
+                    coordinates[too_low] += 2 * (
+                        prior.lower_bounds[too_low] - coordinates[too_low]
+                    )
+                    momentum[too_low] *= -1.0
+                if prior.upper_bounds is not None:
+                    # Upper bound correction
+                    too_high = coordinates > prior.upper_bounds
+                    coordinates[too_high] += 2 * (
+                        prior.upper_bounds[too_high] - coordinates[too_high]
+                    )
+                    momentum[too_high] *= -1.0
 
 
 def _make_spd_matrix(dim):

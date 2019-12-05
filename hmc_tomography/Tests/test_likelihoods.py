@@ -1,18 +1,18 @@
 """A collection of tests for likelihood functions.
 """
-from hmc_tomography import Targets as _Targets
+from hmc_tomography import Likelihoods as _Targets
 import pytest as _pytest
 import numpy as _numpy
 
 
-@_pytest.mark.parametrize("pclass", _Targets._AbstractTarget.__subclasses__())
+@_pytest.mark.parametrize("pclass", _Targets._AbstractLikelihood.__subclasses__())
 @_pytest.mark.parametrize("dimensions", [2, 10, 100, 1000])
-def test_creation(pclass: _Targets._AbstractTarget, dimensions: int):
+def test_creation(pclass: _Targets._AbstractLikelihood, dimensions: int):
     """Test for the creation of targets.
 
     Parameters
     ==========
-    pclass : hmc_tomography._Targets._AbstractTarget
+    pclass : hmc_tomography._Targets._AbstractLikelihood
         A target class.
     dimensions : int
         Dimensions to check the target.
@@ -24,12 +24,12 @@ def test_creation(pclass: _Targets._AbstractTarget, dimensions: int):
 
     # Create the object
     try:
-        target: _Targets._AbstractTarget = pclass(dimensions)
+        target: _Targets._AbstractLikelihood = pclass(dimensions)
     except NotImplementedError:
         return 0
 
     # Check if a subtype of mass matrices
-    assert issubclass(type(target), _Targets._AbstractTarget)
+    assert issubclass(type(target), _Targets._AbstractLikelihood)
 
     # Check if the right amount of dimensions
     assert target.dimensions == dimensions
@@ -37,14 +37,14 @@ def test_creation(pclass: _Targets._AbstractTarget, dimensions: int):
     return True
 
 
-@_pytest.mark.parametrize("pclass", _Targets._AbstractTarget.__subclasses__())
+@_pytest.mark.parametrize("pclass", _Targets._AbstractLikelihood.__subclasses__())
 @_pytest.mark.parametrize("dimensions", [2, 10, 100, 1000])
-def test_misfit(pclass: _Targets._AbstractTarget, dimensions: int):
+def test_misfit(pclass: _Targets._AbstractLikelihood, dimensions: int):
     """Test for the computation of target misfits.
 
     Parameters
     ==========
-    pclass : hmc_tomography._Targets._AbstractTarget
+    pclass : hmc_tomography._Targets._AbstractLikelihood
         A target class.
     dimensions : int
         Dimensions to check the target.
@@ -56,7 +56,7 @@ def test_misfit(pclass: _Targets._AbstractTarget, dimensions: int):
     """
 
     try:
-        target: _Targets._AbstractTarget = pclass(dimensions)
+        target: _Targets._AbstractLikelihood = pclass(dimensions)
     except NotImplementedError:
         return 0
 
@@ -69,17 +69,17 @@ def test_misfit(pclass: _Targets._AbstractTarget, dimensions: int):
     return True
 
 
-@_pytest.mark.parametrize("pclass", _Targets._AbstractTarget.__subclasses__())
+@_pytest.mark.parametrize("pclass", _Targets._AbstractLikelihood.__subclasses__())
 @_pytest.mark.parametrize("dimensions", [2, 10, 100, 1000])
 @_pytest.mark.parametrize("stepsize_delta", [1e-10, 1e-5, 1e-3, -1e-10, -1e-5, -1e-3])
 def test_gradient(
-    pclass: _Targets._AbstractTarget, dimensions: int, stepsize_delta: float
+    pclass: _Targets._AbstractLikelihood, dimensions: int, stepsize_delta: float
 ):
     """Test for the computation of target gradients.
 
     Parameters
     ==========
-    pclass : hmc_tomography._Targets._AbstractTarget
+    pclass : hmc_tomography._Targets._AbstractLikelihood
         A target class.
     dimensions : int
         Dimensions to check the target.
@@ -91,7 +91,7 @@ def test_gradient(
     """
 
     try:
-        target: _Targets._AbstractTarget = pclass(dimensions)
+        target: _Targets._AbstractLikelihood = pclass(dimensions)
     except NotImplementedError:
         return 0
 

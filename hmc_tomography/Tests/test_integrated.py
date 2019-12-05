@@ -34,7 +34,7 @@ def test_diagonal_matrix_optimality_float_covariance(
     # scalar
     inverse_covariance_diagonal = (G.T @ G).diagonal()[:, None] / data_covariance_scalar
 
-    target = hmc_tomography.Targets.LinearMatrix(
+    target = hmc_tomography.Likelihoods.LinearMatrix(
         dimensions, G=G, d=d, data_covariance=data_covariance_scalar
     )
 
@@ -144,7 +144,7 @@ def test_diagonal_matrix_optimality_float_covariance_prior(
         :, None
     ] / data_covariance_scalar
 
-    target = hmc_tomography.Targets.LinearMatrix(
+    target = hmc_tomography.Likelihoods.LinearMatrix(
         dimensions, G=G, d=d, data_covariance=data_covariance_scalar
     )
 
