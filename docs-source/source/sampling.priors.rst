@@ -15,6 +15,8 @@ Avialable priors:
                  hmc_tomography.Priors.LogNormal
                  hmc_tomography.Priors.Uniform
                  hmc_tomography.Priors.CompositePrior
+                 hmc_tomography.Priors.AdditivePrior
+                 hmc_tomography.Priors.MultiplicativePrior
 
 
 What are priors?
@@ -85,4 +87,15 @@ Composite distribution
 .. autoclass:: hmc_tomography.Priors.CompositePrior
     :members:
 
+Additive distribution
+*********************
+
+.. autoclass:: hmc_tomography.Priors.AdditivePrior
+    :members:
+
+Multiplicative distribution
+***************************
+
+.. autoclass:: hmc_tomography.Priors.MultiplicativePrior
+    :members:
 

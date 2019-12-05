@@ -8,7 +8,7 @@ Sampling reference
    :caption: Overview of sampling reference
 
    sampling.priors
-   sampling.targets
+   sampling.likelihoods
    sampling.massmatrices
    sampling.sampler
 
@@ -19,7 +19,7 @@ Available submodules
 
     hmc_tomography.Priors
     hmc_tomography.MassMatrices
-    hmc_tomography.Targets
+    hmc_tomography.Likelihoods
     hmc_tomography.Samplers
     hmc_tomography.Post
     hmc_tomography.Tests
