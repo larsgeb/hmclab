@@ -13,7 +13,7 @@ from typing import Tuple as _Tuple
 
 from hmc_tomography.Priors import _AbstractPrior
 from hmc_tomography.MassMatrices import _AbstractMassMatrix
-from hmc_tomography.Targets import _AbstractTarget
+from hmc_tomography.Likelihoods import _AbstractLikelihood
 
 
 class _AbstractSampler(_ABC):
@@ -24,7 +24,7 @@ class _AbstractSampler(_ABC):
     name: str = "Monte Carlo sampler abstract base class"
     dimensions: int = -1
     prior: _AbstractPrior
-    target: _AbstractTarget
+    target: _AbstractLikelihood
     sample_hdf5_file = None
     sample_hdf5_dataset = None
     sample_ram_buffer: _numpy.ndarray
@@ -64,7 +64,7 @@ class HMC(_AbstractSampler):
 
     def __init__(
         self,
-        target: _AbstractTarget,
+        target: _AbstractLikelihood,
         mass_matrix: _AbstractMassMatrix,
         prior: _AbstractPrior,
     ):
@@ -106,6 +106,7 @@ class HMC(_AbstractSampler):
         ignore_update_hook_mass: bool = False,
         suppress_warnings: bool = True,
         overwrite_samples: bool = False,
+        stages: int = 1,
     ) -> int:
         """
 
@@ -187,7 +188,12 @@ class HMC(_AbstractSampler):
         acceptance_history = _numpy.zeros((100,))
 
         # Selection of integrator ----------------------------------------------
-        propagate = self.propagate_leapfrog
+        if stages == 4:
+            propagate = self.propagate_4_stage_simplified
+        elif stages == 3:
+            propagate = self.propagate_3_stage_simplified
+        elif stages == 1:
+            propagate = self.propagate_leapfrog
 
         # Optional randomization -----------------------------------------------
         if randomize_integration_steps:
@@ -380,6 +386,224 @@ class HMC(_AbstractSampler):
         )
 
         self.prior.corrector(coordinates, momentum)
+
+        return coordinates, momentum, update_coordinates, update_gradient
+
+    def propagate_leapfrog_simplified(
+        self,
+        coordinates: _numpy.ndarray,
+        momentum: _numpy.ndarray,
+        iterations: int,
+        time_step: float,
+    ) -> _Tuple[_numpy.ndarray, _numpy.ndarray]:
+        """
+
+        Parameters
+        ----------
+        coordinates
+        momentum
+        iterations
+        time_step
+
+        Returns
+        -------
+
+        """
+
+        # Make sure not to alter a view but a copy of the passed arrays.
+        coordinates = coordinates.copy()
+        momentum = momentum.copy()
+
+        # Leapfrog integration -------------------------------------------------
+        for i in range(iterations):
+            coordinates += (
+                0.5 * time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
+            )
+            self.prior.corrector(coordinates, momentum)
+
+            potential_gradient = self.target.gradient(
+                coordinates
+            ) + self.prior.gradient(coordinates)
+            momentum -= time_step * potential_gradient
+
+            coordinates += (
+                0.5 * time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
+            )
+            self.prior.corrector(coordinates, momentum)
+
+        # For the update
+        update_coordinates = _numpy.copy(coordinates)
+        update_gradient = _numpy.copy(potential_gradient)
+
+        return coordinates, momentum, update_coordinates, update_gradient
+
+    def propagate_4_stage_simplified(
+        self,
+        coordinates: _numpy.ndarray,
+        momentum: _numpy.ndarray,
+        iterations: int,
+        time_step: float,
+    ) -> _Tuple[_numpy.ndarray, _numpy.ndarray]:
+        """
+
+        Parameters
+        ----------
+        coordinates
+        momentum
+        iterations
+        time_step
+
+        Returns
+        -------
+
+        """
+
+        # Schema: (a1,b1,a2,b2,a3,b2,a2,b1,a1)
+        a1 = 0.071353913450279725904
+        a2 = 0.268548791161230105820
+        a3 = 1.0 - 2.0 * a1 - 2.0 * a2
+        b1 = 0.191667800000000000000
+        b2 = 1.0 / 2.0 - b1
+
+        a1 *= time_step
+        a2 *= time_step
+        a3 *= time_step
+        b1 *= time_step
+        b2 *= time_step
+
+        # Make sure not to alter a view but a copy of the passed arrays.
+        coordinates = coordinates.copy()
+        momentum = momentum.copy()
+
+        # Leapfrog integration -------------------------------------------------
+        for i in range(iterations):
+
+            # A1
+            coordinates += a1 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            self.prior.corrector(coordinates, momentum)
+
+            # B1
+            potential_gradient = self.target.gradient(
+                coordinates
+            ) + self.prior.gradient(coordinates)
+            momentum -= b1 * potential_gradient
+
+            # A2
+            coordinates += a2 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            self.prior.corrector(coordinates, momentum)
+
+            # B2
+            potential_gradient = self.target.gradient(
+                coordinates
+            ) + self.prior.gradient(coordinates)
+            momentum -= b2 * potential_gradient
+
+            # A3
+            coordinates += a3 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            self.prior.corrector(coordinates, momentum)
+
+            # B2
+            potential_gradient = self.target.gradient(
+                coordinates
+            ) + self.prior.gradient(coordinates)
+            momentum -= b2 * potential_gradient
+
+            # A2
+            coordinates += a2 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            self.prior.corrector(coordinates, momentum)
+
+            # B1
+            potential_gradient = self.target.gradient(
+                coordinates
+            ) + self.prior.gradient(coordinates)
+            momentum -= b1 * potential_gradient
+
+            # A1
+            coordinates += a1 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            self.prior.corrector(coordinates, momentum)
+
+        # For the update
+        update_coordinates = _numpy.copy(coordinates)
+        update_gradient = _numpy.copy(potential_gradient)
+
+        return coordinates, momentum, update_coordinates, update_gradient
+
+    def propagate_3_stage_simplified(
+        self,
+        coordinates: _numpy.ndarray,
+        momentum: _numpy.ndarray,
+        iterations: int,
+        time_step: float,
+    ) -> _Tuple[_numpy.ndarray, _numpy.ndarray]:
+        """
+
+        Parameters
+        ----------
+        coordinates
+        momentum
+        iterations
+        time_step
+
+        Returns
+        -------
+
+        """
+
+        # Schema: (a1,b1,a2,b2,a2,b1,a1)
+        a1 = 0.11888010966548
+        a2 = 1.0 / 2.0 - a1
+        b1 = 0.29619504261126
+        b2 = 1.0 - 2.0 * b1
+
+        a1 *= time_step
+        a2 *= time_step
+        b1 *= time_step
+        b2 *= time_step
+
+        # Make sure not to alter a view but a copy of the passed arrays.
+        coordinates = coordinates.copy()
+        momentum = momentum.copy()
+
+        # Leapfrog integration -------------------------------------------------
+        for i in range(iterations):
+
+            # A1
+            coordinates += a1 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            self.prior.corrector(coordinates, momentum)
+
+            # B1
+            potential_gradient = self.target.gradient(
+                coordinates
+            ) + self.prior.gradient(coordinates)
+            momentum -= b1 * potential_gradient
+
+            # A2
+            coordinates += a2 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            self.prior.corrector(coordinates, momentum)
+
+            # B2
+            potential_gradient = self.target.gradient(
+                coordinates
+            ) + self.prior.gradient(coordinates)
+            momentum -= b2 * potential_gradient
+
+            # A2
+            coordinates += a2 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            self.prior.corrector(coordinates, momentum)
+
+            # B1
+            potential_gradient = self.target.gradient(
+                coordinates
+            ) + self.prior.gradient(coordinates)
+            momentum -= b1 * potential_gradient
+
+            # A1
+            coordinates += a1 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            self.prior.corrector(coordinates, momentum)
+
+        # For the update
+        update_coordinates = _numpy.copy(coordinates)
+        update_gradient = _numpy.copy(potential_gradient)
 
         return coordinates, momentum, update_coordinates, update_gradient
 
