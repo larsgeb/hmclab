@@ -1,4 +1,4 @@
-"""Prior classes and associated methods.
+"""Distribution classes and associated methods.
 """
 from abc import ABC as _ABC
 from abc import abstractmethod as _abstractmethod
@@ -6,18 +6,20 @@ from typing import List as _List
 from typing import Union as _Union
 import warnings as _warnings
 import numpy as _numpy
+import scipy as _scipy
+import scipy.sparse as _sparse
 
 
-class _AbstractPrior(_ABC):
-    """Prior abstract base class
+class _AbstractDistribution(_ABC):
+    """Distribution abstract base class
 
     """
 
-    name: str = "abstract prior"
-    """Name of the prior."""
+    name: str = "abstract distribution"
+    """Name of the distribution."""
 
     dimensions: int = -1
-    """Model space dimension of the prior."""
+    """Model space dimension of the distribution."""
 
     lower_bounds: _Union[_numpy.ndarray, None] = None
     """Lower bounds for every parameter. If initialized to None, no bounds are used."""
@@ -27,7 +29,7 @@ class _AbstractPrior(_ABC):
 
     @_abstractmethod
     def misfit(self, coordinates: _numpy.ndarray) -> float:
-        """Computes the misfit of the prior at the given coordinates.
+        """Computes the misfit of the distribution at the given coordinates.
 
         Parameters
         ----------
@@ -38,14 +40,14 @@ class _AbstractPrior(_ABC):
         Returns
         -------
         misfit : float
-            The prior misfit :math:`\\chi`.
+            The distribution misfit :math:`\\chi`.
 
 
-        The prior misfit is related to the prior probability density as:
+        The distribution misfit is related to the distribution probability density as:
 
         .. math::
 
-            \\chi_\\text{prior} (\\mathbf{m}) = -\\log p(\\mathbf{m}).
+            \\chi_\\text{distribution} (\\mathbf{m}) = -\\log p(\\mathbf{m}).
 
 
         This method is called many times in an HMC appraisal. It is therefore
@@ -55,7 +57,7 @@ class _AbstractPrior(_ABC):
 
     @_abstractmethod
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
-        """Computes the misfit gradient of the prior at the given coordinates.
+        """Computes the misfit gradient of the distribution at the given coordinates.
 
         Parameters
         ----------
@@ -66,15 +68,15 @@ class _AbstractPrior(_ABC):
         Returns
         -------
         gradient : numpy.ndarray
-            The prior misfit gradient :math:`\\nabla_\\mathbf{m}\\chi`.
+            The distribution misfit gradient :math:`\\nabla_\\mathbf{m}\\chi`.
 
 
-        The prior misfit gradient is related to the prior probability density
+        The distribution misfit gradient is related to the distribution probability density
         as:
 
         .. math::
 
-            \\nabla_\\mathbf{m} \\chi_\\text{prior} (\\mathbf{m}) = -
+            \\nabla_\\mathbf{m} \\chi_\\text{distribution} (\\mathbf{m}) = -
             \\nabla_\\mathbf{m} \\log p(\\mathbf{m}).
 
 
@@ -85,17 +87,17 @@ class _AbstractPrior(_ABC):
 
     @_abstractmethod
     def generate(self) -> _numpy.ndarray:
-        """Method to draw samples from the prior.
+        """Method to draw samples from the distribution.
 
         Returns
         -------
         sample : numpy.ndarray
-            A numpy array shaped as (dimensions, 1) containing a sample of the prior.
+            A numpy array shaped as (dimensions, 1) containing a sample of the distribution.
 
         Raises
         ------
         TypeError
-            If the prior does not allow generation of samples.
+            If the distribution does not allow generation of samples.
 
 
         This method is mostly a convenience class. The algorithm itself does not
@@ -143,7 +145,7 @@ class _AbstractPrior(_ABC):
         lower_bounds: _Union[_numpy.ndarray, None],
         upper_bounds: _Union[_numpy.ndarray, None],
     ):
-        """Method to update bounds of a prior distribution.
+        """Method to update bounds of a distribution distribution.
 
         Parameters
         ==========
@@ -161,7 +163,7 @@ class _AbstractPrior(_ABC):
         requires both bounds to be passed. If only one is to be updated, simply pass
         the current object of the other bound::
 
-            prior.update_bounds(numpy.zeros((4, 1)), prior.upper_bounds)
+            distribution.update_bounds(numpy.zeros((4, 1)), distribution.upper_bounds)
 
 
         If both vectors are passed, ensure that all upper bounds are above the
@@ -170,9 +172,15 @@ class _AbstractPrior(_ABC):
         """
 
         # Check the types --------------------------------------------------------------
-        if lower_bounds is not None and type(lower_bounds) is not _numpy.ndarray:
+        if (
+            lower_bounds is not None
+            and type(lower_bounds) is not _numpy.ndarray
+        ):
             raise ValueError("Lower bounds object not understood.")
-        if upper_bounds is not None and type(upper_bounds) is not _numpy.ndarray:
+        if (
+            upper_bounds is not None
+            and type(upper_bounds) is not _numpy.ndarray
+        ):
             raise ValueError("Upper bounds object not understood.")
 
         # Set the bounds ---------------------------------------------------------------
@@ -198,7 +206,7 @@ class _AbstractPrior(_ABC):
             raise ValueError("Bounds vectors are incompatible.")
 
     def misfit_bounds(self, coordinates: _numpy.ndarray) -> float:
-        """Method to compute the misfit associated with the truncated part of the prior.
+        """Method to compute the misfit associated with the truncated part of the distribution.
         """
         if (
             self.lower_bounds is not None
@@ -211,7 +219,7 @@ class _AbstractPrior(_ABC):
         return 0.0
 
 
-class Normal(_AbstractPrior):
+class Normal(_AbstractDistribution):
     """Normal distribution in model space.
 
     Parameters
@@ -236,39 +244,52 @@ class Normal(_AbstractPrior):
 
     def __init__(
         self,
-        dimensions: int,
         means: _numpy.ndarray = None,
         covariance: _Union[_numpy.ndarray, float, None] = None,
+        inverse_covariance: _Union[_numpy.ndarray, float, None] = None,
         lower_bounds: _numpy.ndarray = None,
         upper_bounds: _numpy.ndarray = None,
+        override_dimensions: int = 2,
     ):
 
-        self.name = "Gaussian prior"
+        self.name = "Gaussian (normal) distribution"
 
+        # Automatically get dimensionality ...
+        if means is not None:
+            # ... from means
+            dimensions = means.size
+        else:
+            # If no means is provided, use 2 dimensions, and later randomly create
+            # distribution
+            dimensions = override_dimensions
         self.dimensions = dimensions
+        """Amount of dimensions on which the distribution is defined, should agree with
+        means and covariance, and optionally coordinate_transformation."""
 
         self.diagonal: bool = False
         """Indicator whether or not the covariance matrix is diagonal, i.e. if the
         distribution is uncorrelated."""
 
         self.means: _numpy.ndarray = None
-        """Means in model space."""
+        """Means in model space"""
 
         self.covariance: _numpy.ndarray = None
-        """Covariance matrix in model space."""
+        """Covariance matrix in model space"""
+
+        self.inverse_covariance: _numpy.ndarray = None
+        """Inverse covariance matrix"""
 
         if means is None and covariance is None:
             # Neither means nor covariance is provided ---------------------------------
             _warnings.warn(
                 "Neither means or covariance matrix provided. "
-                "Generating random means and variances.",
+                "Generating random means and variances with dimensions 2.",
                 Warning,
             )
             self.means = _numpy.random.rand(dimensions, 1)
             self.covariance = _make_spd_matrix(self.dimensions) + _numpy.eye(
                 self.dimensions
             )
-
         elif means is None or covariance is None:
             # Only one of means or covariance is provided ------------------------------
             raise ValueError(
@@ -278,13 +299,27 @@ class Normal(_AbstractPrior):
             # Both means and covariance are provided -----------------------------------
 
             # Parse means
-            if means.shape != (self.dimensions, 1):
+            if type(means) == float or type(means) == int:
+                _warnings.warn(
+                    "Seems that you only passed a float/int as the means vector. "
+                    "It will be used as a single mean for all dimensions.",
+                    Warning,
+                )
+            elif means.shape != (self.dimensions, 1):
                 raise ValueError("Incorrect size of means vector.")
             self.means: _numpy.ndarray = means
 
             # Parse covariance
-            if covariance.shape == (means.size, means.size):
-                # Supplied a full covariance matrix
+            if type(covariance) == float or type(covariance) == int:
+                self.diagonal = True
+                _warnings.warn(
+                    "Seems that you only passed a float/int as the covariance matrix. "
+                    "It will be used as a single covariance for all dimensions.",
+                    Warning,
+                )
+            elif covariance.shape == (means.size, means.size):
+                # Supplied a full covariance matrix, could be either NumPy or SciPy
+                # matrix.
                 self.diagonal = False
             elif covariance.shape == (means.size, 1):
                 # Supplied a diagonal of a covariance matrix
@@ -294,29 +329,32 @@ class Normal(_AbstractPrior):
                     "It will be used as the covariance diagonal.",
                     Warning,
                 )
-            elif type(covariance) == float:
-                self.diagonal = True
-                _warnings.warn(
-                    "Seems that you only passed a float as the covariance matrix. "
-                    "It will be used as a single covariance.",
-                    Warning,
-                )
             else:
                 raise ValueError("Covariance matrix shape not understood.")
             self.covariance = covariance
 
         # Precomputing inverses to speed up misfit and gradient computation ------------
-        if self.diagonal:
+        if inverse_covariance is not None:
+            # There are many ways in which one could optimize the computation of a
+            # specific PD-matrix inverse. Let the user compute and provide it if wanted.
+            self.inverse_covariance = inverse_covariance
+        elif self.diagonal:
+            # If the user does not provide one, at least check if the covariance matrix
+            # is diagonal, which makes computation of the inverse scale much better.
             self.inverse_covariance: _numpy.ndarray = 1.0 / self.covariance
         else:
-            self.inverse_covariance: _numpy.ndarray = _numpy.linalg.inv(self.covariance)
+            # Else, brute force calculate the inverse using numpy.
+            self.inverse_covariance: _numpy.ndarray = _numpy.linalg.inv(
+                self.covariance
+            )
 
         # Process optional bounds ------------------------------------------------------
         self.update_bounds(lower_bounds, upper_bounds)
 
     def misfit(self, coordinates: _numpy.ndarray) -> float:
-        """Method to compute the misfit of a Normal prior distribution.
+        """Method to compute the misfit of a Normal distribution distribution.
         """
+
         if self.diagonal:
             return self.misfit_bounds(coordinates) + 0.5 * (
                 (self.means - coordinates).T
@@ -330,8 +368,9 @@ class Normal(_AbstractPrior):
             ).item(0)
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
-        """Method to compute the gradient of a Normal prior distribution.
+        """Method to compute the gradient of a Normal distribution distribution.
         """
+
         if self.diagonal:
             return -self.inverse_covariance * (
                 self.means - coordinates
@@ -345,47 +384,75 @@ class Normal(_AbstractPrior):
         raise NotImplementedError("This function is not finished yet")
 
 
-class Sparse(_AbstractPrior):
+class Laplace(_AbstractDistribution):
     """Laplace distribution in model space.
 
     Least absolute deviations, Laplace distribution, LASSO, L1
 
-    TODO: Implement distribution's location other than the 0-vector.
     """
 
     def __init__(
         self,
-        dimensions: int,
-        dispersion: float = 1,
+        means: _numpy.ndarray = None,
+        dispersions: _Union[_numpy.ndarray, float, None] = None,
         lower_bounds: _numpy.ndarray = None,
         upper_bounds: _numpy.ndarray = None,
+        override_dimensions: int = 2,
     ):
+        # Automatically get dimensionality ...
+        if means is not None:
+            # ... from means
+            dimensions = means.size
+        else:
+            # If no means is provided, use 2 dimensions
+            dimensions = override_dimensions
         self.dimensions = dimensions
-        self.dispersion = dispersion
+        """TODO description"""
+
+        self.means = means
+        """TODO description"""
+
+        self.dispersions = dispersions
+        """TODO description"""
+
+        self.inverse_dispersions = 1.0 / dispersions
+        """TODO description"""
+
         self.update_bounds(lower_bounds, upper_bounds)
 
+        # TODO generate random distribution if means and dispersions are not provided.
+
     def misfit(self, coordinates) -> float:
-        """Method to compute the misfit of a L1 prior distribution.
+        """Method to compute the misfit of a L1 distribution distribution.
         """
-        return (
-            self.misfit_bounds(coordinates)
-            + _numpy.sum(_numpy.abs(coordinates)) / self.dispersion
+
+        # if self.coordinate_transformation is not None:
+        #     coordinates = self.coordinate_transformation @ coordinates
+
+        return self.misfit_bounds(coordinates) + _numpy.sum(
+            _numpy.abs(coordinates - self.means) * self.inverse_dispersions
         )
 
     def gradient(self, coordinates):
-        """Method to compute the gradient of a L1 prior distribution.
+        """Method to compute the gradient of a L1 distribution distribution.
         """
+
+        # if self.operator is not None:
+        #     coordinates = self.operator @ coordinates
+
         # The derivative of the function |x| is simply 1 or -1, depending on the sign
-        # of x.
+        # of x, subsequently scaled by the dispersion.
         return (
-            self.misfit_bounds(coordinates) + _numpy.sign(coordinates) / self.dispersion
+            self.misfit_bounds(coordinates)
+            + _numpy.sign(coordinates - self.means) * self.inverse_dispersions
         )
 
     def generate(self):
         raise NotImplementedError()
 
 
-class L05(_AbstractPrior):
+# Unfinished
+class L05(_AbstractDistribution):
     """L05
 
     TODO: Implement distribution's location other than the 0-vector.
@@ -393,35 +460,56 @@ class L05(_AbstractPrior):
 
     def __init__(
         self,
-        dimensions: int,
         dispersion: float = 1,
         lower_bounds: _numpy.ndarray = None,
         upper_bounds: _numpy.ndarray = None,
+        override_dimensions: int = 2,
     ):
+
+        raise NotImplementedError("Not finished yet.")
+
+        # TODO Add location functionality to distribution
+
+        if dispersion is not None:
+            # ... from dispersion
+            dimensions = dispersion.size
+        else:
+            # If no means is provided, use 2 dimensions
+            dimensions = override_dimensions
+
         self.dimensions = dimensions
+        """TODO description"""
+
         self.dispersion = dispersion
+        """TODO description"""
+
         self.update_bounds(lower_bounds, upper_bounds)
+        """TODO description"""
 
     def misfit(self, coordinates) -> float:
-        """Method to compute the misfit of a L1 prior distribution.
+        """Method to compute the misfit of a L1 distribution distribution.
         """
         return self.misfit_bounds(coordinates) + _numpy.sum(
             _numpy.abs(coordinates / self.dispersion) ** 0.5
         )
 
     def gradient(self, coordinates):
-        """Method to compute the gradient of a L1 prior distribution.
+        """Method to compute the gradient of a L1 distribution distribution.
         """
         # The derivative of the function |x| is simply 1 or -1, depending on the sign
         # of x.
-        return self.misfit_bounds(coordinates) + _numpy.sign(coordinates) * 0.5 / (
-            _numpy.abs(coordinates / self.dispersion) ** 0.5
+        return _numpy.nan_to_num(
+            self.misfit_bounds(coordinates)
+            + _numpy.sign(coordinates)
+            * 0.5
+            / (_numpy.abs(coordinates / self.dispersion) ** 0.5)
         )
 
     def generate(self):
         raise NotImplementedError()
 
 
+# Unfinished
 class LogNormal(Normal):
     """Normal distribution in logarithmic model space.
 
@@ -450,15 +538,17 @@ class LogNormal(Normal):
     """
 
     def __init__(self, *args, **kwargs):
-        self.name = "log Gaussian prior"
+        self.name = "log Gaussian distribution"
+
+        raise NotImplementedError("Not finished yet.")
 
         # Re-use the constructor of the superclass (Normal).
         super(LogNormal, self).__init__(*args, **kwargs)
 
     def misfit(self, coordinates: _numpy.ndarray) -> float:
-        """Method to compute the misfit of a log Normal prior distribution.
+        """Method to compute the misfit of a log Normal distribution distribution.
         """
-        # This prior is only non-zero for positive values of the coordinates. ----------
+        # This distribution is only non-zero for positive values of the coordinates. ----------
         if _numpy.any(coordinates <= 0):
             return _numpy.inf
 
@@ -470,7 +560,10 @@ class LogNormal(Normal):
                 + 0.5
                 * (
                     (self.means - logarithmic_coordinates).T
-                    @ (self.inverse_covariance * (self.means - logarithmic_coordinates))
+                    @ (
+                        self.inverse_covariance
+                        * (self.means - logarithmic_coordinates)
+                    )
                 ).item(0)
                 + self.misfit_bounds(coordinates)
             )
@@ -487,7 +580,7 @@ class LogNormal(Normal):
             )
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
-        """Method to compute the gradient of a log Normal prior distribution.
+        """Method to compute the gradient of a log Normal distribution distribution.
 
         TODO Verify these formulas!
         """
@@ -518,8 +611,8 @@ class LogNormal(Normal):
         raise NotImplementedError("This function is not implemented yet.")
 
 
-class Uniform(_AbstractPrior):
-    """Uniform bounded or unbouded prior in model space.
+class Uniform(_AbstractDistribution):
+    """Uniform bounded or unbouded distribution in model space.
 
     Parameters
     ----------
@@ -536,12 +629,24 @@ class Uniform(_AbstractPrior):
 
     def __init__(
         self,
-        dimensions: int,
         lower_bounds: _numpy.ndarray = None,
         upper_bounds: _numpy.ndarray = None,
+        override_dimensions: int = 2,
     ):
-        self.name = "uniform prior"
+        self.name = "uniform distribution"
+
+        # Automatically get dimensionality ...
+        if lower_bounds is not None:
+            # ... from means
+            dimensions = lower_bounds.size
+        else:
+            # If no means is provided, use 2 dimensions
+            dimensions = override_dimensions
         self.dimensions = dimensions
+        """TODO description"""
+
+        # TODO add empty initialization
+
         self.update_bounds(lower_bounds, upper_bounds)
 
     def misfit(self, coordinates: _numpy.ndarray) -> float:
@@ -552,110 +657,130 @@ class Uniform(_AbstractPrior):
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
         """Method to compute the gradient of a uniform distribution.
         """
-        return _numpy.zeros((self.dimensions, 1)) + self.misfit_bounds(coordinates)
+        return _numpy.zeros((self.dimensions, 1)) + self.misfit_bounds(
+            coordinates
+        )
 
     def generate(self) -> _numpy.ndarray:
         raise NotImplementedError("This function is not implemented yet.")
 
 
-class CompositePrior(_AbstractPrior):
-    """Prior distribution combined from multiple unconditional distributions.
+class CompositeDistribution(_AbstractDistribution):
+    """Distribution distribution combined from multiple unconditional distributions.
 
     Parameters
     ==========
     dimensions : int
         Combined dimension of all the separate distributions
-    list_of_priors : List[_AbstractPrior]
-        List of all separate priors.
+    list_of_distributions : List[_AbstractDistribution]
+        List of all separate distributions.
 
 
     Raises
     ======
     ValueError
         Raised if the passed dimensions do not correspond to the sum of the separate
-        dimensions of each prior.
+        dimensions of each distribution.
 
 
     This class can be used when two or more sets of coordinates should be described by
-    different priors, e.g. when one set requires a Normal distribution and another a
+    different distributions, e.g. when one set requires a Normal distribution and another a
     uniform distribution.
     """
 
     def __init__(
         self,
-        dimensions: int,
-        list_of_priors: _List[_AbstractPrior] = None,
+        list_of_distributions: _List[_AbstractDistribution] = None,
         lower_bounds: _numpy.ndarray = None,
         upper_bounds: _numpy.ndarray = None,
+        override_dimensions: int = 2,
     ):
-        self.name = "composite prior"
+        self.name = "composite distribution"
 
-        if list_of_priors is not None:
-            self.separate_priors: _List[_AbstractPrior] = list_of_priors
+        if list_of_distributions is not None:
+            self.separate_distributions: _List[
+                _AbstractDistribution
+            ] = list_of_distributions
         else:
+            dimensions = override_dimensions
+
             _warnings.warn(
-                f"No subpriors were passed, generating {dimensions} random subpriors.",
+                f"No subdistributions were passed, generating {dimensions} random subdistributions.",
                 Warning,
             )
-            available_priors = _AbstractPrior.__subclasses__()
-            for prior_to_remove in [CompositePrior, AdditivePrior, MultiplicativePrior]:
-                available_priors.remove(prior_to_remove)
-            selected_classes = _numpy.random.choice(available_priors, dimensions)
-            self.separate_priors = [
+            available_distributions = _AbstractDistribution.__subclasses__()
+            for distribution_to_remove in [
+                CompositeDistribution,
+                AdditiveDistribution,
+                MultiplicativeDistribution,
+            ]:
+                available_distributions.remove(distribution_to_remove)
+            selected_classes = _numpy.random.choice(
+                available_distributions, dimensions
+            )
+            self.separate_distributions = [
                 selected_class(1) for selected_class in selected_classes
             ]
 
         self.enumerated_dimensions: _numpy.ndarray = _numpy.empty(
-            (len(self.separate_priors))
+            (len(self.separate_distributions))
         )
-        """This object describes how many dimensions each prior has, ordered according
-        to ``CompositePrior.separate_priors``. Sums to ``CompositePrior.dimesions``.
+        """This object describes how many dimensions each distribution has, ordered according
+        to ``CompositeDistribution.separate_distributions``. Sums to ``CompositeDistribution.dimesions``.
         """
 
-        # Assert that the passed priors actually do represent the correct amount of
-        # dimensions, and seperately extract the size of each prior
+        # Assert that the passed distributions actually do represent the correct amount of
+        # dimensions, and seperately extract the size of each distribution
         computed_dimensions: int = 0
-        for i_prior, prior in enumerate(self.separate_priors):
-            computed_dimensions += prior.dimensions
-            self.enumerated_dimensions[i_prior] = prior.dimensions
+        for i_distribution, distribution in enumerate(
+            self.separate_distributions
+        ):
+            computed_dimensions += distribution.dimensions
+            self.enumerated_dimensions[
+                i_distribution
+            ] = distribution.dimensions
 
-        assert computed_dimensions == dimensions
+        self.dimensions = computed_dimensions
 
         self.enumerated_dimensions_cumulative: _numpy.ndarray = _numpy.cumsum(
             self.enumerated_dimensions, dtype="int"
         )[:-1]
-        """This object describes each separate prior index in combined model space. Invoking
-        ``numpy.split(m, CompositePrior.enumerated_dimensions_cumulative)[:-1])``
-        splits a vector appropriately for all separate priors.
+        """This object describes each separate distribution index in combined model space. Invoking
+        ``numpy.split(m, CompositeDistribution.enumerated_dimensions_cumulative)[:-1])``
+        splits a vector appropriately for all separate distributions.
         """
 
-        self.dimensions = dimensions
-
     def misfit(self, coordinates: _numpy.ndarray) -> float:
-        # Split coordinates for all sub-priors -----------------------------------------
+        # Split coordinates for all sub-distributions -----------------------------------------
         split_coordinates = _numpy.split(
             coordinates, self.enumerated_dimensions_cumulative
         )
 
         misfit = 0.0
 
-        # Loop over priors and add misfit ----------------------------------------------
-        for i_prior, prior in enumerate(self.separate_priors):
-            misfit += prior.misfit(split_coordinates[i_prior])
+        # Loop over distributions and add misfit ----------------------------------------------
+        for i_distribution, distribution in enumerate(
+            self.separate_distributions
+        ):
+            misfit += distribution.misfit(split_coordinates[i_distribution])
 
         return misfit + self.misfit_bounds(coordinates)
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
-        # Split coordinates for all sub-priors -----------------------------------------
+        # Split coordinates for all sub-distributions -----------------------------------------
         split_coordinates = _numpy.split(
             coordinates, self.enumerated_dimensions_cumulative
         )
 
         gradients = []
 
-        # Loop over priors and compute gradient ----------------------------------------
-        for i_prior, prior in enumerate(self.separate_priors):
-            gradients.append(prior.gradient(split_coordinates[i_prior]))
+        # Loop over distributions and compute gradient ----------------------------------------
+        for i_distribution, distribution in enumerate(
+            self.separate_distributions
+        ):
+            gradients.append(
+                distribution.gradient(split_coordinates[i_distribution])
+            )
 
         # Vertically stack gradients ---------------------------------------------------
         gradient = _numpy.vstack(gradients)
@@ -673,7 +798,7 @@ class CompositePrior(_AbstractPrior):
         raise NotImplementedError()
 
     def corrector(self, coordinates: _numpy.ndarray, momentum: _numpy.ndarray):
-        """Override method to correct an HMC particle for composite prior, which is
+        """Override method to correct an HMC particle for composite distribution, which is
         called after every time integration step. Calls all sub-correctors only if the
         object does not have bounds itself.
 
@@ -689,7 +814,7 @@ class CompositePrior(_AbstractPrior):
             reference.
 
         """
-        # Start with bounds of CompositePrior ------------------------------------------
+        # Start with bounds of CompositeDistribution ------------------------------------------
         if self.lower_bounds is not None:
             # Lower bound correction
             too_low = coordinates < self.lower_bounds
@@ -705,9 +830,9 @@ class CompositePrior(_AbstractPrior):
             )
             momentum[too_high] *= -1.0
 
-        # If they are not set, check subpriors.
+        # If they are not set, check subdistributions.
         if self.lower_bounds is None and self.upper_bounds is None:
-            # Split coordinates and momenta for all sub-priors -------------------------
+            # Split coordinates and momenta for all sub-distributions -------------------------
             split_coordinates = _numpy.split(
                 coordinates, self.enumerated_dimensions_cumulative
             )
@@ -715,72 +840,100 @@ class CompositePrior(_AbstractPrior):
                 momentum, self.enumerated_dimensions_cumulative
             )
 
-            # And loop over separate priors to check bounds
-            for i_prior, prior in enumerate(self.separate_priors):
+            # And loop over separate distributions to check bounds
+            for i_distribution, distribution in enumerate(
+                self.separate_distributions
+            ):
 
-                if prior.lower_bounds is not None:
+                if distribution.lower_bounds is not None:
                     # Lower bound correction
-                    too_low = split_coordinates[i_prior] < prior.lower_bounds
-                    split_coordinates[i_prior][too_low] += 2 * (
-                        prior.lower_bounds[too_low]
-                        - split_coordinates[i_prior][too_low]
+                    too_low = (
+                        split_coordinates[i_distribution]
+                        < distribution.lower_bounds
                     )
-                    split_momenta[i_prior][too_low] *= -1.0
-                if prior.upper_bounds is not None:
+                    split_coordinates[i_distribution][too_low] += 2 * (
+                        distribution.lower_bounds[too_low]
+                        - split_coordinates[i_distribution][too_low]
+                    )
+                    split_momenta[i_distribution][too_low] *= -1.0
+                if distribution.upper_bounds is not None:
                     # Upper bound correction
-                    too_high = split_coordinates[i_prior] > prior.upper_bounds
-                    split_coordinates[i_prior][too_high] += 2 * (
-                        prior.upper_bounds[too_high]
-                        - split_coordinates[i_prior][too_high]
+                    too_high = (
+                        split_coordinates[i_distribution]
+                        > distribution.upper_bounds
                     )
-                    split_momenta[i_prior][too_high] *= -1.0
+                    split_coordinates[i_distribution][too_high] += 2 * (
+                        distribution.upper_bounds[too_high]
+                        - split_coordinates[i_distribution][too_high]
+                    )
+                    split_momenta[i_distribution][too_high] *= -1.0
 
 
-class AdditivePrior(_AbstractPrior):
+class AdditiveDistribution(_AbstractDistribution):
     def __init__(
         self,
-        dimensions: int,
-        list_of_priors: _List[_AbstractPrior] = None,
+        list_of_distributions: _List[_AbstractDistribution] = None,
         lower_bounds: _numpy.ndarray = None,
         upper_bounds: _numpy.ndarray = None,
+        overrie_dimensions: int = 2,
     ):
-        self.name = "additive prior"
+        self.name = "additive distribution"
 
-        if list_of_priors is not None:
-            self.separate_priors: _List[_AbstractPrior] = list_of_priors
+        # Automatically get dimensionality ...
+        if list_of_distributions is not None:
+            # ... from means
+            dimensions = list_of_distributions[0].dimensions
+        else:
+            # If no means is provided, use 2 dimensions
+            dimensions = override_dimensions
+        self.dimensions = dimensions
+
+        if list_of_distributions is not None:
+            self.separate_distributions: _List[
+                _AbstractDistribution
+            ] = list_of_distributions
         else:
             _warnings.warn(
-                f"No subpriors were passed, generating 3 random subpriors.", Warning
+                f"No subdistributions were passed, generating 3 random subdistributions.",
+                Warning,
             )
-            available_priors = _AbstractPrior.__subclasses__()
-            for prior_to_remove in [CompositePrior, AdditivePrior, MultiplicativePrior]:
-                available_priors.remove(prior_to_remove)
-            selected_classes = _numpy.random.choice(available_priors, 3)
-            self.separate_priors = [
-                selected_class(dimensions) for selected_class in selected_classes
+            available_distributions = _AbstractDistribution.__subclasses__()
+            for distribution_to_remove in [
+                CompositeDistribution,
+                AdditiveDistribution,
+            ]:
+                available_distributions.remove(distribution_to_remove)
+            selected_classes = _numpy.random.choice(available_distributions, 3)
+            self.separate_distributions = [
+                selected_class(dimensions)
+                for selected_class in selected_classes
             ]
 
-        # Assert that the passed priors are of the right dimension
-        for i_prior, prior in enumerate(self.separate_priors):
-            assert prior.dimensions == dimensions
-
-        self.dimensions = dimensions
+        # Assert that the passed distributions are of the right dimension
+        for i_distribution, distribution in enumerate(
+            self.separate_distributions
+        ):
+            assert distribution.dimensions == dimensions
 
     def misfit(self, coordinates: _numpy.ndarray) -> float:
         misfit = 0.0
 
-        # Loop over priors and add misfit ----------------------------------------------
-        for i_prior, prior in enumerate(self.separate_priors):
-            misfit += prior.misfit(coordinates)
+        # Loop over distributions and add misfit ----------------------------------------------
+        for i_distribution, distribution in enumerate(
+            self.separate_distributions
+        ):
+            misfit += distribution.misfit(coordinates)
 
         return misfit + self.misfit_bounds(coordinates)
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
         gradient = _numpy.zeros((self.dimensions, 1))
 
-        # Loop over priors and compute gradient ----------------------------------------
-        for i_prior, prior in enumerate(self.separate_priors):
-            gradient += prior.gradient(coordinates)
+        # Loop over distributions and compute gradient ----------------------------------------
+        for i_distribution, distribution in enumerate(
+            self.separate_distributions
+        ):
+            gradient += distribution.gradient(coordinates)
 
         assert gradient.shape == coordinates.shape
 
@@ -794,8 +947,13 @@ class AdditivePrior(_AbstractPrior):
         """
         raise NotImplementedError()
 
+    def add_distribution(self, distribution: _AbstractDistribution):
+        """Add a distribution to the object."""
+        distribution.dimensions == dimensions
+        self.separate_distributions.append(distribution)
+
     def corrector(self, coordinates: _numpy.ndarray, momentum: _numpy.ndarray):
-        """Override method to correct an HMC particle for additive prior, which is
+        """Override method to correct an HMC particle for additive distribution, which is
         called after every time integration step. Calls all sub-correctors only if the
         object does not have bounds itself.
 
@@ -811,7 +969,7 @@ class AdditivePrior(_AbstractPrior):
             reference.
 
         """
-        # Start with bounds of CompositePrior ------------------------------------------
+        # Start with bounds of CompositeDistribution ------------------------------------------
         if self.lower_bounds is not None:
             # Lower bound correction
             too_low = coordinates < self.lower_bounds
@@ -827,168 +985,90 @@ class AdditivePrior(_AbstractPrior):
             )
             momentum[too_high] *= -1.0
 
-        # If they are not set, check subpriors.
-        if self.lower_bounds is None and self.upper_bounds is None:
-            # Split coordinates and momenta for all sub-priors -------------------------
-            split_coordinates = _numpy.split(
-                coordinates, self.enumerated_dimensions_cumulative
-            )
-            split_momenta = _numpy.split(
-                momentum, self.enumerated_dimensions_cumulative
-            )
+        # TODO Fix this mess
+        # # If they are not set, check subdistributions.
+        # if self.lower_bounds is None and self.upper_bounds is None:
+        #     # Split coordinates and momenta for all sub-distributions -------------------------
+        #     split_coordinates = _numpy.split(
+        #         coordinates, self.enumerated_dimensions_cumulative
+        #     )
+        #     split_momenta = _numpy.split(
+        #         momentum, self.enumerated_dimensions_cumulative
+        #     )
 
-            # And loop over separate priors to check bounds
-            for i_prior, prior in enumerate(self.separate_priors):
+        #     # And loop over separate distributions to check bounds
+        #     for i_distribution, distribution in enumerate(self.separate_distributions):
 
-                if prior.lower_bounds is not None:
-                    # Lower bound correction
-                    too_low = split_coordinates[i_prior] < prior.lower_bounds
-                    split_coordinates[i_prior][too_low] += 2 * (
-                        prior.lower_bounds[too_low]
-                        - split_coordinates[i_prior][too_low]
-                    )
-                    split_momenta[i_prior][too_low] *= -1.0
-                if prior.upper_bounds is not None:
-                    # Upper bound correction
-                    too_high = split_coordinates[i_prior] > prior.upper_bounds
-                    split_coordinates[i_prior][too_high] += 2 * (
-                        prior.upper_bounds[too_high]
-                        - split_coordinates[i_prior][too_high]
-                    )
-                    split_momenta[i_prior][too_high] *= -1.0
+        #         if distribution.lower_bounds is not None:
+        #             # Lower bound correction
+        #             too_low = split_coordinates[i_distribution] < distribution.lower_bounds
+        #             split_coordinates[i_distribution][too_low] += 2 * (
+        #                 distribution.lower_bounds[too_low]
+        #                 - split_coordinates[i_distribution][too_low]
+        #             )
+        #             split_momenta[i_distribution][too_low] *= -1.0
+        #         if distribution.upper_bounds is not None:
+        #             # Upper bound correction
+        #             too_high = split_coordinates[i_distribution] > distribution.upper_bounds
+        #             split_coordinates[i_distribution][too_high] += 2 * (
+        #                 distribution.upper_bounds[too_high]
+        #                 - split_coordinates[i_distribution][too_high]
+        #             )
+        #             split_momenta[i_distribution][too_high] *= -1.0
 
 
-class MultiplicativePrior(_AbstractPrior):
-    """Multiplicative prior"""
+# Create an alias for AdditiveDistribution
+class BayesRule(AdditiveDistribution):
+    pass
 
-    def __init__(
-        self,
-        dimensions: int,
-        list_of_priors: _List[_AbstractPrior] = None,
-        lower_bounds: _numpy.ndarray = None,
-        upper_bounds: _numpy.ndarray = None,
-    ):
-        self.name = "multiplicative prior"
 
-        if list_of_priors is not None:
-            self.separate_priors: _List[_AbstractPrior] = list_of_priors
-        else:
-            _warnings.warn(
-                f"No subpriors were passed, generating 3 random subpriors.", Warning
-            )
-            available_priors = _AbstractPrior.__subclasses__()
-            for prior_to_remove in [CompositePrior, AdditivePrior, MultiplicativePrior]:
-                available_priors.remove(prior_to_remove)
-            selected_classes = _numpy.random.choice(available_priors, 3)
-            self.separate_priors = [
-                selected_class(dimensions) for selected_class in selected_classes
-            ]
+class Himmelblau(_AbstractDistribution):
+    """Himmelblau's 2-dimensional function.
 
-        # Assert that the passed priors are of the right dimension
-        for i_prior, prior in enumerate(self.separate_priors):
-            assert prior.dimensions == dimensions
+    Himmelblau's function is defined as:
 
-        self.dimensions = dimensions
+    .. math::
+
+        f(x,y)=(x^{2}+y-11)^{2}+(x+y^{2}-7)^{2}
+    """
+
+    name: str = "Himmelblau's function"
+    dimensions: int = 2
+    annealing: float = 1
+    """Float representing the annealing (:math:`T`) of Himmelblau's function.
+    
+    Alters the misfit function in the following way:
+
+    .. math::
+
+        f(x,y)_T=\\frac{f(x,y)}{T}
+    """
+
+    def __init__(self, annealing: float = 1):
+        self.annealing = annealing
 
     def misfit(self, coordinates: _numpy.ndarray) -> float:
-        misfit = 1.0
-
-        # Loop over priors and multiply misfit -----------------------------------------
-        for i_prior, prior in enumerate(self.separate_priors):
-            misfit *= prior.misfit(coordinates)
-
-        return misfit + self.misfit_bounds(coordinates)
+        """Returns the value of Himmelblau's function at the given coordinates."""
+        if coordinates.shape != (self.dimensions, 1):
+            raise ValueError()
+        x = coordinates[0, 0]
+        y = coordinates[1, 0]
+        return (
+            (x ** 2 + y - 11) ** 2 + (x + y ** 2 - 7) ** 2
+        ) / self.annealing
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
-        """Gradient of a multiplicative prior implemented as:
-
-
-        .. math::
-            {\\displaystyle {\\frac {d}{dx}}\\left[\\prod _{i=1}^{k}f_{i}(x)\\right]=
-            \\sum _{i=1}^{k}\\left(\\left({\\frac {d}{dx}}f_{i}(x)\\right)
-            \\prod _{j\\neq i}f_{j}(x)\\right)=\\left(\\prod _{i=1}^{k}f_{i}(x)\\right)
-            \\left(\\sum _{i=1}^{k}{\\frac {f'_{i}(x)}{f_{i}(x)}}\\right).}
-
-        """
+        """Returns a numpy.ndarray shaped as (dimensions, 1) containing the gradient of
+        Himmelblau's function at the given coordinates."""
+        x = coordinates[0]
+        y = coordinates[1]
         gradient = _numpy.zeros((self.dimensions, 1))
-        scalar = 1.0
-
-        # Loop over priors and compute misfits and gradients ---------------------------
-        for i_prior, prior in enumerate(self.separate_priors):
-            misfit = prior.misfit(coordinates)
-            scalar *= misfit
-            gradient += prior.gradient(coordinates) / misfit
-
-        gradient *= scalar
-
-        # Use product rule to construct the gradient of the multiplicative prior -------
-        assert gradient.shape == coordinates.shape
-
-        return gradient + self.misfit_bounds(coordinates)
-
-    def generate(self):
-        raise NotImplementedError()
-
-    def collapse_bounds(self):
-        """Method to restructure all composite bounds into top level object.
-        """
-        raise NotImplementedError()
-
-    def corrector(self, coordinates: _numpy.ndarray, momentum: _numpy.ndarray):
-        """Override method to correct an HMC particle for multiplicative prior, which is
-        called after every time integration step. Calls all sub-correctors only if the
-        object does not have bounds itself.
-
-        Parameters
-        ----------
-        coordinates : numpy.ndarray
-            Numpy array shaped as (dimensions, 1) representing a column vector
-            containing the coordinates :math:`\\mathbf{m}` upon which to operate by
-            reference.
-        momentum : numpy.ndarray
-            Numpy array shaped as (dimensions, 1) representing a column vector
-            containing the momenta :math:`\\mathbf{p}` upon which to operate by
-            reference.
-
-        """
-        # Start with bounds of CompositePrior ------------------------------------------
-        if self.lower_bounds is not None:
-            # Lower bound correction
-            too_low = coordinates < self.lower_bounds
-            coordinates[too_low] += 2 * (
-                self.lower_bounds[too_low] - coordinates[too_low]
-            )
-            momentum[too_low] *= -1.0
-        if self.upper_bounds is not None:
-            # Upper bound correction
-            too_high = coordinates > self.upper_bounds
-            coordinates[too_high] += 2 * (
-                self.upper_bounds[too_high] - coordinates[too_high]
-            )
-            momentum[too_high] *= -1.0
-
-        # If they are not set, check subpriors.
-        if self.lower_bounds is None and self.upper_bounds is None:
-            # And loop over separate priors to check bounds
-            for i_prior, prior in enumerate(self.separate_priors):
-
-                if prior.lower_bounds is not None:
-                    # Lower bound correction
-                    too_low = coordinates < prior.lower_bounds
-                    coordinates[too_low] += 2 * (
-                        prior.lower_bounds[too_low] - coordinates[too_low]
-                    )
-                    momentum[too_low] *= -1.0
-                if prior.upper_bounds is not None:
-                    # Upper bound correction
-                    too_high = coordinates > prior.upper_bounds
-                    coordinates[too_high] += 2 * (
-                        prior.upper_bounds[too_high] - coordinates[too_high]
-                    )
-                    momentum[too_high] *= -1.0
+        gradient[0] = 2 * (2 * x * (x ** 2 + y - 11) + x + y ** 2 - 7)
+        gradient[1] = 2 * (x ** 2 + 2 * y * (x + y ** 2 - 7) + y - 11)
+        return gradient / self.annealing
 
 
-def _make_spd_matrix(dim):
+def _make_spd_matrix(dim: int):
     """Generate a random symmetric, positive-definite matrix.
 
     Parameters
@@ -1007,4 +1087,6 @@ def _make_spd_matrix(dim):
     # Create random PD matrix and extract correlation structure
     u, _, v = _numpy.linalg.svd(_numpy.dot(a.T, a))
     # Reconstruct a new matrix with random variances.
-    return _numpy.dot(_numpy.dot(u, 1.0 + _numpy.diag(_numpy.random.rand(dim))), v)
+    return _numpy.dot(
+        _numpy.dot(u, 1.0 + _numpy.diag(_numpy.random.rand(dim))), v
+    )

@@ -1,41 +1,17 @@
-"""Likelihood classes and associated methods.
+"""Distribution classes and associated methods.
 """
 from abc import ABC as _ABC
 from abc import abstractmethod as _abstractmethod
-import numpy as _numpy
+from typing import List as _List
 from typing import Union as _Union
-import scipy as _scipy
-import scipy.sparse
 import warnings as _warnings
+import numpy as _numpy
+import scipy as _scipy
+import scipy.sparse as _sparse
+from hmc_tomography.Distributions import _AbstractDistribution
 
 
-class _AbstractLikelihood(_ABC):
-    """Abstract base class for inverse problem likelihoods. Defines all required
-    methods for derived classes.
-    """
-
-    name: str = "inverse problem likelihood abstract base class"
-    dimensions: int = -1
-
-    def full_name(self) -> str:
-        """Returns the full name of the likelihood"""
-        return self.name
-
-    @_abstractmethod
-    def misfit(self, coordinates: _numpy.ndarray) -> float:
-        """Returns the misfit at the given coordinates. This is equal to the negative
-        logarithm of the likelihood function: :math:`\\chi(m) = - \\log L(m)=
-        - \\log p(m|d)`."""
-        pass
-
-    @_abstractmethod
-    def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
-        """Returns the gradient of the misfit at the given coordinates: :math:`∇_m
-        \\chi(m) = - ∇_m \\log L(m)= - ∇_m \\log p(m|d)`."""
-        pass
-
-
-class LinearMatrix(_AbstractLikelihood):
+class LinearMatrix(_AbstractDistribution):
     """Likelihood model based on a linear forward model given as
     :math:`G \\mathbf{m} = \\mathbf{d}`
     """
@@ -43,9 +19,11 @@ class LinearMatrix(_AbstractLikelihood):
     def __init__(
         self,
         dimensions: int,
-        G: _Union[_numpy.ndarray, _scipy.sparse.spmatrix] = None,
+        G: _Union[_numpy.ndarray, _sparse.spmatrix] = None,
         d: _numpy.ndarray = None,
-        data_covariance: _Union[float, _numpy.ndarray, _scipy.sparse.spmatrix] = None,
+        data_covariance: _Union[
+            float, _numpy.ndarray, _sparse.spmatrix
+        ] = None,
         use_mkl: bool = False,
         use_cupy: bool = False,
     ):
@@ -76,7 +54,8 @@ class LinearMatrix(_AbstractLikelihood):
         """
         if use_mkl and use_cupy:
             _warnings.warn(
-                f"CuPy and MKL are both requested. MKL will take precedence.", Warning
+                f"CuPy and MKL are both requested. MKL will take precedence.",
+                Warning,
             )
 
         self.dimensions = dimensions
@@ -93,18 +72,19 @@ class LinearMatrix(_AbstractLikelihood):
         elif G is None or d is None:
             raise ValueError(
                 "Either no forward model matrix or data was passed."
-                "Not sure what to do."
+                "Not sure what to do. Aborting."
             )
 
         # Parse forward model matrix ---------------------------------------------------
-        if type(G) == _numpy.ndarray or issubclass(type(G), _scipy.sparse.spmatrix):
-
+        if type(G) == _numpy.ndarray or issubclass(type(G), _sparse.spmatrix):
             # Assert that the second dimension of the matrix corresponds to model space
             # dimension.
             assert G.shape[1] == dimensions
             self.G = G
         else:
-            raise ValueError("The forward model matrix type was not understood.")
+            raise ValueError(
+                "The forward model matrix type was not understood."
+            )
 
         # Parse data vector ------------------------------------------------------------
         if type(d) == _numpy.ndarray:
@@ -128,7 +108,6 @@ class LinearMatrix(_AbstractLikelihood):
 
         elif type(data_covariance) is _numpy.ndarray:
             # Numpy array passed
-
             if data_covariance.shape == (d.size, 1):
                 # Diagonal of a data covariance matrix passed
                 self.data_covariance = data_covariance
@@ -146,7 +125,7 @@ class LinearMatrix(_AbstractLikelihood):
                 # Something else passed?
                 raise ValueError("")
 
-        elif issubclass(type(data_covariance), _scipy.sparse.spmatrix):
+        elif issubclass(type(data_covariance), _sparse.spmatrix):
             # Sparse matrix passed
             self.data_covariance_matrix = True
 
@@ -158,7 +137,7 @@ class LinearMatrix(_AbstractLikelihood):
             else:
                 # Something else passed?
                 raise ValueError(
-                    "The sparse data covariance" "matrix was not understood."
+                    "The sparse data covariance matrix was not understood."
                 )
         else:
             # Not a supported type
@@ -171,16 +150,15 @@ class LinearMatrix(_AbstractLikelihood):
                 # Fails with OSError if MKL is not found
                 from hmc_tomography.Helpers.mkl_interface import sparse_gemv
 
-                if issubclass(type(G), _scipy.sparse.spmatrix):
-                    if type(G) != _scipy.sparse.csr_matrix:
-                        self.G = G.tocsr()
+                # MKL binding works only for sparse matrices
+                if type(G) != _sparse.csr_matrix:
+                    self.G = _sparse.csr_matrix(G)
 
                 # Precompute for gradients
-                self.Gt = G.T.tocsr()
+                self.Gt = self.G.T.tocsr()
                 self.use_mkl = True
 
                 # Bind the needed function
-
                 self.sparse_mkl_gemv_binding = sparse_gemv
 
                 # TODO add logic for data covariance other than floats
@@ -205,12 +183,14 @@ class LinearMatrix(_AbstractLikelihood):
 
                 # Convert to csr if needed (if not sparse matrix, creation will fail
                 # later on anyway, no need to check here)
-                if issubclass(type(G), _scipy.sparse.spmatrix):
-                    if type(G) != _scipy.sparse.csr_matrix:
+                if issubclass(type(G), _sparse.spmatrix):
+                    if type(G) != _sparse.csr_matrix:
                         G = G.tocsr()
 
                 # Transfer matrices to GPU
-                self.gpu_G = self.cupyx_binding.scipy.sparse.csr_matrix(G)
+                self.gpu_G = self.cupyx_binding.scipy.sparse.csr_matrix(
+                    _scipy.sparse.csr_matrix(G)
+                )
                 self.gpu_Gt = self.gpu_G.T.tocsr()
                 self.gpu_d = self.cupy_binding.asarray(d)
 
@@ -222,22 +202,27 @@ class LinearMatrix(_AbstractLikelihood):
     def misfit(self, coordinates: _numpy.ndarray) -> float:
         """
         """
-        if self.use_mkl:
+        if self.use_mkl and not self.data_covariance_matrix:
             # Use Intel's MKL to perform sparse csr matrix vector product
             return (
                 0.5
                 * _numpy.linalg.norm(
-                    (self.sparse_mkl_gemv_binding(self.G, coordinates) - self.d), ord=2
+                    (
+                        self.sparse_mkl_gemv_binding(self.G, coordinates)
+                        - self.d
+                    ),
+                    ord=2,
                 )
                 ** 2
                 / self.data_covariance
             )
-        elif self.use_cupy:
+        elif self.use_cupy and not self.data_covariance_matrix:
             # Use CuPy to perform sparse csr matrix vector product using sparse cuBLAS
             return (
                 0.5
                 * self.cupy_binding.linalg.norm(
-                    self.gpu_G.dot(self.cupy_binding.asarray(coordinates)) - self.gpu_d,
+                    self.gpu_G.dot(self.cupy_binding.asarray(coordinates))
+                    - self.gpu_d,
                     # ord=2,
                 )
                 .get()
@@ -250,109 +235,50 @@ class LinearMatrix(_AbstractLikelihood):
             # covariance operation out of the matrix-vector products
             return (
                 0.5
-                * _numpy.linalg.norm((self.G @ coordinates - self.d), ord=2) ** 2
+                * _numpy.linalg.norm((self.G @ coordinates - self.d), ord=2)
+                ** 2
                 / self.data_covariance
             )
 
         else:
             # TODO implement other case
-            raise NotImplementedError("This class is not production ready.")
+            raise NotImplementedError(
+                "We don't have the full covariance matrix implementation yet, let us"
+                "know if you would like this."
+            )
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
         """
         """
 
-        if self.use_mkl:
+        if self.use_mkl and not self.data_covariance_matrix:
             # Use Intel's MKL to perform sparse csr matrix vector product
             return (
                 self.sparse_mkl_gemv_binding(
-                    self.Gt, self.sparse_mkl_gemv_binding(self.G, coordinates) - self.d
+                    self.Gt,
+                    self.sparse_mkl_gemv_binding(self.G, coordinates) - self.d,
                 )
             ) / self.data_covariance
-        elif self.use_cupy:
+        elif self.use_cupy and not self.data_covariance_matrix:
             return (
                 self.gpu_Gt.dot(
-                    self.gpu_G.dot(self.cupy_binding.asarray(coordinates)) - self.gpu_d
+                    self.gpu_G.dot(self.cupy_binding.asarray(coordinates))
+                    - self.gpu_d
                 ).get()
             ) / self.data_covariance
         elif not self.data_covariance_matrix:
             # Data covariance is a single scalar, so we move the data covariance
             # operation out of the matrix-vector products
-            return self.G.T @ (self.G @ coordinates - self.d) / self.data_covariance
-        else:
-            raise NotImplementedError("This class is not production ready.")
-
-
-class Himmelblau(_AbstractLikelihood):
-    """Himmelblau's 2-dimensional function.
-
-    Himmelblau's function is defined as:
-
-    .. math::
-
-        f(x,y)=(x^{2}+y-11)^{2}+(x+y^{2}-7)^{2}
-    """
-
-    name: str = "Himmelblau's function"
-    dimensions: int = 2
-    annealing: float = 1
-    """Float representing the annealing (:math:`T`) of Himmelblau's function.
-    
-    Alters the misfit function in the following way:
-
-    .. math::
-
-        f(x,y)_T=\\frac{f(x,y)}{T}
-    """
-
-    def __init__(self, dimensions: int, annealing: float = 1):
-        if dimensions != 2:
-            raise NotImplementedError(
-                f"The Himmelblau function is not defined for {dimensions} parameters"
+            return (
+                self.G.T
+                @ (self.G @ coordinates - self.d)
+                / self.data_covariance
             )
-        self.annealing = annealing
+        else:
+            raise NotImplementedError(
+                "We don't have the full covariance matrix implementation yet, let us"
+                "know if you would like this."
+            )
 
-    def misfit(self, coordinates: _numpy.ndarray) -> float:
-        """Returns the value of Himmelblau's function at the given coordinates."""
-        if coordinates.shape != (self.dimensions, 1):
-            raise ValueError()
-        x = coordinates[0, 0]
-        y = coordinates[1, 0]
-        return ((x ** 2 + y - 11) ** 2 + (x + y ** 2 - 7) ** 2) / self.annealing
-
-    def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
-        """Returns a numpy.ndarray shaped as (dimensions, 1) containing the gradient of
-        Himmelblau's function at the given coordinates."""
-        x = coordinates[0]
-        y = coordinates[1]
-        gradient = _numpy.zeros((self.dimensions, 1))
-        gradient[0] = 2 * (2 * x * (x ** 2 + y - 11) + x + y ** 2 - 7)
-        gradient[1] = 2 * (x ** 2 + 2 * y * (x + y ** 2 - 7) + y - 11)
-        return gradient / self.annealing
-
-
-class Empty(_AbstractLikelihood):
-    """Null likelihood function.
-
-
-    Has zero misfit and gradient for all parameters
-    everywhere. Defined as:
-
-    .. math::
-
-        f(\\mathbf{m})=0
-
-
-    """
-
-    def __init__(self, dimensions: int):
-        self.name = "empty likelihood"
-        self.dimensions = dimensions
-
-    def misfit(self, coordinates: _numpy.ndarray) -> float:
-        """Returns zero for all arguments."""
-        return 0.0
-
-    def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
-        """Returns a vector of zeros for all arguments."""
-        return _numpy.zeros((self.dimensions, 1))
+    def generate(self):
+        raise NotImplementedError()

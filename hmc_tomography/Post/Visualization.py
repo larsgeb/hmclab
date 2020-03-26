@@ -7,6 +7,7 @@ from hmc_tomography.Post import Processing as _Processing
 from hmc_tomography.Post import Samples as _Samples
 import matplotlib.gridspec as _gridspec
 import numpy as _numpy
+import os
 
 
 def marginal_grid(
@@ -16,10 +17,11 @@ def marginal_grid(
     show: bool = True,
     colormap_2d=_plt.get_cmap("Greys"),
     color_1d="black",
+    figsize=(8, 8),
 ):
     number_of_plots = len(dimensions_list)
 
-    _plt.figure(figsize=(8, 8))
+    _plt.figure(figsize=figsize)
     gs1 = _gridspec.GridSpec(number_of_plots, number_of_plots)
     gs1.update(wspace=0.05, hspace=0.05)  # set the spacing between axes.
 
@@ -39,7 +41,13 @@ def marginal_grid(
             axis.set_xticklabels([])
             axis.tick_params(axis="x", which="both", bottom=False, top=False)
         else:
-            axis.set_xlabel(f"dimension {dimensions_list[number_of_plots-1]}")
+            axis.set_xlabel(
+                f"dimension {dimensions_list[number_of_plots-1]}"
+                f"{os.linesep}"
+                f"mean: {_numpy.mean(samples[dimensions_list[i_plot], :]):.2f}"
+                f"{os.linesep}"
+                f"std: {_numpy.std(samples[dimensions_list[i_plot], :]):.2f}"
+            )
 
         axis.set_yticklabels([])
         axis.tick_params(axis="y", which="both", left=False, right=False)
@@ -54,6 +62,13 @@ def marginal_grid(
             range=dim_range[i_plot],
             color=color_1d,
         )
+        # axis.text(
+        #     0.15,
+        #     0.9,
+        #     horizontalalignment="center",
+        #     verticalalignment="center",
+        #     transform=axis.transAxes,
+        # )
 
         for j_plot in range(i_plot):
             # print(i_plot, j_plot) # grid indices for lower left
@@ -62,13 +77,23 @@ def marginal_grid(
             # Modify axes
             if i_plot != number_of_plots - 1:
                 axis.set_xticklabels([])
-                axis.tick_params(axis="x", which="both", bottom=False, top=False)
+                axis.tick_params(
+                    axis="x", which="both", bottom=False, top=False
+                )
             else:
-                axis.set_xlabel(f"dimension {dimensions_list[j_plot]}")
+                axis.set_xlabel(
+                    f"dimension {dimensions_list[j_plot]}"
+                    f"{os.linesep}"
+                    f"mean: {_numpy.mean(samples[dimensions_list[j_plot], :]):.2f}"
+                    f"{os.linesep}"
+                    f"std: {_numpy.std(samples[dimensions_list[j_plot], :]):.2f}"
+                )
 
             if j_plot != 0:
                 axis.set_yticklabels([])
-                axis.tick_params(axis="y", which="both", left=False, right=False)
+                axis.tick_params(
+                    axis="y", which="both", left=False, right=False
+                )
             else:
                 axis.set_ylabel(f"dimension {dimensions_list[i_plot]}")
 
@@ -92,7 +117,8 @@ def marginal_grid(
             axis.axis("off")
 
             correlation = _numpy.corrcoef(
-                samples[dimensions_list[j_plot], :], samples[dimensions_list[i_plot], :]
+                samples[dimensions_list[j_plot], :],
+                samples[dimensions_list[i_plot], :],
             )[1][0]
             axis.text(
                 0.5,
@@ -150,7 +176,9 @@ def visualize_2_dimensions(
         [0.52, 0.5, 0.45, 0.4], sharex=axis_1d_traceplot
     )
 
-    axis_2d_histogram.hist2d(samples[dim1, :], samples[dim2, :], bins, cmap=colormap_2d)
+    axis_2d_histogram.hist2d(
+        samples[dim1, :], samples[dim2, :], bins, cmap=colormap_2d
+    )
     axis_1d_histogram_x.hist(samples[dim1, :], bins, color=color_1d)
     axis_1d_histogram_y.hist(
         samples[dim2, :], bins, orientation="horizontal", color=color_1d
@@ -158,10 +186,14 @@ def visualize_2_dimensions(
     axis_1d_traceplot.plot(samples[dim2, :], "--", color=color_1d)
     axis_1d_traceplot.set_xlim([0, samples[dim2, :].size])
     axis_autocorrelation.plot(
-        _Processing.autocorrelation(samples[dim1, :]), "r", label=f"Dimension {dim1}"
+        _Processing.autocorrelation(samples[dim1, :]),
+        "r",
+        label=f"Dimension {dim1}",
     )
     axis_autocorrelation.plot(
-        _Processing.autocorrelation(samples[dim2, :]), "b", label=f"Dimension {dim2}"
+        _Processing.autocorrelation(samples[dim2, :]),
+        "b",
+        label=f"Dimension {dim2}",
     )
     axis_autocorrelation.plot(
         _Processing.crosscorrelation(samples[dim1, :], samples[dim2, :]),
@@ -190,11 +222,15 @@ def visualize_2_dimensions(
     axis_1d_histogram_x.tick_params(
         axis="x", which="both", bottom=False, labelbottom=False
     )
-    axis_1d_histogram_y.tick_params(axis="y", which="both", left=False, labelleft=False)
+    axis_1d_histogram_y.tick_params(
+        axis="y", which="both", left=False, labelleft=False
+    )
     # axis_autocorrelation.tick_params(
     #     axis="x", which="both", bottom=False, labelbottom=False
     # )
-    axis_1d_traceplot.tick_params(axis="y", which="both", left=False, labelleft=False)
+    axis_1d_traceplot.tick_params(
+        axis="y", which="both", left=False, labelleft=False
+    )
 
     if show:
         _plt.show()

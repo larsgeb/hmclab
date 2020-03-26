@@ -7,13 +7,12 @@ from abc import abstractmethod as _abstractmethod
 import h5py as _h5py
 import numpy as _numpy
 import time as _time
-import tqdm as _tqdm
+import tqdm.auto as _tqdm_au
 import warnings as _warnings
 from typing import Tuple as _Tuple
 
-from hmc_tomography.Priors import _AbstractPrior
+from hmc_tomography.Distributions import _AbstractDistribution
 from hmc_tomography.MassMatrices import _AbstractMassMatrix
-from hmc_tomography.Likelihoods import _AbstractLikelihood
 
 
 class _AbstractSampler(_ABC):
@@ -23,8 +22,7 @@ class _AbstractSampler(_ABC):
 
     name: str = "Monte Carlo sampler abstract base class"
     dimensions: int = -1
-    prior: _AbstractPrior
-    target: _AbstractLikelihood
+    target: _AbstractDistribution
     sample_hdf5_file = None
     sample_hdf5_dataset = None
     sample_ram_buffer: _numpy.ndarray
@@ -41,7 +39,7 @@ class _AbstractSampler(_ABC):
         proposals: int = 100,
         online_thinning: int = 1,
         sample_ram_buffer_size: int = 1000,
-    ) -> int:
+    ):
         """
         Parameters
         ----------
@@ -60,40 +58,15 @@ class HMC(_AbstractSampler):
     """
 
     name = "Hamiltonian Monte Carlo sampler"
-    mass_matrix: _AbstractMassMatrix
+    mass_matrix: _AbstractMassMatrix = None
 
-    def __init__(
-        self,
-        target: _AbstractLikelihood,
-        mass_matrix: _AbstractMassMatrix,
-        prior: _AbstractPrior,
-    ):
-        """
-
-        Parameters
-        ----------
-        target
-        mass_matrix
-        prior
-        """
-        # Sanity check on the dimensions of passed objects ---------------------
-        if not (target.dimensions == prior.dimensions == mass_matrix.dimensions):
-            raise ValueError(
-                "Incompatible target/prior/mass matrix.\r\n"
-                f"Target dimensions:\t\t{target.dimensions}.\r\n"
-                f"Prior dimensions:\t\t{prior.dimensions}.\r\n"
-                f"Mass matrix dimensions:\t{mass_matrix.dimensions}.\r\n"
-            )
-
-        # Setting the passed objects -------------------------------------------
-        self.dimensions = target.dimensions
-        self.prior = prior
-        self.mass_matrix = mass_matrix
-        self.target = target
-        self.mass_matrix_update_hook = getattr(self.mass_matrix, "update", None)
+    def __init__(self,):
+        pass
 
     def sample(
         self,
+        target: _AbstractDistribution,
+        mass_matrix: _AbstractMassMatrix,
         samples_filename: str,
         proposals: int = 100,
         online_thinning: int = 1,
@@ -107,7 +80,8 @@ class HMC(_AbstractSampler):
         suppress_warnings: bool = True,
         overwrite_samples: bool = False,
         stages: int = 1,
-    ) -> int:
+        update_rate: int = 100,
+    ):
         """
 
         Parameters
@@ -127,6 +101,24 @@ class HMC(_AbstractSampler):
         -------
 
         """
+
+        # Sanity check on the dimensions of passed objects ---------------------
+        if not (target.dimensions == mass_matrix.dimensions):
+            raise ValueError(
+                "Incompatible target/target/mass matrix.\r\n"
+                f"Target dimensions:\t\t{target.dimensions}.\r\n"
+                f"Mass matrix dimensions:\t{mass_matrix.dimensions}.\r\n"
+            )
+
+        # Setting the passed objects -------------------------------------------
+        self.dimensions = target.dimensions
+        self.target = target
+        self.mass_matrix = mass_matrix
+
+        # Try to get update hook, default to None if there isn't one
+        # Update hooks are used for mass matrix that perform an action when sampling,
+        # i.e. autotuning.
+        self.mass_matrix_update_hook = getattr(mass_matrix, "update", None)
 
         # If suppress warnings ---------------------------------------------------------
         if suppress_warnings:
@@ -148,12 +140,16 @@ class HMC(_AbstractSampler):
         )
 
         # Create or open HDF5 file
-        total_samples_to_be_generated = int((1.0 / online_thinning) * proposals)
+        total_samples_to_be_generated = int(
+            (1.0 / online_thinning) * proposals
+        )
 
         # Open file, with some intricate logic
 
         return_code = self.open_samples_hdf5(
-            samples_filename, total_samples_to_be_generated, overwrite=overwrite_samples
+            samples_filename,
+            total_samples_to_be_generated,
+            overwrite=overwrite_samples,
         )
         if return_code == 1:
             return 1
@@ -164,7 +160,9 @@ class HMC(_AbstractSampler):
         self.sample_hdf5_dataset.attrs["online_thinning"] = online_thinning
         self.sample_hdf5_dataset.attrs["time_step"] = time_step
         self.sample_hdf5_dataset.attrs["integration_steps"] = integration_steps
-        self.sample_hdf5_dataset.attrs["randomizetime_step"] = randomize_time_step
+        self.sample_hdf5_dataset.attrs[
+            "randomizetime_step"
+        ] = randomize_time_step
         self.sample_hdf5_dataset.attrs[
             "randomize_iterations"
         ] = randomize_integration_steps
@@ -180,9 +178,17 @@ class HMC(_AbstractSampler):
         _time.sleep(0.001)
 
         # Create progress bar
-        proposals_total = _tqdm.trange(
-            proposals, desc="Sampling. Acceptance rate:", leave=True
-        )
+        try:
+            proposals_total = _tqdm_au.trange(
+                proposals,
+                desc="Sampling. Acceptance rate:",
+                leave=True,
+                dynamic_ncols=True,
+            )
+        except:
+            proposals_total = _tqdm_au.trange(
+                proposals, desc="Sampling. Acceptance rate:", leave=True,
+            )
 
         # Sampling acceptance history
         acceptance_history = _numpy.zeros((100,))
@@ -222,9 +228,7 @@ class HMC(_AbstractSampler):
             for proposal in proposals_total:
 
                 # Compute initial Hamiltonian
-                potential: float = self.target.misfit(coordinates) + self.prior.misfit(
-                    coordinates
-                )
+                potential: float = self.target.misfit(coordinates)
                 momentum = self.mass_matrix.generate_momentum()
                 kinetic: float = self.mass_matrix.kinetic_energy(momentum)
                 hamiltonian: float = potential + kinetic
@@ -235,21 +239,25 @@ class HMC(_AbstractSampler):
                 )
 
                 # Compute resulting Hamiltonian
-                new_potential: float = self.target.misfit(
-                    new_coordinates
-                ) + self.prior.misfit(new_coordinates)
-                new_kinetic: float = self.mass_matrix.kinetic_energy(new_momentum)
+                new_potential: float = self.target.misfit(new_coordinates)
+                new_kinetic: float = self.mass_matrix.kinetic_energy(
+                    new_momentum
+                )
                 new_hamiltonian: float = new_potential + new_kinetic
 
                 # Evaluate acceptance criterion
-                if _numpy.exp(hamiltonian - new_hamiltonian) > _numpy.random.uniform(
-                    0, 1
-                ):
+                if _numpy.exp(
+                    hamiltonian - new_hamiltonian
+                ) > _numpy.random.uniform(0, 1):
                     accepted += 1
                     coordinates = new_coordinates.copy()
-                    acceptance_history = _numpy.append([1], acceptance_history[0:-1])
+                    acceptance_history = _numpy.append(
+                        [1], acceptance_history[0:-1]
+                    )
                 else:
-                    acceptance_history = _numpy.append([0], acceptance_history[0:-1])
+                    acceptance_history = _numpy.append(
+                        [0], acceptance_history[0:-1]
+                    )
 
                 if (
                     callable(self.mass_matrix_update_hook)
@@ -262,28 +270,36 @@ class HMC(_AbstractSampler):
                     buffer_location: int = int(
                         (proposal / online_thinning) % sample_ram_buffer_size
                     )
-                    self.sample_ram_buffer[:-1, buffer_location] = coordinates[:, 0]
-                    self.sample_ram_buffer[-1, buffer_location] = self.target.misfit(
+                    self.sample_ram_buffer[:-1, buffer_location] = coordinates[
+                        :, 0
+                    ]
+                    self.sample_ram_buffer[
+                        -1, buffer_location
+                    ] = self.target.misfit(
                         coordinates
-                    ) + self.prior.misfit(coordinates)
+                    )  # TODO Optimize this
 
                     # Total acceptance rate
                     tot_acc = accepted / (proposal + 1)
 
                     # Last 100 acceptance rate
                     loc_acc = _numpy.sum(acceptance_history) / min(
-                        100.0, current_proposal
+                        100.0, current_proposal + 1
                     )
 
-                    proposals_total.set_description(
-                        f"Tot. acc rate: {tot_acc:.2f}. "
-                        f"Last 100 acc rate: {loc_acc:.2f}. "
-                        "Progress"
-                    )
+                    if proposal % update_rate:
+                        proposals_total.set_description(
+                            f"Tot. acc rate: {tot_acc:.2f}. "
+                            f"Last 100 acc rate: {loc_acc:.2f}. "
+                            "Progress",
+                            refresh=False,
+                        )
                     # Write out to disk when at the end of the buffer
                     if buffer_location == sample_ram_buffer_size - 1:
                         start = int(
-                            (proposal / online_thinning) - sample_ram_buffer_size + 1
+                            (proposal / online_thinning)
+                            - sample_ram_buffer_size
+                            + 1
                         )
                         end = int((proposal / online_thinning))
                         self.flush_samples(start, end, self.sample_ram_buffer)
@@ -305,7 +321,10 @@ class HMC(_AbstractSampler):
 
             # Write out one less to be sure
             end = int(proposal / online_thinning) - 1
-            if end - start + 1 > 0 and buffer_location != sample_ram_buffer_size - 1:
+            if (
+                end - start + 1 > 0
+                and buffer_location != sample_ram_buffer_size - 1
+            ):
                 self.flush_samples(
                     start, end, self.sample_ram_buffer[:, :buffer_location]
                 )
@@ -323,8 +342,6 @@ class HMC(_AbstractSampler):
         # Flush output
         _sys.stdout.flush()
         _time.sleep(0.001)
-
-        return 0
 
     def propagate_leapfrog(
         self,
@@ -354,27 +371,25 @@ class HMC(_AbstractSampler):
         # Leapfrog integration -------------------------------------------------
         # Coordinates half step before loop
         coordinates += (
-            0.5 * time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
+            0.5
+            * time_step
+            * self.mass_matrix.kinetic_energy_gradient(momentum)
         )
-        self.prior.corrector(coordinates, momentum)
+        self.target.corrector(coordinates, momentum)
 
         # Integration loop
         for i in range(iterations - 1):
-            potential_gradient = self.target.gradient(
-                coordinates
-            ) + self.prior.gradient(coordinates)
+            potential_gradient = self.target.gradient(coordinates)
             momentum -= time_step * potential_gradient
-            coordinates += time_step * self.mass_matrix.kinetic_energy_gradient(
-                momentum
+            coordinates += (
+                time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
             )
 
             # Correct bounds
-            self.prior.corrector(coordinates, momentum)
+            self.target.corrector(coordinates, momentum)
 
         # Full momentum and half step coordinates after loop
-        potential_gradient = self.target.gradient(coordinates) + self.prior.gradient(
-            coordinates
-        )
+        potential_gradient = self.target.gradient(coordinates)
 
         # For the update
         update_coordinates = _numpy.copy(coordinates)
@@ -382,10 +397,12 @@ class HMC(_AbstractSampler):
 
         momentum -= time_step * potential_gradient
         coordinates += (
-            0.5 * time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
+            0.5
+            * time_step
+            * self.mass_matrix.kinetic_energy_gradient(momentum)
         )
 
-        self.prior.corrector(coordinates, momentum)
+        self.target.corrector(coordinates, momentum)
 
         return coordinates, momentum, update_coordinates, update_gradient
 
@@ -417,19 +434,21 @@ class HMC(_AbstractSampler):
         # Leapfrog integration -------------------------------------------------
         for i in range(iterations):
             coordinates += (
-                0.5 * time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
+                0.5
+                * time_step
+                * self.mass_matrix.kinetic_energy_gradient(momentum)
             )
-            self.prior.corrector(coordinates, momentum)
+            self.target.corrector(coordinates, momentum)
 
-            potential_gradient = self.target.gradient(
-                coordinates
-            ) + self.prior.gradient(coordinates)
+            potential_gradient = self.target.gradient(coordinates)
             momentum -= time_step * potential_gradient
 
             coordinates += (
-                0.5 * time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
+                0.5
+                * time_step
+                * self.mass_matrix.kinetic_energy_gradient(momentum)
             )
-            self.prior.corrector(coordinates, momentum)
+            self.target.corrector(coordinates, momentum)
 
         # For the update
         update_coordinates = _numpy.copy(coordinates)
@@ -479,48 +498,50 @@ class HMC(_AbstractSampler):
         for i in range(iterations):
 
             # A1
-            coordinates += a1 * self.mass_matrix.kinetic_energy_gradient(momentum)
-            self.prior.corrector(coordinates, momentum)
+            coordinates += a1 * self.mass_matrix.kinetic_energy_gradient(
+                momentum
+            )
+            self.target.corrector(coordinates, momentum)
 
             # B1
-            potential_gradient = self.target.gradient(
-                coordinates
-            ) + self.prior.gradient(coordinates)
+            potential_gradient = self.target.gradient(coordinates)
             momentum -= b1 * potential_gradient
 
             # A2
-            coordinates += a2 * self.mass_matrix.kinetic_energy_gradient(momentum)
-            self.prior.corrector(coordinates, momentum)
+            coordinates += a2 * self.mass_matrix.kinetic_energy_gradient(
+                momentum
+            )
+            self.target.corrector(coordinates, momentum)
 
             # B2
-            potential_gradient = self.target.gradient(
-                coordinates
-            ) + self.prior.gradient(coordinates)
+            potential_gradient = self.target.gradient(coordinates)
             momentum -= b2 * potential_gradient
 
             # A3
-            coordinates += a3 * self.mass_matrix.kinetic_energy_gradient(momentum)
-            self.prior.corrector(coordinates, momentum)
+            coordinates += a3 * self.mass_matrix.kinetic_energy_gradient(
+                momentum
+            )
+            self.target.corrector(coordinates, momentum)
 
             # B2
-            potential_gradient = self.target.gradient(
-                coordinates
-            ) + self.prior.gradient(coordinates)
+            potential_gradient = self.target.gradient(coordinates)
             momentum -= b2 * potential_gradient
 
             # A2
-            coordinates += a2 * self.mass_matrix.kinetic_energy_gradient(momentum)
-            self.prior.corrector(coordinates, momentum)
+            coordinates += a2 * self.mass_matrix.kinetic_energy_gradient(
+                momentum
+            )
+            self.target.corrector(coordinates, momentum)
 
             # B1
-            potential_gradient = self.target.gradient(
-                coordinates
-            ) + self.prior.gradient(coordinates)
+            potential_gradient = self.target.gradient(coordinates)
             momentum -= b1 * potential_gradient
 
             # A1
-            coordinates += a1 * self.mass_matrix.kinetic_energy_gradient(momentum)
-            self.prior.corrector(coordinates, momentum)
+            coordinates += a1 * self.mass_matrix.kinetic_energy_gradient(
+                momentum
+            )
+            self.target.corrector(coordinates, momentum)
 
         # For the update
         update_coordinates = _numpy.copy(coordinates)
@@ -568,38 +589,40 @@ class HMC(_AbstractSampler):
         for i in range(iterations):
 
             # A1
-            coordinates += a1 * self.mass_matrix.kinetic_energy_gradient(momentum)
-            self.prior.corrector(coordinates, momentum)
+            coordinates += a1 * self.mass_matrix.kinetic_energy_gradient(
+                momentum
+            )
+            self.target.corrector(coordinates, momentum)
 
             # B1
-            potential_gradient = self.target.gradient(
-                coordinates
-            ) + self.prior.gradient(coordinates)
+            potential_gradient = self.target.gradient(coordinates)
             momentum -= b1 * potential_gradient
 
             # A2
-            coordinates += a2 * self.mass_matrix.kinetic_energy_gradient(momentum)
-            self.prior.corrector(coordinates, momentum)
+            coordinates += a2 * self.mass_matrix.kinetic_energy_gradient(
+                momentum
+            )
+            self.target.corrector(coordinates, momentum)
 
             # B2
-            potential_gradient = self.target.gradient(
-                coordinates
-            ) + self.prior.gradient(coordinates)
+            potential_gradient = self.target.gradient(coordinates)
             momentum -= b2 * potential_gradient
 
             # A2
-            coordinates += a2 * self.mass_matrix.kinetic_energy_gradient(momentum)
-            self.prior.corrector(coordinates, momentum)
+            coordinates += a2 * self.mass_matrix.kinetic_energy_gradient(
+                momentum
+            )
+            self.target.corrector(coordinates, momentum)
 
             # B1
-            potential_gradient = self.target.gradient(
-                coordinates
-            ) + self.prior.gradient(coordinates)
+            potential_gradient = self.target.gradient(coordinates)
             momentum -= b1 * potential_gradient
 
             # A1
-            coordinates += a1 * self.mass_matrix.kinetic_energy_gradient(momentum)
-            self.prior.corrector(coordinates, momentum)
+            coordinates += a1 * self.mass_matrix.kinetic_energy_gradient(
+                momentum
+            )
+            self.target.corrector(coordinates, momentum)
 
         # For the update
         update_coordinates = _numpy.copy(coordinates)
@@ -635,7 +658,10 @@ class HMC(_AbstractSampler):
 
             # Create dataset
             self.sample_hdf5_dataset = self.sample_hdf5_file.create_dataset(
-                "samples_0", (self.dimensions + 1, length), dtype=dtype, chunks=True
+                "samples_0",
+                (self.dimensions + 1, length),
+                dtype=dtype,
+                chunks=True,
             )
 
             # Update the filename in the sampler object for later retrieval
@@ -664,7 +690,9 @@ class HMC(_AbstractSampler):
                         f"{name} also exists. (n)ew file name, (o)verwrite or (a)bort? >> "
                     )
                 else:
-                    input_choice = input("(n)ew file name, (o)verwrite or (a)bort? >> ")
+                    input_choice = input(
+                        "(n)ew file name, (o)verwrite or (a)bort? >> "
+                    )
 
                 if input_choice == "n":
                     # User wants a new file

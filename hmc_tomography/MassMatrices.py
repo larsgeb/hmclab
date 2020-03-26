@@ -29,7 +29,9 @@ class _AbstractMassMatrix(_ABC):
         float()
 
     @_abstractmethod
-    def kinetic_energy_gradient(self, momentum: _numpy.ndarray) -> _numpy.ndarray:
+    def kinetic_energy_gradient(
+        self, momentum: _numpy.ndarray
+    ) -> _numpy.ndarray:
         """Abstract method for computing kinetic energy gradient for a given
         momentum.
 
@@ -68,9 +70,11 @@ class Unit(_AbstractMassMatrix):
                 f"The passed momentum vector is not of the right dimensions, "
                 f"which would be ({self.dimensions, 1})."
             )
-        return 0.5 * (momentum.T @ momentum).item(0)
+        return 0.5 * (momentum.T @ momentum).item(0)  # TODO optimize
 
-    def kinetic_energy_gradient(self, momentum: _numpy.ndarray) -> _numpy.ndarray:
+    def kinetic_energy_gradient(
+        self, momentum: _numpy.ndarray
+    ) -> _numpy.ndarray:
         """
 
         Parameters
@@ -104,6 +108,7 @@ class Unit(_AbstractMassMatrix):
 
 
 class Diagonal(_AbstractMassMatrix):
+    # TODO remove dimensions
     def __init__(self, dimensions: int, diagonal: _numpy.ndarray = None):
         """Constructor for diagonal mass matrices.
 
@@ -140,7 +145,9 @@ class Diagonal(_AbstractMassMatrix):
         """
         return 0.5 * _numpy.vdot(momentum, self.inverse_diagonal * momentum)
 
-    def kinetic_energy_gradient(self, momentum: _numpy.ndarray) -> _numpy.ndarray:
+    def kinetic_energy_gradient(
+        self, momentum: _numpy.ndarray
+    ) -> _numpy.ndarray:
         """
 
         Parameters
@@ -160,7 +167,9 @@ class Diagonal(_AbstractMassMatrix):
         -------
 
         """
-        return _numpy.sqrt(self.diagonal) * _numpy.random.randn(self.dimensions, 1)
+        return _numpy.sqrt(self.diagonal) * _numpy.random.randn(
+            self.dimensions, 1
+        )
 
     @property
     def matrix(self) -> _numpy.ndarray:
@@ -213,7 +222,9 @@ class LBFGS(_AbstractMassMatrix):
     def kinetic_energy(self, momentum: _numpy.ndarray) -> float:
         return 0.5 * _numpy.vdot(momentum, self.Hinv(momentum))
 
-    def kinetic_energy_gradient(self, momentum: _numpy.ndarray) -> _numpy.ndarray:
+    def kinetic_energy_gradient(
+        self, momentum: _numpy.ndarray
+    ) -> _numpy.ndarray:
         return self.Hinv(momentum)
 
     def generate_momentum(self) -> _numpy.ndarray:
@@ -286,14 +297,18 @@ class LBFGS(_AbstractMassMatrix):
             self.y[:, self.current_number_of_gradients - 1] = y.flatten()
             self.u[:, self.current_number_of_gradients - 1] = u.flatten()
             self.v[:, self.current_number_of_gradients - 1] = v.flatten()
-            self.vTu[self.current_number_of_gradients - 1] = 1.0 + _numpy.vdot(v, u)
+            self.vTu[self.current_number_of_gradients - 1] = 1.0 + _numpy.vdot(
+                v, u
+            )
 
     def S(self, h):
 
         for i in range(self.current_number_of_gradients):
             h = (
                 h
-                - self.v[:, i, None] * _numpy.vdot(self.u[:, i, None], h) / self.vTu[i]
+                - self.v[:, i, None]
+                * _numpy.vdot(self.u[:, i, None], h)
+                / self.vTu[i]
             )
         assert h.shape == (self.dimensions, 1)
         return h
@@ -303,7 +318,9 @@ class LBFGS(_AbstractMassMatrix):
         for i in range(self.current_number_of_gradients - 1, -1, -1):
             h = (
                 h
-                - self.u[:, i, None] * _numpy.vdot(self.v[:, i, None], h) / self.vTu[i]
+                - self.u[:, i, None]
+                * _numpy.vdot(self.v[:, i, None], h)
+                / self.vTu[i]
             )
         assert h.shape == (self.dimensions, 1)
         return h
