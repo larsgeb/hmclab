@@ -17,3 +17,4 @@ examples/notebooks/bin_samples/*
 *_movie
 docs-source/source/examples
 *.ipynb_checkpoints
+*.NOGIT
