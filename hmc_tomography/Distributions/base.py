@@ -1,6 +1,5 @@
-"""Distribution classes and associated methods.
-"""
 from abc import ABC as _ABC
+from abc import ABCMeta as _ABCMeta
 from abc import abstractmethod as _abstractmethod
 from typing import List as _List
 from typing import Union as _Union
@@ -8,18 +7,26 @@ import warnings as _warnings
 import numpy as _numpy
 import scipy as _scipy
 import scipy.sparse as _sparse
+from hmc_tomography.Helpers.better_abc import ABCMeta as _ABCMeta
+from hmc_tomography.Helpers.better_abc import abstract_attribute as _abstract_attribute
 
 
-class _AbstractDistribution(_ABC):
-    """Distribution abstract base class
+class _AbstractDistribution(metaclass=_ABCMeta):
+    """Abstract base class for distributions.
 
     """
 
     name: str = "abstract distribution"
     """Name of the distribution."""
 
-    dimensions: int = -1
-    """Model space dimension of the distribution."""
+    @_abstract_attribute
+    def dimensions(self):
+        """Number of dimensions of the model space.
+        
+        This is an abstract parameter. If it is not defined either in your class
+        directly or in its constructor (the __init__ function) then attempting to use 
+        the class will raise a NotImplementedError."""
+        pass
 
     lower_bounds: _Union[_numpy.ndarray, None] = None
     """Lower bounds for every parameter. If initialized to None, no bounds are used."""
@@ -71,8 +78,8 @@ class _AbstractDistribution(_ABC):
             The distribution misfit gradient :math:`\\nabla_\\mathbf{m}\\chi`.
 
 
-        The distribution misfit gradient is related to the distribution probability density
-        as:
+        The distribution misfit gradient is related to the distribution probability 
+        density as:
 
         .. math::
 
@@ -92,11 +99,12 @@ class _AbstractDistribution(_ABC):
         Returns
         -------
         sample : numpy.ndarray
-            A numpy array shaped as (dimensions, 1) containing a sample of the distribution.
+            A numpy array shaped as (dimensions, 1) containing a sample of the
+            distribution.
 
         Raises
         ------
-        TypeError
+        NotImplementedError
             If the distribution does not allow generation of samples.
 
 
@@ -172,15 +180,9 @@ class _AbstractDistribution(_ABC):
         """
 
         # Check the types --------------------------------------------------------------
-        if (
-            lower_bounds is not None
-            and type(lower_bounds) is not _numpy.ndarray
-        ):
+        if lower_bounds is not None and type(lower_bounds) is not _numpy.ndarray:
             raise ValueError("Lower bounds object not understood.")
-        if (
-            upper_bounds is not None
-            and type(upper_bounds) is not _numpy.ndarray
-        ):
+        if upper_bounds is not None and type(upper_bounds) is not _numpy.ndarray:
             raise ValueError("Upper bounds object not understood.")
 
         # Set the bounds ---------------------------------------------------------------
@@ -217,6 +219,30 @@ class _AbstractDistribution(_ABC):
         ):
             return _numpy.inf
         return 0.0
+
+
+class StandardNormal1D(_AbstractDistribution):
+    """Standard normal distribution in 1 dimension."""
+
+    mean = 0.0
+    std = 1.0
+    dimensions = 1
+    name = "Standard normal distribution in 1 dimension."
+
+    def misfit(self, m: _numpy.ndarray) -> float:
+        assert m.shape == (1, 1)
+
+        # return 0.5 * (m - mean) ** 2 / std ** 2
+        return 0.5 * m ** 2
+
+    def gradient(self, m: _numpy.ndarray) -> _numpy.ndarray:
+        assert m.shape == (1, 1)
+
+        # return 2 * (m - mean) / std ** 2
+        return m
+
+    def generate(self) -> _numpy.ndarray:
+        raise NotImplementedError()
 
 
 class Normal(_AbstractDistribution):
@@ -344,9 +370,7 @@ class Normal(_AbstractDistribution):
             self.inverse_covariance: _numpy.ndarray = 1.0 / self.covariance
         else:
             # Else, brute force calculate the inverse using numpy.
-            self.inverse_covariance: _numpy.ndarray = _numpy.linalg.inv(
-                self.covariance
-            )
+            self.inverse_covariance: _numpy.ndarray = _numpy.linalg.inv(self.covariance)
 
         # Process optional bounds ------------------------------------------------------
         self.update_bounds(lower_bounds, upper_bounds)
@@ -381,7 +405,7 @@ class Normal(_AbstractDistribution):
             ) + self.misfit_bounds(coordinates)
 
     def generate(self) -> _numpy.ndarray:
-        raise NotImplementedError("This function is not finished yet")
+        raise NotImplementedError()
 
 
 class Laplace(_AbstractDistribution):
@@ -560,10 +584,7 @@ class LogNormal(Normal):
                 + 0.5
                 * (
                     (self.means - logarithmic_coordinates).T
-                    @ (
-                        self.inverse_covariance
-                        * (self.means - logarithmic_coordinates)
-                    )
+                    @ (self.inverse_covariance * (self.means - logarithmic_coordinates))
                 ).item(0)
                 + self.misfit_bounds(coordinates)
             )
@@ -616,8 +637,6 @@ class Uniform(_AbstractDistribution):
 
     Parameters
     ----------
-    dimensions : int
-        Dimension of the distribution.
     lower_bounds: numpy.ndarray or None
         Numpy array of shape (dimensions, 1) that contains the lower limits of each
         parameter.
@@ -657,9 +676,7 @@ class Uniform(_AbstractDistribution):
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
         """Method to compute the gradient of a uniform distribution.
         """
-        return _numpy.zeros((self.dimensions, 1)) + self.misfit_bounds(
-            coordinates
-        )
+        return _numpy.zeros((self.dimensions, 1)) + self.misfit_bounds(coordinates)
 
     def generate(self) -> _numpy.ndarray:
         raise NotImplementedError("This function is not implemented yet.")
@@ -715,9 +732,7 @@ class CompositeDistribution(_AbstractDistribution):
                 MultiplicativeDistribution,
             ]:
                 available_distributions.remove(distribution_to_remove)
-            selected_classes = _numpy.random.choice(
-                available_distributions, dimensions
-            )
+            selected_classes = _numpy.random.choice(available_distributions, dimensions)
             self.separate_distributions = [
                 selected_class(1) for selected_class in selected_classes
             ]
@@ -732,13 +747,9 @@ class CompositeDistribution(_AbstractDistribution):
         # Assert that the passed distributions actually do represent the correct amount of
         # dimensions, and seperately extract the size of each distribution
         computed_dimensions: int = 0
-        for i_distribution, distribution in enumerate(
-            self.separate_distributions
-        ):
+        for i_distribution, distribution in enumerate(self.separate_distributions):
             computed_dimensions += distribution.dimensions
-            self.enumerated_dimensions[
-                i_distribution
-            ] = distribution.dimensions
+            self.enumerated_dimensions[i_distribution] = distribution.dimensions
 
         self.dimensions = computed_dimensions
 
@@ -759,9 +770,7 @@ class CompositeDistribution(_AbstractDistribution):
         misfit = 0.0
 
         # Loop over distributions and add misfit ----------------------------------------------
-        for i_distribution, distribution in enumerate(
-            self.separate_distributions
-        ):
+        for i_distribution, distribution in enumerate(self.separate_distributions):
             misfit += distribution.misfit(split_coordinates[i_distribution])
 
         return misfit + self.misfit_bounds(coordinates)
@@ -775,12 +784,8 @@ class CompositeDistribution(_AbstractDistribution):
         gradients = []
 
         # Loop over distributions and compute gradient ----------------------------------------
-        for i_distribution, distribution in enumerate(
-            self.separate_distributions
-        ):
-            gradients.append(
-                distribution.gradient(split_coordinates[i_distribution])
-            )
+        for i_distribution, distribution in enumerate(self.separate_distributions):
+            gradients.append(distribution.gradient(split_coordinates[i_distribution]))
 
         # Vertically stack gradients ---------------------------------------------------
         gradient = _numpy.vstack(gradients)
@@ -841,15 +846,12 @@ class CompositeDistribution(_AbstractDistribution):
             )
 
             # And loop over separate distributions to check bounds
-            for i_distribution, distribution in enumerate(
-                self.separate_distributions
-            ):
+            for i_distribution, distribution in enumerate(self.separate_distributions):
 
                 if distribution.lower_bounds is not None:
                     # Lower bound correction
                     too_low = (
-                        split_coordinates[i_distribution]
-                        < distribution.lower_bounds
+                        split_coordinates[i_distribution] < distribution.lower_bounds
                     )
                     split_coordinates[i_distribution][too_low] += 2 * (
                         distribution.lower_bounds[too_low]
@@ -859,8 +861,7 @@ class CompositeDistribution(_AbstractDistribution):
                 if distribution.upper_bounds is not None:
                     # Upper bound correction
                     too_high = (
-                        split_coordinates[i_distribution]
-                        > distribution.upper_bounds
+                        split_coordinates[i_distribution] > distribution.upper_bounds
                     )
                     split_coordinates[i_distribution][too_high] += 2 * (
                         distribution.upper_bounds[too_high]
@@ -870,6 +871,12 @@ class CompositeDistribution(_AbstractDistribution):
 
 
 class AdditiveDistribution(_AbstractDistribution):
+    """Distribution generated by summing the characteristic functions of two other 
+    distributions.
+    
+    This is essentially the unnormalized Bayes' rule.
+    """
+
     def __init__(
         self,
         list_of_distributions: _List[_AbstractDistribution] = None,
@@ -881,12 +888,11 @@ class AdditiveDistribution(_AbstractDistribution):
 
         # Automatically get dimensionality ...
         if list_of_distributions is not None:
-            # ... from means
-            dimensions = list_of_distributions[0].dimensions
+            # ... from first distribution
+            self.dimensions = list_of_distributions[0].dimensions
         else:
             # If no means is provided, use 2 dimensions
-            dimensions = override_dimensions
-        self.dimensions = dimensions
+            self.dimensions = override_dimensions
 
         if list_of_distributions is not None:
             self.separate_distributions: _List[
@@ -905,23 +911,20 @@ class AdditiveDistribution(_AbstractDistribution):
                 available_distributions.remove(distribution_to_remove)
             selected_classes = _numpy.random.choice(available_distributions, 3)
             self.separate_distributions = [
-                selected_class(dimensions)
-                for selected_class in selected_classes
+                selected_class(dimensions) for selected_class in selected_classes
             ]
 
         # Assert that the passed distributions are of the right dimension
-        for i_distribution, distribution in enumerate(
-            self.separate_distributions
-        ):
-            assert distribution.dimensions == dimensions
+        for i_distribution, distribution in enumerate(self.separate_distributions):
+            assert distribution.dimensions == self.dimensions
+
+        self.collapse_bounds()
 
     def misfit(self, coordinates: _numpy.ndarray) -> float:
         misfit = 0.0
 
         # Loop over distributions and add misfit ----------------------------------------------
-        for i_distribution, distribution in enumerate(
-            self.separate_distributions
-        ):
+        for i_distribution, distribution in enumerate(self.separate_distributions):
             misfit += distribution.misfit(coordinates)
 
         return misfit + self.misfit_bounds(coordinates)
@@ -930,9 +933,7 @@ class AdditiveDistribution(_AbstractDistribution):
         gradient = _numpy.zeros((self.dimensions, 1))
 
         # Loop over distributions and compute gradient ----------------------------------------
-        for i_distribution, distribution in enumerate(
-            self.separate_distributions
-        ):
+        for i_distribution, distribution in enumerate(self.separate_distributions):
             gradient += distribution.gradient(coordinates)
 
         assert gradient.shape == coordinates.shape
@@ -945,12 +946,53 @@ class AdditiveDistribution(_AbstractDistribution):
     def collapse_bounds(self):
         """Method to restructure all composite bounds into top level object.
         """
-        raise NotImplementedError()
+        # Iterate over all subdistributions
+        for i_distribution, distribution in enumerate(self.separate_distributions):
+
+            # Assert that every subdistribution has the right shape
+            assert distribution.dimensions == self.dimensions
+
+            # If the subdistribution has lower bounds ... act
+            if distribution.lower_bounds is not None:
+
+                # Assert the bounds have the right shape
+                assert distribution.lower_bounds.shape == (self.dimensions, 1)
+
+                if self.lower_bounds is None:
+                    # If the top level distribution doesn't have lower bounds yet,
+                    # simply add the new bounds
+                    self.lower_bounds = distribution.lower_bounds
+                else:
+                    # If the top level distribution does already have lower bounds, take
+                    #  the maximum of every separate bound
+                    self.lower_bounds = _numpy.maximum(
+                        self.lower_bounds, distribution.lower_bounds
+                    )
+
+            # If the subdistribution has upper bounds ... act
+            if distribution.upper_bounds is not None:
+
+                # Assert the bounds have the right shape
+                assert distribution.upper_bounds.shape == (self.dimensions, 1)
+
+                if self.upper_bounds is None:
+                    # If the top level distribution doesn't have upper bounds yet,
+                    # simply add the new bounds
+                    self.upper_bounds = distribution.upper_bounds
+                else:
+                    # If the top level distribution does already have upper bounds, take
+                    # the minimum of every separate bound
+                    self.upper_bounds = _numpy.minimum(
+                        self.upper_bounds, distribution.upper_bounds
+                    )
 
     def add_distribution(self, distribution: _AbstractDistribution):
         """Add a distribution to the object."""
-        distribution.dimensions == dimensions
+        assert distribution.dimensions == self.dimensions
+
         self.separate_distributions.append(distribution)
+
+        self.collapse_bounds()
 
     def corrector(self, coordinates: _numpy.ndarray, momentum: _numpy.ndarray):
         """Override method to correct an HMC particle for additive distribution, which is
@@ -1017,8 +1059,10 @@ class AdditiveDistribution(_AbstractDistribution):
         #             split_momenta[i_distribution][too_high] *= -1.0
 
 
-# Create an alias for AdditiveDistribution
+# This creates an alias for AdditiveDistribution
 class BayesRule(AdditiveDistribution):
+    """A class to apply (the unnormalized) Bayes' rule to two or more distributions."""
+
     pass
 
 
@@ -1034,8 +1078,9 @@ class Himmelblau(_AbstractDistribution):
 
     name: str = "Himmelblau's function"
     dimensions: int = 2
-    annealing: float = 1
-    """Float representing the annealing (:math:`T`) of Himmelblau's function.
+    temperature: float = 1
+    """Float representing the temperature (or annealing, :math:`T`) of Himmelblau's
+    function.
     
     Alters the misfit function in the following way:
 
@@ -1044,8 +1089,8 @@ class Himmelblau(_AbstractDistribution):
         f(x,y)_T=\\frac{f(x,y)}{T}
     """
 
-    def __init__(self, annealing: float = 1):
-        self.annealing = annealing
+    def __init__(self, temperature: float = 1):
+        self.temperature = temperature
 
     def misfit(self, coordinates: _numpy.ndarray) -> float:
         """Returns the value of Himmelblau's function at the given coordinates."""
@@ -1053,9 +1098,7 @@ class Himmelblau(_AbstractDistribution):
             raise ValueError()
         x = coordinates[0, 0]
         y = coordinates[1, 0]
-        return (
-            (x ** 2 + y - 11) ** 2 + (x + y ** 2 - 7) ** 2
-        ) / self.annealing
+        return ((x ** 2 + y - 11) ** 2 + (x + y ** 2 - 7) ** 2) / self.temperature
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
         """Returns a numpy.ndarray shaped as (dimensions, 1) containing the gradient of
@@ -1065,7 +1108,7 @@ class Himmelblau(_AbstractDistribution):
         gradient = _numpy.zeros((self.dimensions, 1))
         gradient[0] = 2 * (2 * x * (x ** 2 + y - 11) + x + y ** 2 - 7)
         gradient[1] = 2 * (x ** 2 + 2 * y * (x + y ** 2 - 7) + y - 11)
-        return gradient / self.annealing
+        return gradient / self.temperature
 
 
 def _make_spd_matrix(dim: int):
@@ -1087,6 +1130,4 @@ def _make_spd_matrix(dim: int):
     # Create random PD matrix and extract correlation structure
     u, _, v = _numpy.linalg.svd(_numpy.dot(a.T, a))
     # Reconstruct a new matrix with random variances.
-    return _numpy.dot(
-        _numpy.dot(u, 1.0 + _numpy.diag(_numpy.random.rand(dim))), v
-    )
+    return _numpy.dot(_numpy.dot(u, 1.0 + _numpy.diag(_numpy.random.rand(dim))), v)

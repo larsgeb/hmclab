@@ -14,16 +14,14 @@ from hmc_tomography.Distributions import _AbstractDistribution
 
 class LinearMatrix(_AbstractDistribution):
     """Likelihood model based on a linear forward model given as
-    :math:`G \\mathbf{m} = \\mathbf{d}`
+    :math:`G \\mathbf{m} = \\mathbf{d}` coupled with Gaussian observational errors.
     """
 
     def __init__(
         self,
         G: _Union[_numpy.ndarray, _sparse.spmatrix] = None,
         d: _numpy.ndarray = None,
-        data_covariance: _Union[
-            float, _numpy.ndarray, _sparse.spmatrix
-        ] = None,
+        data_covariance: _Union[float, _numpy.ndarray, _sparse.spmatrix] = None,
         dtype=_numpy.single,
         **kwargs,
     ):
@@ -72,9 +70,10 @@ class LinearMatrix(_AbstractDistribution):
             and data_covariance.shape == (d.size, 1)
         ):
             covariance_simple = True
-        elif type(
-            data_covariance
-        ) is _numpy.ndarray and data_covariance.shape == (d.size, d.size,):
+        elif type(data_covariance) is _numpy.ndarray and data_covariance.shape == (
+            d.size,
+            d.size,
+        ):
             # Full covariance (sparse or dense)
             covariance_simple = False
         else:
@@ -128,6 +127,7 @@ class _LinearMatrix_dense_forward_simple_covariance(_AbstractDistribution):
             float, _numpy.ndarray,
         ] = None,  # The name variance is justified, as only used on diagonal
         dtype=_numpy.single,
+        premultiplication: bool = None,
     ):
         self.dimensions = G.shape[1]
         self.G = G.astype(dtype)
@@ -163,16 +163,13 @@ class _LinearMatrix_dense_forward_simple_covariance(_AbstractDistribution):
             return (
                 0.5
                 * (
-                    coordinates.T @ (self.GtG @ coordinates - 2 * self.Gtd0)
-                    + self.dtd
+                    coordinates.T @ (self.GtG @ coordinates - 2 * self.Gtd0) + self.dtd
                 ).item()
             )
         else:
             return (
                 0.5
-                * _numpy.linalg.norm(
-                    (self.G @ coordinates - self.d) / self.data_sigma
-                )
+                * _numpy.linalg.norm((self.G @ coordinates - self.d) / self.data_sigma)
                 ** 2
             )
 
@@ -180,9 +177,7 @@ class _LinearMatrix_dense_forward_simple_covariance(_AbstractDistribution):
         if self.premultiplication:
             return self.GtG @ coordinates - self.Gtd0
         else:
-            return self.Gt @ (
-                (self.G @ coordinates - self.d) / self.data_variance
-            )
+            return self.Gt @ ((self.G @ coordinates - self.d) / self.data_variance)
 
     def generate(self) -> _numpy.ndarray:
         raise NotImplementedError()
@@ -196,8 +191,9 @@ class _LinearMatrix_dense_forward_dense_covariance(_AbstractDistribution):
         d: _numpy.ndarray = None,
         data_covariance: _numpy.ndarray = None,
         dtype=_numpy.single,
+        premultiplication: bool = None,
     ):
-        self.dimensions = self.dimensions
+        self.dimensions = G.shape[1]
         self.G = G.astype(dtype)
         self.d = d.astype(dtype)
         self.data_covariance = data_covariance
@@ -221,7 +217,7 @@ class _LinearMatrix_dense_forward_dense_covariance(_AbstractDistribution):
             self.dtd: float = (self.d.T @ invcov @ self.d).item()
 
             # Free up unnecessary variables
-            del self.G, self.d, self.data_variance, self.data_sigma
+            del self.G, self.d, self.data_covariance
         else:
             self.Gt: _numpy.ndarray = self.G.T
             self.cholesky_upper_inv_covariance: _numpy.ndarray = numpy.linalg.cholesky(
@@ -233,16 +229,13 @@ class _LinearMatrix_dense_forward_dense_covariance(_AbstractDistribution):
             return (
                 0.5
                 * (
-                    coordinates.T @ (self.GtG @ coordinates - 2 * self.Gtd0)
-                    + self.dtd
+                    coordinates.T @ (self.GtG @ coordinates - 2 * self.Gtd0) + self.dtd
                 ).item()
             )
         else:
             return (
                 0.5
-                * numpy.linalg.norm(
-                    self.cholesky_upper_inv_covariance @ (G @ m - d0)
-                )
+                * numpy.linalg.norm(self.cholesky_upper_inv_covariance @ (G @ m - d0))
                 ** 2
             )
 
@@ -250,9 +243,7 @@ class _LinearMatrix_dense_forward_dense_covariance(_AbstractDistribution):
         if self.premultiplication:
             return self.GtG @ coordinates - self.Gtd0
         else:
-            return (
-                self.Gt @ self.inv_covariance @ (self.G @ coordinates - self.d)
-            )
+            return self.Gt @ self.inv_covariance @ (self.G @ coordinates - self.d)
 
     def generate(self) -> _numpy.ndarray:
         raise NotImplementedError()
@@ -290,9 +281,7 @@ class _LinearMatrix_sparse_forward_simple_covariance(_AbstractDistribution):
         if self.premultiplication:
             # Compute covariance matrix for premultiplication
             if type(self.data_variance) == float:
-                invcov = (
-                    _scipy.sparse.eye(self.d.size).tocsr() / self.data_variance
-                )
+                invcov = _scipy.sparse.eye(self.d.size).tocsr() / self.data_variance
             else:
                 invcov = _scipy.sparse.diags(
                     1.0 / self.data_variance[:, 0], offsets=0
@@ -312,9 +301,7 @@ class _LinearMatrix_sparse_forward_simple_covariance(_AbstractDistribution):
             if use_mkl:
                 try:
                     # Fails with OSError if MKL is not found
-                    from hmc_tomography.Helpers.mkl_interface import (
-                        sparse_gemv,
-                    )
+                    from hmc_tomography.Helpers.mkl_interface import sparse_gemv
 
                     # MKL binding works only for sparse matrices
                     if type(G) != _sparse.csr_matrix:
@@ -342,25 +329,21 @@ class _LinearMatrix_sparse_forward_simple_covariance(_AbstractDistribution):
             return (
                 0.5
                 * (
-                    coordinates.T @ (self.GtG @ coordinates - 2 * self.Gtd0)
-                    + self.dtd
+                    coordinates.T @ (self.GtG @ coordinates - 2 * self.Gtd0) + self.dtd
                 ).item()
             )
         elif self.use_mkl:
             return (
                 0.5
                 * _numpy.linalg.norm(
-                    (self.sparse_gemv(self.G, coordinates) - self.d)
-                    / self.data_sigma
+                    (self.sparse_gemv(self.G, coordinates) - self.d) / self.data_sigma
                 )
                 ** 2
             )
         else:
             return (
                 0.5
-                * _numpy.linalg.norm(
-                    (self.G @ coordinates - self.d) / self.data_sigma
-                )
+                * _numpy.linalg.norm((self.G @ coordinates - self.d) / self.data_sigma)
                 ** 2
             )
 
@@ -370,15 +353,10 @@ class _LinearMatrix_sparse_forward_simple_covariance(_AbstractDistribution):
         elif self.use_mkl:
             return self.sparse_gemv(
                 self.Gt,
-                (
-                    (self.sparse_gemv(self.G, coordinates) - self.d)
-                    / self.data_variance
-                ),
+                ((self.sparse_gemv(self.G, coordinates) - self.d) / self.data_variance),
             )
         else:
-            return self.Gt @ (
-                (self.G @ coordinates - self.d) / self.data_variance
-            )
+            return self.Gt @ ((self.G @ coordinates - self.d) / self.data_variance)
 
     def generate(self) -> _numpy.ndarray:
         raise NotImplementedError()
@@ -393,7 +371,7 @@ class _LinearMatrix_sparse_forward_sparse_covariance(_AbstractDistribution):
         data_covariance: _numpy.ndarray = None,
         dtype=_numpy.single,
     ):
-        self.dimensions = self.dimensions
+        self.dimensions = G.shape[1]
         self.G = G.astype(dtype)
         self.d = d.astype(dtype)
 
@@ -404,9 +382,7 @@ class _LinearMatrix_sparse_forward_sparse_covariance(_AbstractDistribution):
 
         self.Gt = self.G.T.tocsr()
         self.dt = d.T
-        self.factorized_covariance = _sparse_linalg.factorized(
-            self.data_covariance
-        )
+        self.factorized_covariance = _sparse_linalg.factorized(self.data_covariance)
 
     def misfit(self, coordinates: _numpy.ndarray) -> float:
         return (
@@ -418,9 +394,7 @@ class _LinearMatrix_sparse_forward_sparse_covariance(_AbstractDistribution):
         )
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
-        return self.Gt @ self.factorized_covariance(
-            self.G @ coordinates - self.d
-        )
+        return self.Gt @ self.factorized_covariance(self.G @ coordinates - self.d)
 
     def generate(self) -> _numpy.ndarray:
         raise NotImplementedError()
