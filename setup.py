@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="hmc-tomography",
-    version="0.1.0",
+    version="0.2.1",
     author="Lars Gebraad, Andreas Fichtner, Andrea Zunino",
     author_email="lars.gebraad@erdw.ethz.ch",
     description="An example HMC tomography package",
@@ -15,11 +15,11 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     classifiers=[
         "Development Status :: 3 - Alpha",
-        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     install_requires=[
         "numpy",
         "scipy",
@@ -29,6 +29,8 @@ setuptools.setup(
         "h5py",
         "pyyaml",
     ],
-    extras_require={"dev": ["black", "pre-commit", "sphinx", "numpydoc", "codecov", "pytest"]},
+    extras_require={
+        "dev": ["black", "pre-commit", "sphinx", "numpydoc", "codecov", "pytest"]
+    },
     entry_points={"console_scripts": ["hmc_tomography=hmc_tomography.__main__:cli"]},
 )

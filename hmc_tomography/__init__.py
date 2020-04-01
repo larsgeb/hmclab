@@ -1,5 +1,5 @@
 """HMC Tomography module.
-Copyright 2019 Andrea Zunino, Andreas Fichtner, Lars Gebraad
+Copyright 2019-2020 Andrea Zunino, Andreas Fichtner, Lars Gebraad
 """
 from hmc_tomography import (
     MassMatrices,
