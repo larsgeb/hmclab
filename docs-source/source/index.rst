@@ -8,12 +8,8 @@ HMC Tomography
 
     self
     setup
-    tour
     examples
-    sampling
-    post
-    tests
-    references
+    api/index
     py-modindex
     genindex
 
