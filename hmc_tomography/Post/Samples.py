@@ -1,4 +1,6 @@
 import h5py as _h5py
+import os as _os
+import shutil as _shutil
 
 
 class Samples:
@@ -37,7 +39,7 @@ class Samples:
             if key > self.last_sample:
                 raise ValueError("Index out of range")
             # Access a single samples. The none keyword forces a column vector.
-            return self.raw_samples[:, self.burn_in + key][:, None]
+            return self.raw_samples_hdf[:, self.burn_in + key][:, None]
 
         elif type(key) == slice:
 
@@ -64,7 +66,7 @@ class Samples:
             print(key, self.last_sample)
 
             # Access multiple samples
-            return self.raw_samples[:, key]
+            return self.raw_samples_hdf[:, key]
 
         elif type(key) == tuple:
 
@@ -95,7 +97,7 @@ class Samples:
                 key2 = slice(start, stop, step)
 
             # Access multiple samples
-            return self.raw_samples[key1, key2]
+            return self.raw_samples_hdf[key1, key2]
 
     def __enter__(self):
         return self
@@ -103,6 +105,56 @@ class Samples:
     def __exit__(self, type, value, traceback):
         self.file_handle.close()
 
+    def close(self):
+        self.file_handle.close()
+
+    @property
+    def misfits(self):
+        return self.file_handle[self.datasetname][-1, :][:, None]
+
     @property
     def raw_samples(self):
+        return self.file_handle[self.datasetname][:-1, :].T
+
+    @property
+    def raw_samples_hdf(self):
         return self.file_handle[self.datasetname]
+
+    def print_details(self):
+
+        size = _shutil.get_terminal_size((80, 20))  # pass fallback
+
+        print()
+        print("{:^{width}}".format("H5 file details", width=size[0]))
+        print("━" * size[0])
+        print("{0:30} {1}".format("Filename", self.filename))
+        print("{0:30} {1}".format("Dataset", self.datasetname))
+
+        dataset = self.file_handle[self.datasetname]
+        details = dict(
+            (key, value) for key, value in _h5py.AttributeManager(dataset).items()
+        )
+
+        # Print common attributes
+        print()
+        print("{:^{width}}".format("Sampling attributes", width=size[0]))
+        print("━" * size[0])
+        print("{0:30} {1}".format("Sampler", details["sampler"]))
+        print("{0:30} {1}".format("Requested proposals", details["proposals"]))
+        print("{0:30} {1}".format("Proposals saved to disk", details["end_of_samples"]))
+        print("{0:30} {1}".format("Acceptance rate", details["acceptance_rate"]))
+        print("{0:30} {1}".format("Online thinning", details["online_thinning"]))
+        print("{0:30} {1}".format("Sampling start time", details["start_time"]))
+
+        details.pop("sampler")
+        details.pop("proposals")
+        details.pop("end_of_samples")
+        details.pop("acceptance_rate")
+        details.pop("online_thinning")
+        details.pop("start_time")
+
+        print()
+        print("{:^{width}}".format("Sampler specific attributes", width=size[0]))
+        print("━" * size[0])
+        for key in details:
+            print("{0:30} {1}".format(key, details[key]))
