@@ -19,6 +19,9 @@ def marginal_grid(
     color_1d="black",
     figsize=(8, 8),
 ):
+    """Method to visualize 1D and 2D marginals for multiple dimensions simultaneously.
+    
+    """
     number_of_plots = len(dimensions_list)
 
     _plt.figure(figsize=figsize)
@@ -77,9 +80,7 @@ def marginal_grid(
             # Modify axes
             if i_plot != number_of_plots - 1:
                 axis.set_xticklabels([])
-                axis.tick_params(
-                    axis="x", which="both", bottom=False, top=False
-                )
+                axis.tick_params(axis="x", which="both", bottom=False, top=False)
             else:
                 axis.set_xlabel(
                     f"dimension {dimensions_list[j_plot]}"
@@ -91,9 +92,7 @@ def marginal_grid(
 
             if j_plot != 0:
                 axis.set_yticklabels([])
-                axis.tick_params(
-                    axis="y", which="both", left=False, right=False
-                )
+                axis.tick_params(axis="y", which="both", left=False, right=False)
             else:
                 axis.set_ylabel(f"dimension {dimensions_list[i_plot]}")
 
@@ -129,6 +128,47 @@ def marginal_grid(
                 fontsize=40 * _numpy.abs(correlation),
                 transform=axis.transAxes,
             )
+
+    if show:
+        _plt.show()
+
+
+def marginal(
+    samples: _Samples,
+    dimension: int,
+    bins: int = 25,
+    show: bool = True,
+    color="black",
+    figsize=(8, 8),
+):
+    """Method to visualize 1D marginals."""
+    number_of_plots = 1
+
+    _plt.figure(figsize=figsize)
+    gs1 = _gridspec.GridSpec(number_of_plots, number_of_plots)
+    gs1.update(wspace=0.05, hspace=0.05)  # set the spacing between axes.
+
+    # Get extent of samples
+    min = samples[dimension, :].min()
+    max = samples[dimension, :].max()
+    dim_range = (min, max)
+
+    axis = _plt.subplot(gs1[0])
+
+    axis.set_xlabel(
+        f"dimension {dimension}"
+        f"{os.linesep}"
+        f"emperical mean: {_numpy.mean(samples[dimension, :]):.2f}"
+        f"{os.linesep}"
+        f"emperical std: {_numpy.std(samples[dimension, :]):.2f}"
+    )
+
+    axis.set_ylabel("relative density")
+
+    # Plot histogram on diagonal
+    axis.hist(
+        samples[dimension, :], bins=bins, density=False, range=dim_range, color=color,
+    )
 
     if show:
         _plt.show()
@@ -176,9 +216,7 @@ def visualize_2_dimensions(
         [0.52, 0.5, 0.45, 0.4], sharex=axis_1d_traceplot
     )
 
-    axis_2d_histogram.hist2d(
-        samples[dim1, :], samples[dim2, :], bins, cmap=colormap_2d
-    )
+    axis_2d_histogram.hist2d(samples[dim1, :], samples[dim2, :], bins, cmap=colormap_2d)
     axis_1d_histogram_x.hist(samples[dim1, :], bins, color=color_1d)
     axis_1d_histogram_y.hist(
         samples[dim2, :], bins, orientation="horizontal", color=color_1d
@@ -186,14 +224,10 @@ def visualize_2_dimensions(
     axis_1d_traceplot.plot(samples[dim2, :], "--", color=color_1d)
     axis_1d_traceplot.set_xlim([0, samples[dim2, :].size])
     axis_autocorrelation.plot(
-        _Processing.autocorrelation(samples[dim1, :]),
-        "r",
-        label=f"Dimension {dim1}",
+        _Processing.autocorrelation(samples[dim1, :]), "r", label=f"Dimension {dim1}",
     )
     axis_autocorrelation.plot(
-        _Processing.autocorrelation(samples[dim2, :]),
-        "b",
-        label=f"Dimension {dim2}",
+        _Processing.autocorrelation(samples[dim2, :]), "b", label=f"Dimension {dim2}",
     )
     axis_autocorrelation.plot(
         _Processing.crosscorrelation(samples[dim1, :], samples[dim2, :]),
@@ -222,15 +256,11 @@ def visualize_2_dimensions(
     axis_1d_histogram_x.tick_params(
         axis="x", which="both", bottom=False, labelbottom=False
     )
-    axis_1d_histogram_y.tick_params(
-        axis="y", which="both", left=False, labelleft=False
-    )
+    axis_1d_histogram_y.tick_params(axis="y", which="both", left=False, labelleft=False)
     # axis_autocorrelation.tick_params(
     #     axis="x", which="both", bottom=False, labelbottom=False
     # )
-    axis_1d_traceplot.tick_params(
-        axis="y", which="both", left=False, labelleft=False
-    )
+    axis_1d_traceplot.tick_params(axis="y", which="both", left=False, labelleft=False)
 
     if show:
         _plt.show()

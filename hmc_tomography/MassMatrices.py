@@ -1,4 +1,18 @@
 """Mass matrix classes and associated methods.
+
+The classes in this module describe the metric used in HMC algorithms. Changing the 
+metric alters the shape of trajectories the HMC algorithm generates, thereby impacting
+convergence performance.
+
+All of the classes inherit from :class:`._AbstractMassMatrix`; a base class outlining
+required methods and their signatures (required in- and outputs). 
+
+.. note::
+
+    The mass matrix is vitally important for the performance of HMC algorithms A 
+    tutorial on the tuning parameters of HMC can be found at 
+    :ref:`/examples/0.2 - Tuning Hamiltonian Monte Carlo.ipynb`.
+
 """
 from abc import ABC as _ABC
 from abc import abstractmethod as _abstractmethod
@@ -7,8 +21,9 @@ import warnings as _warnings
 
 
 class _AbstractMassMatrix(_ABC):
-    """Abstract base class for mass matrix. Defines all required methods for
-    derived classes.
+    """Abstract base class for mass matrices. 
+    
+    Defines all required methods for derived classes.
 
     """
 
@@ -29,9 +44,7 @@ class _AbstractMassMatrix(_ABC):
         float()
 
     @_abstractmethod
-    def kinetic_energy_gradient(
-        self, momentum: _numpy.ndarray
-    ) -> _numpy.ndarray:
+    def kinetic_energy_gradient(self, momentum: _numpy.ndarray) -> _numpy.ndarray:
         """Abstract method for computing kinetic energy gradient for a given
         momentum.
 
@@ -47,7 +60,16 @@ class _AbstractMassMatrix(_ABC):
 
 
 class Unit(_AbstractMassMatrix):
-    def __init__(self, dimensions: int):
+    """The unit mass matrix.
+
+    This mass matrix or metric does not perform any scaling on the target distribution.
+    It is the default setting for the HMC algorithms and is optimal when all parameters
+    of your target distribution are expected to have the same variance and no 
+    trade-offs.
+
+    """
+
+    def __init__(self, dimensions: int = -1):
         """Constructor for unit mass matrices
 
         """
@@ -65,16 +87,14 @@ class Unit(_AbstractMassMatrix):
         -------
 
         """
-        if momentum.shape != (self.dimensions, 1):
+        if momentum.shape != (momentum.size, 1):
             raise ValueError(
                 f"The passed momentum vector is not of the right dimensions, "
-                f"which would be ({self.dimensions, 1})."
+                f"which would be ({momentum.size, 1})."
             )
         return 0.5 * (momentum.T @ momentum).item(0)  # TODO optimize
 
-    def kinetic_energy_gradient(
-        self, momentum: _numpy.ndarray
-    ) -> _numpy.ndarray:
+    def kinetic_energy_gradient(self, momentum: _numpy.ndarray) -> _numpy.ndarray:
         """
 
         Parameters
@@ -108,6 +128,14 @@ class Unit(_AbstractMassMatrix):
 
 
 class Diagonal(_AbstractMassMatrix):
+    """The diagonal mass matrix.
+
+    This mass matrix or metric does only performs scaling on each dimension separately.
+    It is optimal when all parameters of your target distribution are expected to be 
+    independent (not have trade-offs) but still varying scales of disperion / variance.
+
+    """
+
     # TODO remove dimensions
     def __init__(self, dimensions: int, diagonal: _numpy.ndarray = None):
         """Constructor for diagonal mass matrices.
@@ -145,9 +173,7 @@ class Diagonal(_AbstractMassMatrix):
         """
         return 0.5 * _numpy.vdot(momentum, self.inverse_diagonal * momentum)
 
-    def kinetic_energy_gradient(
-        self, momentum: _numpy.ndarray
-    ) -> _numpy.ndarray:
+    def kinetic_energy_gradient(self, momentum: _numpy.ndarray) -> _numpy.ndarray:
         """
 
         Parameters
@@ -167,9 +193,7 @@ class Diagonal(_AbstractMassMatrix):
         -------
 
         """
-        return _numpy.sqrt(self.diagonal) * _numpy.random.randn(
-            self.dimensions, 1
-        )
+        return _numpy.sqrt(self.diagonal) * _numpy.random.randn(self.dimensions, 1)
 
     @property
     def matrix(self) -> _numpy.ndarray:
@@ -177,6 +201,14 @@ class Diagonal(_AbstractMassMatrix):
 
 
 class LBFGS(_AbstractMassMatrix):
+    """The experimental adaptive LBFGS mass matrix.
+
+    .. warning::
+
+        This mass matrix is not guaranteed to produce valid Markov chains.
+
+    """
+
     def __init__(
         self,
         dimensions: int,
@@ -222,9 +254,7 @@ class LBFGS(_AbstractMassMatrix):
     def kinetic_energy(self, momentum: _numpy.ndarray) -> float:
         return 0.5 * _numpy.vdot(momentum, self.Hinv(momentum))
 
-    def kinetic_energy_gradient(
-        self, momentum: _numpy.ndarray
-    ) -> _numpy.ndarray:
+    def kinetic_energy_gradient(self, momentum: _numpy.ndarray) -> _numpy.ndarray:
         return self.Hinv(momentum)
 
     def generate_momentum(self) -> _numpy.ndarray:
@@ -297,18 +327,14 @@ class LBFGS(_AbstractMassMatrix):
             self.y[:, self.current_number_of_gradients - 1] = y.flatten()
             self.u[:, self.current_number_of_gradients - 1] = u.flatten()
             self.v[:, self.current_number_of_gradients - 1] = v.flatten()
-            self.vTu[self.current_number_of_gradients - 1] = 1.0 + _numpy.vdot(
-                v, u
-            )
+            self.vTu[self.current_number_of_gradients - 1] = 1.0 + _numpy.vdot(v, u)
 
     def S(self, h):
 
         for i in range(self.current_number_of_gradients):
             h = (
                 h
-                - self.v[:, i, None]
-                * _numpy.vdot(self.u[:, i, None], h)
-                / self.vTu[i]
+                - self.v[:, i, None] * _numpy.vdot(self.u[:, i, None], h) / self.vTu[i]
             )
         assert h.shape == (self.dimensions, 1)
         return h
@@ -318,9 +344,7 @@ class LBFGS(_AbstractMassMatrix):
         for i in range(self.current_number_of_gradients - 1, -1, -1):
             h = (
                 h
-                - self.u[:, i, None]
-                * _numpy.vdot(self.v[:, i, None], h)
-                / self.vTu[i]
+                - self.u[:, i, None] * _numpy.vdot(self.v[:, i, None], h) / self.vTu[i]
             )
         assert h.shape == (self.dimensions, 1)
         return h

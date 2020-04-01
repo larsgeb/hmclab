@@ -1,4 +1,12 @@
-"""Sampler classes and associated methods.
+"""Optimizer classes and associated methods.
+
+The classes in this module describe various numerical optimization routines. These 
+routines can be used to find the minima of misfit function. This is directly related to
+deterministic inversion.
+
+All of the classes inherit from :class:`._AbstractOptimizer`; a base class outlining
+required methods and their signatures (required in- and outputs). 
+
 """
 import sys as _sys
 from abc import ABC as _ABC
@@ -16,6 +24,8 @@ from hmc_tomography.Distributions import _AbstractDistribution
 
 
 class _AbstractOptimizer(_ABC):
+    """Abstract base class for optimization routines."""
+
     name: str = "Optimizer abstract base class"
     dimensions: int = -1
     target: _AbstractDistribution
@@ -48,6 +58,8 @@ class _AbstractOptimizer(_ABC):
 
 
 class gradient_descent(_AbstractOptimizer):
+    """An unscaled gradient descent optimization routine."""
+
     def __init__(
         self, target: _AbstractDistribution, epsilon: float = 0.1,
     ):
@@ -123,9 +135,7 @@ class simple_preconditioned_gradient_descent(_AbstractOptimizer):
 
         g = self.target.gradient(initial_model)
 
-        precond = _numpy.diag(
-            1.0 / (_numpy.diag(g @ g.T) + self.regularization)
-        )
+        precond = _numpy.diag(1.0 / (_numpy.diag(g @ g.T) + self.regularization))
 
         new_model = initial_model - epsilon * (precond @ g)
 
@@ -161,9 +171,7 @@ class simple_preconditioned_gradient_descent(_AbstractOptimizer):
 
             g = self.target.gradient(m)
 
-            precond = _numpy.diag(
-                1.0 / (_numpy.diag(g @ g.T) + self.regularization)
-            )
+            precond = _numpy.diag(1.0 / (_numpy.diag(g @ g.T) + self.regularization))
 
             m = m - epsilon * (precond @ g)
 
