@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>HMC Tomography &mdash; HMC Tom 0.1.1 documentation</title>
+  <title>HMC Tomography &mdash; HMC Tom 0.2.1 documentation</title>
   
 
   
@@ -21,12 +21,12 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                0.1
+                0.2
               </div>
             
           
@@ -94,12 +94,8 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">HMC Tomography</a></li>
 <li class="toctree-l1"><a class="reference internal" href="setup.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tour.html">A tour of hmc_tomography</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples and tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sampling.html">Sampling reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="post.html">Post-sampling reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tests.html">Development and testing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="py-modindex.html">Module index</a></li>
 <li class="toctree-l1"><a class="reference internal" href="genindex.html">Alphabetic index</a></li>
 </ul>
@@ -171,13 +167,13 @@
 /* CSS overrides for sphinx_rtd_theme */
 
 /* 24px margin */
-.nbinput.nblast,
-.nboutput.nblast {
+.nbinput.nblast.container,
+.nboutput.nblast.container {
     margin-bottom: 19px;  /* padding has already 5px */
 }
 
 /* ... except between code cells! */
-.nblast + .nbinput {
+.nblast.container + .nbinput.container {
     margin-top: -19px;
 }
 
@@ -197,12 +193,8 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">HMC Tomography</a></li>
 <li class="toctree-l1"><a class="reference internal" href="setup.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tour.html">A tour of hmc_tomography</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples and tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sampling.html">Sampling reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="post.html">Post-sampling reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tests.html">Development and testing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="py-modindex.html">Module index</a></li>
 <li class="toctree-l1"><a class="reference internal" href="genindex.html">Alphabetic index</a></li>
 </ul>
@@ -236,7 +228,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Andrea Zunino, Andreas Fichtner, Lars Gebraad
+        &copy; Copyright 2019-2020, Andrea Zunino, Andreas Fichtner, Lars Gebraad
 
     </p>
   </div>

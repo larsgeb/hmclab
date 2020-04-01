@@ -1,0 +1,330 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Normal &mdash; HMC Tom 0.2.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Laplace" href="Laplace.html" />
+    <link rel="prev" title="_AbstractDistribution" href="_AbstractDistribution.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> HMC Tom
+          
+
+          
+            
+            <img src="../../_static/hmctom.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">HMC Tomography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../setup.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples and tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Distributions</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="_AbstractDistribution.html">_AbstractDistribution</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Normal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Laplace.html">Laplace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Uniform.html">Uniform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="LinearMatrix.html">LinearMatrix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CompositeDistribution.html">CompositeDistribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="AdditiveDistribution.html">AdditiveDistribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="BayesRule.html">BayesRule</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Himmelblau.html">Himmelblau</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../massmatrices/index.html">MassMatrices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../samplers/index.html">Samplers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../post/index.html">Post - visualization and processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../optimizers/index.html">Optimizers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../py-modindex.html">Module index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Alphabetic index</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">HMC Tom</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">API reference</a> &raquo;</li>
+        
+          <li><a href="index.html">Distributions</a> &raquo;</li>
+        
+      <li>Normal</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/api/distributions/Normal.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="normal">
+<h1>Normal<a class="headerlink" href="#normal" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="hmc_tomography.Distributions.Normal">
+<em class="property">class </em><code class="sig-prename descclassname">hmc_tomography.Distributions.</code><code class="sig-name descname">Normal</code><span class="sig-paren">(</span><em class="sig-param">means: numpy.ndarray = None</em>, <em class="sig-param">covariance: Union[numpy.ndarray</em>, <em class="sig-param">float</em>, <em class="sig-param">None] = None</em>, <em class="sig-param">inverse_covariance: Union[numpy.ndarray</em>, <em class="sig-param">float</em>, <em class="sig-param">None] = None</em>, <em class="sig-param">lower_bounds: numpy.ndarray = None</em>, <em class="sig-param">upper_bounds: numpy.ndarray = None</em>, <em class="sig-param">override_dimensions: int = 2</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#Normal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Distributions.Normal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">hmc_tomography.Distributions.base._AbstractDistribution</span></code></p>
+<p>Normal distribution in model space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dimensions</strong> (<em>int</em>) – Dimension of the distribution.</p></li>
+<li><p><strong>means</strong> (<em>numpy.ndarray</em>) – Numpy array shaped as (dimensions, 1) containing the means of the distribution.</p></li>
+<li><p><strong>covariance</strong> (<em>numpy.ndarray</em>) – Numpy array shaped as either as (dimensions, dimensions) or (dimensions, 1).
+This array represents either the full covariance matrix for a multivariate
+Gaussian, or an column vector with variances for <cite>dimensions</cite> separate
+uncorrelated Gaussians.</p></li>
+<li><p><strong>lower_bounds</strong> (<em>numpy.ndarray</em>) – Numpy array of shape (dimensions, 1) that contains the lower limits of each
+parameter.</p></li>
+<li><p><strong>upper_bounds</strong> (<em>numpy.ndarray</em>) – Numpy array of shape (dimensions, 1) that contains the upper limits of each
+parameter.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="hmc_tomography.Distributions.Normal.means">
+<code class="sig-name descname">means</code><em class="property">: _numpy.ndarray</em><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Distributions.Normal.means" title="Permalink to this definition">¶</a></dt>
+<dd><p>Means in model space</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="hmc_tomography.Distributions.Normal.diagonal">
+<code class="sig-name descname">diagonal</code><em class="property">: bool</em><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Distributions.Normal.diagonal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicator whether or not the covariance matrix is diagonal, i.e. if the
+distribution is uncorrelated.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="hmc_tomography.Distributions.Normal.covariance">
+<code class="sig-name descname">covariance</code><em class="property">: _numpy.ndarray</em><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Distributions.Normal.covariance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Covariance matrix in model space</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="hmc_tomography.Distributions.Normal.inverse_covariance">
+<code class="sig-name descname">inverse_covariance</code><em class="property">: _numpy.ndarray</em><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Distributions.Normal.inverse_covariance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inverse covariance matrix</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hmc_tomography.Distributions.Normal.misfit">
+<code class="sig-name descname">misfit</code><span class="sig-paren">(</span><em class="sig-param">coordinates: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#Normal.misfit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Distributions.Normal.misfit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to compute the misfit of a Normal distribution distribution.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hmc_tomography.Distributions.Normal.gradient">
+<code class="sig-name descname">gradient</code><span class="sig-paren">(</span><em class="sig-param">coordinates: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#Normal.gradient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Distributions.Normal.gradient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to compute the gradient of a Normal distribution distribution.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hmc_tomography.Distributions.Normal.generate">
+<code class="sig-name descname">generate</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#Normal.generate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Distributions.Normal.generate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Laplace.html" class="btn btn-neutral float-right" title="Laplace" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="_AbstractDistribution.html" class="btn btn-neutral float-left" title="_AbstractDistribution" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019-2020, Andrea Zunino, Andreas Fichtner, Lars Gebraad
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

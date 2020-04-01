@@ -1,0 +1,1060 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Tutorial 0.1 - Getting started &mdash; HMC Tom 0.2.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Tutorial 0.2 - Tuning Hamiltonian Monte Carlo" href="0.2 - Tuning Hamiltonian Monte Carlo.html" />
+    <link rel="prev" title="Examples and tutorials" href="../examples.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> HMC Tom
+          
+
+          
+            
+            <img src="../_static/hmctom.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">HMC Tomography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../examples.html">Examples and tutorials</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Tutorial 0.1 - Getting started</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Sampling-for-the-first-time">Sampling for the first time</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Investigating-your-samples">Investigating your samples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Accessing-the-raw-samples-and-misfits">Accessing the raw samples and misfits</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Interrupting-sampling:-no-big-deal">Interrupting sampling: no big deal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Interpreting-multidimensional-results">Interpreting multidimensional results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Using-Bayes’-rule">Using Bayes’ rule</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="0.2 - Tuning Hamiltonian Monte Carlo.html">Tutorial 0.2 - Tuning Hamiltonian Monte Carlo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1 - Gaussian inverse problems - dense forward operator.html">Tutorial 1 - Gaussian inverse problems - dense forward operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2 - Gaussian inverse problems - sparse forward operator.html">Tutorial 2 - Gaussian inverse problems - sparse forward operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3 - Separate priors per dimension.html">Tutorial 3 - Separate priors per dimension</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4 - Creating your own inverse problem.html">Tutorial 4 - Creating your own inverse problem</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../py-modindex.html">Module index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Alphabetic index</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">HMC Tom</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../examples.html">Examples and tutorials</a> &raquo;</li>
+        
+      <li>Tutorial 0.1 - Getting started</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/examples/0.1 - Getting started.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container,
+div.nbinput.container div.prompt,
+div.nbinput.container div.input_area,
+div.nbinput.container div[class*=highlight],
+div.nbinput.container div[class*=highlight] pre,
+div.nboutput.container,
+div.nboutput.container div.prompt,
+div.nboutput.container div.output_area,
+div.nboutput.container div[class*=highlight],
+div.nboutput.container div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    min-width: 5ex;
+    padding-top: 0.3rem;
+    padding-right: 0.3rem;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    background: #f5f5f5;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 0.3rem;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">hmc_tomography</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="Tutorial-0.1---Getting-started">
+<h1>Tutorial 0.1 - Getting started<a class="headerlink" href="#Tutorial-0.1---Getting-started" title="Permalink to this headline">¶</a></h1>
+<p>In this tutorial, you will see all the essentials of using <code class="docutils literal notranslate"><span class="pre">hmc_tomography</span></code>. We will cover the following topics:</p>
+<ol class="arabic simple">
+<li><p>Creating and sampling from a distribution;</p></li>
+<li><p>Investigating your samples;</p></li>
+<li><p>Accessing the raw samples and misfits;</p></li>
+<li><p>Interrupting sampling;</p></li>
+<li><p>Using Bayes’ rule.</p></li>
+</ol>
+<p>To start, we will sample one of the most common distributions in statistics, the standard normal distribution. To sample anything in this framework, we need an instance of the distribution class we wish to sample. Here is how we create a standard normal distribution in 1 dimension:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">distribution</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Distributions</span><span class="o">.</span><span class="n">StandardNormal1D</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>Every distribution object should have a few essential methods and attributes, which will be covered in the tutorial on implementing your own inverse problem. However, maybe the most important attribute of any distribution is its dimensionality, indicating the dimensions of the model space:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">distribution</span><span class="o">.</span><span class="n">dimensions</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+1
+</pre></div></div>
+</div>
+<p>As expected, the 1 dimensional standard normal distribution has 1 dimension. Great!</p>
+<div class="section" id="Sampling-for-the-first-time">
+<h2>Sampling for the first time<a class="headerlink" href="#Sampling-for-the-first-time" title="Permalink to this headline">¶</a></h2>
+<p>To generate samples of the distribution, one can use the methods contained in the submodule <code class="docutils literal notranslate"><span class="pre">hmc_tomography.Samplers</span></code>. As of yet, it only has the vanilla HMC algorithm.</p>
+<p>Running the associated <code class="docutils literal notranslate"><span class="pre">sample()</span></code> method requires you to <strong>minimally</strong> pass the <strong>distribution</strong> and the <strong>filename</strong> of the h5 file you wish to write to. This h5 file will be created if it does not exist. If it does exist, the program will prompt you with options on how to continue.</p>
+<div class="admonition warning">
+<p class="admonition-title fa fa-exclamation-circle"><strong>Note:</strong> .h5 files</p>
+<p>The sample files with extension .h5 are a special kind of files that are designed to hold a lot of data. They were specifically chosen for hmc_tomography because MCMC generates large amounts of data.</p>
+<p>The samplers in this package buffer samples to RAM, and flush them intermittently to the hard drive. This is to allow for sample sizes bigger than RAM (by writing to disk) as well as avoiding continuous writes to disk which might slow down sampling (by buffering).</p>
+<p>However, these files are not the easiest to work with. They require either an API to access them (in Python <code class="docutils literal notranslate"><span class="pre">h5py</span></code>) or a specialized program (e.g. <code class="docutils literal notranslate"><span class="pre">HDFCompass</span></code>). There are no easy ways to ‘have a peek’ in the file if you’re not a little experienced with the file format.</p>
+<p>In this package, we provide a class (<code class="docutils literal notranslate"><span class="pre">hmc_tomography.Post.Samples</span></code>) that allows us to work in an easy way with the samples. However, they should <strong>ALWAYS</strong> be used in a Python context manager, as shown in the section <code class="docutils literal notranslate"><span class="pre">Investigating</span> <span class="pre">your</span> <span class="pre">samples</span></code>.</p>
+</div>
+<p>Any other setting has defaults for all samplers, such that <em>you</em> can get started quickly.</p>
+<p>For the Hamiltonian Monte Carlo algorithm, important settings you could change include: 1. Mass matrix; 2. Amount of integration steps; 3. Integration time step. 4. …</p>
+<p>You can find detailed descriptions of all the parameters in the API reference.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;bin_samples/tutorial_01_standard_normal.h5&quot;</span>
+
+<span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">HMC</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">distribution</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Tot. acc rate: 1.00. Last 100 acc rate: 1.00. Progress: 100%|██████████| 100/100 [00:00&lt;00:00, 8904.54it/s]
+</pre></div></div>
+</div>
+<p>Great! We just generated 100 samples from the distribution. The total acceptance rate was 1.00, and the acceptance rate of the last 100 samples (coincidentally the total amount of samples) is also 1.00. These numbers are rounded, so at a high amount of samples there might still be some rejected samples if you see 1.00.</p>
+<p>In the next cell, we try to write to the same samples file again, so the sampler also asks us for permission to overwrite the previous file.</p>
+<p>This package allows you to run the <code class="docutils literal notranslate"><span class="pre">sample()</span></code> method on either the instance, or directly on the class. What this means is that the previous and the following code snippets do the same thing:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Subtle difference here: HMC() instead of HMC</span>
+<span class="n">hmc_instance</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">HMC</span><span class="p">()</span>
+
+<span class="n">hmc_instance</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+    <span class="n">distribution</span><span class="p">,</span> <span class="s2">&quot;bin_samples/tutorial_01_standard_normal.h5&quot;</span><span class="p">,</span> <span class="n">proposals</span><span class="o">=</span><span class="mi">10000</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+sys:1: Warning:
+It seems that the samples file (bin_samples/tutorial_01_standard_normal.h5) already exists.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(n)ew file name, (o)verwrite or (a)bort? &gt;&gt; o
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Tot. acc rate: 1.00. Last 100 acc rate: 1.00. Progress: 100%|██████████| 10000/10000 [00:01&lt;00:00, 9997.43it/s]
+</pre></div></div>
+</div>
+<p>Sneakily, I’ve now also passed an extra argument: proposals. This controls how many proposals the algorithm makes. How many of those are accepted still depends on other settings!</p>
+</div>
+<div class="section" id="Investigating-your-samples">
+<h2>Investigating your samples<a class="headerlink" href="#Investigating-your-samples" title="Permalink to this headline">¶</a></h2>
+<p>Now that we have some samples generated on disk, we should do something useful with them!</p>
+<p>As a first step, we should verify some attributes of the generated samples. We can do this by using a Python context manager. The reason for this is that this construct closes the file properly when we are done with it.</p>
+<p>One of the helpful functions that <code class="docutils literal notranslate"><span class="pre">Samples</span></code> provides is <code class="docutils literal notranslate"><span class="pre">print_details()</span></code>, showing the final statistics of the Markov Chain:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+    <span class="s2">&quot;bin_samples/tutorial_01_standard_normal.h5&quot;</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
+    <span class="n">samples</span><span class="o">.</span><span class="n">print_details</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+                                H5 file details
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Filename                       bin_samples/tutorial_01_standard_normal.h5
+Dataset                        samples_0
+
+                              Sampling attributes
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Sampler                        HMC
+Requested proposals            10000
+Proposals saved to disk        10000
+Acceptance rate                0.9991
+Online thinning                1
+Sampling start time            2020-04-01 14:42:32
+
+                          Sampler specific attributes
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+integration_steps              10
+randomize_iterations           True
+randomize_time_step            True
+time_step                      0.1
+</pre></div></div>
+</div>
+<p>We might wish to visualize the resulting distribution. Luckily, there is a visualization module, <code class="docutils literal notranslate"><span class="pre">hmc_tomography.Post.Visualization</span></code>.</p>
+<p>This module contains multiple helpful functions to start with. One of them is <code class="docutils literal notranslate"><span class="pre">marginal</span></code>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+    <span class="s2">&quot;bin_samples/tutorial_01_standard_normal.h5&quot;</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
+    <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Visualization</span><span class="o">.</span><span class="n">marginal</span><span class="p">(</span>
+        <span class="n">samples</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">25</span>  <span class="c1"># Note that dimensions are zero indexed</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_0.1_-_Getting_started_17_0.png" src="../_images/examples_0.1_-_Getting_started_17_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Accessing-the-raw-samples-and-misfits">
+<h2>Accessing the raw samples and misfits<a class="headerlink" href="#Accessing-the-raw-samples-and-misfits" title="Permalink to this headline">¶</a></h2>
+<p>Sometimes you want more control over your samples. Luckily, we got your back. You can access the samples both as a NumPy array as well as the actual HDF5 dataset object.</p>
+<p>If you know how to work with it, accessing via HDF is faster, as it doesn’t necessarily load all samples into RAM before slicing.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+    <span class="s2">&quot;bin_samples/tutorial_01_standard_normal.h5&quot;</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
+
+    <span class="c1"># Access samples as a numpy array</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Type:  {type(samples.raw_samples)}&quot;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Shape: {samples.raw_samples.shape}&quot;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">()</span>
+
+    <span class="c1"># Access samples as a HDF dataset</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Type:  {type(samples.raw_samples_hdf)}&quot;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Shape: {samples.raw_samples_hdf.shape}&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Type:  &lt;class &#39;numpy.ndarray&#39;&gt;
+Shape: (9999, 1)
+
+Type:  &lt;class &#39;h5py._hl.dataset.Dataset&#39;&gt;
+Shape: (2, 9999)
+</pre></div></div>
+</div>
+<p>You might notice the the <code class="docutils literal notranslate"><span class="pre">raw_samples_hdf</span></code> attribute has one extra dimension. That is because the samples file also records the misfits of each sample. We can easily access these as a NumPy array in the following way:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+    <span class="s2">&quot;bin_samples/tutorial_01_standard_normal.h5&quot;</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
+
+    <span class="c1"># Access misfits as a numpy array</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Type:  {type(samples.misfits)}&quot;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Shape: {samples.misfits.shape}&quot;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Type:  &lt;class &#39;numpy.ndarray&#39;&gt;
+Shape: (9999, 1)
+
+</pre></div></div>
+</div>
+<p>Accessing the data directly might be handy when you need to compute some properties of a parameter, or wish to visualize some behaviour of the Monte Carlo sampler.</p>
+<p>Here is an example where we plot the evolution of parameter 1 and the misfit during the Markov chain, as well as printing statistics on parameter 1:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+
+<span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+    <span class="s2">&quot;bin_samples/tutorial_01_standard_normal.h5&quot;</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">samples</span><span class="o">.</span><span class="n">raw_samples</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;sample index&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;parameter 1 value&quot;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">samples</span><span class="o">.</span><span class="n">misfits</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;sample index&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;misfit&quot;</span><span class="p">)</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;emperical mean: {samples.raw_samples[:,0].mean():.2f}&quot;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;emperical standard deviation: {samples.raw_samples[:,0].std():.2f}&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+emperical mean: -0.01
+emperical standard deviation: 1.01
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_0.1_-_Getting_started_24_1.png" src="../_images/examples_0.1_-_Getting_started_24_1.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Interrupting-sampling:-no-big-deal">
+<h2>Interrupting sampling: no big deal<a class="headerlink" href="#Interrupting-sampling:-no-big-deal" title="Permalink to this headline">¶</a></h2>
+<p>Sometimes you think you have the perfect settings for your ‘run’, and then after half an hour realize sampling is going to take longer than expected. At least, we experienced this a lot during our work with HMC.</p>
+<p>Luckily, we’ve added some nice functionality in this specific case. When a sampler is busy doing his thing, and you want it to wrap up, simply interrupt the process. What this means is you either <strong>once</strong> press <code class="docutils literal notranslate"><span class="pre">CTRL</span> <span class="pre">+</span> <span class="pre">C</span></code> when you’re running from a terminal, or press the stop button (■) at the top if you’re in a Jupyter Notebook. This ensures that the algorithm gracefully wraps up, leaving your dear samples intact.</p>
+<p>Try this out with the next cell. Let it progress to some percentage, and interrupt the kernel.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">HMC</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+    <span class="n">distribution</span><span class="p">,</span>
+    <span class="s2">&quot;bin_samples/tutorial_01_standard_normal.h5&quot;</span><span class="p">,</span>
+    <span class="n">proposals</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span>
+    <span class="n">online_thinning</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">overwrite_samples</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+sys:1: Warning:
+Silently overwriting samples file (bin_samples/tutorial_01_standard_normal.h5) if it exists.
+Sampling. Acceptance rate::  40%|███▉      | 39506/100000 [00:03&lt;00:05, 11546.42it/s]
+</pre></div></div>
+</div>
+<p>When we now inspect the resulting samples file, we see that because we interrupted the kernel, the <code class="docutils literal notranslate"><span class="pre">proposals</span> <span class="pre">saved</span> <span class="pre">to</span> <span class="pre">disk</span></code> is less than we would expect after dividing <code class="docutils literal notranslate"><span class="pre">requested</span> <span class="pre">proposals</span></code> by <code class="docutils literal notranslate"><span class="pre">online</span> <span class="pre">thinning</span></code> (i.e. the number we would expect if the sampler finished).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+    <span class="s2">&quot;bin_samples/tutorial_01_standard_normal.h5&quot;</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
+    <span class="n">samples</span><span class="o">.</span><span class="n">print_details</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+                                H5 file details
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Filename                       bin_samples/tutorial_01_standard_normal.h5
+Dataset                        samples_0
+
+                              Sampling attributes
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Sampler                        HMC
+Requested proposals            100000
+Proposals saved to disk        400
+Acceptance rate                0.9991750206244844
+Online thinning                100
+Sampling start time            2020-04-01 14:42:33
+
+                          Sampler specific attributes
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+integration_steps              10
+randomize_iterations           True
+randomize_time_step            True
+time_step                      0.1
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Interpreting-multidimensional-results">
+<h2>Interpreting multidimensional results<a class="headerlink" href="#Interpreting-multidimensional-results" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># These guys have to be column vectors</span>
+<span class="n">mean</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.2</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">]])</span>
+<span class="n">std</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">4.5</span><span class="p">]])</span>
+<span class="n">variance</span> <span class="o">=</span> <span class="n">std</span> <span class="o">**</span> <span class="mi">2</span>
+
+
+<span class="n">normal_2d</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Distributions</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">variance</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/larsgebraad/Documents/Hamiltonian Monte Carlo/hmc-tomography/hmc_tomography/Distributions/base.py:356: Warning: Seems that you only passed a vector as the covariance matrix. It will be used as the covariance diagonal.
+  Warning,
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">HMC</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+    <span class="n">normal_2d</span><span class="p">,</span> <span class="s2">&quot;bin_samples/tutorial_01_mvn.h5&quot;</span><span class="p">,</span> <span class="n">time_step</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">proposals</span><span class="o">=</span><span class="mi">25000</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+rm: cannot remove &#39;bin_samples/tutorial_01_mvn.h5&#39;: No such file or directory
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Tot. acc rate: 0.69. Last 100 acc rate: 0.64. Progress: 100%|██████████| 25000/25000 [00:02&lt;00:00, 8463.45it/s]
+</pre></div></div>
+</div>
+<p>One of the most interesting things to investigate when sampling from multidimensional distributions is the trade-off between different parameters. We can visualize these (second order) trade-offs by inspecting the 2D marginals. We supply a function that can create a set of 2D marginals from a samples object, by specifying which dimensions should be investigated:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span><span class="s2">&quot;bin_samples/tutorial_01_mvn.h5&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
+    <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Visualization</span><span class="o">.</span><span class="n">marginal_grid</span><span class="p">(</span>
+        <span class="n">samples</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="mi">25</span>  <span class="c1"># Note that dimensions are zero indexed</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_0.1_-_Getting_started_33_0.png" src="../_images/examples_0.1_-_Getting_started_33_0.png" />
+</div>
+</div>
+<p>If you want to investigate sampler behaviour, it is often beneficial to look at a trace plot of the Markov chain. In the next cell, we visualize the evolution of parameter 2 (dimension 1, due to zero based index). We give this function only the first 250 samples.</p>
+<p>Additionally, the used function creates the 2D marginal with another dimension and plots the autocorrelation function of these two parameters during the supplied samples.</p>
+<p>These types of plots can help us identify problems with sampling and assess convergence.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span><span class="s2">&quot;bin_samples/tutorial_01_mvn.h5&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
+    <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Visualization</span><span class="o">.</span><span class="n">visualize_2_dimensions</span><span class="p">(</span>
+        <span class="n">samples</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">250</span><span class="p">],</span>
+    <span class="p">)</span>  <span class="c1"># Note that we only pass the first 250 samples</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_0.1_-_Getting_started_35_0.png" src="../_images/examples_0.1_-_Getting_started_35_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Using-Bayes’-rule">
+<h2>Using Bayes’ rule<a class="headerlink" href="#Using-Bayes’-rule" title="Permalink to this headline">¶</a></h2>
+<p>One of the main operations users of Bayesian inference do is applying Bayes’ rule to two distributions. Bayes’ rule combines two distributions (typically a likelihood and a prior) to a combined state of information, the posterior. We provide a simple interface to combine two or more distributions using Bayes’ rule in the following way.</p>
+<p>First we create two distributions we wish to combine. The first distribution is a 2D uniform distribution bounded between <span class="math notranslate nohighlight">\([0, 1]\)</span> for both parameters:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">lower_bounds</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="n">upper_bounds</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+<span class="n">distribution_1</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Distributions</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span>
+    <span class="n">lower_bounds</span><span class="o">=</span><span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="o">=</span><span class="n">upper_bounds</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The next distribution is a mutlivariate (uncorrelated) normal distribution with varying means and standard deviations:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">mean</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.75</span><span class="p">]])</span>
+<span class="n">std</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.1</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.25</span><span class="p">]])</span>
+<span class="n">variance</span> <span class="o">=</span> <span class="n">std</span> <span class="o">**</span> <span class="mi">2</span>
+
+<span class="n">distribution_2</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Distributions</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">variance</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/larsgebraad/Documents/Hamiltonian Monte Carlo/hmc-tomography/hmc_tomography/Distributions/base.py:356: Warning: Seems that you only passed a vector as the covariance matrix. It will be used as the covariance diagonal.
+  Warning,
+</pre></div></div>
+</div>
+<p>The hmc_tomography package additionally warns us that it assumed the passed variance object was the diagonal of a covariance matrix. This is fine, as we don’t want to define any correlations in this distribution.</p>
+<p>We can use Bayes’ rule by passing a list of distributions to the method <code class="docutils literal notranslate"><span class="pre">hmc_tomography.Distributions.BayesRule</span></code>. The returned distribution will contain the originally passed distributions completely.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">posterior</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Distributions</span><span class="o">.</span><span class="n">BayesRule</span><span class="p">([</span><span class="n">distribution_1</span><span class="p">,</span> <span class="n">distribution_2</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<p>The generated distribution can then be investigated using the samplers:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">HMC</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+    <span class="n">posterior</span><span class="p">,</span> <span class="s2">&quot;bin_samples/tutorial_01_posterior.h5&quot;</span><span class="p">,</span> <span class="n">proposals</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+sys:1: Warning:
+It seems that the samples file (bin_samples/tutorial_01_posterior.h5) already exists.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(n)ew file name, (o)verwrite or (a)bort? &gt;&gt; o
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Tot. acc rate: 0.52. Last 100 acc rate: 0.57. Progress: 100%|██████████| 10000/10000 [00:04&lt;00:00, 2031.85it/s]
+</pre></div></div>
+</div>
+<p>Upon visualization we see the influence of both the uniform distributions (truncating the posterior at their limits) as well as the multivariate normal distribution:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span><span class="s2">&quot;bin_samples/tutorial_01_posterior.h5&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
+
+    <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Visualization</span><span class="o">.</span><span class="n">marginal_grid</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_0.1_-_Getting_started_46_0.png" src="../_images/examples_0.1_-_Getting_started_46_0.png" />
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="0.2 - Tuning Hamiltonian Monte Carlo.html" class="btn btn-neutral float-right" title="Tutorial 0.2 - Tuning Hamiltonian Monte Carlo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../examples.html" class="btn btn-neutral float-left" title="Examples and tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019-2020, Andrea Zunino, Andreas Fichtner, Lars Gebraad
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

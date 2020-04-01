@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>hmc_tomography.Samplers &mdash; HMC Tom 0.1.1 documentation</title>
+  <title>hmc_tomography.Samplers &mdash; HMC Tom 0.2.1 documentation</title>
   
 
   
@@ -21,12 +21,12 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.1
+                0.2
               </div>
             
           
@@ -93,12 +93,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../index.html">HMC Tomography</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../setup.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tour.html">A tour of hmc_tomography</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples and tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../sampling.html">Sampling reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../post.html">Post-sampling reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tests.html">Development and testing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../py-modindex.html">Module index</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Alphabetic index</a></li>
 </ul>
@@ -165,6 +161,32 @@
             
   <h1>Source code for hmc_tomography.Samplers</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Sampler classes and associated methods.</span>
+
+<span class="sd">The classes in this module provide different sampling algorithms to appraise </span>
+<span class="sd">distributions. All of them are designed to work in a minimal way; you can run the</span>
+<span class="sd">sampling method with only a target distribution and filename to write your samples to. </span>
+<span class="sd">However, the true power of any algorithm only shows when the user injects his expertise</span>
+<span class="sd">through tuning parameters.</span>
+
+<span class="sd">Sampling can be initialised from both an instance of a sampler or directly as a static </span>
+<span class="sd">method:</span>
+
+<span class="sd">.. code-block:: python</span>
+
+<span class="sd">    from hmc_tomography import HMC</span>
+
+<span class="sd">    HMC_instance = HMC()</span>
+
+<span class="sd">    # Sampling using the static method</span>
+<span class="sd">    HMC.sample(distribution, &quot;samples.h5&quot;)</span>
+
+<span class="sd">    # Sampling using the instance method</span>
+<span class="sd">    HMC_instance.sample(distribution, &quot;samples.h5&quot;)</span>
+
+<span class="sd">All of the classes inherit from :class:`._AbstractSampler`; a base class outlining</span>
+<span class="sd">required methods and their signatures (required in- and outputs). </span>
+
+
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">sys</span> <span class="k">as</span> <span class="nn">_sys</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">ABC</span> <span class="k">as</span> <span class="n">_ABC</span>
@@ -173,24 +195,23 @@
 <span class="kn">import</span> <span class="nn">h5py</span> <span class="k">as</span> <span class="nn">_h5py</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">_numpy</span>
 <span class="kn">import</span> <span class="nn">time</span> <span class="k">as</span> <span class="nn">_time</span>
-<span class="kn">import</span> <span class="nn">tqdm</span> <span class="k">as</span> <span class="nn">_tqdm</span>
+<span class="kn">import</span> <span class="nn">tqdm.auto</span> <span class="k">as</span> <span class="nn">_tqdm_au</span>
 <span class="kn">import</span> <span class="nn">warnings</span> <span class="k">as</span> <span class="nn">_warnings</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Tuple</span> <span class="k">as</span> <span class="n">_Tuple</span>
 
-<span class="kn">from</span> <span class="nn">hmc_tomography.Priors</span> <span class="k">import</span> <span class="n">_AbstractPrior</span>
+<span class="kn">from</span> <span class="nn">hmc_tomography.Distributions</span> <span class="k">import</span> <span class="n">_AbstractDistribution</span>
 <span class="kn">from</span> <span class="nn">hmc_tomography.MassMatrices</span> <span class="k">import</span> <span class="n">_AbstractMassMatrix</span>
-<span class="kn">from</span> <span class="nn">hmc_tomography.Targets</span> <span class="k">import</span> <span class="n">_AbstractTarget</span>
+<span class="kn">from</span> <span class="nn">hmc_tomography.MassMatrices</span> <span class="k">import</span> <span class="n">Unit</span> <span class="k">as</span> <span class="n">_Unit</span>
 
 
-<div class="viewcode-block" id="_AbstractSampler"><a class="viewcode-back" href="../../sampling.sampler.html#hmc_tomography.Samplers._AbstractSampler">[docs]</a><span class="k">class</span> <span class="nc">_AbstractSampler</span><span class="p">(</span><span class="n">_ABC</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Monte Carlo Sampler base class</span>
+<div class="viewcode-block" id="_AbstractSampler"><a class="viewcode-back" href="../../api/samplers/_AbstractSampler.html#hmc_tomography.Samplers._AbstractSampler">[docs]</a><span class="k">class</span> <span class="nc">_AbstractSampler</span><span class="p">(</span><span class="n">_ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class for Markov chain Monte Carlo samplers.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Monte Carlo sampler abstract base class&quot;</span>
     <span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-    <span class="n">prior</span><span class="p">:</span> <span class="n">_AbstractPrior</span>
-    <span class="n">target</span><span class="p">:</span> <span class="n">_AbstractTarget</span>
+    <span class="n">target</span><span class="p">:</span> <span class="n">_AbstractDistribution</span>
     <span class="n">sample_hdf5_file</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">sample_hdf5_dataset</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">sample_ram_buffer</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span>
@@ -200,14 +221,14 @@
 <span class="sd">    the filename might be altered. This alteration is never done without user</span>
 <span class="sd">    interaction.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="_AbstractSampler.sample"><a class="viewcode-back" href="../../sampling.sampler.html#hmc_tomography.Samplers._AbstractSampler.sample">[docs]</a>    <span class="nd">@_abstractmethod</span>
+<div class="viewcode-block" id="_AbstractSampler.sample"><a class="viewcode-back" href="../../api/samplers/_AbstractSampler.html#hmc_tomography.Samplers._AbstractSampler.sample">[docs]</a>    <span class="nd">@_abstractmethod</span>
     <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">samples_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">proposals</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
         <span class="n">online_thinning</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">sample_ram_buffer_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -220,47 +241,24 @@
         <span class="k">pass</span></div></div>
 
 
-<div class="viewcode-block" id="HMC"><a class="viewcode-back" href="../../sampling.sampler.html#hmc_tomography.Samplers.HMC">[docs]</a><span class="k">class</span> <span class="nc">HMC</span><span class="p">(</span><span class="n">_AbstractSampler</span><span class="p">):</span>
+<div class="viewcode-block" id="HMC"><a class="viewcode-back" href="../../api/samplers/HMC.html#hmc_tomography.Samplers.HMC">[docs]</a><span class="k">class</span> <span class="nc">HMC</span><span class="p">(</span><span class="n">_AbstractSampler</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Hamiltonian Monte Carlo class.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Hamiltonian Monte Carlo sampler&quot;</span>
-    <span class="n">mass_matrix</span><span class="p">:</span> <span class="n">_AbstractMassMatrix</span>
+    <span class="n">mass_matrix</span><span class="p">:</span> <span class="n">_AbstractMassMatrix</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">target</span><span class="p">:</span> <span class="n">_AbstractTarget</span><span class="p">,</span>
-        <span class="n">mass_matrix</span><span class="p">:</span> <span class="n">_AbstractMassMatrix</span><span class="p">,</span>
-        <span class="n">prior</span><span class="p">:</span> <span class="n">_AbstractPrior</span><span class="p">,</span>
-    <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,):</span>
+        <span class="sd">&quot;&quot;&quot;Re-assign static method&quot;&quot;&quot;</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        target</span>
-<span class="sd">        mass_matrix</span>
-<span class="sd">        prior</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Sanity check on the dimensions of passed objects ---------------------</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">==</span> <span class="n">prior</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">==</span> <span class="n">mass_matrix</span><span class="o">.</span><span class="n">dimensions</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Incompatible target/prior/mass matrix.</span><span class="se">\r\n</span><span class="s2">&quot;</span>
-                <span class="n">f</span><span class="s2">&quot;Target dimensions:</span><span class="se">\t\t</span><span class="si">{target.dimensions}</span><span class="s2">.</span><span class="se">\r\n</span><span class="s2">&quot;</span>
-                <span class="n">f</span><span class="s2">&quot;Prior dimensions:</span><span class="se">\t\t</span><span class="si">{prior.dimensions}</span><span class="s2">.</span><span class="se">\r\n</span><span class="s2">&quot;</span>
-                <span class="n">f</span><span class="s2">&quot;Mass matrix dimensions:</span><span class="se">\t</span><span class="si">{mass_matrix.dimensions}</span><span class="s2">.</span><span class="se">\r\n</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_sample</span>
 
-        <span class="c1"># Setting the passed objects -------------------------------------------</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">dimensions</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">prior</span> <span class="o">=</span> <span class="n">prior</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span> <span class="o">=</span> <span class="n">mass_matrix</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix_update_hook</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="p">,</span> <span class="s2">&quot;update&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-
-<div class="viewcode-block" id="HMC.sample"><a class="viewcode-back" href="../../sampling.sampler.html#hmc_tomography.Samplers.HMC.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
+<div class="viewcode-block" id="HMC.sample"><a class="viewcode-back" href="../../api/samplers/HMC.html#hmc_tomography.Samplers.HMC.sample">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span>
+        <span class="n">target</span><span class="p">:</span> <span class="n">_AbstractDistribution</span><span class="p">,</span>
         <span class="n">samples_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">mass_matrix</span><span class="p">:</span> <span class="n">_AbstractMassMatrix</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">proposals</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
         <span class="n">online_thinning</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">sample_ram_buffer_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
@@ -272,7 +270,9 @@
         <span class="n">ignore_update_hook_mass</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">suppress_warnings</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">overwrite_samples</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">stages</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">update_rate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Parameters</span>
@@ -292,6 +292,91 @@
 <span class="sd">        -------</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">HMC</span><span class="p">()</span><span class="o">.</span><span class="n">instance_sample</span><span class="p">(</span>
+            <span class="n">target</span><span class="p">,</span>
+            <span class="n">samples_filename</span><span class="p">,</span>
+            <span class="n">mass_matrix</span><span class="p">,</span>
+            <span class="n">proposals</span><span class="p">,</span>
+            <span class="n">online_thinning</span><span class="p">,</span>
+            <span class="n">sample_ram_buffer_size</span><span class="p">,</span>
+            <span class="n">integration_steps</span><span class="p">,</span>
+            <span class="n">time_step</span><span class="p">,</span>
+            <span class="n">randomize_integration_steps</span><span class="p">,</span>
+            <span class="n">randomize_time_step</span><span class="p">,</span>
+            <span class="n">initial_model</span><span class="p">,</span>
+            <span class="n">ignore_update_hook_mass</span><span class="p">,</span>
+            <span class="n">suppress_warnings</span><span class="p">,</span>
+            <span class="n">overwrite_samples</span><span class="p">,</span>
+            <span class="n">stages</span><span class="p">,</span>
+            <span class="n">update_rate</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="HMC.instance_sample"><a class="viewcode-back" href="../../api/samplers/HMC.html#hmc_tomography.Samplers.HMC.instance_sample">[docs]</a>    <span class="k">def</span> <span class="nf">instance_sample</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">target</span><span class="p">:</span> <span class="n">_AbstractDistribution</span><span class="p">,</span>
+        <span class="n">samples_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">mass_matrix</span><span class="p">:</span> <span class="n">_AbstractMassMatrix</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">proposals</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">online_thinning</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">sample_ram_buffer_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+        <span class="n">integration_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">time_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">randomize_integration_steps</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">randomize_time_step</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">initial_model</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ignore_update_hook_mass</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">suppress_warnings</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">overwrite_samples</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">stages</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">update_rate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ignore_update_hook_mass</span>
+<span class="sd">        initial_model</span>
+<span class="sd">        samples_filename</span>
+<span class="sd">        proposals</span>
+<span class="sd">        online_thinning</span>
+<span class="sd">        sample_ram_buffer_size</span>
+<span class="sd">        integration_steps</span>
+<span class="sd">        time_step</span>
+<span class="sd">        randomize_integration_steps</span>
+<span class="sd">        randomize_time_step</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Fix filename extension if needed ---------------------------------------------</span>
+        <span class="k">if</span> <span class="n">samples_filename</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:]</span> <span class="o">!=</span> <span class="s2">&quot;.h5&quot;</span><span class="p">:</span>
+            <span class="n">samples_filename</span> <span class="o">+=</span> <span class="s2">&quot;.h5&quot;</span>
+
+        <span class="c1"># Sanity check on the dimensions of passed objects -----------------------------</span>
+        <span class="k">if</span> <span class="n">mass_matrix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># The mass matrix can be None as default, so we default to the unit mass</span>
+            <span class="c1"># matrix. This choice should &#39;just work&#39;.</span>
+            <span class="n">mass_matrix</span> <span class="o">=</span> <span class="n">_Unit</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span>
+
+        <span class="c1"># Any other mass matrix needs to have the correct dimensionality.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">==</span> <span class="n">mass_matrix</span><span class="o">.</span><span class="n">dimensions</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Incompatible target/target/mass matrix.</span><span class="se">\r\n</span><span class="s2">&quot;</span>
+                <span class="n">f</span><span class="s2">&quot;Target dimensions:</span><span class="se">\t\t</span><span class="si">{target.dimensions}</span><span class="s2">.</span><span class="se">\r\n</span><span class="s2">&quot;</span>
+                <span class="n">f</span><span class="s2">&quot;Mass matrix dimensions:</span><span class="se">\t</span><span class="si">{mass_matrix.dimensions}</span><span class="s2">.</span><span class="se">\r\n</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Setting the passed objects ---------------------------------------------------</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">dimensions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span> <span class="o">=</span> <span class="n">mass_matrix</span>
+
+        <span class="c1"># Try to get update hook, default to None if there isn&#39;t one</span>
+        <span class="c1"># Update hooks are used for mass matrix that perform an action when sampling,</span>
+        <span class="c1"># i.e. autotuning.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix_update_hook</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">mass_matrix</span><span class="p">,</span> <span class="s2">&quot;update&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="c1"># If suppress warnings ---------------------------------------------------------</span>
         <span class="k">if</span> <span class="n">suppress_warnings</span><span class="p">:</span>
@@ -318,7 +403,9 @@
         <span class="c1"># Open file, with some intricate logic</span>
 
         <span class="n">return_code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_samples_hdf5</span><span class="p">(</span>
-            <span class="n">samples_filename</span><span class="p">,</span> <span class="n">total_samples_to_be_generated</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite_samples</span>
+            <span class="n">samples_filename</span><span class="p">,</span>
+            <span class="n">total_samples_to_be_generated</span><span class="p">,</span>
+            <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite_samples</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">return_code</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">return</span> <span class="mi">1</span>
@@ -329,7 +416,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">sample_hdf5_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;online_thinning&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">online_thinning</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sample_hdf5_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;time_step&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_step</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sample_hdf5_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;integration_steps&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">integration_steps</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sample_hdf5_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;randomizetime_step&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">randomize_time_step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_hdf5_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;randomize_time_step&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">randomize_time_step</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sample_hdf5_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span>
             <span class="s2">&quot;randomize_iterations&quot;</span>
         <span class="p">]</span> <span class="o">=</span> <span class="n">randomize_integration_steps</span>
@@ -345,15 +432,28 @@
         <span class="n">_time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.001</span><span class="p">)</span>
 
         <span class="c1"># Create progress bar</span>
-        <span class="n">proposals_total</span> <span class="o">=</span> <span class="n">_tqdm</span><span class="o">.</span><span class="n">trange</span><span class="p">(</span>
-            <span class="n">proposals</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Sampling. Acceptance rate:&quot;</span><span class="p">,</span> <span class="n">leave</span><span class="o">=</span><span class="kc">True</span>
-        <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">proposals_total</span> <span class="o">=</span> <span class="n">_tqdm_au</span><span class="o">.</span><span class="n">trange</span><span class="p">(</span>
+                <span class="n">proposals</span><span class="p">,</span>
+                <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Sampling. Acceptance rate:&quot;</span><span class="p">,</span>
+                <span class="n">leave</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">dynamic_ncols</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">proposals_total</span> <span class="o">=</span> <span class="n">_tqdm_au</span><span class="o">.</span><span class="n">trange</span><span class="p">(</span>
+                <span class="n">proposals</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Sampling. Acceptance rate:&quot;</span><span class="p">,</span> <span class="n">leave</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="c1"># Sampling acceptance history</span>
         <span class="n">acceptance_history</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">100</span><span class="p">,))</span>
 
         <span class="c1"># Selection of integrator ----------------------------------------------</span>
-        <span class="n">propagate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagate_leapfrog</span>
+        <span class="k">if</span> <span class="n">stages</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">propagate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagate_4_stage_simplified</span>
+        <span class="k">elif</span> <span class="n">stages</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">propagate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagate_3_stage_simplified</span>
+        <span class="k">elif</span> <span class="n">stages</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">propagate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagate_leapfrog</span>
 
         <span class="c1"># Optional randomization -----------------------------------------------</span>
         <span class="k">if</span> <span class="n">randomize_integration_steps</span><span class="p">:</span>
@@ -378,12 +478,11 @@
 
         <span class="c1"># Start sampling, but catch CTRL+C / COMMAND + . (SIGINT) ----------------------</span>
         <span class="k">try</span><span class="p">:</span>
+            <span class="n">current_proposal</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">for</span> <span class="n">proposal</span> <span class="ow">in</span> <span class="n">proposals_total</span><span class="p">:</span>
 
                 <span class="c1"># Compute initial Hamiltonian</span>
-                <span class="n">potential</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">misfit</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">prior</span><span class="o">.</span><span class="n">misfit</span><span class="p">(</span>
-                    <span class="n">coordinates</span>
-                <span class="p">)</span>
+                <span class="n">potential</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">misfit</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
                 <span class="n">momentum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">generate_momentum</span><span class="p">()</span>
                 <span class="n">kinetic</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">kinetic_energy</span><span class="p">(</span><span class="n">momentum</span><span class="p">)</span>
                 <span class="n">hamiltonian</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">potential</span> <span class="o">+</span> <span class="n">kinetic</span>
@@ -394,9 +493,7 @@
                 <span class="p">)</span>
 
                 <span class="c1"># Compute resulting Hamiltonian</span>
-                <span class="n">new_potential</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">misfit</span><span class="p">(</span>
-                    <span class="n">new_coordinates</span>
-                <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">prior</span><span class="o">.</span><span class="n">misfit</span><span class="p">(</span><span class="n">new_coordinates</span><span class="p">)</span>
+                <span class="n">new_potential</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">misfit</span><span class="p">(</span><span class="n">new_coordinates</span><span class="p">)</span>
                 <span class="n">new_kinetic</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">kinetic_energy</span><span class="p">(</span><span class="n">new_momentum</span><span class="p">)</span>
                 <span class="n">new_hamiltonian</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">new_potential</span> <span class="o">+</span> <span class="n">new_kinetic</span>
 
@@ -416,7 +513,7 @@
                 <span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">update_m</span><span class="p">,</span> <span class="n">update_g</span><span class="p">)</span>
 
-                <span class="c1"># On-line thinning and  writing samples to disk ----------------</span>
+                <span class="c1"># On-line thinning, progress bar and writing samples to disk -----------</span>
                 <span class="k">if</span> <span class="n">proposal</span> <span class="o">%</span> <span class="n">online_thinning</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">buffer_location</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
                         <span class="p">(</span><span class="n">proposal</span> <span class="o">/</span> <span class="n">online_thinning</span><span class="p">)</span> <span class="o">%</span> <span class="n">sample_ram_buffer_size</span>
@@ -424,13 +521,23 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">sample_ram_buffer</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">buffer_location</span><span class="p">]</span> <span class="o">=</span> <span class="n">coordinates</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">sample_ram_buffer</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">buffer_location</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">misfit</span><span class="p">(</span>
                         <span class="n">coordinates</span>
-                    <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">prior</span><span class="o">.</span><span class="n">misfit</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
-                    <span class="n">proposals_total</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span>
-                        <span class="n">f</span><span class="s2">&quot;Tot. acc rate: {accepted/(proposal+1):.2f}. &quot;</span>
-                        <span class="n">f</span><span class="s2">&quot;Last 100 acc rate: &quot;</span>
-                        <span class="n">f</span><span class="s2">&quot;{_numpy.sum(acceptance_history)/100.:.2f}. &quot;</span>
-                        <span class="s2">&quot;Progress&quot;</span>
+                    <span class="p">)</span>  <span class="c1"># TODO Optimize this</span>
+
+                    <span class="c1"># Total acceptance rate</span>
+                    <span class="n">tot_acc</span> <span class="o">=</span> <span class="n">accepted</span> <span class="o">/</span> <span class="p">(</span><span class="n">proposal</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+                    <span class="c1"># Last 100 acceptance rate</span>
+                    <span class="n">loc_acc</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">acceptance_history</span><span class="p">)</span> <span class="o">/</span> <span class="nb">min</span><span class="p">(</span>
+                        <span class="mf">100.0</span><span class="p">,</span> <span class="n">current_proposal</span> <span class="o">+</span> <span class="mi">1</span>
                     <span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">proposal</span> <span class="o">%</span> <span class="n">update_rate</span><span class="p">:</span>
+                        <span class="n">proposals_total</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span>
+                            <span class="n">f</span><span class="s2">&quot;Tot. acc rate: </span><span class="si">{tot_acc:.2f}</span><span class="s2">. &quot;</span>
+                            <span class="n">f</span><span class="s2">&quot;Last 100 acc rate: </span><span class="si">{loc_acc:.2f}</span><span class="s2">. &quot;</span>
+                            <span class="s2">&quot;Progress&quot;</span><span class="p">,</span>
+                            <span class="n">refresh</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="p">)</span>
                     <span class="c1"># Write out to disk when at the end of the buffer</span>
                     <span class="k">if</span> <span class="n">buffer_location</span> <span class="o">==</span> <span class="n">sample_ram_buffer_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
                         <span class="n">start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
@@ -438,6 +545,7 @@
                         <span class="p">)</span>
                         <span class="n">end</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">proposal</span> <span class="o">/</span> <span class="n">online_thinning</span><span class="p">))</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">flush_samples</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_ram_buffer</span><span class="p">)</span>
+                <span class="n">current_proposal</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>  <span class="c1"># Catch SIGINT --------------------------------------</span>
             <span class="c1"># Close tqdm progressbar</span>
@@ -453,7 +561,7 @@
                 <span class="o">*</span> <span class="n">sample_ram_buffer_size</span>
             <span class="p">)</span>
 
-            <span class="c1"># Write out one less to be sure</span>
+            <span class="c1"># Write out one less to be sure if interrupted</span>
             <span class="n">end</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">proposal</span> <span class="o">/</span> <span class="n">online_thinning</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
             <span class="k">if</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">buffer_location</span> <span class="o">!=</span> <span class="n">sample_ram_buffer_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">flush_samples</span><span class="p">(</span>
@@ -462,6 +570,8 @@
 
             <span class="c1"># Trim the dataset to have the shape of end_of_samples</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sample_hdf5_dataset</span><span class="o">.</span><span class="n">resize</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">sample_hdf5_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;acceptance_rate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tot_acc</span>
 
             <span class="c1"># Close the HDF file</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sample_hdf5_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -472,11 +582,9 @@
 
         <span class="c1"># Flush output</span>
         <span class="n">_sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
-        <span class="n">_time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.001</span><span class="p">)</span>
+        <span class="n">_time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.001</span><span class="p">)</span></div>
 
-        <span class="k">return</span> <span class="mi">0</span></div>
-
-<div class="viewcode-block" id="HMC.propagate_leapfrog"><a class="viewcode-back" href="../../sampling.sampler.html#hmc_tomography.Samplers.HMC.propagate_leapfrog">[docs]</a>    <span class="k">def</span> <span class="nf">propagate_leapfrog</span><span class="p">(</span>
+<div class="viewcode-block" id="HMC.propagate_leapfrog"><a class="viewcode-back" href="../../api/samplers/HMC.html#hmc_tomography.Samplers.HMC.propagate_leapfrog">[docs]</a>    <span class="k">def</span> <span class="nf">propagate_leapfrog</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">momentum</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
@@ -506,25 +614,21 @@
         <span class="n">coordinates</span> <span class="o">+=</span> <span class="p">(</span>
             <span class="mf">0.5</span> <span class="o">*</span> <span class="n">time_step</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">kinetic_energy_gradient</span><span class="p">(</span><span class="n">momentum</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">prior</span><span class="o">.</span><span class="n">corrector</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">corrector</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
 
         <span class="c1"># Integration loop</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iterations</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="n">potential_gradient</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span>
-                <span class="n">coordinates</span>
-            <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">prior</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+            <span class="n">potential_gradient</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
             <span class="n">momentum</span> <span class="o">-=</span> <span class="n">time_step</span> <span class="o">*</span> <span class="n">potential_gradient</span>
             <span class="n">coordinates</span> <span class="o">+=</span> <span class="n">time_step</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">kinetic_energy_gradient</span><span class="p">(</span>
                 <span class="n">momentum</span>
             <span class="p">)</span>
 
             <span class="c1"># Correct bounds</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">prior</span><span class="o">.</span><span class="n">corrector</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">corrector</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
 
         <span class="c1"># Full momentum and half step coordinates after loop</span>
-        <span class="n">potential_gradient</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">prior</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span>
-            <span class="n">coordinates</span>
-        <span class="p">)</span>
+        <span class="n">potential_gradient</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
 
         <span class="c1"># For the update</span>
         <span class="n">update_coordinates</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
@@ -535,11 +639,213 @@
             <span class="mf">0.5</span> <span class="o">*</span> <span class="n">time_step</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">kinetic_energy_gradient</span><span class="p">(</span><span class="n">momentum</span><span class="p">)</span>
         <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">prior</span><span class="o">.</span><span class="n">corrector</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">corrector</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">,</span> <span class="n">update_coordinates</span><span class="p">,</span> <span class="n">update_gradient</span></div>
 
-<div class="viewcode-block" id="HMC.open_samples_hdf5"><a class="viewcode-back" href="../../sampling.sampler.html#hmc_tomography.Samplers.HMC.open_samples_hdf5">[docs]</a>    <span class="k">def</span> <span class="nf">open_samples_hdf5</span><span class="p">(</span>
+<div class="viewcode-block" id="HMC.propagate_leapfrog_simplified"><a class="viewcode-back" href="../../api/samplers/HMC.html#hmc_tomography.Samplers.HMC.propagate_leapfrog_simplified">[docs]</a>    <span class="k">def</span> <span class="nf">propagate_leapfrog_simplified</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">momentum</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">time_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_Tuple</span><span class="p">[</span><span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        coordinates</span>
+<span class="sd">        momentum</span>
+<span class="sd">        iterations</span>
+<span class="sd">        time_step</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Make sure not to alter a view but a copy of the passed arrays.</span>
+        <span class="n">coordinates</span> <span class="o">=</span> <span class="n">coordinates</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">momentum</span> <span class="o">=</span> <span class="n">momentum</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># Leapfrog integration -------------------------------------------------</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iterations</span><span class="p">):</span>
+            <span class="n">coordinates</span> <span class="o">+=</span> <span class="p">(</span>
+                <span class="mf">0.5</span> <span class="o">*</span> <span class="n">time_step</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">kinetic_energy_gradient</span><span class="p">(</span><span class="n">momentum</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">corrector</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
+
+            <span class="n">potential_gradient</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+            <span class="n">momentum</span> <span class="o">-=</span> <span class="n">time_step</span> <span class="o">*</span> <span class="n">potential_gradient</span>
+
+            <span class="n">coordinates</span> <span class="o">+=</span> <span class="p">(</span>
+                <span class="mf">0.5</span> <span class="o">*</span> <span class="n">time_step</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">kinetic_energy_gradient</span><span class="p">(</span><span class="n">momentum</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">corrector</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
+
+        <span class="c1"># For the update</span>
+        <span class="n">update_coordinates</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+        <span class="n">update_gradient</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">potential_gradient</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">,</span> <span class="n">update_coordinates</span><span class="p">,</span> <span class="n">update_gradient</span></div>
+
+<div class="viewcode-block" id="HMC.propagate_4_stage_simplified"><a class="viewcode-back" href="../../api/samplers/HMC.html#hmc_tomography.Samplers.HMC.propagate_4_stage_simplified">[docs]</a>    <span class="k">def</span> <span class="nf">propagate_4_stage_simplified</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">momentum</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">time_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_Tuple</span><span class="p">[</span><span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        coordinates</span>
+<span class="sd">        momentum</span>
+<span class="sd">        iterations</span>
+<span class="sd">        time_step</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Schema: (a1,b1,a2,b2,a3,b2,a2,b1,a1)</span>
+        <span class="n">a1</span> <span class="o">=</span> <span class="mf">0.071353913450279725904</span>
+        <span class="n">a2</span> <span class="o">=</span> <span class="mf">0.268548791161230105820</span>
+        <span class="n">a3</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">a1</span> <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">a2</span>
+        <span class="n">b1</span> <span class="o">=</span> <span class="mf">0.191667800000000000000</span>
+        <span class="n">b2</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">-</span> <span class="n">b1</span>
+
+        <span class="n">a1</span> <span class="o">*=</span> <span class="n">time_step</span>
+        <span class="n">a2</span> <span class="o">*=</span> <span class="n">time_step</span>
+        <span class="n">a3</span> <span class="o">*=</span> <span class="n">time_step</span>
+        <span class="n">b1</span> <span class="o">*=</span> <span class="n">time_step</span>
+        <span class="n">b2</span> <span class="o">*=</span> <span class="n">time_step</span>
+
+        <span class="c1"># Make sure not to alter a view but a copy of the passed arrays.</span>
+        <span class="n">coordinates</span> <span class="o">=</span> <span class="n">coordinates</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">momentum</span> <span class="o">=</span> <span class="n">momentum</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># Leapfrog integration -------------------------------------------------</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iterations</span><span class="p">):</span>
+
+            <span class="c1"># A1</span>
+            <span class="n">coordinates</span> <span class="o">+=</span> <span class="n">a1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">kinetic_energy_gradient</span><span class="p">(</span><span class="n">momentum</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">corrector</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
+
+            <span class="c1"># B1</span>
+            <span class="n">potential_gradient</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+            <span class="n">momentum</span> <span class="o">-=</span> <span class="n">b1</span> <span class="o">*</span> <span class="n">potential_gradient</span>
+
+            <span class="c1"># A2</span>
+            <span class="n">coordinates</span> <span class="o">+=</span> <span class="n">a2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">kinetic_energy_gradient</span><span class="p">(</span><span class="n">momentum</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">corrector</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
+
+            <span class="c1"># B2</span>
+            <span class="n">potential_gradient</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+            <span class="n">momentum</span> <span class="o">-=</span> <span class="n">b2</span> <span class="o">*</span> <span class="n">potential_gradient</span>
+
+            <span class="c1"># A3</span>
+            <span class="n">coordinates</span> <span class="o">+=</span> <span class="n">a3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">kinetic_energy_gradient</span><span class="p">(</span><span class="n">momentum</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">corrector</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
+
+            <span class="c1"># B2</span>
+            <span class="n">potential_gradient</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+            <span class="n">momentum</span> <span class="o">-=</span> <span class="n">b2</span> <span class="o">*</span> <span class="n">potential_gradient</span>
+
+            <span class="c1"># A2</span>
+            <span class="n">coordinates</span> <span class="o">+=</span> <span class="n">a2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">kinetic_energy_gradient</span><span class="p">(</span><span class="n">momentum</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">corrector</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
+
+            <span class="c1"># B1</span>
+            <span class="n">potential_gradient</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+            <span class="n">momentum</span> <span class="o">-=</span> <span class="n">b1</span> <span class="o">*</span> <span class="n">potential_gradient</span>
+
+            <span class="c1"># A1</span>
+            <span class="n">coordinates</span> <span class="o">+=</span> <span class="n">a1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">kinetic_energy_gradient</span><span class="p">(</span><span class="n">momentum</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">corrector</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
+
+        <span class="c1"># For the update</span>
+        <span class="n">update_coordinates</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+        <span class="n">update_gradient</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">potential_gradient</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">,</span> <span class="n">update_coordinates</span><span class="p">,</span> <span class="n">update_gradient</span></div>
+
+<div class="viewcode-block" id="HMC.propagate_3_stage_simplified"><a class="viewcode-back" href="../../api/samplers/HMC.html#hmc_tomography.Samplers.HMC.propagate_3_stage_simplified">[docs]</a>    <span class="k">def</span> <span class="nf">propagate_3_stage_simplified</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">momentum</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">time_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_Tuple</span><span class="p">[</span><span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        coordinates</span>
+<span class="sd">        momentum</span>
+<span class="sd">        iterations</span>
+<span class="sd">        time_step</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Schema: (a1,b1,a2,b2,a2,b1,a1)</span>
+        <span class="n">a1</span> <span class="o">=</span> <span class="mf">0.11888010966548</span>
+        <span class="n">a2</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">-</span> <span class="n">a1</span>
+        <span class="n">b1</span> <span class="o">=</span> <span class="mf">0.29619504261126</span>
+        <span class="n">b2</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">b1</span>
+
+        <span class="n">a1</span> <span class="o">*=</span> <span class="n">time_step</span>
+        <span class="n">a2</span> <span class="o">*=</span> <span class="n">time_step</span>
+        <span class="n">b1</span> <span class="o">*=</span> <span class="n">time_step</span>
+        <span class="n">b2</span> <span class="o">*=</span> <span class="n">time_step</span>
+
+        <span class="c1"># Make sure not to alter a view but a copy of the passed arrays.</span>
+        <span class="n">coordinates</span> <span class="o">=</span> <span class="n">coordinates</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">momentum</span> <span class="o">=</span> <span class="n">momentum</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># Leapfrog integration -------------------------------------------------</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iterations</span><span class="p">):</span>
+
+            <span class="c1"># A1</span>
+            <span class="n">coordinates</span> <span class="o">+=</span> <span class="n">a1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">kinetic_energy_gradient</span><span class="p">(</span><span class="n">momentum</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">corrector</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
+
+            <span class="c1"># B1</span>
+            <span class="n">potential_gradient</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+            <span class="n">momentum</span> <span class="o">-=</span> <span class="n">b1</span> <span class="o">*</span> <span class="n">potential_gradient</span>
+
+            <span class="c1"># A2</span>
+            <span class="n">coordinates</span> <span class="o">+=</span> <span class="n">a2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">kinetic_energy_gradient</span><span class="p">(</span><span class="n">momentum</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">corrector</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
+
+            <span class="c1"># B2</span>
+            <span class="n">potential_gradient</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+            <span class="n">momentum</span> <span class="o">-=</span> <span class="n">b2</span> <span class="o">*</span> <span class="n">potential_gradient</span>
+
+            <span class="c1"># A2</span>
+            <span class="n">coordinates</span> <span class="o">+=</span> <span class="n">a2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">kinetic_energy_gradient</span><span class="p">(</span><span class="n">momentum</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">corrector</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
+
+            <span class="c1"># B1</span>
+            <span class="n">potential_gradient</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+            <span class="n">momentum</span> <span class="o">-=</span> <span class="n">b1</span> <span class="o">*</span> <span class="n">potential_gradient</span>
+
+            <span class="c1"># A1</span>
+            <span class="n">coordinates</span> <span class="o">+=</span> <span class="n">a1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">kinetic_energy_gradient</span><span class="p">(</span><span class="n">momentum</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">corrector</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
+
+        <span class="c1"># For the update</span>
+        <span class="n">update_coordinates</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+        <span class="n">update_gradient</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">potential_gradient</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">momentum</span><span class="p">,</span> <span class="n">update_coordinates</span><span class="p">,</span> <span class="n">update_gradient</span></div>
+
+<div class="viewcode-block" id="HMC.open_samples_hdf5"><a class="viewcode-back" href="../../api/samplers/HMC.html#hmc_tomography.Samplers.HMC.open_samples_hdf5">[docs]</a>    <span class="k">def</span> <span class="nf">open_samples_hdf5</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -567,7 +873,7 @@
 
             <span class="c1"># Create dataset</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sample_hdf5_dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_hdf5_file</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span>
-                <span class="s2">&quot;samples_0&quot;</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">length</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="kc">True</span>
+                <span class="s2">&quot;samples_0&quot;</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">length</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="c1"># Update the filename in the sampler object for later retrieval</span>
@@ -639,10 +945,9 @@
                     <span class="n">choice_made</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="k">return</span> <span class="mi">1</span></div>
 
-<div class="viewcode-block" id="HMC.flush_samples"><a class="viewcode-back" href="../../sampling.sampler.html#hmc_tomography.Samplers.HMC.flush_samples">[docs]</a>    <span class="k">def</span> <span class="nf">flush_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<div class="viewcode-block" id="HMC.flush_samples"><a class="viewcode-back" href="../../api/samplers/HMC.html#hmc_tomography.Samplers.HMC.flush_samples">[docs]</a>    <span class="k">def</span> <span class="nf">flush_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sample_hdf5_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;end_of_samples&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">end</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sample_hdf5_dataset</span><span class="p">[:,</span> <span class="n">start</span> <span class="p">:</span> <span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span></div></div>
-
 </pre></div>
 
            </div>
@@ -655,7 +960,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Andrea Zunino, Andreas Fichtner, Lars Gebraad
+        &copy; Copyright 2019-2020, Andrea Zunino, Andreas Fichtner, Lars Gebraad
 
     </p>
   </div>

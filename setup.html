@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; HMC Tom 0.1.1 documentation</title>
+  <title>Installation &mdash; HMC Tom 0.2.1 documentation</title>
   
 
   
@@ -21,12 +21,12 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -39,7 +39,7 @@
   <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="A tour of hmc_tomography" href="tour.html" />
+    <link rel="next" title="Examples and tutorials" href="examples.html" />
     <link rel="prev" title="HMC Tomography" href="index.html" /> 
 </head>
 
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.1
+                0.2
               </div>
             
           
@@ -94,13 +94,18 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">HMC Tomography</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tour.html">A tour of hmc_tomography</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installing-the-package-in-a-new-conda-environment">Installing the package (in a new Conda environment)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#option-one">Option one</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#option-two">Option two</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#option-three">Option three</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#installing-development-dependencies">Installing development dependencies</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples and tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sampling.html">Sampling reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="post.html">Post-sampling reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tests.html">Development and testing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="py-modindex.html">Module index</a></li>
 <li class="toctree-l1"><a class="reference internal" href="genindex.html">Alphabetic index</a></li>
 </ul>
@@ -172,13 +177,13 @@
 /* CSS overrides for sphinx_rtd_theme */
 
 /* 24px margin */
-.nbinput.nblast,
-.nboutput.nblast {
+.nbinput.nblast.container,
+.nboutput.nblast.container {
     margin-bottom: 19px;  /* padding has already 5px */
 }
 
 /* ... except between code cells! */
-.nblast + .nbinput {
+.nblast.container + .nbinput.container {
     margin-top: -19px;
 }
 
@@ -193,6 +198,87 @@
 </style>
 <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>Installing the <code class="code docutils literal notranslate"><span class="pre">hmc_tomography</span></code> package is dead-simple. It requires you to have
+Python 3.7 on your system. Virtual environments and <code class="code docutils literal notranslate"><span class="pre">Conda</span></code> are also fine.</p>
+<div class="section" id="installing-the-package-in-a-new-conda-environment">
+<h2>Installing the package (in a new Conda environment)<a class="headerlink" href="#installing-the-package-in-a-new-conda-environment" title="Permalink to this headline">¶</a></h2>
+<p>Activate your environment of choice. To create e.g. a new <code class="code docutils literal notranslate"><span class="pre">Conda</span></code> environment with the
+appropriate Python version, run the following from your terminal:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt; $ conda create -n hmc-tomography <span class="nv">python</span><span class="o">=</span><span class="m">3</span>.7
+</pre></div>
+</div>
+<p>Now to install the package, we need to first activate this distribution:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt; $ conda activate hmc-tomography
+</pre></div>
+</div>
+<p>There’s at the moment two options to install the package:</p>
+<ol class="arabic simple">
+<li><p>Install the code directly from GitHub;</p></li>
+<li><p>Clone the GitHub repo and install from that directory.</p></li>
+<li><p>Download the <code class="code docutils literal notranslate"><span class="pre">.zip</span></code> file of the repo, unzip, and install from that directory.</p></li>
+</ol>
+<div class="section" id="option-one">
+<h3>Option one<a class="headerlink" href="#option-one" title="Permalink to this headline">¶</a></h3>
+<p>Option one simply requires you to run the following command from your shell (with the
+appropriate environment activated):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt; $ pip install -e git+git@github.com:larsgeb/hmc-tomography.git@master#egg<span class="o">=</span>hmc_tomography
+</pre></div>
+</div>
+<p>This won’t work as long as the GitHub repo is private. If you’ve set up SSH keys with
+your GitHub account, and we’ve granted you access, you can run the following command
+instead:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt; $ pip install -e git+ssh://git@github.com/larsgeb/hmc-tomography.git#egg<span class="o">=</span>hmc_tomography
+</pre></div>
+</div>
+</div>
+<div class="section" id="option-two">
+<h3>Option two<a class="headerlink" href="#option-two" title="Permalink to this headline">¶</a></h3>
+<p>Option two requires you to run the following commands (with the appropriate environment
+activated):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt; $ git clone git@github.com:larsgeb/hmc-tomography.git
+&gt; $ <span class="nb">cd</span> hmc-tomography
+&gt; $ pip install -e .
+</pre></div>
+</div>
+</div>
+<div class="section" id="option-three">
+<h3>Option three<a class="headerlink" href="#option-three" title="Permalink to this headline">¶</a></h3>
+<p>Option three requires you to decompress the <code class="code docutils literal notranslate"><span class="pre">.zip</span></code> file and go open a terminal in
+the resulting folder (such that you see the files <code class="code docutils literal notranslate"><span class="pre">setup.py</span></code>, <code class="code docutils literal notranslate"><span class="pre">README.md</span></code>,
+etc. Once you have activated the proper environment in your shell, run the following:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt; $ pip install -e .
+</pre></div>
+</div>
+<p>If the command succeeds, you now have access to the package from your Python 3.7
+distribution by importing <code class="code docutils literal notranslate"><span class="pre">hmc_tomography</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">hmc_tomography</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="installing-development-dependencies">
+<h2>Installing development dependencies<a class="headerlink" href="#installing-development-dependencies" title="Permalink to this headline">¶</a></h2>
+<p>If you want to develop within this repo, we recommend a few extra packages. They can
+also be installed using pip.</p>
+<p>In <code class="code docutils literal notranslate"><span class="pre">Bash</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>    <span class="c1"># from github</span>
+&gt; $ pip install -e <span class="se">\</span>
+    git+git@github.com:larsgeb/hmc-tomography.git@master#egg<span class="o">=</span>hmc_tomography<span class="o">[</span>dev<span class="o">]</span>
+
+    <span class="c1"># from local clone</span>
+&gt; $ pip install -e .<span class="o">[</span>dev<span class="o">]</span>
+</pre></div>
+</div>
+<p>… or <code class="code docutils literal notranslate"><span class="pre">Zsh</span></code>, which requires escapes for brackets:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>    <span class="c1"># from github</span>
+&gt; $ pip install -e<span class="se">\</span>
+    git+git@github.com:larsgeb/hmc-tomography.git@master#egg<span class="o">=</span>hmc_tomography<span class="se">\[</span>dev<span class="se">\]</span>
+
+    <span class="c1"># from local clone</span>
+&gt; $ pip install -e .<span class="se">\[</span>dev<span class="se">\]</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -203,7 +289,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="tour.html" class="btn btn-neutral float-right" title="A tour of hmc_tomography" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="examples.html" class="btn btn-neutral float-right" title="Examples and tutorials" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="index.html" class="btn btn-neutral float-left" title="HMC Tomography" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -215,7 +301,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Andrea Zunino, Andreas Fichtner, Lars Gebraad
+        &copy; Copyright 2019-2020, Andrea Zunino, Andreas Fichtner, Lars Gebraad
 
     </p>
   </div>
