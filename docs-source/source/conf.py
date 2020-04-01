@@ -31,18 +31,18 @@ autodoc_default_flags = ["members", "undoc-members", "show-inheritance"]
 
 html_logo = "../hmctom.png"
 
-nbsphinx_execute = 'never' 
+nbsphinx_execute = "never"
 
 # -- Project information -----------------------------------------------------
 
 project = "HMC Tom"
-copyright = "2019, Andrea Zunino, Andreas Fichtner, Lars Gebraad"
+copyright = "2019-2020, Andrea Zunino, Andreas Fichtner, Lars Gebraad"
 author = "Andrea Zunino, Andreas Fichtner, Lars Gebraad"
 
 # The short X.Y version
-version = "0.1"
+version = "0.2"
 # The full version, including alpha/beta/rc tags
-release = "0.1.1"
+release = "0.2.1"
 
 
 # -- General configuration ---------------------------------------------------
@@ -90,7 +90,7 @@ language = None
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
-exclude_patterns = ['_build', '**.ipynb_checkpoints']
+exclude_patterns = ["_build", "**.ipynb_checkpoints"]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
