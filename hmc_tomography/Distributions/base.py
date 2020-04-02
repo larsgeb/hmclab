@@ -9,6 +9,13 @@ import scipy as _scipy
 import scipy.sparse as _sparse
 from hmc_tomography.Helpers.better_abc import ABCMeta as _ABCMeta
 from hmc_tomography.Helpers.better_abc import abstract_attribute as _abstract_attribute
+from hmc_tomography.Helpers.make_spd_matrix import make_spd_matrix as _make_spd_matrix
+from hmc_tomography.Helpers.CustomExceptions import (
+    AbstractMethodError as _AbstractMethodError,
+)
+from hmc_tomography.Helpers.CustomExceptions import (
+    InvalidCaseError as _InvalidCaseError,
+)
 
 
 class _AbstractDistribution(metaclass=_ABCMeta):
@@ -116,6 +123,10 @@ class _AbstractDistribution(metaclass=_ABCMeta):
 
         """
         pass
+
+    @staticmethod
+    def create_default(dimensions: int):
+        raise _AbstractMethodError()
 
     def corrector(self, coordinates: _numpy.ndarray, momentum: _numpy.ndarray):
         """Method to correct an HMC particle, which is called after every time
@@ -244,6 +255,13 @@ class StandardNormal1D(_AbstractDistribution):
     def generate(self) -> _numpy.ndarray:
         raise NotImplementedError()
 
+    @staticmethod
+    def create_default(dimensions: int):
+        if dimensions == 1:
+            return StandardNormal1D()
+        else:
+            raise _InvalidCaseError()
+
 
 class Normal(_AbstractDistribution):
     """Normal distribution in model space.
@@ -270,24 +288,18 @@ class Normal(_AbstractDistribution):
 
     def __init__(
         self,
-        means: _numpy.ndarray = None,
-        covariance: _Union[_numpy.ndarray, float, None] = None,
+        means: _numpy.ndarray,
+        covariance: _Union[_numpy.ndarray, float, None],
         inverse_covariance: _Union[_numpy.ndarray, float, None] = None,
         lower_bounds: _numpy.ndarray = None,
         upper_bounds: _numpy.ndarray = None,
-        override_dimensions: int = 2,
     ):
 
         self.name = "Gaussian (normal) distribution"
 
-        # Automatically get dimensionality ...
-        if means is not None:
-            # ... from means
-            dimensions = means.size
-        else:
-            # If no means is provided, use 2 dimensions, and later randomly create
-            # distribution
-            dimensions = override_dimensions
+        # Automatically get dimensionality from means
+        dimensions = means.size
+
         self.dimensions = dimensions
         """Amount of dimensions on which the distribution is defined, should agree with
         means and covariance, and optionally coordinate_transformation."""
@@ -305,59 +317,41 @@ class Normal(_AbstractDistribution):
         self.inverse_covariance: _numpy.ndarray = None
         """Inverse covariance matrix"""
 
-        if means is None and covariance is None:
-            # Neither means nor covariance is provided ---------------------------------
+        # Parse means
+        if type(means) == float or type(means) == int:
             _warnings.warn(
-                "Neither means or covariance matrix provided. "
-                "Generating random means and variances with dimensions 2.",
+                "Seems that you only passed a float/int as the means vector. "
+                "It will be used as a single mean for all dimensions.",
                 Warning,
             )
-            self.means = _numpy.random.rand(dimensions, 1)
-            self.covariance = _make_spd_matrix(self.dimensions) + _numpy.eye(
-                self.dimensions
+            means = _numpy.ones((self.dimensions, 1)) * means
+        elif means.shape != (self.dimensions, 1):
+            raise ValueError("Incorrect size of means vector.")
+        self.means: _numpy.ndarray = means
+
+        # Parse covariance
+        if type(covariance) == float or type(covariance) == int:
+            self.diagonal = True
+            _warnings.warn(
+                "Seems that you only passed a float/int as the covariance matrix. "
+                "It will be used as a single covariance for all dimensions.",
+                Warning,
             )
-        elif means is None or covariance is None:
-            # Only one of means or covariance is provided ------------------------------
-            raise ValueError(
-                "Only one of means or covariance matrix provided. Not sure what to do!"
+        elif covariance.shape == (means.size, means.size):
+            # Supplied a full covariance matrix, could be either NumPy or SciPy
+            # matrix.
+            self.diagonal = False
+        elif covariance.shape == (means.size, 1):
+            # Supplied a diagonal of a covariance matrix
+            self.diagonal = True
+            _warnings.warn(
+                "Seems that you only passed a vector as the covariance matrix. "
+                "It will be used as the covariance diagonal.",
+                Warning,
             )
         else:
-            # Both means and covariance are provided -----------------------------------
-
-            # Parse means
-            if type(means) == float or type(means) == int:
-                _warnings.warn(
-                    "Seems that you only passed a float/int as the means vector. "
-                    "It will be used as a single mean for all dimensions.",
-                    Warning,
-                )
-            elif means.shape != (self.dimensions, 1):
-                raise ValueError("Incorrect size of means vector.")
-            self.means: _numpy.ndarray = means
-
-            # Parse covariance
-            if type(covariance) == float or type(covariance) == int:
-                self.diagonal = True
-                _warnings.warn(
-                    "Seems that you only passed a float/int as the covariance matrix. "
-                    "It will be used as a single covariance for all dimensions.",
-                    Warning,
-                )
-            elif covariance.shape == (means.size, means.size):
-                # Supplied a full covariance matrix, could be either NumPy or SciPy
-                # matrix.
-                self.diagonal = False
-            elif covariance.shape == (means.size, 1):
-                # Supplied a diagonal of a covariance matrix
-                self.diagonal = True
-                _warnings.warn(
-                    "Seems that you only passed a vector as the covariance matrix. "
-                    "It will be used as the covariance diagonal.",
-                    Warning,
-                )
-            else:
-                raise ValueError("Covariance matrix shape not understood.")
-            self.covariance = covariance
+            raise ValueError("Covariance matrix shape not understood.")
+        self.covariance = covariance
 
         # Precomputing inverses to speed up misfit and gradient computation ------------
         if inverse_covariance is not None:
@@ -369,7 +363,7 @@ class Normal(_AbstractDistribution):
             # is diagonal, which makes computation of the inverse scale much better.
             self.inverse_covariance: _numpy.ndarray = 1.0 / self.covariance
         else:
-            # Else, brute force calculate the inverse using numpy.
+            # Else, brute force calculation of the inverse using numpy.
             self.inverse_covariance: _numpy.ndarray = _numpy.linalg.inv(self.covariance)
 
         # Process optional bounds ------------------------------------------------------
@@ -407,6 +401,17 @@ class Normal(_AbstractDistribution):
     def generate(self) -> _numpy.ndarray:
         raise NotImplementedError()
 
+    @staticmethod
+    def create_default(dimensions: int):
+
+        # Create random means
+        means = _numpy.random.rand(dimensions, 1)
+
+        # Create a PD matrix with some extra definiteness by adding the identity
+        covariance = _make_spd_matrix(dimensions) + _numpy.eye(dimensions)
+
+        return Normal(means, covariance)
+
 
 class Laplace(_AbstractDistribution):
     """Laplace distribution in model space.
@@ -417,19 +422,14 @@ class Laplace(_AbstractDistribution):
 
     def __init__(
         self,
-        means: _numpy.ndarray = None,
-        dispersions: _Union[_numpy.ndarray, float, None] = None,
+        means: _numpy.ndarray,
+        dispersions: _Union[_numpy.ndarray, float, None],
         lower_bounds: _numpy.ndarray = None,
         upper_bounds: _numpy.ndarray = None,
-        override_dimensions: int = 2,
     ):
-        # Automatically get dimensionality ...
-        if means is not None:
-            # ... from means
-            dimensions = means.size
-        else:
-            # If no means is provided, use 2 dimensions
-            dimensions = override_dimensions
+        # Automatically get dimensionality from means
+        dimensions = means.size
+
         self.dimensions = dimensions
         """TODO description"""
 
@@ -474,162 +474,16 @@ class Laplace(_AbstractDistribution):
     def generate(self):
         raise NotImplementedError()
 
+    @staticmethod
+    def create_default(dimensions: int):
 
-# Unfinished
-class L05(_AbstractDistribution):
-    """L05
+        # Create random means
+        means = _numpy.random.rand(dimensions, 1)
 
-    TODO: Implement distribution's location other than the 0-vector.
-    """
+        # Create a PD matrix with some extra definiteness by adding the identity
+        dispersions = 10 ** _numpy.random.rand(dimensions, 1)
 
-    def __init__(
-        self,
-        dispersion: float = 1,
-        lower_bounds: _numpy.ndarray = None,
-        upper_bounds: _numpy.ndarray = None,
-        override_dimensions: int = 2,
-    ):
-
-        raise NotImplementedError("Not finished yet.")
-
-        # TODO Add location functionality to distribution
-
-        if dispersion is not None:
-            # ... from dispersion
-            dimensions = dispersion.size
-        else:
-            # If no means is provided, use 2 dimensions
-            dimensions = override_dimensions
-
-        self.dimensions = dimensions
-        """TODO description"""
-
-        self.dispersion = dispersion
-        """TODO description"""
-
-        self.update_bounds(lower_bounds, upper_bounds)
-        """TODO description"""
-
-    def misfit(self, coordinates) -> float:
-        """Method to compute the misfit of a L1 distribution distribution.
-        """
-        return self.misfit_bounds(coordinates) + _numpy.sum(
-            _numpy.abs(coordinates / self.dispersion) ** 0.5
-        )
-
-    def gradient(self, coordinates):
-        """Method to compute the gradient of a L1 distribution distribution.
-        """
-        # The derivative of the function |x| is simply 1 or -1, depending on the sign
-        # of x.
-        return _numpy.nan_to_num(
-            self.misfit_bounds(coordinates)
-            + _numpy.sign(coordinates)
-            * 0.5
-            / (_numpy.abs(coordinates / self.dispersion) ** 0.5)
-        )
-
-    def generate(self):
-        raise NotImplementedError()
-
-
-# Unfinished
-class LogNormal(Normal):
-    """Normal distribution in logarithmic model space.
-
-
-    Parameters
-    ----------
-    dimensions : int
-        Dimension of the distribution.
-    means : numpy.ndarray
-        Numpy array shaped as (dimensions, 1) containing the means of the distribution
-        in logarithmic model space.
-    covariance : numpy.ndarray
-        Numpy array shaped as either as (dimensions, dimensions) or (dimensions, 1).
-        This array represents either the full covariance matrix for a multivariate
-        Gaussian, or an column vector with variances for `dimensions` separate
-        uncorrelated Gaussians, all in logarithmic model space.
-    lower_bounds: numpy.ndarray
-        Numpy array of shape (dimensions, 1) that contains the lower limits of each
-        parameter.
-    upper_bounds: numpy.ndarray
-        Numpy array of shape (dimensions, 1) that contains the upper limits of each
-        parameter.
-
-
-    TODO Validate this class' methods.
-    """
-
-    def __init__(self, *args, **kwargs):
-        self.name = "log Gaussian distribution"
-
-        raise NotImplementedError("Not finished yet.")
-
-        # Re-use the constructor of the superclass (Normal).
-        super(LogNormal, self).__init__(*args, **kwargs)
-
-    def misfit(self, coordinates: _numpy.ndarray) -> float:
-        """Method to compute the misfit of a log Normal distribution distribution.
-        """
-        # This distribution is only non-zero for positive values of the coordinates. ----------
-        if _numpy.any(coordinates <= 0):
-            return _numpy.inf
-
-        # Compute logarithmic coordinates and misfit -----------------------------------
-        logarithmic_coordinates = _numpy.log(coordinates)
-        if self.diagonal:
-            return (
-                _numpy.sum(logarithmic_coordinates).item(0)
-                + 0.5
-                * (
-                    (self.means - logarithmic_coordinates).T
-                    @ (self.inverse_covariance * (self.means - logarithmic_coordinates))
-                ).item(0)
-                + self.misfit_bounds(coordinates)
-            )
-        else:
-            return (
-                _numpy.sum(logarithmic_coordinates).item(0)
-                + 0.5
-                * (
-                    (self.means - logarithmic_coordinates).T
-                    @ self.inverse_covariance
-                    @ (self.means - logarithmic_coordinates)
-                ).item(0)
-                + self.misfit_bounds(coordinates)
-            )
-
-    def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
-        """Method to compute the gradient of a log Normal distribution distribution.
-
-        TODO Verify these formulas!
-        """
-        # Compute logarithmic coordinates and gradient ---------------------------------
-        logarithmic_coordinates = _numpy.log(coordinates)
-        if self.diagonal:
-            return (
-                (
-                    -self.inverse_covariance
-                    * (self.means - logarithmic_coordinates)
-                    / coordinates
-                )
-                + _numpy.sum(1.0 / coordinates)
-                + self.misfit_bounds(coordinates)
-            )
-        else:
-            return (
-                (
-                    -self.inverse_covariance
-                    @ (self.means - logarithmic_coordinates)
-                    / coordinates
-                )
-                + _numpy.sum(1.0 / coordinates)
-                + self.misfit_bounds(coordinates)
-            )
-
-    def generate(self) -> _numpy.ndarray:
-        raise NotImplementedError("This function is not implemented yet.")
+        return Laplace(means, dispersions)
 
 
 class Uniform(_AbstractDistribution):
@@ -647,20 +501,13 @@ class Uniform(_AbstractDistribution):
     """
 
     def __init__(
-        self,
-        lower_bounds: _numpy.ndarray = None,
-        upper_bounds: _numpy.ndarray = None,
-        override_dimensions: int = 2,
+        self, lower_bounds: _numpy.ndarray, upper_bounds: _numpy.ndarray,
     ):
         self.name = "uniform distribution"
 
-        # Automatically get dimensionality ...
-        if lower_bounds is not None:
-            # ... from means
-            dimensions = lower_bounds.size
-        else:
-            # If no means is provided, use 2 dimensions
-            dimensions = override_dimensions
+        # Automatically get dimensionality from bounds
+        dimensions = lower_bounds.size
+
         self.dimensions = dimensions
         """TODO description"""
 
@@ -680,6 +527,14 @@ class Uniform(_AbstractDistribution):
 
     def generate(self) -> _numpy.ndarray:
         raise NotImplementedError("This function is not implemented yet.")
+
+    @staticmethod
+    def create_default(dimensions: int):
+
+        lower_bounds = _numpy.random.rand(dimensions, 1) * 5 - 10
+        upper_bounds = _numpy.random.rand(dimensions, 1) * 5 + 10
+
+        return Uniform(lower_bounds, upper_bounds)
 
 
 class CompositeDistribution(_AbstractDistribution):
@@ -710,32 +565,12 @@ class CompositeDistribution(_AbstractDistribution):
         list_of_distributions: _List[_AbstractDistribution] = None,
         lower_bounds: _numpy.ndarray = None,
         upper_bounds: _numpy.ndarray = None,
-        override_dimensions: int = 2,
     ):
         self.name = "composite distribution"
 
-        if list_of_distributions is not None:
-            self.separate_distributions: _List[
-                _AbstractDistribution
-            ] = list_of_distributions
-        else:
-            dimensions = override_dimensions
-
-            _warnings.warn(
-                f"No subdistributions were passed, generating {dimensions} random subdistributions.",
-                Warning,
-            )
-            available_distributions = _AbstractDistribution.__subclasses__()
-            for distribution_to_remove in [
-                CompositeDistribution,
-                AdditiveDistribution,
-                MultiplicativeDistribution,
-            ]:
-                available_distributions.remove(distribution_to_remove)
-            selected_classes = _numpy.random.choice(available_distributions, dimensions)
-            self.separate_distributions = [
-                selected_class(1) for selected_class in selected_classes
-            ]
+        self.separate_distributions: _List[
+            _AbstractDistribution
+        ] = list_of_distributions
 
         self.enumerated_dimensions: _numpy.ndarray = _numpy.empty(
             (len(self.separate_distributions))
@@ -760,6 +595,9 @@ class CompositeDistribution(_AbstractDistribution):
         ``numpy.split(m, CompositeDistribution.enumerated_dimensions_cumulative)[:-1])``
         splits a vector appropriately for all separate distributions.
         """
+
+        self.lower_bounds = lower_bounds
+        self.upper_bounds = upper_bounds
 
     def misfit(self, coordinates: _numpy.ndarray) -> float:
         # Split coordinates for all sub-distributions -----------------------------------------
@@ -869,6 +707,30 @@ class CompositeDistribution(_AbstractDistribution):
                     )
                     split_momenta[i_distribution][too_high] *= -1.0
 
+    @staticmethod
+    def create_default(dimensions: int):
+
+        # Create a list of all possible distributions
+        available_distributions = _AbstractDistribution.__subclasses__()
+
+        # We don't want to recursively create many distributions, so remove those
+        for distribution_to_remove in [
+            CompositeDistribution,
+            AdditiveDistribution,
+        ]:
+            available_distributions.remove(distribution_to_remove)
+
+        if dimensions != 2:
+            # This guy only supports 2 dimensions
+            available_distributions.remove(Himmelblau)
+
+        # We select distributions at random
+        selected_classes = _numpy.random.choice(available_distributions, dimensions)
+
+        list_of_instances = [d_class.create_default(1) for d_class in selected_classes]
+
+        return CompositeDistribution(list_of_instances)
+
 
 class AdditiveDistribution(_AbstractDistribution):
     """Distribution generated by summing the characteristic functions of two other 
@@ -879,40 +741,18 @@ class AdditiveDistribution(_AbstractDistribution):
 
     def __init__(
         self,
-        list_of_distributions: _List[_AbstractDistribution] = None,
+        list_of_distributions: _List[_AbstractDistribution],
         lower_bounds: _numpy.ndarray = None,
         upper_bounds: _numpy.ndarray = None,
-        overrie_dimensions: int = 2,
     ):
         self.name = "additive distribution"
 
-        # Automatically get dimensionality ...
-        if list_of_distributions is not None:
-            # ... from first distribution
-            self.dimensions = list_of_distributions[0].dimensions
-        else:
-            # If no means is provided, use 2 dimensions
-            self.dimensions = override_dimensions
+        # Automatically get dimensionality  from first distribution
+        self.dimensions = list_of_distributions[0].dimensions
 
-        if list_of_distributions is not None:
-            self.separate_distributions: _List[
-                _AbstractDistribution
-            ] = list_of_distributions
-        else:
-            _warnings.warn(
-                f"No subdistributions were passed, generating 3 random subdistributions.",
-                Warning,
-            )
-            available_distributions = _AbstractDistribution.__subclasses__()
-            for distribution_to_remove in [
-                CompositeDistribution,
-                AdditiveDistribution,
-            ]:
-                available_distributions.remove(distribution_to_remove)
-            selected_classes = _numpy.random.choice(available_distributions, 3)
-            self.separate_distributions = [
-                selected_class(dimensions) for selected_class in selected_classes
-            ]
+        self.separate_distributions: _List[
+            _AbstractDistribution
+        ] = list_of_distributions
 
         # Assert that the passed distributions are of the right dimension
         for i_distribution, distribution in enumerate(self.separate_distributions):
@@ -1058,6 +898,32 @@ class AdditiveDistribution(_AbstractDistribution):
         #             )
         #             split_momenta[i_distribution][too_high] *= -1.0
 
+    @staticmethod
+    def create_default(dimensions: int):
+
+        # Create a list of all possible distributions
+        available_distributions = _AbstractDistribution.__subclasses__()
+
+        # We don't want to recursively create many distributions, so remove those
+        for distribution_to_remove in [
+            CompositeDistribution,
+            AdditiveDistribution,
+        ]:
+            available_distributions.remove(distribution_to_remove)
+
+        if dimensions != 2:
+            # This guy only supports 2 dimensions
+            available_distributions.remove(Himmelblau)
+
+        # We select distributions at random
+        selected_classes = _numpy.random.choice(available_distributions, 3)
+
+        list_of_instances = [
+            d_class.create_default(dimensions) for d_class in selected_classes
+        ]
+
+        return AdditiveDistribution(list_of_instances)
+
 
 # This creates an alias for AdditiveDistribution
 class BayesRule(AdditiveDistribution):
@@ -1110,24 +976,14 @@ class Himmelblau(_AbstractDistribution):
         gradient[1] = 2 * (x ** 2 + 2 * y * (x + y ** 2 - 7) + y - 11)
         return gradient / self.temperature
 
+    def generate(self) -> _numpy.ndarray:
+        raise NotImplementedError()
 
-def _make_spd_matrix(dim: int):
-    """Generate a random symmetric, positive-definite matrix.
+    @staticmethod
+    def create_default(dimensions: int):
 
-    Parameters
-    ----------
-    dim : int
-        The matrix dimension.
+        if dimensions != 2:
+            raise _InvalidCaseError()
 
-    Returns
-    -------
-    x : array of shape [n_dim, n_dim]
-        The random symmetric, positive-definite matrix.
-
-    """
-    # Create random matrix
-    a = _numpy.random.rand(dim, dim)
-    # Create random PD matrix and extract correlation structure
-    u, _, v = _numpy.linalg.svd(_numpy.dot(a.T, a))
-    # Reconstruct a new matrix with random variances.
-    return _numpy.dot(_numpy.dot(u, 1.0 + _numpy.diag(_numpy.random.rand(dim))), v)
+        temperature = 1.0
+        return Himmelblau(temperature=temperature)

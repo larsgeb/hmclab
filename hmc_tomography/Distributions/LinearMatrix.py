@@ -10,6 +10,7 @@ import scipy as _scipy
 import scipy.sparse.linalg as _sparse_linalg
 import scipy.sparse as _sparse
 from hmc_tomography.Distributions import _AbstractDistribution
+from hmc_tomography.Helpers import make_spd_matrix as _make_spd_matrix
 
 
 class LinearMatrix(_AbstractDistribution):
@@ -19,9 +20,9 @@ class LinearMatrix(_AbstractDistribution):
 
     def __init__(
         self,
-        G: _Union[_numpy.ndarray, _sparse.spmatrix] = None,
-        d: _numpy.ndarray = None,
-        data_covariance: _Union[float, _numpy.ndarray, _sparse.spmatrix] = None,
+        G: _Union[_numpy.ndarray, _sparse.spmatrix],
+        d: _numpy.ndarray,
+        data_covariance: _Union[float, _numpy.ndarray, _sparse.spmatrix],
         dtype=_numpy.single,
         **kwargs,
     ):
@@ -116,23 +117,34 @@ class LinearMatrix(_AbstractDistribution):
     def generate(self):
         return self.Distribution.generate()
 
+    @staticmethod
+    def create_default(dimensions: int):
+        G = _numpy.eye(dimensions)
+        d = _numpy.arange(dimensions)[:, None]
+        data_variance = 1.0
+        return LinearMatrix(G, d, data_variance)
+
 
 # 1 - Dense G, scalar/vector covariance
 class _LinearMatrix_dense_forward_simple_covariance(_AbstractDistribution):
     def __init__(
         self,
-        G: _numpy.ndarray = None,
-        d: _numpy.ndarray = None,
+        G: _numpy.ndarray,
+        d: _numpy.ndarray,
         data_variance: _Union[
             float, _numpy.ndarray,
-        ] = None,  # The name variance is justified, as only used on diagonal
+        ],  # The name variance is justified, as only used on diagonal
         dtype=_numpy.single,
         premultiplication: bool = None,
     ):
         self.dimensions = G.shape[1]
         self.G = G.astype(dtype)
         self.d = d.astype(dtype)
-        self.data_variance = data_variance
+        if type(data_variance) == _numpy.ndarray:
+            self.data_variance = data_variance.astype(dtype)
+        else:
+            # There are no float32 for normal numeric instances
+            self.data_variance = data_variance
         self.data_sigma = self.data_variance ** 0.5
 
         # Depending on whether the data or the model space dimension is bigger,
@@ -182,21 +194,28 @@ class _LinearMatrix_dense_forward_simple_covariance(_AbstractDistribution):
     def generate(self) -> _numpy.ndarray:
         raise NotImplementedError()
 
+    @staticmethod
+    def create_default(dimensions: int):
+        G = _numpy.eye(dimensions)
+        d = _numpy.arange(dimensions)[:, None]
+        data_variance = _numpy.ones((dimensions, 1))
+        return _LinearMatrix_dense_forward_simple_covariance(G, d, data_variance)
+
 
 # 2 - Dense G, dense covariance
 class _LinearMatrix_dense_forward_dense_covariance(_AbstractDistribution):
     def __init__(
         self,
-        G: _numpy.ndarray = None,
-        d: _numpy.ndarray = None,
-        data_covariance: _numpy.ndarray = None,
+        G: _numpy.ndarray,
+        d: _numpy.ndarray,
+        data_covariance: _numpy.ndarray,
         dtype=_numpy.single,
         premultiplication: bool = None,
     ):
         self.dimensions = G.shape[1]
         self.G = G.astype(dtype)
         self.d = d.astype(dtype)
-        self.data_covariance = data_covariance
+        self.data_covariance = data_covariance.astype(dtype)
 
         # Depending on whether the data or the model space dimension is bigger,
         # performance of the misfit and gradient algorithm differs. If the data
@@ -220,7 +239,7 @@ class _LinearMatrix_dense_forward_dense_covariance(_AbstractDistribution):
             del self.G, self.d, self.data_covariance
         else:
             self.Gt: _numpy.ndarray = self.G.T
-            self.cholesky_upper_inv_covariance: _numpy.ndarray = numpy.linalg.cholesky(
+            self.cholesky_upper_inv_covariance: _numpy.ndarray = _numpy.linalg.cholesky(
                 invcov
             ).T
 
@@ -235,7 +254,7 @@ class _LinearMatrix_dense_forward_dense_covariance(_AbstractDistribution):
         else:
             return (
                 0.5
-                * numpy.linalg.norm(self.cholesky_upper_inv_covariance @ (G @ m - d0))
+                * _numpy.linalg.norm(self.cholesky_upper_inv_covariance @ (G @ m - d0))
                 ** 2
             )
 
@@ -248,16 +267,23 @@ class _LinearMatrix_dense_forward_dense_covariance(_AbstractDistribution):
     def generate(self) -> _numpy.ndarray:
         raise NotImplementedError()
 
+    @staticmethod
+    def create_default(dimensions: int):
+        G = _numpy.eye(dimensions)
+        d = _numpy.arange(dimensions)[:, None]
+        data_variance = _numpy.eye(dimensions)
+        return _LinearMatrix_dense_forward_dense_covariance(G, d, data_variance)
+
 
 # 3 - Sparse G, scalar vector covariance
 class _LinearMatrix_sparse_forward_simple_covariance(_AbstractDistribution):
     def __init__(
         self,
-        G: _scipy.sparse.spmatrix = None,
-        d: _numpy.ndarray = None,
+        G: _scipy.sparse.spmatrix,
+        d: _numpy.ndarray,
         data_variance: _Union[
             float, _numpy.ndarray,
-        ] = None,  # The name variance is justified, as only used on diagonal
+        ],  # The name variance is justified, as only used on diagonal
         dtype=_numpy.single,
         premultiplication: bool = None,
         use_mkl: bool = False,
@@ -265,7 +291,10 @@ class _LinearMatrix_sparse_forward_simple_covariance(_AbstractDistribution):
         self.dimensions = G.shape[1]
         self.G = _scipy.sparse.csr_matrix(G, dtype=dtype)
         self.d = d.astype(dtype)
-        self.data_variance = data_variance
+        if type(data_variance) == _numpy.ndarray:
+            self.data_variance = data_variance.astype(dtype)
+        else:
+            elf.data_variance = data_variance
         self.data_sigma = self.data_variance ** 0.5
         self.use_mkl = use_mkl
 
@@ -361,14 +390,21 @@ class _LinearMatrix_sparse_forward_simple_covariance(_AbstractDistribution):
     def generate(self) -> _numpy.ndarray:
         raise NotImplementedError()
 
+    @staticmethod
+    def create_default(dimensions: int):
+        G = _sparse.eye(dimensions)
+        d = _numpy.arange(dimensions)[:, None]
+        data_variance = _numpy.ones((dimensions, 1))
+        return _LinearMatrix_sparse_forward_simple_covariance(G, d, data_variance)
+
 
 # 4 - Sparse G, sparse covariance
 class _LinearMatrix_sparse_forward_sparse_covariance(_AbstractDistribution):
     def __init__(
         self,
-        G: _numpy.ndarray = None,
-        d: _numpy.ndarray = None,
-        data_covariance: _numpy.ndarray = None,
+        G: _scipy.sparse.spmatrix,
+        d: _numpy.ndarray,
+        data_covariance: _scipy.sparse.spmatrix,
         dtype=_numpy.single,
     ):
         self.dimensions = G.shape[1]
@@ -376,13 +412,15 @@ class _LinearMatrix_sparse_forward_sparse_covariance(_AbstractDistribution):
         self.d = d.astype(dtype)
 
         if not issubclass(type(data_covariance), _scipy.sparse.spmatrix):
-            data_covariance = _scipy.sparse.csr_matrix(data_covariance)
+            data_covariance = _scipy.sparse.csr_matrix(data_covariance, dtype=dtype)
 
         self.data_covariance = data_covariance
 
         self.Gt = self.G.T.tocsr()
         self.dt = d.T
-        self.factorized_covariance = _sparse_linalg.factorized(self.data_covariance)
+        self.factorized_covariance = _sparse_linalg.factorized(
+            self.data_covariance.tocsc()
+        )
 
     def misfit(self, coordinates: _numpy.ndarray) -> float:
         return (
@@ -398,3 +436,10 @@ class _LinearMatrix_sparse_forward_sparse_covariance(_AbstractDistribution):
 
     def generate(self) -> _numpy.ndarray:
         raise NotImplementedError()
+
+    @staticmethod
+    def create_default(dimensions: int):
+        G = _sparse.eye(dimensions)
+        d = _numpy.arange(dimensions)[:, None]
+        data_variance = _sparse.eye(dimensions)
+        return _LinearMatrix_sparse_forward_sparse_covariance(G, d, data_variance)
