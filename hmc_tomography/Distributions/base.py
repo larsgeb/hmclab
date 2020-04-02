@@ -244,7 +244,7 @@ class StandardNormal1D(_AbstractDistribution):
         assert m.shape == (1, 1)
 
         # return 0.5 * (m - mean) ** 2 / std ** 2
-        return 0.5 * m ** 2
+        return float(0.5 * m[0, 0] ** 2)
 
     def gradient(self, m: _numpy.ndarray) -> _numpy.ndarray:
         assert m.shape == (1, 1)
@@ -453,8 +453,11 @@ class Laplace(_AbstractDistribution):
         # if self.coordinate_transformation is not None:
         #     coordinates = self.coordinate_transformation @ coordinates
 
-        return self.misfit_bounds(coordinates) + _numpy.sum(
-            _numpy.abs(coordinates - self.means) * self.inverse_dispersions
+        return (
+            self.misfit_bounds(coordinates)
+            + _numpy.sum(
+                _numpy.abs(coordinates - self.means) * self.inverse_dispersions
+            ).item()
         )
 
     def gradient(self, coordinates):
@@ -964,7 +967,9 @@ class Himmelblau(_AbstractDistribution):
             raise ValueError()
         x = coordinates[0, 0]
         y = coordinates[1, 0]
-        return ((x ** 2 + y - 11) ** 2 + (x + y ** 2 - 7) ** 2) / self.temperature
+        return float(
+            ((x ** 2 + y - 11) ** 2 + (x + y ** 2 - 7) ** 2) / self.temperature
+        )
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
         """Returns a numpy.ndarray shaped as (dimensions, 1) containing the gradient of

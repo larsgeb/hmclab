@@ -183,7 +183,7 @@ class _LinearMatrix_dense_forward_simple_covariance(_AbstractDistribution):
                 0.5
                 * _numpy.linalg.norm((self.G @ coordinates - self.d) / self.data_sigma)
                 ** 2
-            )
+            ).item()
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
         if self.premultiplication:
@@ -227,20 +227,20 @@ class _LinearMatrix_dense_forward_dense_covariance(_AbstractDistribution):
 
         # Inverse of the data covariance as needed both with and without
         # premultiplication
-        invcov = _numpy.linalg.inv(self.data_covariance)
+        self.invcov = _numpy.linalg.inv(self.data_covariance)
 
         if self.premultiplication:
             # Precompute factors
-            self.GtG: _numpy.ndarray = (self.G.T @ invcov @ self.G)
-            self.Gtd0: _numpy.ndarray = G.T @ invcov @ self.d
-            self.dtd: float = (self.d.T @ invcov @ self.d).item()
+            self.GtG: _numpy.ndarray = (self.G.T @ self.invcov @ self.G)
+            self.Gtd0: _numpy.ndarray = G.T @ self.invcov @ self.d
+            self.dtd: float = (self.d.T @ self.invcov @ self.d).item()
 
             # Free up unnecessary variables
             del self.G, self.d, self.data_covariance
         else:
             self.Gt: _numpy.ndarray = self.G.T
             self.cholesky_upper_inv_covariance: _numpy.ndarray = _numpy.linalg.cholesky(
-                invcov
+                self.invcov
             ).T
 
     def misfit(self, coordinates: _numpy.ndarray) -> float:
@@ -254,15 +254,17 @@ class _LinearMatrix_dense_forward_dense_covariance(_AbstractDistribution):
         else:
             return (
                 0.5
-                * _numpy.linalg.norm(self.cholesky_upper_inv_covariance @ (G @ m - d0))
+                * _numpy.linalg.norm(
+                    self.cholesky_upper_inv_covariance @ (self.G @ coordinates - self.d)
+                )
                 ** 2
-            )
+            ).item()
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
         if self.premultiplication:
             return self.GtG @ coordinates - self.Gtd0
         else:
-            return self.Gt @ self.inv_covariance @ (self.G @ coordinates - self.d)
+            return self.Gt @ self.invcov @ (self.G @ coordinates - self.d)
 
     def generate(self) -> _numpy.ndarray:
         raise NotImplementedError()
@@ -368,13 +370,13 @@ class _LinearMatrix_sparse_forward_simple_covariance(_AbstractDistribution):
                     (self.sparse_gemv(self.G, coordinates) - self.d) / self.data_sigma
                 )
                 ** 2
-            )
+            ).item()
         else:
             return (
                 0.5
                 * _numpy.linalg.norm((self.G @ coordinates - self.d) / self.data_sigma)
                 ** 2
-            )
+            ).item()
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
         if self.premultiplication:
