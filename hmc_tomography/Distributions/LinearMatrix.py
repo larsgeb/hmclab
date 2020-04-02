@@ -10,7 +10,7 @@ import scipy as _scipy
 import scipy.sparse.linalg as _sparse_linalg
 import scipy.sparse as _sparse
 from hmc_tomography.Distributions import _AbstractDistribution
-from hmc_tomography.Helpers import make_spd_matrix as _make_spd_matrix
+from hmc_tomography.Helpers import random_matrices as _random_matrices
 
 
 class LinearMatrix(_AbstractDistribution):
@@ -273,7 +273,7 @@ class _LinearMatrix_dense_forward_dense_covariance(_AbstractDistribution):
     def create_default(dimensions: int):
         G = _numpy.eye(dimensions)
         d = _numpy.arange(dimensions)[:, None]
-        data_variance = _numpy.eye(dimensions)
+        data_variance = _random_matrices.random_correlation_matrix(dimensions)
         return _LinearMatrix_dense_forward_dense_covariance(G, d, data_variance)
 
 

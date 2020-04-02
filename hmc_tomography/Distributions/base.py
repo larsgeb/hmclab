@@ -9,7 +9,7 @@ import scipy as _scipy
 import scipy.sparse as _sparse
 from hmc_tomography.Helpers.better_abc import ABCMeta as _ABCMeta
 from hmc_tomography.Helpers.better_abc import abstract_attribute as _abstract_attribute
-from hmc_tomography.Helpers.make_spd_matrix import make_spd_matrix as _make_spd_matrix
+from hmc_tomography.Helpers import random_matrices as _random_matrices
 from hmc_tomography.Helpers.CustomExceptions import (
     AbstractMethodError as _AbstractMethodError,
 )
@@ -330,7 +330,12 @@ class Normal(_AbstractDistribution):
         self.means: _numpy.ndarray = means
 
         # Parse covariance
-        if type(covariance) == float or type(covariance) == int:
+        if (
+            type(covariance) == float
+            or type(covariance) == _numpy.float64
+            or type(covariance) == _numpy.float32
+            or type(covariance) == int
+        ):
             self.diagonal = True
             _warnings.warn(
                 "Seems that you only passed a float/int as the covariance matrix. "
@@ -408,7 +413,12 @@ class Normal(_AbstractDistribution):
         means = _numpy.random.rand(dimensions, 1)
 
         # Create a PD matrix with some extra definiteness by adding the identity
-        covariance = _make_spd_matrix(dimensions) + _numpy.eye(dimensions)
+        correlation = _random_matrices.random_correlation_matrix(dimensions)
+
+        # Standard deviations between 1 and 2
+        standard_deviations = _numpy.diag(_numpy.random.rand(dimensions,) + 1)
+
+        covariance = standard_deviations @ correlation @ standard_deviations
 
         return Normal(means, covariance)
 
