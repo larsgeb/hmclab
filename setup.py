@@ -30,7 +30,8 @@ setuptools.setup(
         "pyyaml",
     ],
     extras_require={
-        "dev": ["black", "pre-commit", "sphinx", "numpydoc", "codecov", "pytest"]
+        "dev": ["black", "pre-commit", "sphinx", "numpydoc", "codecov", "pytest"],
+        "testing": ["black", "pre-commit", "codecov", "pytest"],
     },
     entry_points={"console_scripts": ["hmc_tomography=hmc_tomography.__main__:cli"]},
 )
