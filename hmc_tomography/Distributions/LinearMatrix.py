@@ -107,7 +107,7 @@ class LinearMatrix(_AbstractDistribution):
     def misfit(self, coordinates: _numpy.ndarray) -> float:
         """
         """
-        return self.Distribution.misfit(coordinates)
+        return self.Distribution.misfit(coordinates) + self.misfit_bounds(coordinates)
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
         """
@@ -172,7 +172,7 @@ class _LinearMatrix_dense_forward_simple_covariance(_AbstractDistribution):
 
     def misfit(self, coordinates: _numpy.ndarray) -> float:
         if self.premultiplication:
-            return (
+            return self.misfit_bounds(coordinates) + (
                 0.5
                 * (
                     coordinates.T @ (self.GtG @ coordinates - 2 * self.Gtd0) + self.dtd
@@ -180,10 +180,15 @@ class _LinearMatrix_dense_forward_simple_covariance(_AbstractDistribution):
             )
         else:
             return (
-                0.5
-                * _numpy.linalg.norm((self.G @ coordinates - self.d) / self.data_sigma)
-                ** 2
-            ).item()
+                self.misfit_bounds(coordinates)
+                + (
+                    0.5
+                    * _numpy.linalg.norm(
+                        (self.G @ coordinates - self.d) / self.data_sigma
+                    )
+                    ** 2
+                ).item()
+            )
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
         if self.premultiplication:
@@ -245,7 +250,7 @@ class _LinearMatrix_dense_forward_dense_covariance(_AbstractDistribution):
 
     def misfit(self, coordinates: _numpy.ndarray) -> float:
         if self.premultiplication:
-            return (
+            return self.misfit_bounds(coordinates) + (
                 0.5
                 * (
                     coordinates.T @ (self.GtG @ coordinates - 2 * self.Gtd0) + self.dtd
@@ -253,12 +258,16 @@ class _LinearMatrix_dense_forward_dense_covariance(_AbstractDistribution):
             )
         else:
             return (
-                0.5
-                * _numpy.linalg.norm(
-                    self.cholesky_upper_inv_covariance @ (self.G @ coordinates - self.d)
-                )
-                ** 2
-            ).item()
+                self.misfit_bounds(coordinates)
+                + (
+                    0.5
+                    * _numpy.linalg.norm(
+                        self.cholesky_upper_inv_covariance
+                        @ (self.G @ coordinates - self.d)
+                    )
+                    ** 2
+                ).item()
+            )
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
         if self.premultiplication:
@@ -357,7 +366,7 @@ class _LinearMatrix_sparse_forward_simple_covariance(_AbstractDistribution):
 
     def misfit(self, coordinates: _numpy.ndarray) -> float:
         if self.premultiplication:
-            return (
+            return self.misfit_bounds(coordinates) + (
                 0.5
                 * (
                     coordinates.T @ (self.GtG @ coordinates - 2 * self.Gtd0) + self.dtd
@@ -365,18 +374,27 @@ class _LinearMatrix_sparse_forward_simple_covariance(_AbstractDistribution):
             )
         elif self.use_mkl:
             return (
-                0.5
-                * _numpy.linalg.norm(
-                    (self.sparse_gemv(self.G, coordinates) - self.d) / self.data_sigma
-                )
-                ** 2
-            ).item()
+                self.misfit_bounds(coordinates)
+                + (
+                    0.5
+                    * _numpy.linalg.norm(
+                        (self.sparse_gemv(self.G, coordinates) - self.d)
+                        / self.data_sigma
+                    )
+                    ** 2
+                ).item()
+            )
         else:
             return (
-                0.5
-                * _numpy.linalg.norm((self.G @ coordinates - self.d) / self.data_sigma)
-                ** 2
-            ).item()
+                self.misfit_bounds(coordinates)
+                + (
+                    0.5
+                    * _numpy.linalg.norm(
+                        (self.G @ coordinates - self.d) / self.data_sigma
+                    )
+                    ** 2
+                ).item()
+            )
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
         if self.premultiplication:
@@ -425,7 +443,7 @@ class _LinearMatrix_sparse_forward_sparse_covariance(_AbstractDistribution):
         )
 
     def misfit(self, coordinates: _numpy.ndarray) -> float:
-        return (
+        return self.misfit_bounds(coordinates) + (
             0.5
             * (
                 (coordinates.T @ self.Gt - self.dt)

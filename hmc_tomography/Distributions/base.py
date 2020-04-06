@@ -161,8 +161,8 @@ class _AbstractDistribution(metaclass=_ABCMeta):
 
     def update_bounds(
         self,
-        lower_bounds: _Union[_numpy.ndarray, None],
-        upper_bounds: _Union[_numpy.ndarray, None],
+        lower_bounds: _Union[_numpy.ndarray, None] = None,
+        upper_bounds: _Union[_numpy.ndarray, None] = None,
     ):
         """Method to update bounds of a distribution distribution.
 
@@ -190,17 +190,32 @@ class _AbstractDistribution(metaclass=_ABCMeta):
 
         """
 
-        # Check the types --------------------------------------------------------------
-        if lower_bounds is not None and type(lower_bounds) is not _numpy.ndarray:
-            raise ValueError("Lower bounds object not understood.")
-        if upper_bounds is not None and type(upper_bounds) is not _numpy.ndarray:
-            raise ValueError("Upper bounds object not understood.")
+        old_limits = (self.lower_bounds, self.upper_bounds)
 
         # Set the bounds ---------------------------------------------------------------
         self.upper_bounds = upper_bounds
         self.lower_bounds = lower_bounds
 
-        # Check for both arrays, if they are not None, if the dimension is correct. ----
+        # Check the types --------------------------------------------------------------
+        if lower_bounds is not None and type(lower_bounds) is not _numpy.ndarray:
+            # Lower bound is wrong
+
+            # Reset bounds
+            self.lower_bounds, self.upper_bounds = old_limits
+
+            # Raise error
+            raise ValueError("Lower bounds object not understood.")
+
+        if upper_bounds is not None and type(upper_bounds) is not _numpy.ndarray:
+            # Upper bound is wrong
+
+            # Reset bounds
+            self.lower_bounds, self.upper_bounds = old_limits
+
+            # Raise error
+            raise ValueError("Upper bounds object not understood.")
+
+        # Check for both arrays; if they are not None, if the dimension is correct. ----
         if (
             self.lower_bounds is not None
             and self.lower_bounds.shape != (self.dimensions, 1)
@@ -208,6 +223,10 @@ class _AbstractDistribution(metaclass=_ABCMeta):
             self.upper_bounds is not None
             and self.upper_bounds.shape != (self.dimensions, 1)
         ):
+            # Reset bounds
+            self.lower_bounds, self.upper_bounds = old_limits
+
+            # Raise error
             raise ValueError(f"Bounds vectors are of incorrect size.")
 
         # Check that all upper bounds are (finitely) above lower bounds ----------------
@@ -216,6 +235,10 @@ class _AbstractDistribution(metaclass=_ABCMeta):
             and self.upper_bounds is not None
             and _numpy.any(self.upper_bounds <= self.lower_bounds)
         ):
+            # Reset bounds
+            self.lower_bounds, self.upper_bounds = old_limits
+
+            # Raise error
             raise ValueError("Bounds vectors are incompatible.")
 
     def misfit_bounds(self, coordinates: _numpy.ndarray) -> float:
@@ -244,7 +267,7 @@ class StandardNormal1D(_AbstractDistribution):
         assert m.shape == (1, 1)
 
         # return 0.5 * (m - mean) ** 2 / std ** 2
-        return float(0.5 * m[0, 0] ** 2)
+        return self.misfit_bounds(m) + float(0.5 * m[0, 0] ** 2)
 
     def gradient(self, m: _numpy.ndarray) -> _numpy.ndarray:
         assert m.shape == (1, 1)
@@ -977,7 +1000,7 @@ class Himmelblau(_AbstractDistribution):
             raise ValueError()
         x = coordinates[0, 0]
         y = coordinates[1, 0]
-        return float(
+        return self.misfit_bounds(coordinates) + float(
             ((x ** 2 + y - 11) ** 2 + (x + y ** 2 - 7) ** 2) / self.temperature
         )
 
