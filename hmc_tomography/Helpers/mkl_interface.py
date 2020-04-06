@@ -29,7 +29,10 @@ import scipy.sparse as sparse
 from ctypes import POINTER, c_int, c_double, c_float, byref, cdll
 
 # Load DLL
-mkl = cdll.LoadLibrary("libmkl_rt.so")
+try:
+    mkl = cdll.LoadLibrary("libmkl_rt.so")
+except OSError:
+    mkl = None
 
 
 def sparse_gemv(A: sparse.csr_matrix, x: numpy.ndarray) -> numpy.ndarray:

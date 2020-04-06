@@ -15,11 +15,11 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     classifiers=[
         "Development Status :: 3 - Alpha",
-        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.6",
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.7",
+    python_requires=">=3.6",
     install_requires=[
         "numpy",
         "scipy",
@@ -30,7 +30,16 @@ setuptools.setup(
         "pyyaml",
     ],
     extras_require={
-        "dev": ["black", "pre-commit", "sphinx", "numpydoc", "codecov", "pytest"]
+        "dev": [
+            "black",
+            "pre-commit",
+            "sphinx",
+            "numpydoc",
+            "codecov",
+            "pytest",
+            "pytest-harvest",
+        ],
+        "testing": ["black", "pre-commit", "codecov", "pytest", "pytest-harvest"],
     },
     entry_points={"console_scripts": ["hmc_tomography=hmc_tomography.__main__:cli"]},
 )

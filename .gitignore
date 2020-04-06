@@ -12,7 +12,6 @@ hmc_tomography_*
 *.h5
 *.npy
 *.npz
-examples/old
 examples/notebooks/bin_samples/*
 *_movie
 docs-source/source/examples
