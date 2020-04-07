@@ -36,6 +36,7 @@ import time as _time
 import tqdm.auto as _tqdm_au
 import warnings as _warnings
 from typing import Tuple as _Tuple
+from typing import Union as _Union
 
 from hmc_tomography.Distributions import _AbstractDistribution
 from hmc_tomography.MassMatrices import _AbstractMassMatrix
@@ -78,16 +79,26 @@ class _AbstractSampler(_ABC):
     """A NumPy ndarray containing the samples that are as of yet not written to disk."""
 
     current_model: _numpy.ndarray = None
+    """A NumPy array containing the model at the current state of the Markov chain."""
 
     proposed_model: _numpy.ndarray = None
+    """A NumPy array containing the model at the proposed state of the Markov chain."""
 
     current_x: float = None
+    """A NumPy array containing :math:`\chi = -\log\left( p\\right)` (i.e. the misfit, 
+    negative log probability) of the distribution at the current state of the Markov
+    chain."""
 
     proposed_x: float = None
+    """A NumPy array containing :math:`\chi = -\log\left( p\\right)` (i.e. the misfit, 
+    negative log probability) of the distribution at the proposed state of the Markov
+    chain."""
 
     accepted_proposals: int = None
+    """An integer represeting the amount of accepted proposals."""
 
     amount_of_writes: int = None
+    """An integer represeting the amount of times the sampler has written to disk."""
 
     def __init__(self):
         self.sample = self._sample
@@ -249,68 +260,20 @@ class _AbstractSampler(_ABC):
     def _close_sampler(self):
         self.samples_hdf5_filehandle.close()
 
-    @classmethod
-    def sample(
-        cls,
-        samples_hdf5_filename: str,
-        distribution: _AbstractDistribution,
-        initial_model: _numpy.ndarray = None,
-        proposals: int = 100,
-        online_thinning: int = 1,
-        samples_ram_buffer_size: int = None,
-        overwrite_existing_file: bool = False,
-        **kwargs,
-    ):
-        """Class method for sampling. This allows on to sample without creating an instance
-        of the class. """
-
-        return cls()._sample(
-            samples_hdf5_filename,
-            distribution,
-            initial_model,
-            proposals,
-            online_thinning,
-            samples_ram_buffer_size,
-            overwrite_existing_file,
-            **kwargs,
-        )
-
-    def _sample(
-        self,
-        samples_hdf5_filename: str,
-        distribution: _AbstractDistribution,
-        initial_model: _numpy.ndarray = None,
-        proposals: int = 100,
-        online_thinning: int = 1,
-        samples_ram_buffer_size: int = None,
-        overwrite_existing_file: bool = False,
-        **kwargs,
-    ):
+    def _sample_loop(self):
         """The actual sampling code."""
-
-        # Initialize sampler -----------------------------------------------------------
-        self._init_sampler(
-            samples_hdf5_filename,
-            distribution,
-            initial_model,
-            proposals,
-            online_thinning,
-            samples_ram_buffer_size,
-            overwrite_existing_file,
-            **kwargs,
-        )
 
         # Create progressbar -----------------------------------------------------------
         try:
             self.proposals_iterator = _tqdm_au.trange(
-                proposals,
+                self.proposals,
                 desc="Sampling. Acceptance rate:",
                 leave=True,
                 dynamic_ncols=True,
             )
         except:
             self.proposals_iterator = _tqdm_au.trange(
-                proposals, desc="Sampling. Acceptance rate:", leave=True,
+                self.proposals, desc="Sampling. Acceptance rate:", leave=True,
             )
 
         # Run the Markov process -------------------------------------------------------
@@ -504,9 +467,111 @@ class _AbstractSampler(_ABC):
         pass
 
 
-class MetropolisHastings(_AbstractSampler):
-    step_length: float = 1.0
-    """Standard deviation of MH proposal distribution."""
+class RWMH(_AbstractSampler):
+    step_length: _Union[float, _numpy.ndarray] = 1.0
+    """A parameter describing the standard deviation of a multivariate normal (MVN) used
+    as the proposal distribution for Random Walk Metropolis-Hastings. Using a
+    _numpy.ndarray column vector (shape dimensions × 1) will give every dimensions a
+    unique step length. Correlations in the MVN are not yet implemented. Has a strong
+    influence on acceptance rate. **An essential tuning parameter.**"""
+
+    def _sample(
+        self,
+        samples_hdf5_filename: str,
+        distribution: _AbstractDistribution,
+        step_length: _Union[float, _numpy.ndarray] = 1.0,
+        initial_model: _numpy.ndarray = None,
+        proposals: int = 100,
+        online_thinning: int = 1,
+        samples_ram_buffer_size: int = None,
+        overwrite_existing_file: bool = False,
+        **kwargs,
+    ):
+        """Sampling using the Metropolis-Hastings algorithm.
+        
+        Parameters
+        ----------
+        samples_hdf5_filename: str
+            String containing the (path+)filename of the HDF5 file to contain the
+            samples. **A required parameter.**
+        distribution: _AbstractDistribution
+            The distribution to sample. Should be an instance of a subclass of
+            _AbstractDistribution. **A required parameter.**
+        step_length: _Union[float, _numpy.ndarray]
+            A parameter describing the standard deviation of a multivariate normal (MVN)
+            used as the proposal distribution for Random Walk Metropolis-Hastings. Using
+            a _numpy.ndarray column vector (shape dimensions × 1) will give every 
+            dimensions a unique step length. Correlations in the MVN are not yet 
+            implemented. Has a strong influence on acceptance rate. **An essential
+            tuning parameter.**
+        initial_model: _numpy
+            A NumPy column vector (shape dimensions × 1) containing the starting model 
+            of the Markov chain. This model will not be written out as a sample.
+        proposals: int
+            An integer representing the amount of proposals the algorithm should make.
+        online_thinning: int
+            An integer representing the degree of online thinning, i.e. the interval 
+            between storing samples. 
+        samples_ram_buffer_size: int
+            An integer representing how many samples should be kept in RAM before 
+            writing to storage.
+        overwrite_existing_file: bool
+            A boolean describing whether or not to silently overwrite existing files. 
+            Use with caution.
+        **kwargs
+            Arbitrary keyword arguments.
+
+        Raises
+        ------
+        AssertionError
+            For any unspecified invalid entry.
+        ValueError
+            For any invalid value of algorithm settings.
+        TypeError
+            For any invalid value of algorithm settings.
+
+
+        """
+        self._init_sampler(
+            samples_hdf5_filename,
+            distribution,
+            initial_model,
+            proposals,
+            online_thinning,
+            samples_ram_buffer_size,
+            overwrite_existing_file,
+            **kwargs,
+        )
+
+        self._sample_loop()
+
+    @classmethod
+    def sample(
+        cls,
+        samples_hdf5_filename: str,
+        distribution: _AbstractDistribution,
+        step_length: float = 1.0,
+        initial_model: _numpy.ndarray = None,
+        proposals: int = 100,
+        online_thinning: int = 1,
+        samples_ram_buffer_size: int = None,
+        overwrite_existing_file: bool = False,
+        **kwargs,
+    ):
+        """Simply a forward to the instance method of the sampler; check out
+        _sample()."""
+
+        return cls()._sample(
+            samples_hdf5_filename,
+            distribution,
+            initial_model,
+            proposals,
+            online_thinning,
+            samples_ram_buffer_size,
+            overwrite_existing_file,
+            step_length,
+            **kwargs,
+        )
 
     def _init_sampler_specific(self, **kwargs):
 
@@ -547,3 +612,188 @@ class MetropolisHastings(_AbstractSampler):
             self.current_model = _numpy.copy(self.proposed_model)
             self.current_x = self.proposed_x
             self.accepted_proposals += 1
+
+
+class HMC(_AbstractSampler):
+    time_step: float = 0.1
+    """A positive float representing the time step to be used in solving Hamiltons
+    equations. Has a strong influence on acceptance rate. **An essential tuning
+    parameter.**"""
+
+    amount_of_steps: int = 10
+    """A positive integer representing the amount of integration steps to be used in
+    solving Hamiltons equations. Has a medium influence on acceptance rate. **An
+    essential tuning parameter.**"""
+
+    mass_matrix: _AbstractMassMatrix = None
+    """An object representing the artificial masses assigned to each parameters. Needs 
+    to be a subtype of _AbstractMassMatrix. Has a strong influence on convergence rate.
+    **An essential tuning parameter.**"""
+
+    current_momentum: _numpy.ndarray = None
+    """A NumPy ndarray (shape dimensions × 1) containing the momentum at the current
+    state of the Markov chain. Indicates direction in which the model will initially
+    move along its numerical trajectory. Will be resampled from the mass matrix for each
+    proposal."""
+
+    current_k: float = _numpy.nan
+    """A float representing the kinetic energy associated with the current state. 
+    Typically follows the ChiSquared[dimensions] distribution."""
+
+    current_h: float = _numpy.nan
+    """A float representing the total energy associated with the current state."""
+
+    proposed_momentum: _numpy.ndarray = None
+    """A NumPy ndarray (shape dimensions × 1) containing the momentum at the proposed
+    state of the Markov chain. Indicates direction in which the model was moving at the
+    end of its numerical trajectory. Will be computed deterministically from the 
+    current_momentum, i.e. the state the Markov chain started in."""
+
+    proposed_k: float = _numpy.nan
+    """A float representing the kinetic energy associated with the proposed state."""
+
+    proposed_h: float = _numpy.nan
+    """A float representing the total energy associated with the proposed state."""
+
+    def _sample(
+        self,
+        samples_hdf5_filename: str,
+        distribution: _AbstractDistribution,
+        time_step: float = 0.1,
+        amount_of_steps: int = 10,
+        mass_matrix: _AbstractMassMatrix = None,
+        initial_model: _numpy.ndarray = None,
+        proposals: int = 100,
+        online_thinning: int = 1,
+        samples_ram_buffer_size: int = None,
+        overwrite_existing_file: bool = False,
+        **kwargs,
+    ):
+        """Sampling using the Metropolis-Hastings algorithm.
+        
+        Parameters
+        ----------
+        samples_hdf5_filename: str
+            String containing the (path+)filename of the HDF5 file to contain the
+            samples. **A required parameter.**
+        distribution: _AbstractDistribution
+            The distribution to sample. Should be an instance of a subclass of
+            _AbstractDistribution. **A required parameter.**
+        time_step: float
+            A positive float representing the time step to be used in solving Hamiltons
+            equations. Has a strong influence on acceptance rate. **An essential tuning
+            parameter.**
+        amount_of_steps: int
+            A positive integer representing the amount of integration steps to be used
+            in solving Hamiltons equations. Has a medium influence on acceptance rate.
+            **An essential tuning parameter.**
+        mass_matrix: _AbstractMassMatrix
+            An object representing the artificial masses assigned to each parameters.
+            Needs to be a subtype of _AbstractMassMatrix. Has a strong influence on
+            convergence rate. One passing None, defaults to the Unit mass matrix. **An
+            essential tuning parameter.**
+        initial_model: _numpy
+            A NumPy column vector (shape dimensions × 1) containing the starting model 
+            of the Markov chain. This model will not be written out as a sample.
+        proposals: int
+            An integer representing the amount of proposals the algorithm should make.
+        online_thinning: int
+            An integer representing the degree of online thinning, i.e. the interval 
+            between storing samples. 
+        samples_ram_buffer_size: int
+            An integer representing how many samples should be kept in RAM before 
+            writing to storage.
+        overwrite_existing_file: bool
+            A boolean describing whether or not to silently overwrite existing files. 
+            Use with caution.
+        **kwargs
+            Arbitrary keyword arguments.
+
+        Raises
+        ------
+        AssertionError
+            For any unspecified invalid entry.
+        ValueError
+            For any invalid value of algorithm settings.
+        TypeError
+            For any invalid value of algorithm settings.
+
+
+        """
+        self._init_sampler(
+            samples_hdf5_filename,
+            distribution,
+            initial_model,
+            proposals,
+            online_thinning,
+            samples_ram_buffer_size,
+            overwrite_existing_file,
+            **kwargs,
+        )
+
+        self._sample_loop()
+
+    @classmethod
+    def sample(
+        cls,
+        samples_hdf5_filename: str,
+        distribution: _AbstractDistribution,
+        time_step: float = 0.1,
+        amount_of_steps: int = 10,
+        mass_matrix: _AbstractMassMatrix = None,
+        initial_model: _numpy.ndarray = None,
+        proposals: int = 100,
+        online_thinning: int = 1,
+        samples_ram_buffer_size: int = None,
+        overwrite_existing_file: bool = False,
+        **kwargs,
+    ):
+        """Simply a forward to the instance method of the sampler; check out
+        _sample()."""
+
+        return cls()._sample(
+            samples_hdf5_filename,
+            distribution,
+            initial_model,
+            proposals,
+            online_thinning,
+            samples_ram_buffer_size,
+            overwrite_existing_file,
+            **kwargs,
+        )
+
+    def _init_sampler_specific(self, **kwargs):
+        # Parse all possible kwargs
+        for key in (
+            "time_step",
+            "amount_of_steps",
+            "mass_matrix",
+        ):
+            if key in kwargs:
+                setattr(self, key, kwargs[key])
+
+        # Assert that step length for Hamiltons equations is a float and bigger than
+        # zero
+        self.time_step = float(self.time_step)
+        assert self.time_step > 0.0
+
+        # Assert that number of steps for Hamiltons equations is a positive integer
+        assert type(self.amount_of_steps) == int
+        assert self.amount_of_steps > 0
+
+        # Set the mass matrix if it is not yet set using the default: a unit mass
+        if self.mass_matrix is None:
+            self.mass_matrix = _Unit(self.dimensions)
+
+        # Assert that the mass matrix is the right type and dimension
+        assert isinstance(self.mass_matrix, _AbstractMassMatrix)
+        assert self.mass_matrix.dimensions == self.dimensions
+
+    def _write_tuning_settings(self):
+        pass
+
+    def _propose(self):
+        pass
+
+    def _evaluate_acceptance(self):
+        pass
