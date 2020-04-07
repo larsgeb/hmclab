@@ -1,5 +1,7 @@
 language: python
 
+cache: pip
+
 matrix:
   include:
     - name: "Python 3.6.5 on macOS (xcode9.4)"
