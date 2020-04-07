@@ -137,27 +137,19 @@ class Diagonal(_AbstractMassMatrix):
     """
 
     # TODO remove dimensions
-    def __init__(self, dimensions: int, diagonal: _numpy.ndarray = None):
+    def __init__(self, diagonal: _numpy.ndarray):
         """Constructor for diagonal mass matrices.
 
         """
         self.name = "diagonal mass matrix"
-        self.dimensions = dimensions
 
-        if diagonal is None:
-            _warnings.warn(
-                f"The diagonal mass matrix did not receive a diagonal. We will generate"
-                f"a linearly increasing diagonal (1, 2, 3, 4, ...) for the mass matrix.",
-                Warning,
+        if diagonal.shape != (diagonal.size, 1):
+            raise ValueError(
+                f"The passed diagonal vector is not of the right"
+                f"dimensions, which would be ({diagonal.size, 1})."
             )
-            self.diagonal = _numpy.arange(self.dimensions)[:, None] + 1
-        else:
-            if diagonal.shape != (self.dimensions, 1):
-                raise ValueError(
-                    f"The passed diagonal vector is not of the right"
-                    f"dimensions, which would be ({self.dimensions, 1})."
-                )
-            self.diagonal = diagonal
+        self.dimensions = diagonal.size
+        self.diagonal = diagonal
         self.inverse_diagonal = 1.0 / self.diagonal
 
     def kinetic_energy(self, momentum: _numpy.ndarray) -> float:
@@ -225,17 +217,17 @@ class LBFGS(_AbstractMassMatrix):
         if starting_position is None or starting_gradient is None:
             _warnings.warn(
                 f"The LBFGS-style mass matrix did either not receive a starting "
-                f"coordinate or a starting gradient. We will use a random initial "
-                f"point and gradient.",
+                f"coordinate or a starting gradient. We will use a unit initial "
+                f"point (m=1) and gradient (g=1).",
                 Warning,
             )
-            starting_gradient = _numpy.ones(dimensions)
-            starting_position = _numpy.ones(dimensions)
+            starting_gradient = _numpy.ones((dimensions, 1))
+            starting_position = _numpy.ones((dimensions, 1))
 
         self.name = "LBFGS-style mass matrix"
         self.dimensions = dimensions
         self.number_of_vectors = number_of_vectors
-        self.current_number_of_gradients = 0
+        self.currently_stored_gradients = 0
 
         self.current_position = starting_position
         self.current_gradient = starting_gradient
@@ -264,74 +256,96 @@ class LBFGS(_AbstractMassMatrix):
 
         self.update_attempt += 1
 
-        if (
-            self.current_number_of_gradients == self.number_of_vectors
-            or self.update_attempt % self.update_interval
-        ):
-            return
+        # if (
+        #     self.currently_stored_gradients == self.number_of_vectors
+        #     or self.update_attempt % self.update_interval
+        # ):
+        #     # Do nothing if we shouldn't do anything
+        #     return
 
-        s = m - self.current_position
-        y = g - self.current_gradient
+        # Calculate separation and gradient change
+        s_update = m - self.current_position
+        y_update = g - self.current_gradient
 
-        assert s.shape == (self.dimensions, 1)
-        assert y.shape == (self.dimensions, 1)
+        assert s_update.shape == (self.dimensions, 1)
+        assert y_update.shape == (self.dimensions, 1)
 
-        self.current_position = m
-        self.current_gradient = g
-
-        # Compute auxiliary stuff
-
-        rho = 1.0 / _numpy.vdot(s, y)
-
+        rho = 1.0 / _numpy.vdot(s_update, y_update)
         # Do nothing unless rho is positive.
-        if rho > 0:
 
-            Hinv_y = self.Hinv(y)
-            gamma2 = rho ** 2 * _numpy.vdot(y, y) + rho
-            beta = gamma2 * _numpy.vdot(s, self.H(s))
+        if rho > 0 and not _numpy.isnan(rho) and not _numpy.isinf(rho):
+
+            self.current_position = m
+            self.current_gradient = g
+
+            Hinv_y = self.Hinv(y_update)
+
+            gamma2 = rho ** 2 * _numpy.vdot(y_update, y_update) + rho
+
+            beta = gamma2 * _numpy.vdot(s_update, self.H(s_update))
             theta = _numpy.sqrt(rho / (beta * gamma2))
 
-            a = _numpy.sqrt(gamma2) * s
+            a = _numpy.sqrt(gamma2) * s_update
             b = (rho / _numpy.sqrt(gamma2)) * Hinv_y
 
-            u = a
-            v = -self.H(b + theta * a)
+            u_update = a
+            v_update = -self.H(b + theta * a)
 
-            assert u.shape == (self.dimensions, 1)
-            assert v.shape == (self.dimensions, 1)
+            assert u_update.shape == (self.dimensions, 1)
+            assert v_update.shape == (self.dimensions, 1)
 
-            sigma_threshold = (1.0 / (1.0 + _numpy.vdot(u, v))) ** 2
+            sigma_threshold = (1.0 / (1.0 + _numpy.vdot(u_update, v_update))) ** 2
 
             if sigma_threshold < self.max_determinant_change:
                 r = (1.0 - self.max_determinant_change) / (
-                    self.max_determinant_change * _numpy.vdot(u, v)
+                    self.max_determinant_change * _numpy.vdot(u_update, v_update)
                 )
-                v = r * v
+                v_update = r * v_update
 
-            if self.current_number_of_gradients < self.number_of_vectors:
-                self.current_number_of_gradients += 1
+            if self.currently_stored_gradients < self.number_of_vectors:
+                self.currently_stored_gradients += 1
             else:
-                # todo get rid of this abysmal thing
+                # TODO get rid of this abysmal thing
+                # self.s[:, 1:-1] = self.s[:, 2:]
+                # self.y[:, 1:-1] = self.y[:, 2:]
+                # self.u[:, 1:-1] = self.u[:, 2:]
+                # self.v[:, 1:-1] = self.v[:, 2:]
+                # self.vTu[1:-1] = self.vTu[2:]
+
+                # Next two blocks are equivalent
+
+                # 1
+                # self.s[:, :-1] = self.s[:, 1:]
+                # self.y[:, :-1] = self.y[:, 1:]
+                # self.u[:, :-1] = self.u[:, 1:]
+                # self.v[:, :-1] = self.v[:, 1:]
+                # self.vTu[:-1] = self.vTu[1:]
+
+                # 2
                 self.s = _numpy.roll(self.s, -1, axis=1)
                 self.y = _numpy.roll(self.y, -1, axis=1)
                 self.u = _numpy.roll(self.u, -1, axis=1)
                 self.v = _numpy.roll(self.v, -1, axis=1)
-                self.vTu = _numpy.roll(self.vTu, -1)
+                self.vTu = _numpy.roll(self.vTu, -1, axis=0)
 
-            assert s.shape == (self.dimensions, 1)
-            assert y.shape == (self.dimensions, 1)
-            assert u.shape == (self.dimensions, 1)
-            assert v.shape == (self.dimensions, 1)
+            assert s_update.shape == (self.dimensions, 1)
+            assert y_update.shape == (self.dimensions, 1)
+            assert u_update.shape == (self.dimensions, 1)
+            assert v_update.shape == (self.dimensions, 1)
 
-            self.s[:, self.current_number_of_gradients - 1] = s.flatten()
-            self.y[:, self.current_number_of_gradients - 1] = y.flatten()
-            self.u[:, self.current_number_of_gradients - 1] = u.flatten()
-            self.v[:, self.current_number_of_gradients - 1] = v.flatten()
-            self.vTu[self.current_number_of_gradients - 1] = 1.0 + _numpy.vdot(v, u)
+            self.s[:, self.currently_stored_gradients - 1] = s_update.flatten()
+            self.y[:, self.currently_stored_gradients - 1] = y_update.flatten()
+            self.u[:, self.currently_stored_gradients - 1] = u_update.flatten()
+            self.v[:, self.currently_stored_gradients - 1] = v_update.flatten()
+            self.vTu[self.currently_stored_gradients - 1] = 1.0 + _numpy.vdot(
+                v_update, u_update
+            )
+        else:
+            print(f"Not updating. Rho: {rho}")
 
     def S(self, h):
 
-        for i in range(self.current_number_of_gradients):
+        for i in range(self.currently_stored_gradients):
             h = (
                 h
                 - self.v[:, i, None] * _numpy.vdot(self.u[:, i, None], h) / self.vTu[i]
@@ -341,7 +355,7 @@ class LBFGS(_AbstractMassMatrix):
 
     def ST(self, h):
 
-        for i in range(self.current_number_of_gradients - 1, -1, -1):
+        for i in range(self.currently_stored_gradients - 1, -1, -1):
             h = (
                 h
                 - self.u[:, i, None] * _numpy.vdot(self.v[:, i, None], h) / self.vTu[i]
@@ -351,14 +365,14 @@ class LBFGS(_AbstractMassMatrix):
 
     def Sinv(self, h):
 
-        for i in range(self.current_number_of_gradients - 1, -1, -1):
+        for i in range(self.currently_stored_gradients - 1, -1, -1):
             h = h + self.v[:, i, None] * _numpy.vdot(self.u[:, i, None], h)
         assert h.shape == (self.dimensions, 1)
         return h
 
     def SinvT(self, h):
 
-        for i in range(self.current_number_of_gradients):
+        for i in range(self.currently_stored_gradients):
             h = h + self.u[:, i, None] * _numpy.vdot(self.v[:, i, None], h)
         assert h.shape == (self.dimensions, 1)
         return h
@@ -378,32 +392,8 @@ class LBFGS(_AbstractMassMatrix):
     def logdet(self):
 
         logdet = 0.0
-        for i in range(self.current_number_of_gradients):
+        for i in range(self.currently_stored_gradients):
             alpha = 1.0 / (1.0 + _numpy.dot(self.u[:, i], self.v[:, i]))
             logdet += _numpy.log(alpha ** 2)
 
         return logdet
-
-
-# class SparseDecomposed(_AbstractMassMatrix):
-#     def __init__(self, decomposition):
-#         raise NotImplementedError("This class is not production ready")
-#         self.decomposition = decomposition
-#         self.dimensions = self.decomposition.shape[0]
-
-#     def kinetic_energy(self, momentum: _numpy.ndarray) -> float:
-#         raise NotImplementedError("This class is not production ready")
-#         return (
-#             0.5 * _numpy.linalg.norm(_spsolve(self.decomposition, momentum)) ** 2
-#         ).item()
-
-#     def kinetic_energy_gradient(self, momentum: _numpy.ndarray) -> _numpy.ndarray:
-#         raise NotImplementedError("This class is not production ready")
-#         return _spsolve(self.decomposition, momentum)[:, _numpy.newaxis]
-
-#     def generate_momentum(self) -> _numpy.ndarray:
-#         raise NotImplementedError("This class is not production ready")
-#         return (
-#             self.decomposition
-#             @ _numpy.random.randn(self.decomposition.shape[0])[:, _numpy.newaxis]
-#         )
