@@ -41,6 +41,13 @@ from hmc_tomography.Distributions import _AbstractDistribution
 from hmc_tomography.MassMatrices import _AbstractMassMatrix
 from hmc_tomography.MassMatrices import Unit as _Unit
 
+from hmc_tomography.Helpers.CustomExceptions import (
+    AbstractMethodError as _AbstractMethodError,
+)
+from hmc_tomography.Helpers.CustomExceptions import (
+    InvalidCaseError as _InvalidCaseError,
+)
+
 
 class _AbstractSampler(_ABC):
     """Abstract base class for Markov chain Monte Carlo samplers.
@@ -48,642 +55,282 @@ class _AbstractSampler(_ABC):
     """
 
     name: str = "Monte Carlo sampler abstract base class"
-    dimensions: int = -1
-    target: _AbstractDistribution
-    sample_hdf5_file = None
-    sample_hdf5_dataset = None
-    sample_ram_buffer: _numpy.ndarray
+    """The name of the sampler"""
 
-    samples_filename: str = ""
-    """Variable to store the samples filename. This is stored because during sampling
-    the filename might be altered. This alteration is never done without user
-    interaction."""
+    dimensions: int = None
+    """An integer representing the dimensionality in which the MCMC sampler works."""
 
-    @_abstractmethod
-    def sample(
+    distribution: _AbstractDistribution = None
+    """The _AbstractDistribution object on which the sampler works."""
+
+    samples_hdf5_filename: str = None
+    """A string containing the path+filename of the hdf5 file to which samples will be
+    stored."""
+
+    samples_hdf5_filehandle = None
+    """A HDF5 file handle of the hdf5 file to which samples will be stored."""
+
+    samples_hdf5_dataset = None
+    """A string containing the HDF5 group of the hdf5 file to which samples will be
+    stored. """
+
+    samples_ram_buffer: _numpy.ndarray = None
+    """A NumPy ndarray containing the samples that are as of yet not written to disk."""
+
+    current_model: _numpy.ndarray = None
+
+    proposed_model: _numpy.ndarray = None
+
+    current_x: float = None
+
+    proposed_x: float = None
+
+    accepted_proposals: int = None
+
+    amount_of_writes: int = None
+
+    def __init__(self):
+        self.sample = self._sample
+
+    def _init_sampler(
         self,
-        samples_filename: str,
-        proposals: int = 100,
-        online_thinning: int = 1,
-        sample_ram_buffer_size: int = 1000,
+        samples_hdf5_filename: str,
+        distribution,
+        initial_model,
+        proposals,
+        online_thinning,
+        samples_ram_buffer_size,
+        overwrite_existing_file,
+        **kwargs,
     ):
-        """
-        Parameters
-        ----------
-        proposals
-        online_thinning
-        sample_ram_buffer_size
-        samples_filename
 
-        """
-        pass
+        # Parse the distribution -------------------------------------------------------
 
+        # Store the distribution
+        assert issubclass(type(distribution), _AbstractDistribution)
+        self.distribution = distribution
 
-class HMC(_AbstractSampler):
-    """Hamiltonian Monte Carlo class.
+        # Extract dimensionality from the distribution
+        assert distribution.dimensions > 0
+        assert type(distribution.dimensions) == int
+        self.dimensions = distribution.dimensions
 
-    """
+        # Set up proposals -------------------------------------------------------------
 
-    name = "Hamiltonian Monte Carlo sampler"
-    mass_matrix: _AbstractMassMatrix = None
+        # Assert that proposals is a positive integer
+        assert proposals > 0
+        assert type(proposals) == int
+        self.proposals = proposals
 
-    def __init__(self,):
-        """Re-assign static method"""
+        # Assert that online_thinning is a positive integer
+        assert online_thinning > 0
+        assert type(online_thinning) == int
+        self.online_thinning = online_thinning
 
-        self.sample = self.instance_sample
+        # Assert that we would write out the last sample, preventing wasteful
+        # computations
+        assert self.proposals % self.online_thinning == 0
+        self.proposals_after_thinning = int(self.proposals / self.online_thinning)
 
-    @staticmethod
-    def sample(
-        target: _AbstractDistribution,
-        samples_filename: str,
-        mass_matrix: _AbstractMassMatrix = None,
-        proposals: int = 100,
-        online_thinning: int = 1,
-        sample_ram_buffer_size: int = 1000,
-        integration_steps: int = 10,
-        time_step: float = 0.1,
-        randomize_integration_steps: bool = True,
-        randomize_time_step: bool = True,
-        initial_model: _numpy.ndarray = None,
-        ignore_update_hook_mass: bool = False,
-        suppress_warnings: bool = True,
-        overwrite_samples: bool = False,
-        stages: int = 1,
-        update_rate: int = 100,
-    ):
-        """
+        # Set up the sample RAM buffer -------------------------------------------------
 
-        Parameters
-        ----------
-        ignore_update_hook_mass
-        initial_model
-        samples_filename
-        proposals
-        online_thinning
-        sample_ram_buffer_size
-        integration_steps
-        time_step
-        randomize_integration_steps
-        randomize_time_step
+        if samples_ram_buffer_size is not None:
+            # Assert that samples_ram_buffer_size is a positive integer
+            assert samples_ram_buffer_size > 0
+            assert type(samples_ram_buffer_size) == int
 
-        Returns
-        -------
+            # Assert that the total generated proposals are a multiple of this number
+            try:
+                assert self.proposals_after_thinning % samples_ram_buffer_size == 0
+                self.samples_ram_buffer_size = samples_ram_buffer_size
+            except AssertionError as e:
+                # That doesn't fit nicely in the amount of proposals, let's make the
+                # block bigger until it fits
+                while self.proposals_after_thinning % samples_ram_buffer_size != 0:
+                    samples_ram_buffer_size = samples_ram_buffer_size - 1
+                self.samples_ram_buffer_size = samples_ram_buffer_size
 
-        """
-        return HMC().instance_sample(
-            target,
-            samples_filename,
-            mass_matrix,
-            proposals,
-            online_thinning,
-            sample_ram_buffer_size,
-            integration_steps,
-            time_step,
-            randomize_integration_steps,
-            randomize_time_step,
-            initial_model,
-            ignore_update_hook_mass,
-            suppress_warnings,
-            overwrite_samples,
-            stages,
-            update_rate,
-        )
+                if self.samples_ram_buffer_size > 1e4:
+                    _warnings.warn(
+                        f"\r\nSample RAM buffer is incorrectly sized. Resizing such "
+                        f"that it is a multiple of the amount of proposals that are "
+                        f"written to disk (proposals divided by online thinning): "
+                        f"{self.samples_ram_buffer_size}. \r\n\r\nResizing could not "
+                        f"be done any smaller. This is a very large number of samples "
+                        f"to keep in RAM. Consider altering the number of proposals to "
+                        f"a multiple of thousands.\r\n\r\n",
+                        Warning,
+                        stacklevel=100,
+                    )
+                else:
+                    _warnings.warn(
+                        f"\r\nSample RAM buffer is incorrectly sized. Resizing such "
+                        f"that it is a multiple of the amount of proposals that are "
+                        f"written to disk (proposals divided by online thinning): "
+                        f"{self.samples_ram_buffer_size}.",
+                        Warning,
+                        stacklevel=100,
+                    )
 
-    def instance_sample(
-        self,
-        target: _AbstractDistribution,
-        samples_filename: str,
-        mass_matrix: _AbstractMassMatrix = None,
-        proposals: int = 100,
-        online_thinning: int = 1,
-        sample_ram_buffer_size: int = 1000,
-        integration_steps: int = 10,
-        time_step: float = 0.1,
-        randomize_integration_steps: bool = True,
-        randomize_time_step: bool = True,
-        initial_model: _numpy.ndarray = None,
-        ignore_update_hook_mass: bool = False,
-        suppress_warnings: bool = True,
-        overwrite_samples: bool = False,
-        stages: int = 1,
-        update_rate: int = 100,
-    ):
-        """
+        else:
+            # This is all automated stuff. You can force any size by setting it
+            # manually.
 
-        Parameters
-        ----------
-        ignore_update_hook_mass
-        initial_model
-        samples_filename
-        proposals
-        online_thinning
-        sample_ram_buffer_size
-        integration_steps
-        time_step
-        randomize_integration_steps
-        randomize_time_step
+            # Detailed explanation: we strive for approximately 1 gigabyte in
+            # memory before we write to disk, by default. The amount of floats that are
+            # in memory is calculated as follows: (dimensions + 1) *
+            # samples_ram_buffer_size. The plus ones comes from requiring to store the
+            # misfit. 1 gigabyte is approximately 1e8 64 bits floats (actually 1.25e8).
+            # Additionally, there is a cap at 10000 samples.
+            samples_ram_buffer_size = min(
+                int(_numpy.floor(1e8 / self.dimensions)), 10000
+            )
+            # Reduce this number until it fits in the amount of proposals
+            while self.proposals_after_thinning % samples_ram_buffer_size != 0:
+                samples_ram_buffer_size = samples_ram_buffer_size - 1
 
-        Returns
-        -------
-
-        """
-
-        # Fix filename extension if needed ---------------------------------------------
-        if samples_filename[-3:] != ".h5":
-            samples_filename += ".h5"
-
-        # Sanity check on the dimensions of passed objects -----------------------------
-        if mass_matrix is None:
-            # The mass matrix can be None as default, so we default to the unit mass
-            # matrix. This choice should 'just work'.
-            mass_matrix = _Unit(target.dimensions)
-
-        # Any other mass matrix needs to have the correct dimensionality.
-        if not (target.dimensions == mass_matrix.dimensions):
-            raise ValueError(
-                "Incompatible target/target/mass matrix.\r\n"
-                f"Target dimensions:\t\t{target.dimensions}.\r\n"
-                f"Mass matrix dimensions:\t{mass_matrix.dimensions}.\r\n"
+            # Now, this number might be larger than the actual amount of samples, so we
+            # take the minimum of this and the amount of proposals to write as the
+            # actual ram size.
+            self.samples_ram_buffer_size = min(
+                samples_ram_buffer_size, self.proposals_after_thinning
             )
 
-        # Setting the passed objects ---------------------------------------------------
-        self.dimensions = target.dimensions
-        self.target = target
-        self.mass_matrix = mass_matrix
+            assert type(self.samples_ram_buffer_size) == int
 
-        # Try to get update hook, default to None if there isn't one
-        # Update hooks are used for mass matrix that perform an action when sampling,
-        # i.e. autotuning.
-        self.mass_matrix_update_hook = getattr(mass_matrix, "update", None)
+        shape = (self.dimensions + 1, self.samples_ram_buffer_size)
 
-        # If suppress warnings ---------------------------------------------------------
-        if suppress_warnings:
-            _warnings.filterwarnings("ignore", category=RuntimeWarning)
+        self.samples_ram_buffer = _numpy.empty(shape, dtype=_numpy.float64)
 
-        # Prepare sampling -------------------------------------------------------------
-        accepted = 0
+        # Set up the samples file ------------------------------------------------------
 
-        # Initial model
+        # Parse the filename
+        assert type(samples_hdf5_filename) == str
+        if samples_hdf5_filename[-3:] != ".h5":
+            samples_hdf5_filename += ".h5"
+        self.samples_hdf5_filename = samples_hdf5_filename
+
+        # Open the HDF5 file
+        self._open_samples_hdf5(
+            self.samples_hdf5_filename,
+            self.proposals_after_thinning,
+            overwrite=overwrite_existing_file,
+        )
+
+        # Set up the initial model and preallocate other necessary arrays --------------
+
         if initial_model is None:
-            coordinates = _numpy.zeros((self.dimensions, 1))
-        else:
-            assert initial_model.shape == (self.dimensions, 1)
-            coordinates = initial_model
+            initial_model = _numpy.zeros((self.dimensions, 1))
 
-        # Create RAM buffer for samples
-        self.sample_ram_buffer = _numpy.empty(
-            (self.dimensions + 1, sample_ram_buffer_size)
+        assert initial_model.shape == (self.dimensions, 1)
+
+        self.current_model = initial_model.astype(_numpy.float64)
+        self.current_x = distribution.misfit(self.current_model)
+
+        self.proposed_model = _numpy.empty_like(self.current_model)
+        self.proposed_x = _numpy.nan
+
+        # Set up accepted_proposals for acceptance rate --------------------------------
+        self.accepted_proposals = 0
+        self.amount_of_writes = 0
+
+        # Do specific stuff
+
+        self._init_sampler_specific(**kwargs)
+
+        self._write_tuning_settings()
+
+    @_abstractmethod
+    def _init_sampler_specific(self):
+        """An abstract method that sets up all required attributes and method for the 
+        algorithm."""
+        pass
+
+    def _close_sampler(self):
+        self.samples_hdf5_filehandle.close()
+
+    @classmethod
+    def sample(
+        cls,
+        samples_hdf5_filename: str,
+        distribution: _AbstractDistribution,
+        initial_model: _numpy.ndarray = None,
+        proposals: int = 100,
+        online_thinning: int = 1,
+        samples_ram_buffer_size: int = None,
+        overwrite_existing_file: bool = False,
+        **kwargs,
+    ):
+        """Class method for sampling. This allows on to sample without creating an instance
+        of the class. """
+
+        return cls()._sample(
+            samples_hdf5_filename,
+            distribution,
+            initial_model,
+            proposals,
+            online_thinning,
+            samples_ram_buffer_size,
+            overwrite_existing_file,
+            **kwargs,
         )
 
-        # Create or open HDF5 file
-        total_samples_to_be_generated = int((1.0 / online_thinning) * proposals)
+    def _sample(
+        self,
+        samples_hdf5_filename: str,
+        distribution: _AbstractDistribution,
+        initial_model: _numpy.ndarray = None,
+        proposals: int = 100,
+        online_thinning: int = 1,
+        samples_ram_buffer_size: int = None,
+        overwrite_existing_file: bool = False,
+        **kwargs,
+    ):
+        """The actual sampling code."""
 
-        # Open file, with some intricate logic
-
-        return_code = self.open_samples_hdf5(
-            samples_filename,
-            total_samples_to_be_generated,
-            overwrite=overwrite_samples,
-        )
-        if return_code == 1:
-            return 1
-
-        # Set attributes of the dataset to correspond to sampling settings
-        self.sample_hdf5_dataset.attrs["sampler"] = "HMC"
-        self.sample_hdf5_dataset.attrs["proposals"] = proposals
-        self.sample_hdf5_dataset.attrs["online_thinning"] = online_thinning
-        self.sample_hdf5_dataset.attrs["time_step"] = time_step
-        self.sample_hdf5_dataset.attrs["integration_steps"] = integration_steps
-        self.sample_hdf5_dataset.attrs["randomize_time_step"] = randomize_time_step
-        self.sample_hdf5_dataset.attrs[
-            "randomize_iterations"
-        ] = randomize_integration_steps
-        self.sample_hdf5_dataset.attrs[
-            "randomize_iterations"
-        ] = randomize_integration_steps
-        self.sample_hdf5_dataset.attrs["start_time"] = _time.strftime(
-            "%Y-%m-%d %H:%M:%S", _time.gmtime()
+        # Initialize sampler -----------------------------------------------------------
+        self._init_sampler(
+            samples_hdf5_filename,
+            distribution,
+            initial_model,
+            proposals,
+            online_thinning,
+            samples_ram_buffer_size,
+            overwrite_existing_file,
+            **kwargs,
         )
 
-        # Flush output (works best if followed by sleep() )
-        _sys.stdout.flush()
-        _time.sleep(0.001)
-
-        # Create progress bar
+        # Create progressbar -----------------------------------------------------------
         try:
-            proposals_total = _tqdm_au.trange(
+            self.proposals_iterator = _tqdm_au.trange(
                 proposals,
                 desc="Sampling. Acceptance rate:",
                 leave=True,
                 dynamic_ncols=True,
             )
         except:
-            proposals_total = _tqdm_au.trange(
+            self.proposals_iterator = _tqdm_au.trange(
                 proposals, desc="Sampling. Acceptance rate:", leave=True,
             )
 
-        # Sampling acceptance history
-        acceptance_history = _numpy.zeros((100,))
+        # Run the Markov process -------------------------------------------------------
+        for self.current_proposal in self.proposals_iterator:
 
-        # Selection of integrator ----------------------------------------------
-        if stages == 4:
-            propagate = self.propagate_4_stage_simplified
-        elif stages == 3:
-            propagate = self.propagate_3_stage_simplified
-        elif stages == 1:
-            propagate = self.propagate_leapfrog
+            # Propose a new sample
+            self._propose()
 
-        # Optional randomization -----------------------------------------------
-        if randomize_integration_steps:
+            # Evaluate acceptance criterion
+            self._evaluate_acceptance()
 
-            def _iterations():
-                return int(integration_steps * (0.5 + _numpy.random.rand()))
+            # Write sample to RAM (and disk if needed)
+            self._flush_sample()
 
-        else:
+            # Update the progressbar
+            self._update_progressbar()
 
-            def _iterations():
-                return integration_steps
+        self._close_sampler()
 
-        if randomize_time_step:
-
-            def _time_step():
-                return float(time_step * (0.5 + _numpy.random.rand()))
-
-        else:
-
-            def _time_step():
-                return time_step
-
-        # Start sampling, but catch CTRL+C / COMMAND + . (SIGINT) ----------------------
-        try:
-            current_proposal = 0
-            for proposal in proposals_total:
-
-                # Compute initial Hamiltonian
-                potential: float = self.target.misfit(coordinates)
-                momentum = self.mass_matrix.generate_momentum()
-                kinetic: float = self.mass_matrix.kinetic_energy(momentum)
-                hamiltonian: float = potential + kinetic
-
-                # Propagate using the numerical integrator
-                new_coordinates, new_momentum, update_m, update_g = propagate(
-                    coordinates, momentum, _iterations(), _time_step()
-                )
-
-                # Compute resulting Hamiltonian
-                new_potential: float = self.target.misfit(new_coordinates)
-                new_kinetic: float = self.mass_matrix.kinetic_energy(new_momentum)
-                new_hamiltonian: float = new_potential + new_kinetic
-
-                # Evaluate acceptance criterion
-                if _numpy.exp(hamiltonian - new_hamiltonian) > _numpy.random.uniform(
-                    0, 1
-                ):
-                    accepted += 1
-                    coordinates = new_coordinates.copy()
-                    acceptance_history = _numpy.append([1], acceptance_history[0:-1])
-                else:
-                    acceptance_history = _numpy.append([0], acceptance_history[0:-1])
-
-                if (
-                    callable(self.mass_matrix_update_hook)
-                    and not ignore_update_hook_mass
-                ):
-                    self.mass_matrix.update(update_m, update_g)
-
-                # On-line thinning, progress bar and writing samples to disk -----------
-                if proposal % online_thinning == 0:
-                    buffer_location: int = int(
-                        (proposal / online_thinning) % sample_ram_buffer_size
-                    )
-                    self.sample_ram_buffer[:-1, buffer_location] = coordinates[:, 0]
-                    self.sample_ram_buffer[-1, buffer_location] = self.target.misfit(
-                        coordinates
-                    )  # TODO Optimize this
-
-                    # Total acceptance rate
-                    tot_acc = accepted / (proposal + 1)
-
-                    # Last 100 acceptance rate
-                    loc_acc = _numpy.sum(acceptance_history) / min(
-                        100.0, current_proposal + 1
-                    )
-
-                    if proposal % update_rate:
-                        proposals_total.set_description(
-                            f"Tot. acc rate: {tot_acc:.2f}. "
-                            f"Last 100 acc rate: {loc_acc:.2f}. "
-                            "Progress",
-                            refresh=False,
-                        )
-                    # Write out to disk when at the end of the buffer
-                    if buffer_location == sample_ram_buffer_size - 1:
-                        start = int(
-                            (proposal / online_thinning) - sample_ram_buffer_size + 1
-                        )
-                        end = int((proposal / online_thinning))
-                        self.flush_samples(start, end, self.sample_ram_buffer)
-                current_proposal += 1
-
-        except KeyboardInterrupt:  # Catch SIGINT --------------------------------------
-            # Close tqdm progressbar
-            proposals_total.close()
-            # optional TODO delete all non-written entries in hdf5 file. This is also
-            # taken care of in plotting
-        finally:  # Write out samples still in the buffer ------------------------------
-            buffer_location: int = int(
-                (proposal / online_thinning) % sample_ram_buffer_size
-            )
-            start = (
-                int((proposal / online_thinning) / sample_ram_buffer_size)
-                * sample_ram_buffer_size
-            )
-
-            # Write out one less to be sure if interrupted
-            end = int(proposal / online_thinning) - 1
-            if end - start + 1 > 0 and buffer_location != sample_ram_buffer_size - 1:
-                self.flush_samples(
-                    start, end, self.sample_ram_buffer[:, :buffer_location]
-                )
-
-            # Trim the dataset to have the shape of end_of_samples
-            self.sample_hdf5_dataset.resize((self.dimensions + 1, end + 1))
-
-            self.sample_hdf5_dataset.attrs["acceptance_rate"] = tot_acc
-
-            # Close the HDF file
-            self.sample_hdf5_file.close()
-
-        # Re-enable warnings
-        if suppress_warnings:
-            _warnings.filterwarnings("default", category=RuntimeWarning)
-
-        # Flush output
-        _sys.stdout.flush()
-        _time.sleep(0.001)
-
-    def propagate_leapfrog(
-        self,
-        coordinates: _numpy.ndarray,
-        momentum: _numpy.ndarray,
-        iterations: int,
-        time_step: float,
-    ) -> _Tuple[_numpy.ndarray, _numpy.ndarray]:
-        """
-
-        Parameters
-        ----------
-        coordinates
-        momentum
-        iterations
-        time_step
-
-        Returns
-        -------
-
-        """
-
-        # Make sure not to alter a view but a copy of the passed arrays.
-        coordinates = coordinates.copy()
-        momentum = momentum.copy()
-
-        # Leapfrog integration -------------------------------------------------
-        # Coordinates half step before loop
-        coordinates += (
-            0.5 * time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
-        )
-        self.target.corrector(coordinates, momentum)
-
-        # Integration loop
-        for i in range(iterations - 1):
-            potential_gradient = self.target.gradient(coordinates)
-            momentum -= time_step * potential_gradient
-            coordinates += time_step * self.mass_matrix.kinetic_energy_gradient(
-                momentum
-            )
-
-            # Correct bounds
-            self.target.corrector(coordinates, momentum)
-
-        # Full momentum and half step coordinates after loop
-        potential_gradient = self.target.gradient(coordinates)
-
-        # For the update
-        update_coordinates = _numpy.copy(coordinates)
-        update_gradient = _numpy.copy(potential_gradient)
-
-        momentum -= time_step * potential_gradient
-        coordinates += (
-            0.5 * time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
-        )
-
-        self.target.corrector(coordinates, momentum)
-
-        return coordinates, momentum, update_coordinates, update_gradient
-
-    def propagate_leapfrog_simplified(
-        self,
-        coordinates: _numpy.ndarray,
-        momentum: _numpy.ndarray,
-        iterations: int,
-        time_step: float,
-    ) -> _Tuple[_numpy.ndarray, _numpy.ndarray]:
-        """
-
-        Parameters
-        ----------
-        coordinates
-        momentum
-        iterations
-        time_step
-
-        Returns
-        -------
-
-        """
-
-        # Make sure not to alter a view but a copy of the passed arrays.
-        coordinates = coordinates.copy()
-        momentum = momentum.copy()
-
-        # Leapfrog integration -------------------------------------------------
-        for i in range(iterations):
-            coordinates += (
-                0.5 * time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
-            )
-            self.target.corrector(coordinates, momentum)
-
-            potential_gradient = self.target.gradient(coordinates)
-            momentum -= time_step * potential_gradient
-
-            coordinates += (
-                0.5 * time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
-            )
-            self.target.corrector(coordinates, momentum)
-
-        # For the update
-        update_coordinates = _numpy.copy(coordinates)
-        update_gradient = _numpy.copy(potential_gradient)
-
-        return coordinates, momentum, update_coordinates, update_gradient
-
-    def propagate_4_stage_simplified(
-        self,
-        coordinates: _numpy.ndarray,
-        momentum: _numpy.ndarray,
-        iterations: int,
-        time_step: float,
-    ) -> _Tuple[_numpy.ndarray, _numpy.ndarray]:
-        """
-
-        Parameters
-        ----------
-        coordinates
-        momentum
-        iterations
-        time_step
-
-        Returns
-        -------
-
-        """
-
-        # Schema: (a1,b1,a2,b2,a3,b2,a2,b1,a1)
-        a1 = 0.071353913450279725904
-        a2 = 0.268548791161230105820
-        a3 = 1.0 - 2.0 * a1 - 2.0 * a2
-        b1 = 0.191667800000000000000
-        b2 = 1.0 / 2.0 - b1
-
-        a1 *= time_step
-        a2 *= time_step
-        a3 *= time_step
-        b1 *= time_step
-        b2 *= time_step
-
-        # Make sure not to alter a view but a copy of the passed arrays.
-        coordinates = coordinates.copy()
-        momentum = momentum.copy()
-
-        # Leapfrog integration -------------------------------------------------
-        for i in range(iterations):
-
-            # A1
-            coordinates += a1 * self.mass_matrix.kinetic_energy_gradient(momentum)
-            self.target.corrector(coordinates, momentum)
-
-            # B1
-            potential_gradient = self.target.gradient(coordinates)
-            momentum -= b1 * potential_gradient
-
-            # A2
-            coordinates += a2 * self.mass_matrix.kinetic_energy_gradient(momentum)
-            self.target.corrector(coordinates, momentum)
-
-            # B2
-            potential_gradient = self.target.gradient(coordinates)
-            momentum -= b2 * potential_gradient
-
-            # A3
-            coordinates += a3 * self.mass_matrix.kinetic_energy_gradient(momentum)
-            self.target.corrector(coordinates, momentum)
-
-            # B2
-            potential_gradient = self.target.gradient(coordinates)
-            momentum -= b2 * potential_gradient
-
-            # A2
-            coordinates += a2 * self.mass_matrix.kinetic_energy_gradient(momentum)
-            self.target.corrector(coordinates, momentum)
-
-            # B1
-            potential_gradient = self.target.gradient(coordinates)
-            momentum -= b1 * potential_gradient
-
-            # A1
-            coordinates += a1 * self.mass_matrix.kinetic_energy_gradient(momentum)
-            self.target.corrector(coordinates, momentum)
-
-        # For the update
-        update_coordinates = _numpy.copy(coordinates)
-        update_gradient = _numpy.copy(potential_gradient)
-
-        return coordinates, momentum, update_coordinates, update_gradient
-
-    def propagate_3_stage_simplified(
-        self,
-        coordinates: _numpy.ndarray,
-        momentum: _numpy.ndarray,
-        iterations: int,
-        time_step: float,
-    ) -> _Tuple[_numpy.ndarray, _numpy.ndarray]:
-        """
-
-        Parameters
-        ----------
-        coordinates
-        momentum
-        iterations
-        time_step
-
-        Returns
-        -------
-
-        """
-
-        # Schema: (a1,b1,a2,b2,a2,b1,a1)
-        a1 = 0.11888010966548
-        a2 = 1.0 / 2.0 - a1
-        b1 = 0.29619504261126
-        b2 = 1.0 - 2.0 * b1
-
-        a1 *= time_step
-        a2 *= time_step
-        b1 *= time_step
-        b2 *= time_step
-
-        # Make sure not to alter a view but a copy of the passed arrays.
-        coordinates = coordinates.copy()
-        momentum = momentum.copy()
-
-        # Leapfrog integration -------------------------------------------------
-        for i in range(iterations):
-
-            # A1
-            coordinates += a1 * self.mass_matrix.kinetic_energy_gradient(momentum)
-            self.target.corrector(coordinates, momentum)
-
-            # B1
-            potential_gradient = self.target.gradient(coordinates)
-            momentum -= b1 * potential_gradient
-
-            # A2
-            coordinates += a2 * self.mass_matrix.kinetic_energy_gradient(momentum)
-            self.target.corrector(coordinates, momentum)
-
-            # B2
-            potential_gradient = self.target.gradient(coordinates)
-            momentum -= b2 * potential_gradient
-
-            # A2
-            coordinates += a2 * self.mass_matrix.kinetic_energy_gradient(momentum)
-            self.target.corrector(coordinates, momentum)
-
-            # B1
-            potential_gradient = self.target.gradient(coordinates)
-            momentum -= b1 * potential_gradient
-
-            # A1
-            coordinates += a1 * self.mass_matrix.kinetic_energy_gradient(momentum)
-            self.target.corrector(coordinates, momentum)
-
-        # For the update
-        update_coordinates = _numpy.copy(coordinates)
-        update_gradient = _numpy.copy(potential_gradient)
-
-        return coordinates, momentum, update_coordinates, update_gradient
-
-    def open_samples_hdf5(
+    def _open_samples_hdf5(
         self,
         name: str,
         length: int,
@@ -692,11 +339,13 @@ class HMC(_AbstractSampler):
         overwrite: bool = False,
     ) -> int:
 
+        # Add file extension
         if not name.endswith(".h5"):
             name += ".h5"
 
+        # Try to create file
         try:
-            if overwrite:
+            if overwrite:  # honor overwrite flag
                 flag = "w"
                 _warnings.warn(
                     f"\r\nSilently overwriting samples file ({name}) if it exists.",
@@ -707,22 +356,15 @@ class HMC(_AbstractSampler):
                 flag = "w-"
 
             # Create file, fail if exists and flag == w-
-            self.sample_hdf5_file = _h5py.File(name, flag)
+            self.samples_hdf5_filehandle = _h5py.File(name, flag)
 
-            # Create dataset
-            self.sample_hdf5_dataset = self.sample_hdf5_file.create_dataset(
-                "samples_0", (self.dimensions + 1, length), dtype=dtype, chunks=True,
-            )
-
-            # Update the filename in the sampler object for later retrieval
-            self.samples_filename = name
-
-            # Return the exit code upwards through the recursive functions
-            return 0
         except OSError:
-            # If it exists, three options, abort, overwrite, or new filename
+            # Catch error on file creations, likely that the file already exists
+
+            # If it exists, prompt the user with a warning
             _warnings.warn(
-                f"\r\nIt seems that the samples file ({name}) already exists.",
+                f"\r\nIt seems that the samples file ({name}) already exists, or the"
+                f"file could otherwise not be created.",
                 Warning,
                 stacklevel=100,
             )
@@ -733,29 +375,29 @@ class HMC(_AbstractSampler):
             # Keep trying until the user makes a valid choice
             while not choice_made:
 
-                # Prompt the user
+                # Prompt user with three options, abort, overwrite, or new filename
                 if nested:
-                    # If this is not the first time that this is called, also print the warning again
+                    # If this is not the first time that this is called, also print the
+                    # warning again
                     input_choice = input(
                         f"{name} also exists. (n)ew file name, (o)verwrite or (a)bort? >> "
                     )
                 else:
                     input_choice = input("(n)ew file name, (o)verwrite or (a)bort? >> ")
 
+                # Act on choice
                 if input_choice == "n":
                     # User wants a new file
                     choice_made = True
 
                     # Ask user for the new filename
-                    name = input("new file name? (adds missing .h5) >> ")
+                    new_name = input("new file name? (adds missing .h5) >> ")
 
-                    # Call the current method again, with the new filename
-                    return_code = self.open_samples_hdf5(
-                        name, length, dtype=dtype, nested=True
-                    )
+                    # Call the current method again, with the new filename (recursion!)
+                    self._open_samples_hdf5(new_name, length, dtype=dtype, nested=True)
 
-                    # If the user chose abort in the recursive call, pass that on
-                    return return_code
+                    # Exit from here
+                    return
 
                 elif input_choice == "o":
                     # User wants to overwrite the file
@@ -764,25 +406,144 @@ class HMC(_AbstractSampler):
                     # Create file, truncate if exists. This should never give an
                     # error on file exists, but could fail for other reasons. Therefore,
                     # no try-catch block.
-                    self.sample_hdf5_file = _h5py.File(name, "w")
-
-                    # Create dataset
-                    self.sample_hdf5_dataset = self.sample_hdf5_file.create_dataset(
-                        "samples_0",
-                        (self.dimensions + 1, length),
-                        dtype=dtype,
-                        chunks=True,
-                    )
-
-                    # Update the filename in the sampler object for later retrieval
-                    self.samples_filename = name
-                    return 0
+                    self.samples_hdf5_filehandle = _h5py.File(name, "w")
 
                 elif input_choice == "a":
                     # User wants to abort sampling
                     choice_made = True
-                    return 1
+                    raise AttributeError(
+                        "Wasn't able to create the samples file. This exception should "
+                        "come paired with an OSError thrown by h5py."
+                    )
 
-    def flush_samples(self, start: int, end: int, data: _numpy.ndarray):
-        self.sample_hdf5_dataset.attrs["end_of_samples"] = end + 1
-        self.sample_hdf5_dataset[:, start : end + 1] = data
+        # Update the filename in the sampler object for later retrieval
+        self.samples_hdf5_filename = name
+
+        # Create dataset
+        self.samples_hdf5_dataset = self.samples_hdf5_filehandle.create_dataset(
+            "samples_0",
+            (self.dimensions + 1, length),  # one extra for misfit
+            dtype=dtype,
+            chunks=True,
+        )
+
+    def _update_progressbar(self):
+
+        # Calculate acceptance rate
+        acceptance_rate = self.accepted_proposals / (self.current_proposal + 1)
+
+        if self.current_proposal % 1000:
+            self.proposals_iterator.set_description(
+                f"Tot. acc rate: {acceptance_rate:.2f}. Progress", refresh=False,
+            )
+
+    def _flush_sample(self):
+        # Calculate proposal number after thinning
+        current_proposal_after_thinning = int(
+            self.current_proposal / self.online_thinning
+        )
+
+        # Assert that it's an integer
+        if self.current_proposal % self.online_thinning == 0:
+
+            # Calculate index for the RAM array
+            index_in_ram = (
+                current_proposal_after_thinning % self.samples_ram_buffer_size
+            )
+
+            # Place samples in RAM
+            self.samples_ram_buffer[:-1, index_in_ram] = self.current_model[:, 0]
+
+            # Place misfit in RAM
+            self.samples_ram_buffer[-1, index_in_ram] = self.current_x
+
+            # Check if the buffer is full
+            if index_in_ram == self.samples_ram_buffer_size - 1:
+                # Write samples to disk
+                self._samples_to_disk()
+
+    def _samples_to_disk(self):
+
+        # Calculate proposal number after thinning
+        current_proposal_after_thinning = int(
+            self.current_proposal / self.online_thinning
+        )
+
+        # Calculate start/end indices
+        start = current_proposal_after_thinning - self.samples_ram_buffer_size + 1
+        end = current_proposal_after_thinning + 1
+
+        # Some sanity checks on the indices
+        assert start >= 0 and start <= self.proposals_after_thinning + 1
+        assert end >= 0 and end <= self.proposals_after_thinning + 1
+        assert end >= start
+
+        self.amount_of_writes += 1
+
+        # Write samples to disk
+        self.samples_hdf5_dataset[:, start:end] = self.samples_ram_buffer
+
+        # Reset the marker in the HDF5 file
+        self.samples_hdf5_dataset.attrs["end_of_samples"] = self.current_proposal
+
+    @_abstractmethod
+    def _propose(self):
+        pass
+
+    @_abstractmethod
+    def _evaluate_acceptance(self):
+        """This abstract method evaluates the acceptance criterion in the MCMC 
+        algorithm. Pass or fail, it updates the objects attributes accordingly; 
+        modifying current_model and current_x as needed."""
+        pass
+
+    @_abstractmethod
+    def _write_tuning_settings(self):
+        """An abstract method that writes all the relevant tuning settings of the 
+        algorithm to the HDF5 file."""
+        pass
+
+
+class MetropolisHastings(_AbstractSampler):
+    step_length: float = 1.0
+    """Standard deviation of MH proposal distribution."""
+
+    def _init_sampler_specific(self, **kwargs):
+
+        # Parse all possible kwargs
+        for key in ("step_length", "example_extra_option"):
+            if key in kwargs:
+                setattr(self, key, kwargs[key])
+
+        # Assert that step length is either a float and bigger than zero, or a full
+        # matrix / diagonal
+        try:
+            self.step_length = float(self.step_length)
+            assert self.step_length > 0.0
+        except TypeError as e:
+            assert type(self.step_length) == _numpy.ndarray
+            assert self.step_length.shape == (self.dimensions, 1)
+
+    def _write_tuning_settings(self):
+        pass
+
+    def _propose(self):
+
+        # Propose a new model according to the MH Random Walk algorithm with a Gaussian
+        # proposal distribution
+        self.proposed_model = (
+            self.current_model
+            + self.step_length * _numpy.random.randn(self.dimensions, 1)
+        )
+        assert self.proposed_model.shape == (self.dimensions, 1)
+
+    def _evaluate_acceptance(self):
+
+        # Compute new misfit
+        self.proposed_x = self.distribution.misfit(self.proposed_model)
+
+        # Evaluate acceptence rate
+        if _numpy.exp(self.current_x - self.proposed_x) > _numpy.random.uniform(0, 1):
+            self.current_model = _numpy.copy(self.proposed_model)
+            self.current_x = self.proposed_x
+            self.accepted_proposals += 1
