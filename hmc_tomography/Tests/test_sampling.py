@@ -15,30 +15,35 @@ import matplotlib.pyplot as _plt
 import os as _os
 
 
-dimensions = [1, 2, 10, 100]
-distribution_classes = (
-    _hmc_tomography.Distributions._AbstractDistribution.__subclasses__()
-)
-proposals = [100, 321, 731, 1500]
+dimensions = [1, 2, 10]  # , 100]
+distribution_classes = [
+    _hmc_tomography.Distributions.Normal
+]  # _AbstractDistribution.__subclasses__()
+sampler_classes = _hmc_tomography.Samplers._AbstractSampler.__subclasses__()
+proposals = [100, 1000]  # , 731, 1500]
 
 
-@_pytest.mark.parametrize("pclass", distribution_classes)
+@_pytest.mark.parametrize("sampler_class", sampler_classes)
+@_pytest.mark.parametrize("distribution_class", distribution_classes)
 @_pytest.mark.parametrize("dimensions", dimensions)
 @_pytest.mark.parametrize("proposals", proposals)
 def test_basic_sampling(
-    pclass: _hmc_tomography.Distributions._AbstractDistribution,
+    sampler_class: _hmc_tomography.Samplers._AbstractDistribution,
+    distribution_class: _hmc_tomography.Distributions._AbstractDistribution,
     dimensions: int,
     proposals: int,
 ):
 
     try:
-        distribution: _hmc_tomography.Distributions._AbstractDistribution = pclass.create_default(
+        distribution: _hmc_tomography.Distributions._AbstractDistribution = distribution_class.create_default(
             dimensions
         )
     except _InvalidCaseError:
         return 0
 
-    sampler = _hmc_tomography.Samplers.RWMH()
+    sampler = sampler_class()
+
+    assert isinstance(sampler, _hmc_tomography.Samplers._AbstractSampler)
 
     filename = "temporary_file.h5"
 
@@ -46,7 +51,13 @@ def test_basic_sampling(
     if _os.path.exists(filename):
         _os.remove(filename)
 
-    sampler.sample(filename, distribution, proposals=proposals)
+    sampler.sample(
+        filename,
+        distribution,
+        proposals=proposals,
+        online_thinning=10,
+        samples_ram_buffer_size=100,
+    )
 
     # Check if the file was created. If it wasn't, fail
     if not _os.path.exists(filename):
@@ -56,23 +67,25 @@ def test_basic_sampling(
     _os.remove(filename)
 
 
-@_pytest.mark.parametrize("pclass", distribution_classes)
+@_pytest.mark.parametrize("sampler_class", sampler_classes)
+@_pytest.mark.parametrize("distribution_class", distribution_classes)
 @_pytest.mark.parametrize("dimensions", dimensions)
 @_pytest.mark.parametrize("proposals", proposals)
 def test_samples_file(
-    pclass: _hmc_tomography.Distributions._AbstractDistribution,
+    sampler_class: _hmc_tomography.Samplers._AbstractDistribution,
+    distribution_class: _hmc_tomography.Distributions._AbstractDistribution,
     dimensions: int,
     proposals: int,
 ):
 
     try:
-        distribution: _hmc_tomography.Distributions._AbstractDistribution = pclass.create_default(
+        distribution: _hmc_tomography.Distributions._AbstractDistribution = distribution_class.create_default(
             dimensions
         )
     except _InvalidCaseError:
         return 0
 
-    sampler = _hmc_tomography.Samplers.RWMH()
+    sampler = sampler_class()
 
     filename = "temporary_file.h5"
 

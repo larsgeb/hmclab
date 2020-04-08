@@ -32,7 +32,7 @@ from abc import abstractmethod as _abstractmethod
 
 import h5py as _h5py
 import numpy as _numpy
-import time as _time
+from time import time as _time
 import tqdm.auto as _tqdm_au
 import warnings as _warnings
 from typing import Tuple as _Tuple
@@ -48,6 +48,8 @@ from hmc_tomography.Helpers.CustomExceptions import (
 from hmc_tomography.Helpers.CustomExceptions import (
     InvalidCaseError as _InvalidCaseError,
 )
+
+# TODO Write type, shape and instance checkers
 
 
 class _AbstractSampler(_ABC):
@@ -75,30 +77,38 @@ class _AbstractSampler(_ABC):
     """A string containing the HDF5 group of the hdf5 file to which samples will be
     stored. """
 
-    samples_ram_buffer: _numpy.ndarray = None
+    ram_buffer: _numpy.ndarray = None
     """A NumPy ndarray containing the samples that are as of yet not written to disk."""
 
     current_model: _numpy.ndarray = None
-    """A NumPy array containing the model at the current state of the Markov chain."""
+    """A NumPy array containing the model at the current state of the Markov chain. """
 
     proposed_model: _numpy.ndarray = None
-    """A NumPy array containing the model at the proposed state of the Markov chain."""
+    """A NumPy array containing the model at the proposed state of the Markov chain. """
 
     current_x: float = None
     """A NumPy array containing :math:`\chi = -\log\left( p\\right)` (i.e. the misfit, 
-    negative log probability) of the distribution at the current state of the Markov
-    chain."""
+    negative log probability) of the distribution at the current state of the
+    Markov chain. """
 
     proposed_x: float = None
     """A NumPy array containing :math:`\chi = -\log\left( p\\right)` (i.e. the misfit, 
-    negative log probability) of the distribution at the proposed state of the Markov
-    chain."""
+    negative log probability) of the distribution at the proposed state of the 
+    Markov chain. """
 
     accepted_proposals: int = None
-    """An integer represeting the amount of accepted proposals."""
+    """An integer representing the amount of accepted proposals."""
 
     amount_of_writes: int = None
-    """An integer represeting the amount of times the sampler has written to disk."""
+    """An integer representing the amount of times the sampler has written to disk."""
+
+    progressbar_refresh_rate: int = 1000
+    """An integer representing how many samples lie between an update of the progress 
+    bar statistics (acceptance rate etc.)."""
+
+    max_time: float = None
+    """A float representing the maximum time in seconds that sampling is allowed to take
+    before it is automatically terminated. The value None is used for unlimited time."""
 
     def __init__(self):
         self.sample = self._sample
@@ -110,8 +120,9 @@ class _AbstractSampler(_ABC):
         initial_model,
         proposals,
         online_thinning,
-        samples_ram_buffer_size,
+        ram_buffer_size,
         overwrite_existing_file,
+        max_time,
         **kwargs,
     ):
 
@@ -145,28 +156,28 @@ class _AbstractSampler(_ABC):
 
         # Set up the sample RAM buffer -------------------------------------------------
 
-        if samples_ram_buffer_size is not None:
-            # Assert that samples_ram_buffer_size is a positive integer
-            assert samples_ram_buffer_size > 0
-            assert type(samples_ram_buffer_size) == int
+        if ram_buffer_size is not None:
+            # Assert that ram_buffer_size is a positive integer
+            assert ram_buffer_size > 0
+            assert type(ram_buffer_size) == int
 
             # Assert that the total generated proposals are a multiple of this number
             try:
-                assert self.proposals_after_thinning % samples_ram_buffer_size == 0
-                self.samples_ram_buffer_size = samples_ram_buffer_size
+                assert self.proposals_after_thinning % ram_buffer_size == 0
+                self.ram_buffer_size = ram_buffer_size
             except AssertionError as e:
                 # That doesn't fit nicely in the amount of proposals, let's make the
                 # block bigger until it fits
-                while self.proposals_after_thinning % samples_ram_buffer_size != 0:
-                    samples_ram_buffer_size = samples_ram_buffer_size - 1
-                self.samples_ram_buffer_size = samples_ram_buffer_size
+                while self.proposals_after_thinning % ram_buffer_size != 0:
+                    ram_buffer_size = ram_buffer_size - 1
+                self.ram_buffer_size = ram_buffer_size
 
-                if self.samples_ram_buffer_size > 1e4:
+                if self.ram_buffer_size > 1e4:
                     _warnings.warn(
                         f"\r\nSample RAM buffer is incorrectly sized. Resizing such "
                         f"that it is a multiple of the amount of proposals that are "
                         f"written to disk (proposals divided by online thinning): "
-                        f"{self.samples_ram_buffer_size}. \r\n\r\nResizing could not "
+                        f"{self.ram_buffer_size}. \r\n\r\nResizing could not "
                         f"be done any smaller. This is a very large number of samples "
                         f"to keep in RAM. Consider altering the number of proposals to "
                         f"a multiple of thousands.\r\n\r\n",
@@ -178,7 +189,7 @@ class _AbstractSampler(_ABC):
                         f"\r\nSample RAM buffer is incorrectly sized. Resizing such "
                         f"that it is a multiple of the amount of proposals that are "
                         f"written to disk (proposals divided by online thinning): "
-                        f"{self.samples_ram_buffer_size}.",
+                        f"{self.ram_buffer_size}.",
                         Warning,
                         stacklevel=100,
                     )
@@ -190,28 +201,24 @@ class _AbstractSampler(_ABC):
             # Detailed explanation: we strive for approximately 1 gigabyte in
             # memory before we write to disk, by default. The amount of floats that are
             # in memory is calculated as follows: (dimensions + 1) *
-            # samples_ram_buffer_size. The plus ones comes from requiring to store the
+            # ram_buffer_size. The plus ones comes from requiring to store the
             # misfit. 1 gigabyte is approximately 1e8 64 bits floats (actually 1.25e8).
             # Additionally, there is a cap at 10000 samples.
-            samples_ram_buffer_size = min(
-                int(_numpy.floor(1e8 / self.dimensions)), 10000
-            )
+            ram_buffer_size = min(int(_numpy.floor(1e8 / self.dimensions)), 10000)
             # Reduce this number until it fits in the amount of proposals
-            while self.proposals_after_thinning % samples_ram_buffer_size != 0:
-                samples_ram_buffer_size = samples_ram_buffer_size - 1
+            while self.proposals_after_thinning % ram_buffer_size != 0:
+                ram_buffer_size = ram_buffer_size - 1
 
             # Now, this number might be larger than the actual amount of samples, so we
             # take the minimum of this and the amount of proposals to write as the
             # actual ram size.
-            self.samples_ram_buffer_size = min(
-                samples_ram_buffer_size, self.proposals_after_thinning
-            )
+            self.ram_buffer_size = min(ram_buffer_size, self.proposals_after_thinning)
 
-            assert type(self.samples_ram_buffer_size) == int
+            assert type(self.ram_buffer_size) == int
 
-        shape = (self.dimensions + 1, self.samples_ram_buffer_size)
+        shape = (self.dimensions + 1, self.ram_buffer_size)
 
-        self.samples_ram_buffer = _numpy.empty(shape, dtype=_numpy.float64)
+        self.ram_buffer = _numpy.empty(shape, dtype=_numpy.float64)
 
         # Set up the samples file ------------------------------------------------------
 
@@ -245,10 +252,19 @@ class _AbstractSampler(_ABC):
         self.accepted_proposals = 0
         self.amount_of_writes = 0
 
-        # Do specific stuff
+        # Set up time limit ------------------------------------------------------------
 
+        if max_time is not None:
+            max_time = float(max_time)
+            assert max_time > 0.0
+            self.max_time = max_time
+
+        # Do specific stuff ------------------------------------------------------------
+
+        # Set up specifics for each algorithm
         self._init_sampler_specific(**kwargs)
 
+        # Write out the tuning settings
         self._write_tuning_settings()
 
     @_abstractmethod
@@ -277,19 +293,50 @@ class _AbstractSampler(_ABC):
             )
 
         # Run the Markov process -------------------------------------------------------
-        for self.current_proposal in self.proposals_iterator:
+        try:
 
-            # Propose a new sample
-            self._propose()
+            # If we are given a maximum time, start timer now
+            if self.max_time is not None:
+                t_end = _time() + self.max_time
 
-            # Evaluate acceptance criterion
-            self._evaluate_acceptance()
+            for self.current_proposal in self.proposals_iterator:
 
-            # Write sample to RAM (and disk if needed)
-            self._flush_sample()
+                # Propose a new sample
+                self._propose()
 
-            # Update the progressbar
-            self._update_progressbar()
+                # Evaluate acceptance criterium
+                self._evaluate_acceptance()
+
+                # If we are on a thinning number (i.e. one of the non-discarded samples)
+                if self.current_proposal % self.online_thinning == 0:
+
+                    # Write sample to ram array
+                    self._sample_to_ram()
+
+                    # Calculate the index this sample has after thinning
+                    after_thinning = int(self.current_proposal / self.online_thinning)
+
+                    # Check if this number is at the end of the buffer
+                    if (
+                        after_thinning % self.ram_buffer_size
+                    ) == self.ram_buffer_size - 1:
+
+                        # If so, write samples to disk
+                        self._samples_to_disk()
+
+                # Update the progressbar
+                self._update_progressbar()
+
+                # Check elapsed time
+                if self.max_time is not None and t_end < _time():
+                    # Raise KeyboardInterrupt if we're over time
+                    raise KeyboardInterrupt
+
+        except KeyboardInterrupt:  # Catch SIGINT --------------------------------------
+            # Close progressbar
+            self.proposals_iterator.close()
+        finally:  # Write out the last samples not on a full buffer --------------------
+            self._samples_to_disk()
 
         self._close_sampler()
 
@@ -390,64 +437,77 @@ class _AbstractSampler(_ABC):
             chunks=True,
         )
 
+        # Set the current index of samples to the start of the file
+        self.samples_hdf5_dataset.attrs["write_index"] = 0
+        self.samples_hdf5_dataset.attrs["last_written_sample"] = -1
+
     def _update_progressbar(self):
 
-        # Calculate acceptance rate
-        acceptance_rate = self.accepted_proposals / (self.current_proposal + 1)
+        if self.current_proposal % self.progressbar_refresh_rate:
+            # Calculate acceptance rate
+            acceptance_rate = self.accepted_proposals / (self.current_proposal + 1)
 
-        if self.current_proposal % 1000:
             self.proposals_iterator.set_description(
                 f"Tot. acc rate: {acceptance_rate:.2f}. Progress", refresh=False,
             )
 
-    def _flush_sample(self):
+    def _sample_to_ram(self):
         # Calculate proposal number after thinning
         current_proposal_after_thinning = int(
             self.current_proposal / self.online_thinning
         )
+        # Assert that it's an integer (if we only write on end of buffer)
+        assert self.current_proposal % self.online_thinning == 0
 
-        # Assert that it's an integer
-        if self.current_proposal % self.online_thinning == 0:
+        # Calculate index for the RAM array
+        index_in_ram = current_proposal_after_thinning % self.ram_buffer_size
 
-            # Calculate index for the RAM array
-            index_in_ram = (
-                current_proposal_after_thinning % self.samples_ram_buffer_size
-            )
+        # Place samples in RAM
+        self.ram_buffer[:-1, index_in_ram] = self.current_model[:, 0]
 
-            # Place samples in RAM
-            self.samples_ram_buffer[:-1, index_in_ram] = self.current_model[:, 0]
-
-            # Place misfit in RAM
-            self.samples_ram_buffer[-1, index_in_ram] = self.current_x
-
-            # Check if the buffer is full
-            if index_in_ram == self.samples_ram_buffer_size - 1:
-                # Write samples to disk
-                self._samples_to_disk()
+        # Place misfit in RAM
+        self.ram_buffer[-1, index_in_ram] = self.current_x
 
     def _samples_to_disk(self):
 
         # Calculate proposal number after thinning
         current_proposal_after_thinning = int(
-            self.current_proposal / self.online_thinning
+            _numpy.floor(self.current_proposal / self.online_thinning)
         )
 
+        # This should always be the case if we write during or at the end of sampling,
+        # but not after a KeyboardInterrupt. However, samples are definitely only
+        # written to RAM on a whole number
+        # assert self.current_proposal % self.online_thinning == 0:
+
         # Calculate start/end indices
-        start = current_proposal_after_thinning - self.samples_ram_buffer_size + 1
+        start = current_proposal_after_thinning - self.ram_buffer_size + 1
+        robust_start = (
+            current_proposal_after_thinning
+            - current_proposal_after_thinning % self.ram_buffer_size
+        )
         end = current_proposal_after_thinning + 1
 
-        # Some sanity checks on the indices
-        assert start >= 0 and start <= self.proposals_after_thinning + 1
-        assert end >= 0 and end <= self.proposals_after_thinning + 1
-        assert end >= start
+        # If there is something to write
+        if self.samples_hdf5_dataset.attrs["write_index"] == robust_start:
 
-        self.amount_of_writes += 1
+            # Some sanity checks on the indices
+            assert (
+                robust_start >= 0 and robust_start <= self.proposals_after_thinning + 1
+            )
+            assert end >= 0 and end <= self.proposals_after_thinning + 1
+            assert end >= robust_start
 
-        # Write samples to disk
-        self.samples_hdf5_dataset[:, start:end] = self.samples_ram_buffer
+            self.amount_of_writes += 1
 
-        # Reset the marker in the HDF5 file
-        self.samples_hdf5_dataset.attrs["end_of_samples"] = self.current_proposal
+            # Write samples to disk
+            self.samples_hdf5_dataset[:, robust_start:end] = self.ram_buffer[
+                :, : end - robust_start
+            ]
+
+            # Reset the markers in the HDF5 file
+            self.samples_hdf5_dataset.attrs["write_index"] = end
+            self.samples_hdf5_dataset.attrs["last_written_sample"] = end - 1
 
     @_abstractmethod
     def _propose(self):
@@ -483,8 +543,9 @@ class RWMH(_AbstractSampler):
         initial_model: _numpy.ndarray = None,
         proposals: int = 100,
         online_thinning: int = 1,
-        samples_ram_buffer_size: int = None,
+        ram_buffer_size: int = None,
         overwrite_existing_file: bool = False,
+        max_time: float = None,
         **kwargs,
     ):
         """Sampling using the Metropolis-Hastings algorithm.
@@ -512,12 +573,16 @@ class RWMH(_AbstractSampler):
         online_thinning: int
             An integer representing the degree of online thinning, i.e. the interval 
             between storing samples. 
-        samples_ram_buffer_size: int
+        ram_buffer_size: int
             An integer representing how many samples should be kept in RAM before 
             writing to storage.
         overwrite_existing_file: bool
             A boolean describing whether or not to silently overwrite existing files. 
             Use with caution.
+        max_time: float
+            A float representing the maximum time in seconds that sampling is allowed to
+            take before it is automatically terminated. The value None is used for
+            unlimited time.
         **kwargs
             Arbitrary keyword arguments.
 
@@ -538,8 +603,9 @@ class RWMH(_AbstractSampler):
             initial_model,
             proposals,
             online_thinning,
-            samples_ram_buffer_size,
+            ram_buffer_size,
             overwrite_existing_file,
+            max_time,
             **kwargs,
         )
 
@@ -554,8 +620,9 @@ class RWMH(_AbstractSampler):
         initial_model: _numpy.ndarray = None,
         proposals: int = 100,
         online_thinning: int = 1,
-        samples_ram_buffer_size: int = None,
+        ram_buffer_size: int = None,
         overwrite_existing_file: bool = False,
+        max_time: float = None,
         **kwargs,
     ):
         """Simply a forward to the instance method of the sampler; check out
@@ -567,9 +634,10 @@ class RWMH(_AbstractSampler):
             initial_model,
             proposals,
             online_thinning,
-            samples_ram_buffer_size,
+            ram_buffer_size,
             overwrite_existing_file,
             step_length,
+            max_time,
             **kwargs,
         )
 
@@ -590,6 +658,7 @@ class RWMH(_AbstractSampler):
             assert self.step_length.shape == (self.dimensions, 1)
 
     def _write_tuning_settings(self):
+        # TODO Write this function
         pass
 
     def _propose(self):
@@ -665,8 +734,9 @@ class HMC(_AbstractSampler):
         initial_model: _numpy.ndarray = None,
         proposals: int = 100,
         online_thinning: int = 1,
-        samples_ram_buffer_size: int = None,
+        ram_buffer_size: int = None,
         overwrite_existing_file: bool = False,
+        max_time: float = None,
         **kwargs,
     ):
         """Sampling using the Metropolis-Hastings algorithm.
@@ -700,12 +770,16 @@ class HMC(_AbstractSampler):
         online_thinning: int
             An integer representing the degree of online thinning, i.e. the interval 
             between storing samples. 
-        samples_ram_buffer_size: int
+        ram_buffer_size: int
             An integer representing how many samples should be kept in RAM before 
             writing to storage.
         overwrite_existing_file: bool
             A boolean describing whether or not to silently overwrite existing files. 
             Use with caution.
+        max_time: float
+            A float representing the maximum time in seconds that sampling is allowed to
+            take before it is automatically terminated. The value None is used for
+            unlimited time.
         **kwargs
             Arbitrary keyword arguments.
 
@@ -726,8 +800,9 @@ class HMC(_AbstractSampler):
             initial_model,
             proposals,
             online_thinning,
-            samples_ram_buffer_size,
+            ram_buffer_size,
             overwrite_existing_file,
+            max_time,
             **kwargs,
         )
 
@@ -744,8 +819,9 @@ class HMC(_AbstractSampler):
         initial_model: _numpy.ndarray = None,
         proposals: int = 100,
         online_thinning: int = 1,
-        samples_ram_buffer_size: int = None,
+        ram_buffer_size: int = None,
         overwrite_existing_file: bool = False,
+        max_time: float = None,
         **kwargs,
     ):
         """Simply a forward to the instance method of the sampler; check out
@@ -757,8 +833,9 @@ class HMC(_AbstractSampler):
             initial_model,
             proposals,
             online_thinning,
-            samples_ram_buffer_size,
+            ram_buffer_size,
             overwrite_existing_file,
+            max_time,
             **kwargs,
         )
 
@@ -790,6 +867,7 @@ class HMC(_AbstractSampler):
         assert self.mass_matrix.dimensions == self.dimensions
 
     def _write_tuning_settings(self):
+        # TODO Write this function
         pass
 
     def _propose(self):
