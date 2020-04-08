@@ -15,12 +15,12 @@ import matplotlib.pyplot as _plt
 import os as _os
 
 
-dimensions = [1, 2, 10]  # , 100]
-distribution_classes = [
-    _hmc_tomography.Distributions.Normal
-]  # _AbstractDistribution.__subclasses__()
+dimensions = [1, 2, 10]
+distribution_classes = (
+    _hmc_tomography.Distributions._AbstractDistribution.__subclasses__()
+)
 sampler_classes = _hmc_tomography.Samplers._AbstractSampler.__subclasses__()
-proposals = [100, 1000]  # , 731, 1500]
+proposals = [10, 1000]  # , 731, 1500]
 
 
 @_pytest.mark.parametrize("sampler_class", sampler_classes)
@@ -56,7 +56,8 @@ def test_basic_sampling(
         distribution,
         proposals=proposals,
         online_thinning=10,
-        samples_ram_buffer_size=100,
+        ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
+        max_time=1.0,
     )
 
     # Check if the file was created. If it wasn't, fail
@@ -93,14 +94,25 @@ def test_samples_file(
     if _os.path.exists(filename):
         _os.remove(filename)
 
-    sampler.sample(filename, distribution, proposals=proposals)
+    sampler.sample(filename, distribution, proposals=proposals, max_time=1.0)
 
     # Check if the file was created. If it wasn't, fail
     if not _os.path.exists(filename):
         _pytest.fail("Samples file wasn't created")
 
+    samples_written_expected = int(
+        _numpy.floor(sampler.current_proposal / sampler.online_thinning) + 1
+    )
+
     with _hmc_tomography.Post.Samples(filename) as samples:
+        # Assert that the HDF array has the right dimensions
         assert samples.raw_samples_hdf.shape == (distribution.dimensions + 1, proposals)
+
+        # Assert that the actual written samples have the right dimensions
+        assert samples[:, :].shape == (
+            distribution.dimensions + 1,
+            samples_written_expected,
+        )
 
     # Remove the file
     _os.remove(filename)
