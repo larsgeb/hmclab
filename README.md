@@ -11,6 +11,8 @@ This repository is meant to be an introduction to Bayesian tomography using Hami
 
 ## Installing the packge
 
+For full installation instructions, [see here](https://larsgeb.github.io/hmc-tomography/setup.html).
+
 Directly to your environment:
 
 ```
