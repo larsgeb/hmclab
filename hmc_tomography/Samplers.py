@@ -988,8 +988,60 @@ class HMC(_AbstractSampler):
         self.proposed_model = _numpy.copy(position)
         self.proposed_momentum = _numpy.copy(momentum)
 
+    def _propagate_3_stage_simplified(self):
+
+        # Schema: (a1,b1,a2,b2,a2,b1,a1)
+        a1 = 0.11888010966548
+        a2 = 1.0 / 2.0 - a1
+        b1 = 0.29619504261126
+        b2 = 1.0 - 2.0 * b1
+
+        a1 *= self.time_step
+        a2 *= self.time_step
+        b1 *= self.time_step
+        b2 *= self.time_step
+
+        # Make sure not to alter a view but a copy of the passed arrays.
+        position = self.current_model.copy()
+        momentum = self.current_momentum.copy()
+
+        # Leapfrog integration -------------------------------------------------
+        for i in range(self.amount_of_steps):
+
+            # A1
+            position += a1 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            self.distribution.corrector(position, momentum)
+
+            # B1
+            potential_gradient = self.distribution.gradient(position)
+            momentum -= b1 * potential_gradient
+
+            # A2
+            position += a2 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            self.distribution.corrector(position, momentum)
+
+            # B2
+            potential_gradient = self.distribution.gradient(position)
+            momentum -= b2 * potential_gradient
+
+            # A2
+            position += a2 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            self.distribution.corrector(position, momentum)
+
+            # B1
+            potential_gradient = self.distribution.gradient(position)
+            momentum -= b1 * potential_gradient
+
+            # A1
+            position += a1 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            self.distribution.corrector(position, momentum)
+
+        self.proposed_model = position.copy()
+        self.proposed_momentum = momentum.copy()
+
     integrators = {
         "lf": _propagate_leapfrog,
+        "3s": _propagate_3_stage_simplified,
         "4s": _propagate_4_stage_simplified,
     }
     available_integrators = integrators.keys()
