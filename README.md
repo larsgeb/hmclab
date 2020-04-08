@@ -56,6 +56,6 @@ We test our code tests for coverage using codecov. The project apge can be found
 
 Codecov graph follows below. An interactive version can be found on the codecov project page.
 
-![codecov graph](https://codecov.io/gh/larsgeb/hmc-tomography/commit/eeeb67f2229ce22a7491a9341100c66ce75e38f9/graphs/sunburst.svg?token=6svV9YDRhd)
+![codecov graph](https://codecov.io/gh/larsgeb/hmc-tomography/graphs/sunburst.svg?token=6svV9YDRhd)
 
 > The inner-most circle is the entire project, moving away from the center are folders then, finally, a single file. The size and color of each slice is representing the number of statements and the coverage, respectively. 
