@@ -115,7 +115,7 @@ class _AbstractSampler(_ABC):
 
     def _init_sampler(
         self,
-        samples_hdf5_filename: str,
+        samples_hdf5_filename,
         distribution,
         initial_model,
         proposals,
@@ -161,38 +161,8 @@ class _AbstractSampler(_ABC):
             assert ram_buffer_size > 0
             assert type(ram_buffer_size) == int
 
-            # Assert that the total generated proposals are a multiple of this number
-            try:
-                assert self.proposals_after_thinning % ram_buffer_size == 0
-                self.ram_buffer_size = ram_buffer_size
-            except AssertionError as e:
-                # That doesn't fit nicely in the amount of proposals, let's make the
-                # block bigger until it fits
-                while self.proposals_after_thinning % ram_buffer_size != 0:
-                    ram_buffer_size = ram_buffer_size - 1
-                self.ram_buffer_size = ram_buffer_size
-
-                if self.ram_buffer_size > 1e4:
-                    _warnings.warn(
-                        f"\r\nSample RAM buffer is incorrectly sized. Resizing such "
-                        f"that it is a multiple of the amount of proposals that are "
-                        f"written to disk (proposals divided by online thinning): "
-                        f"{self.ram_buffer_size}. \r\n\r\nResizing could not "
-                        f"be done any smaller. This is a very large number of samples "
-                        f"to keep in RAM. Consider altering the number of proposals to "
-                        f"a multiple of thousands.\r\n\r\n",
-                        Warning,
-                        stacklevel=100,
-                    )
-                else:
-                    _warnings.warn(
-                        f"\r\nSample RAM buffer is incorrectly sized. Resizing such "
-                        f"that it is a multiple of the amount of proposals that are "
-                        f"written to disk (proposals divided by online thinning): "
-                        f"{self.ram_buffer_size}.",
-                        Warning,
-                        stacklevel=100,
-                    )
+            # Set the ram buffer size
+            self.ram_buffer_size = ram_buffer_size
 
         else:
             # This is all automated stuff. You can force any size by setting it
@@ -266,12 +236,6 @@ class _AbstractSampler(_ABC):
 
         # Write out the tuning settings
         self._write_tuning_settings()
-
-    @_abstractmethod
-    def _init_sampler_specific(self):
-        """An abstract method that sets up all required attributes and method for the 
-        algorithm."""
-        pass
 
     def _close_sampler(self):
         self.samples_hdf5_filehandle.close()
@@ -477,11 +441,10 @@ class _AbstractSampler(_ABC):
 
         # This should always be the case if we write during or at the end of sampling,
         # but not after a KeyboardInterrupt. However, samples are definitely only
-        # written to RAM on a whole number
+        # written to RAM on a whole number.
         # assert self.current_proposal % self.online_thinning == 0:
 
         # Calculate start/end indices
-        start = current_proposal_after_thinning - self.ram_buffer_size + 1
         robust_start = (
             current_proposal_after_thinning
             - current_proposal_after_thinning % self.ram_buffer_size
@@ -498,6 +461,7 @@ class _AbstractSampler(_ABC):
             assert end >= 0 and end <= self.proposals_after_thinning + 1
             assert end >= robust_start
 
+            # Update the amount of writes
             self.amount_of_writes += 1
 
             # Write samples to disk
@@ -526,6 +490,12 @@ class _AbstractSampler(_ABC):
         algorithm to the HDF5 file."""
         pass
 
+    @_abstractmethod
+    def _init_sampler_specific(self):
+        """An abstract method that sets up all required attributes and method for the 
+        algorithm."""
+        pass
+
 
 class RWMH(_AbstractSampler):
     step_length: _Union[float, _numpy.ndarray] = 1.0
@@ -546,7 +516,6 @@ class RWMH(_AbstractSampler):
         ram_buffer_size: int = None,
         overwrite_existing_file: bool = False,
         max_time: float = None,
-        **kwargs,
     ):
         """Sampling using the Metropolis-Hastings algorithm.
         
@@ -598,15 +567,15 @@ class RWMH(_AbstractSampler):
 
         """
         self._init_sampler(
-            samples_hdf5_filename,
-            distribution,
-            initial_model,
-            proposals,
-            online_thinning,
-            ram_buffer_size,
-            overwrite_existing_file,
-            max_time,
-            **kwargs,
+            samples_hdf5_filename=samples_hdf5_filename,
+            distribution=distribution,
+            step_length=step_length,
+            initial_model=initial_model,
+            proposals=proposals,
+            online_thinning=online_thinning,
+            ram_buffer_size=ram_buffer_size,
+            overwrite_existing_file=overwrite_existing_file,
+            max_time=max_time,
         )
 
         self._sample_loop()
@@ -623,23 +592,25 @@ class RWMH(_AbstractSampler):
         ram_buffer_size: int = None,
         overwrite_existing_file: bool = False,
         max_time: float = None,
-        **kwargs,
     ):
         """Simply a forward to the instance method of the sampler; check out
         _sample()."""
 
-        return cls()._sample(
-            samples_hdf5_filename,
-            distribution,
-            initial_model,
-            proposals,
-            online_thinning,
-            ram_buffer_size,
-            overwrite_existing_file,
-            step_length,
-            max_time,
-            **kwargs,
+        instance = cls()
+
+        instance._sample(
+            samples_hdf5_filename=samples_hdf5_filename,
+            distribution=distribution,
+            step_length=step_length,
+            initial_model=initial_model,
+            proposals=proposals,
+            online_thinning=online_thinning,
+            ram_buffer_size=ram_buffer_size,
+            overwrite_existing_file=overwrite_existing_file,
+            max_time=max_time,
         )
+
+        return instance
 
     def _init_sampler_specific(self, **kwargs):
 
@@ -676,7 +647,7 @@ class RWMH(_AbstractSampler):
         # Compute new misfit
         self.proposed_x = self.distribution.misfit(self.proposed_model)
 
-        # Evaluate acceptence rate
+        # Evaluate acceptance rate
         if _numpy.exp(self.current_x - self.proposed_x) > _numpy.random.uniform(0, 1):
             self.current_model = _numpy.copy(self.proposed_model)
             self.current_x = self.proposed_x
@@ -731,13 +702,13 @@ class HMC(_AbstractSampler):
         time_step: float = 0.1,
         amount_of_steps: int = 10,
         mass_matrix: _AbstractMassMatrix = None,
+        integrator: str = "lf",
         initial_model: _numpy.ndarray = None,
         proposals: int = 100,
         online_thinning: int = 1,
         ram_buffer_size: int = None,
         overwrite_existing_file: bool = False,
         max_time: float = None,
-        **kwargs,
     ):
         """Sampling using the Metropolis-Hastings algorithm.
         
@@ -780,8 +751,6 @@ class HMC(_AbstractSampler):
             A float representing the maximum time in seconds that sampling is allowed to
             take before it is automatically terminated. The value None is used for
             unlimited time.
-        **kwargs
-            Arbitrary keyword arguments.
 
         Raises
         ------
@@ -795,15 +764,18 @@ class HMC(_AbstractSampler):
 
         """
         self._init_sampler(
-            samples_hdf5_filename,
-            distribution,
-            initial_model,
-            proposals,
-            online_thinning,
-            ram_buffer_size,
-            overwrite_existing_file,
-            max_time,
-            **kwargs,
+            samples_hdf5_filename=samples_hdf5_filename,
+            distribution=distribution,
+            time_step=time_step,
+            amount_of_steps=amount_of_steps,
+            mass_matrix=mass_matrix,
+            integrator=integrator,
+            initial_model=initial_model,
+            proposals=proposals,
+            online_thinning=online_thinning,
+            ram_buffer_size=ram_buffer_size,
+            overwrite_existing_file=overwrite_existing_file,
+            max_time=max_time,
         )
 
         self._sample_loop()
@@ -816,48 +788,59 @@ class HMC(_AbstractSampler):
         time_step: float = 0.1,
         amount_of_steps: int = 10,
         mass_matrix: _AbstractMassMatrix = None,
+        integrator: str = "lf",
         initial_model: _numpy.ndarray = None,
         proposals: int = 100,
         online_thinning: int = 1,
         ram_buffer_size: int = None,
         overwrite_existing_file: bool = False,
         max_time: float = None,
-        **kwargs,
     ):
         """Simply a forward to the instance method of the sampler; check out
         _sample()."""
 
-        return cls()._sample(
-            samples_hdf5_filename,
-            distribution,
-            initial_model,
-            proposals,
-            online_thinning,
-            ram_buffer_size,
-            overwrite_existing_file,
-            max_time,
-            **kwargs,
+        instance = cls()
+
+        instance._sample(
+            samples_hdf5_filename=samples_hdf5_filename,
+            distribution=distribution,
+            time_step=time_step,
+            amount_of_steps=amount_of_steps,
+            mass_matrix=mass_matrix,
+            integrator=integrator,
+            initial_model=initial_model,
+            proposals=proposals,
+            online_thinning=online_thinning,
+            ram_buffer_size=ram_buffer_size,
+            overwrite_existing_file=overwrite_existing_file,
+            max_time=max_time,
         )
+
+        return instance
 
     def _init_sampler_specific(self, **kwargs):
         # Parse all possible kwargs
-        for key in (
-            "time_step",
-            "amount_of_steps",
-            "mass_matrix",
-        ):
-            if key in kwargs:
-                setattr(self, key, kwargs[key])
+        for key in ("time_step", "amount_of_steps", "mass_matrix", "integrator"):
+            setattr(self, key, kwargs[key])
+            kwargs.pop(key)
 
+        if len(kwargs) != 0:
+            raise TypeError(
+                f"Unidentified argument(s) not applicable to sampler: {kwargs}"
+            )
+
+        # Step length ------------------------------------------------------------------
         # Assert that step length for Hamiltons equations is a float and bigger than
         # zero
         self.time_step = float(self.time_step)
         assert self.time_step > 0.0
 
+        # Step amount ------------------------------------------------------------------
         # Assert that number of steps for Hamiltons equations is a positive integer
         assert type(self.amount_of_steps) == int
         assert self.amount_of_steps > 0
 
+        # Mass matrix ------------------------------------------------------------------
         # Set the mass matrix if it is not yet set using the default: a unit mass
         if self.mass_matrix is None:
             self.mass_matrix = _Unit(self.dimensions)
@@ -866,12 +849,147 @@ class HMC(_AbstractSampler):
         assert isinstance(self.mass_matrix, _AbstractMassMatrix)
         assert self.mass_matrix.dimensions == self.dimensions
 
+        # Integrator -------------------------------------------------------------------
+        self.integrator = str(self.integrator)
+
+        if self.integrator not in self.available_integrators:
+            raise ValueError(
+                f"Unknown integrator used. Choices are: {self.available_integrators}"
+            )
+
     def _write_tuning_settings(self):
         # TODO Write this function
         pass
 
     def _propose(self):
-        pass
+
+        # Generate a momentum sample
+        self.current_momentum = self.mass_matrix.generate_momentum()
+
+        # Propagate the sample
+        self.integrators[self.integrator](self)
 
     def _evaluate_acceptance(self):
-        pass
+
+        self.current_x = self.distribution.misfit(self.current_model)
+        self.current_k = self.mass_matrix.kinetic_energy(self.current_momentum)
+        self.current_h = self.current_x + self.current_k
+
+        self.proposed_x = self.distribution.misfit(self.proposed_model)
+        self.proposed_k = self.mass_matrix.kinetic_energy(self.proposed_momentum)
+        self.proposed_h = self.proposed_x + self.proposed_k
+
+        # Evaluate acceptence rate
+        if _numpy.exp(self.current_h - self.proposed_h) > _numpy.random.uniform(0, 1):
+            self.current_model = _numpy.copy(self.proposed_model)
+            self.current_x = self.proposed_x
+            self.accepted_proposals += 1
+
+    def _propagate_leapfrog(self,):
+
+        # Make sure not to alter a view but a copy of arrays ---------------------------
+        position = self.current_model.copy()
+        momentum = self.current_momentum.copy()
+
+        # Leapfrog integration ---------------------------------------------------------
+        position += (
+            0.5 * self.time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
+        )
+
+        self.distribution.corrector(position, momentum)
+
+        # Integration loop
+        for i in range(self.amount_of_steps - 1):
+
+            # Calculate gradient
+            potential_gradient = self.distribution.gradient(position)
+
+            momentum -= self.time_step * potential_gradient
+            position += self.time_step * self.mass_matrix.kinetic_energy_gradient(
+                momentum
+            )
+
+            # Correct bounds
+            self.distribution.corrector(position, momentum)
+
+        # Full momentum and half step position after loop ------------------------------
+
+        # Calculate gradient
+        potential_gradient = self.distribution.gradient(position)
+
+        momentum -= self.time_step * potential_gradient
+        position += (
+            0.5 * self.time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
+        )
+
+        self.distribution.corrector(position, momentum)
+
+        self.proposed_model = position.copy()
+        self.proposed_momentum = momentum.copy()
+
+    def _propagate_4_stage_simplified(self):
+        # Schema: (a1,b1,a2,b2,a3,b2,a2,b1,a1)
+        a1 = 0.071353913450279725904
+        a2 = 0.268548791161230105820
+        a3 = 1.0 - 2.0 * a1 - 2.0 * a2
+        b1 = 0.191667800000000000000
+        b2 = 1.0 / 2.0 - b1
+
+        a1 *= self.time_step
+        a2 *= self.time_step
+        a3 *= self.time_step
+        b1 *= self.time_step
+        b2 *= self.time_step
+
+        # Make sure not to alter a view but a copy of the passed arrays.
+        position = self.current_model.copy()
+        momentum = self.current_momentum.copy()
+
+        # Leapfrog integration -------------------------------------------------
+        for i in range(self.amount_of_steps):
+
+            # A1
+            position += a1 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            self.distribution.corrector(position, momentum)
+
+            # B1
+            potential_gradient = self.distribution.gradient(position)
+            momentum -= b1 * potential_gradient
+
+            # A2
+            position += a2 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            self.distribution.corrector(position, momentum)
+
+            # B2
+            potential_gradient = self.distribution.gradient(position)
+            momentum -= b2 * potential_gradient
+
+            # A3
+            position += a3 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            self.distribution.corrector(position, momentum)
+
+            # B2
+            potential_gradient = self.distribution.gradient(position)
+            momentum -= b2 * potential_gradient
+
+            # A2
+            position += a2 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            self.distribution.corrector(position, momentum)
+
+            # B1
+            potential_gradient = self.distribution.gradient(position)
+            momentum -= b1 * potential_gradient
+
+            # A1
+            position += a1 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            self.distribution.corrector(position, momentum)
+
+        # For the update
+        self.proposed_model = _numpy.copy(position)
+        self.proposed_momentum = _numpy.copy(momentum)
+
+    integrators = {
+        "lf": _propagate_leapfrog,
+        "4s": _propagate_4_stage_simplified,
+    }
+    available_integrators = integrators.keys()
