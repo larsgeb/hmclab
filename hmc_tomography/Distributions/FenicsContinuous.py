@@ -51,9 +51,7 @@ class FenicsContinuous(_AbstractPrior):
         if mesh is None:  # No mesh was passed
             self.mesh = _dolfin.UnitIntervalMesh(50)
         elif (
-            all(
-                [base != _dolfin.cpp.mesh.Mesh for base in type(mesh).__bases__]
-            )
+            all([base != _dolfin.cpp.mesh.Mesh for base in type(mesh).__bases__])
             and type(mesh) != _dolfin.cpp.mesh.Mesh
         ):  # Something was passed, but it ain't a mesh
             raise TypeError()
@@ -67,17 +65,11 @@ class FenicsContinuous(_AbstractPrior):
 
         # Creating operators for GRF -------------------------------------------
         if operators is None or operators == "smooth":
-            bilinear_component, linear_component = (
-                self._example_operator_smooth()
-            )
+            bilinear_component, linear_component = self._example_operator_smooth()
         elif operators == "rough":
-            bilinear_component, linear_component = (
-                self._example_operator_rough()
-            )
+            bilinear_component, linear_component = self._example_operator_rough()
         elif operators == "independent":
-            bilinear_component, linear_component = (
-                self._example_operator_independent()
-            )
+            bilinear_component, linear_component = self._example_operator_independent()
         elif type(operators) == tuple:
             bilinear_component, linear_component = self._biharmonic_operator(
                 operators[0], operators[1]
@@ -94,9 +86,7 @@ class FenicsContinuous(_AbstractPrior):
         self.mass_matrix = _fenics.assemble(
             self._trial_function * self._test_function * _fenics.dx
         )
-        stiffness_matrix_backend = _fenics.as_backend_type(
-            self.stiffness_matrix
-        ).mat()
+        stiffness_matrix_backend = _fenics.as_backend_type(self.stiffness_matrix).mat()
         mass_matrix_backend = _fenics.as_backend_type(self.mass_matrix).mat()
         ka, kb, kc = stiffness_matrix_backend.getValuesCSR()
         self.stiffness_matrix_sparse = _csr_matrix(
@@ -140,9 +130,7 @@ class FenicsContinuous(_AbstractPrior):
 
     def mean_discrete(self):
         mean = _fenics.Function(self._function_space)
-        E = _dolfin.Expression(
-            self.mean(), element=self._function_space.ufl_element()
-        )
+        E = _dolfin.Expression(self.mean(), element=self._function_space.ufl_element())
         mean.interpolate(E)
         return mean.vector().get_local()[:, _numpy.newaxis]
 
@@ -168,9 +156,7 @@ class FenicsContinuous(_AbstractPrior):
                 0.5
                 * dm.T
                 @ self.stiffness_matrix_sparse
-                @ _spsolve(
-                    self.mass_matrix_sparse, self.stiffness_matrix_sparse @ dm
-                )
+                @ _spsolve(self.mass_matrix_sparse, self.stiffness_matrix_sparse @ dm)
             ).item()
         elif not self.dense:
             # Use a direct sparse solver to compute misfit with the approximate
@@ -201,16 +187,14 @@ class FenicsContinuous(_AbstractPrior):
 
         if self.superlu:
             return self.stiffness_matrix_sparse @ self.mass_ludecomp.solve(
-                self.stiffness_matrix_sparse
-                @ (coordinates - self.mean_discrete())
+                self.stiffness_matrix_sparse @ (coordinates - self.mean_discrete())
             )
         elif not self.dense and not self.lump_for_misfit:
             return (
                 self.stiffness_matrix_sparse
                 @ _spsolve(
                     self.mass_matrix_sparse,
-                    self.stiffness_matrix_sparse
-                    @ (coordinates - self.mean_discrete()),
+                    self.stiffness_matrix_sparse @ (coordinates - self.mean_discrete()),
                 )[:, _numpy.newaxis]
             )
         elif not self.dense:
@@ -322,9 +306,7 @@ class FenicsContinuous(_AbstractPrior):
             dirac_source.apply(forcing_vector_copy)
 
             # Solve the PDE
-            _fenics.solve(
-                self.stiffness_matrix, solution.vector(), forcing_vector_copy
-            )
+            _fenics.solve(self.stiffness_matrix, solution.vector(), forcing_vector_copy)
 
             # Compute values on mesh
 
@@ -349,9 +331,7 @@ class FenicsContinuous(_AbstractPrior):
             sample_values = samples[:, i]
 
             _plt.plot(
-                self.mesh.coordinates()[
-                    _numpy.argsort(self.mesh.coordinates()[:, 0])
-                ],
+                self.mesh.coordinates()[_numpy.argsort(self.mesh.coordinates()[:, 0])],
                 sample_values[_numpy.argsort(self.mesh.coordinates()[:, 0])],
                 color=color,
                 alpha=alpha,
@@ -373,15 +353,11 @@ class FenicsContinuous(_AbstractPrior):
             if self.dense:
                 # If we're using dense matrices, it makes sense to precompute
                 # the complete covariance operator and its inverse.
-                self.massSqrt = _scipy_linalg.sqrtm(
-                    self.mass_matrix_sparse.todense()
-                )
+                self.massSqrt = _scipy_linalg.sqrtm(self.mass_matrix_sparse.todense())
                 self.combined_operator = _spsolve(
                     self.stiffness_matrix_sparse, self.massSqrt
                 )
-                self.combined_operator_inv = _numpy_linalg.inv(
-                    self.combined_operator
-                )
+                self.combined_operator_inv = _numpy_linalg.inv(self.combined_operator)
             else:
                 # If we allow lumping of the mass matrix, we can make the
                 # generation of samples sparse, and therefore scale much better
@@ -468,9 +444,7 @@ class FenicsContinuous(_AbstractPrior):
             )
             * _fenics.dx
         )
-        linear_component = (
-            _fenics.Constant(0) * self._test_function * _fenics.dx
-        )
+        linear_component = _fenics.Constant(0) * self._test_function * _fenics.dx
         return bilinear_component, linear_component
 
     def _example_operator_independent(self):
@@ -480,9 +454,7 @@ class FenicsContinuous(_AbstractPrior):
             alpha * self._trial_function * self._test_function * _fenics.dx
         )
 
-        linear_component = (
-            _fenics.Constant(0) * self._test_function * _fenics.dx
-        )
+        linear_component = _fenics.Constant(0) * self._test_function * _fenics.dx
         return bilinear_component, linear_component
 
     def sample_to_function(self, sample):
@@ -495,9 +467,7 @@ class FenicsContinuous(_AbstractPrior):
             # Computing the inverse of the lumped mass matrix. Lumping is done
             # using basic row summation.
             self.mass_lumped_inverse = _diags(
-                _numpy.asarray(
-                    1.0 / (self.mass_matrix_sparse.sum(axis=1))
-                ).squeeze()
+                _numpy.asarray(1.0 / (self.mass_matrix_sparse.sum(axis=1))).squeeze()
             )
 
 

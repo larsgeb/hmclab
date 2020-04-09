@@ -32,9 +32,7 @@ class ABCMeta(NativeABCMeta):
         abstract_attributes = {
             name
             for name in dir(instance)
-            if getattr(
-                getattr(instance, name), "__is_abstract_attribute__", False
-            )
+            if getattr(getattr(instance, name), "__is_abstract_attribute__", False)
         }
         if abstract_attributes:
             raise NotImplementedError(
