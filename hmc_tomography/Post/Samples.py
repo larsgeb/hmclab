@@ -21,7 +21,7 @@ class Samples:
         self.burn_in = burn_in
 
         # Property indicating that sampling is terminated prematurely
-        self.last_sample = self.file_handle[self.datasetname].attrs["end_of_samples"]
+        self.last_sample = self.file_handle[self.datasetname].attrs["write_index"]
 
         if self.last_sample <= self.burn_in:
             raise ValueError("The burn-in phase is longer than the chain itself.")
@@ -141,14 +141,14 @@ class Samples:
         print("━" * size[0])
         print("{0:30} {1}".format("Sampler", details["sampler"]))
         print("{0:30} {1}".format("Requested proposals", details["proposals"]))
-        print("{0:30} {1}".format("Proposals saved to disk", details["end_of_samples"]))
+        print("{0:30} {1}".format("Proposals saved to disk", details["write_index"]))
         print("{0:30} {1}".format("Acceptance rate", details["acceptance_rate"]))
         print("{0:30} {1}".format("Online thinning", details["online_thinning"]))
         print("{0:30} {1}".format("Sampling start time", details["start_time"]))
 
         details.pop("sampler")
         details.pop("proposals")
-        details.pop("end_of_samples")
+        details.pop("write_index")
         details.pop("acceptance_rate")
         details.pop("online_thinning")
         details.pop("start_time")
