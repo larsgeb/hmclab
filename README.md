@@ -1,6 +1,6 @@
 # HMC Tomography
 
-![GitHub CI Build status](https://github.com/larsgeb/hmc-tomography/workflows/Python%20application/badge.svg) [![Travis CI Build status](https://travis-ci.com/larsgeb/hmc-tomography.svg?token=G43u7wF834znRn3jm2mR&branch=master)](https://travis-ci.com/larsgeb/hmc-tomography) [![codecov](https://codecov.io/gh/larsgeb/hmc-tomography/branch/master/graph/badge.svg?token=6svV9YDRhd)](https://codecov.io/gh/larsgeb/hmc-tomography) ![GitHub](https://img.shields.io/github/license/larsgeb/hmc-tomography) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+![GitHub CI Build status](https://github.com/larsgeb/hmc-tomography/workflows/Python%20application/badge.svg) [![Travis CI Build status](https://travis-ci.com/larsgeb/hmc-tomography.svg?token=G43u7wF834znRn3jm2mR&branch=master)](https://travis-ci.com/larsgeb/hmc-tomography) [![codecov](https://codecov.io/gh/larsgeb/hmc-tomography/branch/master/graph/badge.svg?token=6svV9YDRhd)](https://codecov.io/gh/larsgeb/hmc-tomography) ![GitHub](https://img.shields.io/github/license/larsgeb/hmc-tomography) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black) [![GitHub Releases (by Release)](https://img.shields.io/github/downloads/larsgeb/hmc-tomography/0.2.1/total)]
 
 Manual:
 https://larsgeb.github.io/hmc-tomography/
