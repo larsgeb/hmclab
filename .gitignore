@@ -17,3 +17,4 @@ examples/notebooks/bin_samples/*
 docs-source/source/examples
 *.ipynb_checkpoints
 *.NOGIT
+.pytest_cache/
