@@ -23,10 +23,10 @@ These are harder to implement because MKL requires 4-array CSRs, as well as pass
 objects as MKL types.
 
 """
-import numpy
+from ctypes import POINTER, byref, c_double, c_float, c_int, cdll
+
 import numpy as np
 import scipy.sparse as sparse
-from ctypes import POINTER, c_int, c_double, c_float, byref, cdll
 
 # Load DLL
 try:
@@ -35,7 +35,7 @@ except OSError:
     mkl = None
 
 
-def sparse_gemv(A: sparse.csr_matrix, x: numpy.ndarray) -> numpy.ndarray:
+def sparse_gemv(A: sparse.csr_matrix, x: np.ndarray) -> np.ndarray:
     """Delegator function for double or single precision gemv.
 
     Parameters

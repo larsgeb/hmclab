@@ -1,14 +1,13 @@
 """Distribution classes and associated methods.
 """
-from abc import ABC as _ABC
-from abc import abstractmethod as _abstractmethod
-from typing import List as _List
-from typing import Union as _Union
 import warnings as _warnings
+from typing import Union as _Union
+
 import numpy as _numpy
 import scipy as _scipy
-import scipy.sparse.linalg as _sparse_linalg
 import scipy.sparse as _sparse
+import scipy.sparse.linalg as _sparse_linalg
+
 from hmc_tomography.Distributions import _AbstractDistribution
 from hmc_tomography.Helpers import random_matrices as _random_matrices
 
@@ -60,8 +59,9 @@ class LinearMatrix(_AbstractDistribution):
             raise ValueError(
                 "Didn't understand the forward model matrix object."
                 "Should either be "
-                "a NumPy square matrix (ndarray: [self.dimensions, self.dimensions]) or "
-                "a SciPy spmatrix derived type (spmatrix: [self.dimensions, self.dimensions])."
+                "a NumPy square matrix (ndarray: [self.dimensions, self.dimensions]) "
+                "or a SciPy spmatrix derived type (spmatrix: [self.dimensions, "
+                "self.dimensions])."
             )
 
         # Check data covariance --------------------------------------------------------
@@ -305,7 +305,7 @@ class _LinearMatrix_sparse_forward_simple_covariance(_AbstractDistribution):
         if type(data_variance) == _numpy.ndarray:
             self.data_variance = data_variance.astype(dtype)
         else:
-            elf.data_variance = data_variance
+            self.data_variance = data_variance
         self.data_sigma = self.data_variance ** 0.5
         self.use_mkl = use_mkl
 
@@ -356,7 +356,8 @@ class _LinearMatrix_sparse_forward_simple_covariance(_AbstractDistribution):
 
                 except OSError:
                     _warnings.warn(
-                        f"MKL not found, will evaluate matrix-vector products using SciPy.",
+                        f"MKL not found, will evaluate matrix-vector products using "
+                        "SciPy.",
                         Warning,
                     )
                     self.use_mkl = False

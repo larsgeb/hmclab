@@ -1,6 +1,6 @@
-import h5py as _h5py
-import os as _os
 import shutil as _shutil
+
+import h5py as _h5py
 
 
 class Samples:
@@ -31,7 +31,7 @@ class Samples:
 
     def __getitem__(self, key):
         """This operator overloads the [] brackets to correct for burn in.
-        
+
         The operator overload takes care of the burn-in phase sample discard."""
 
         if type(key) == int:

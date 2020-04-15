@@ -1,7 +1,9 @@
-import hmc_tomography as _hmc_tomography
-import numpy as _numpy
 import os as _os
+
+import numpy as _numpy
 import pytest as _pytest
+
+import hmc_tomography as _hmc_tomography
 
 sampler_classes = _hmc_tomography.Samplers._AbstractSampler.__subclasses__()
 

@@ -1,8 +1,9 @@
 """A collection of tests for mass matrices.
 """
-from hmc_tomography import MassMatrices as _MassMatrices
-import pytest as _pytest
 import numpy as _numpy
+import pytest as _pytest
+
+from hmc_tomography import MassMatrices as _MassMatrices
 
 dimensions = [1, 10, 100]
 subclasses = _MassMatrices._AbstractMassMatrix.__subclasses__()

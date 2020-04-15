@@ -1,7 +1,8 @@
-import hmc_tomography as _hmc_tomography
-import numpy as _numpy
 import os as _os
-import pytest as _pytest
+
+import numpy as _numpy
+
+import hmc_tomography as _hmc_tomography
 
 
 def test_leapfrog():

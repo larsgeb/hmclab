@@ -1,25 +1,21 @@
 """A collection of integrated tests.
 """
+import os as _os
+
+import numpy as _numpy
+import pytest as _pytest
+
 import hmc_tomography as _hmc_tomography
-from hmc_tomography.Helpers.CustomExceptions import (
-    AbstractMethodError as _AbstractMethodError,
-)
 from hmc_tomography.Helpers.CustomExceptions import (
     InvalidCaseError as _InvalidCaseError,
 )
 
-import pytest as _pytest
-from pytest_harvest import saved_fixture as _saved_fixture
-import numpy as _numpy
-import matplotlib.pyplot as _plt
-import os as _os
-
+_ad = _hmc_tomography.Distributions._AbstractDistribution
+_as = _hmc_tomography.Samplers._AbstractSampler
 
 dimensions = [1, 2, 10]
-distribution_classes = (
-    _hmc_tomography.Distributions._AbstractDistribution.__subclasses__()
-)
-sampler_classes = _hmc_tomography.Samplers._AbstractSampler.__subclasses__()
+distribution_classes = _ad.__subclasses__()
+sampler_classes = _as.__subclasses__()
 proposals = [10, 1000]  # , 731, 1500]
 
 
@@ -28,22 +24,17 @@ proposals = [10, 1000]  # , 731, 1500]
 @_pytest.mark.parametrize("dimensions", dimensions)
 @_pytest.mark.parametrize("proposals", proposals)
 def test_basic_sampling(
-    sampler_class: _hmc_tomography.Samplers._AbstractDistribution,
-    distribution_class: _hmc_tomography.Distributions._AbstractDistribution,
-    dimensions: int,
-    proposals: int,
+    sampler_class: _as, distribution_class: _ad, dimensions: int, proposals: int,
 ):
 
     try:
-        distribution: _hmc_tomography.Distributions._AbstractDistribution = distribution_class.create_default(
-            dimensions
-        )
+        distribution: _ad = distribution_class.create_default(dimensions)
     except _InvalidCaseError:
         return 0
 
     sampler = sampler_class()
 
-    assert isinstance(sampler, _hmc_tomography.Samplers._AbstractSampler)
+    assert isinstance(sampler, _as)
 
     filename = "temporary_file.h5"
 
@@ -73,16 +64,11 @@ def test_basic_sampling(
 @_pytest.mark.parametrize("dimensions", dimensions)
 @_pytest.mark.parametrize("proposals", proposals)
 def test_samples_file(
-    sampler_class: _hmc_tomography.Samplers._AbstractDistribution,
-    distribution_class: _hmc_tomography.Distributions._AbstractDistribution,
-    dimensions: int,
-    proposals: int,
+    sampler_class: _as, distribution_class: _ad, dimensions: int, proposals: int,
 ):
 
     try:
-        distribution: _hmc_tomography.Distributions._AbstractDistribution = distribution_class.create_default(
-            dimensions
-        )
+        distribution: _ad = distribution_class.create_default(dimensions)
     except _InvalidCaseError:
         return 0
 

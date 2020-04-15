@@ -1,23 +1,17 @@
 """Optimizer classes and associated methods.
 
-The classes in this module describe various numerical optimization routines. These 
+The classes in this module describe various numerical optimization routines. These
 routines can be used to find the minima of misfit function. This is directly related to
 deterministic inversion.
 
 All of the classes inherit from :class:`._AbstractOptimizer`; a base class outlining
-required methods and their signatures (required in- and outputs). 
+required methods and their signatures (required in- and outputs).
 
 """
-import sys as _sys
 from abc import ABC as _ABC
 from abc import abstractmethod as _abstractmethod
 
-import h5py as _h5py
 import numpy as _numpy
-import time as _time
-import tqdm as _tqdm
-import warnings as _warnings
-from typing import Tuple as _Tuple
 import tqdm.auto as _tqdm_au
 
 from hmc_tomography.Distributions import _AbstractDistribution
@@ -102,7 +96,8 @@ class gradient_descent(_AbstractOptimizer):
             iterations = _tqdm_au.trange(
                 nmax, desc="Iterating", leave=True, dynamic_ncols=True,
             )
-        except:
+        except Exception:
+            assert False
             iterations = _tqdm_au.trange(nmax, desc="Iterating", leave=True,)
 
         for iteration in iterations:
@@ -162,7 +157,8 @@ class simple_preconditioned_gradient_descent(_AbstractOptimizer):
             iterations = _tqdm_au.trange(
                 nmax, desc="Iterating", leave=True, dynamic_ncols=True,
             )
-        except:
+        except Exception:
+            assert False
             iterations = _tqdm_au.trange(nmax, desc="Iterating", leave=True,)
 
         for iteration in iterations:

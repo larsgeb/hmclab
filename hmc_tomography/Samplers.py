@@ -1,12 +1,12 @@
 """Sampler classes and associated methods.
 
-The classes in this module provide different sampling algorithms to appraise 
+The classes in this module provide different sampling algorithms to appraise
 distributions. All of them are designed to work in a minimal way; you can run the
-sampling method with only a target distribution and filename to write your samples to. 
+sampling method with only a target distribution and filename to write your samples to.
 However, the true power of any algorithm only shows when the user injects his expertise
 through tuning parameters.
 
-Sampling can be initialised from both an instance of a sampler or directly as a static 
+Sampling can be initialised from both an instance of a sampler or directly as a static
 method:
 
 .. code-block:: python
@@ -22,32 +22,23 @@ method:
     HMC_instance.sample(distribution, "samples.h5")
 
 All of the classes inherit from :class:`._AbstractSampler`; a base class outlining
-required methods and their signatures (required in- and outputs). 
+required methods and their signatures (required in- and outputs).
 
 
 """
-import sys as _sys
+import warnings as _warnings
 from abc import ABC as _ABC
 from abc import abstractmethod as _abstractmethod
+from time import time as _time
+from typing import Union as _Union
 
 import h5py as _h5py
 import numpy as _numpy
-from time import time as _time
 import tqdm.auto as _tqdm_au
-import warnings as _warnings
-from typing import Tuple as _Tuple
-from typing import Union as _Union
 
 from hmc_tomography.Distributions import _AbstractDistribution
-from hmc_tomography.MassMatrices import _AbstractMassMatrix
 from hmc_tomography.MassMatrices import Unit as _Unit
-
-from hmc_tomography.Helpers.CustomExceptions import (
-    AbstractMethodError as _AbstractMethodError,
-)
-from hmc_tomography.Helpers.CustomExceptions import (
-    InvalidCaseError as _InvalidCaseError,
-)
+from hmc_tomography.MassMatrices import _AbstractMassMatrix
 
 # TODO Write type, shape and instance checkers
 
@@ -87,13 +78,13 @@ class _AbstractSampler(_ABC):
     """A NumPy array containing the model at the proposed state of the Markov chain. """
 
     current_x: float = None
-    """A NumPy array containing :math:`\chi = -\log\left( p\\right)` (i.e. the misfit, 
+    """A NumPy array containing :math:`\chi = -\log\left( p\\right)` (i.e. the misfit,
     negative log probability) of the distribution at the current state of the
     Markov chain. """
 
     proposed_x: float = None
-    """A NumPy array containing :math:`\chi = -\log\left( p\\right)` (i.e. the misfit, 
-    negative log probability) of the distribution at the proposed state of the 
+    """A NumPy array containing :math:`\chi = -\log\left( p\\right)` (i.e. the misfit,
+    negative log probability) of the distribution at the proposed state of the
     Markov chain. """
 
     accepted_proposals: int = None
@@ -103,7 +94,7 @@ class _AbstractSampler(_ABC):
     """An integer representing the amount of times the sampler has written to disk."""
 
     progressbar_refresh_rate: int = 1000
-    """An integer representing how many samples lie between an update of the progress 
+    """An integer representing how many samples lie between an update of the progress
     bar statistics (acceptance rate etc.)."""
 
     max_time: float = None
@@ -251,7 +242,7 @@ class _AbstractSampler(_ABC):
                 leave=True,
                 dynamic_ncols=True,
             )
-        except:
+        except Exception:
             self.proposals_iterator = _tqdm_au.trange(
                 self.proposals, desc="Sampling. Acceptance rate:", leave=True,
             )
@@ -354,7 +345,8 @@ class _AbstractSampler(_ABC):
                     # If this is not the first time that this is called, also print the
                     # warning again
                     input_choice = input(
-                        f"{name} also exists. (n)ew file name, (o)verwrite or (a)bort? >> "
+                        f"{name} also exists. (n)ew file name, (o)verwrite or (a)bort? "
+                        ">> "
                     )
                 else:
                     input_choice = input("(n)ew file name, (o)verwrite or (a)bort? >> ")
@@ -479,20 +471,20 @@ class _AbstractSampler(_ABC):
 
     @_abstractmethod
     def _evaluate_acceptance(self):
-        """This abstract method evaluates the acceptance criterion in the MCMC 
-        algorithm. Pass or fail, it updates the objects attributes accordingly; 
+        """This abstract method evaluates the acceptance criterion in the MCMC
+        algorithm. Pass or fail, it updates the objects attributes accordingly;
         modifying current_model and current_x as needed."""
         pass
 
     @_abstractmethod
     def _write_tuning_settings(self):
-        """An abstract method that writes all the relevant tuning settings of the 
+        """An abstract method that writes all the relevant tuning settings of the
         algorithm to the HDF5 file."""
         pass
 
     @_abstractmethod
     def _init_sampler_specific(self):
-        """An abstract method that sets up all required attributes and method for the 
+        """An abstract method that sets up all required attributes and method for the
         algorithm."""
         pass
 
@@ -518,7 +510,7 @@ class RWMH(_AbstractSampler):
         max_time: float = None,
     ):
         """Sampling using the Metropolis-Hastings algorithm.
-        
+
         Parameters
         ----------
         samples_hdf5_filename: str
@@ -530,23 +522,23 @@ class RWMH(_AbstractSampler):
         step_length: _Union[float, _numpy.ndarray]
             A parameter describing the standard deviation of a multivariate normal (MVN)
             used as the proposal distribution for Random Walk Metropolis-Hastings. Using
-            a _numpy.ndarray column vector (shape dimensions × 1) will give every 
-            dimensions a unique step length. Correlations in the MVN are not yet 
+            a _numpy.ndarray column vector (shape dimensions × 1) will give every
+            dimensions a unique step length. Correlations in the MVN are not yet
             implemented. Has a strong influence on acceptance rate. **An essential
             tuning parameter.**
         initial_model: _numpy
-            A NumPy column vector (shape dimensions × 1) containing the starting model 
+            A NumPy column vector (shape dimensions × 1) containing the starting model
             of the Markov chain. This model will not be written out as a sample.
         proposals: int
             An integer representing the amount of proposals the algorithm should make.
         online_thinning: int
-            An integer representing the degree of online thinning, i.e. the interval 
-            between storing samples. 
+            An integer representing the degree of online thinning, i.e. the interval
+            between storing samples.
         ram_buffer_size: int
-            An integer representing how many samples should be kept in RAM before 
+            An integer representing how many samples should be kept in RAM before
             writing to storage.
         overwrite_existing_file: bool
-            A boolean describing whether or not to silently overwrite existing files. 
+            A boolean describing whether or not to silently overwrite existing files.
             Use with caution.
         max_time: float
             A float representing the maximum time in seconds that sampling is allowed to
@@ -624,7 +616,7 @@ class RWMH(_AbstractSampler):
         try:
             self.step_length = float(self.step_length)
             assert self.step_length > 0.0
-        except TypeError as e:
+        except TypeError:
             assert type(self.step_length) == _numpy.ndarray
             assert self.step_length.shape == (self.dimensions, 1)
 
@@ -666,7 +658,7 @@ class HMC(_AbstractSampler):
     essential tuning parameter.**"""
 
     mass_matrix: _AbstractMassMatrix = None
-    """An object representing the artificial masses assigned to each parameters. Needs 
+    """An object representing the artificial masses assigned to each parameters. Needs
     to be a subtype of _AbstractMassMatrix. Has a strong influence on convergence rate.
     **An essential tuning parameter.**"""
 
@@ -677,7 +669,7 @@ class HMC(_AbstractSampler):
     proposal."""
 
     current_k: float = _numpy.nan
-    """A float representing the kinetic energy associated with the current state. 
+    """A float representing the kinetic energy associated with the current state.
     Typically follows the ChiSquared[dimensions] distribution."""
 
     current_h: float = _numpy.nan
@@ -686,7 +678,7 @@ class HMC(_AbstractSampler):
     proposed_momentum: _numpy.ndarray = None
     """A NumPy ndarray (shape dimensions × 1) containing the momentum at the proposed
     state of the Markov chain. Indicates direction in which the model was moving at the
-    end of its numerical trajectory. Will be computed deterministically from the 
+    end of its numerical trajectory. Will be computed deterministically from the
     current_momentum, i.e. the state the Markov chain started in."""
 
     proposed_k: float = _numpy.nan
@@ -711,7 +703,7 @@ class HMC(_AbstractSampler):
         max_time: float = None,
     ):
         """Sampling using the Metropolis-Hastings algorithm.
-        
+
         Parameters
         ----------
         samples_hdf5_filename: str
@@ -734,18 +726,18 @@ class HMC(_AbstractSampler):
             convergence rate. One passing None, defaults to the Unit mass matrix. **An
             essential tuning parameter.**
         initial_model: _numpy
-            A NumPy column vector (shape dimensions × 1) containing the starting model 
+            A NumPy column vector (shape dimensions × 1) containing the starting model
             of the Markov chain. This model will not be written out as a sample.
         proposals: int
             An integer representing the amount of proposals the algorithm should make.
         online_thinning: int
-            An integer representing the degree of online thinning, i.e. the interval 
-            between storing samples. 
+            An integer representing the degree of online thinning, i.e. the interval
+            between storing samples.
         ram_buffer_size: int
-            An integer representing how many samples should be kept in RAM before 
+            An integer representing how many samples should be kept in RAM before
             writing to storage.
         overwrite_existing_file: bool
-            A boolean describing whether or not to silently overwrite existing files. 
+            A boolean describing whether or not to silently overwrite existing files.
             Use with caution.
         max_time: float
             A float representing the maximum time in seconds that sampling is allowed to

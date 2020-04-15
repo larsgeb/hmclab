@@ -1,28 +1,29 @@
 """Mass matrix classes and associated methods.
 
-The classes in this module describe the metric used in HMC algorithms. Changing the 
+The classes in this module describe the metric used in HMC algorithms. Changing the
 metric alters the shape of trajectories the HMC algorithm generates, thereby impacting
 convergence performance.
 
 All of the classes inherit from :class:`._AbstractMassMatrix`; a base class outlining
-required methods and their signatures (required in- and outputs). 
+required methods and their signatures (required in- and outputs).
 
 .. note::
 
-    The mass matrix is vitally important for the performance of HMC algorithms A 
-    tutorial on the tuning parameters of HMC can be found at 
+    The mass matrix is vitally important for the performance of HMC algorithms A
+    tutorial on the tuning parameters of HMC can be found at
     :ref:`/examples/0.2 - Tuning Hamiltonian Monte Carlo.ipynb`.
 
 """
+import warnings as _warnings
 from abc import ABC as _ABC
 from abc import abstractmethod as _abstractmethod
+
 import numpy as _numpy
-import warnings as _warnings
 
 
 class _AbstractMassMatrix(_ABC):
-    """Abstract base class for mass matrices. 
-    
+    """Abstract base class for mass matrices.
+
     Defines all required methods for derived classes.
 
     """
@@ -64,7 +65,7 @@ class Unit(_AbstractMassMatrix):
 
     This mass matrix or metric does not perform any scaling on the target distribution.
     It is the default setting for the HMC algorithms and is optimal when all parameters
-    of your target distribution are expected to have the same variance and no 
+    of your target distribution are expected to have the same variance and no
     trade-offs.
 
     """
@@ -131,7 +132,7 @@ class Diagonal(_AbstractMassMatrix):
     """The diagonal mass matrix.
 
     This mass matrix or metric does only performs scaling on each dimension separately.
-    It is optimal when all parameters of your target distribution are expected to be 
+    It is optimal when all parameters of your target distribution are expected to be
     independent (not have trade-offs) but still varying scales of disperion / variance.
 
     """
@@ -147,7 +148,8 @@ class Diagonal(_AbstractMassMatrix):
         if diagonal is None:
             _warnings.warn(
                 f"The diagonal mass matrix did not receive a diagonal. We will generate"
-                f"a linearly increasing diagonal (1, 2, 3, 4, ...) for the mass matrix.",
+                f"a linearly increasing diagonal (1, 2, 3, 4, ...) for the mass "
+                "matrix.",
                 Warning,
             )
             self.diagonal = _numpy.arange(self.dimensions)[:, None] + 1

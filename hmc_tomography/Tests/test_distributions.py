@@ -1,16 +1,13 @@
 """A collection of tests for likelihood functions.
 """
+import matplotlib.pyplot as _plt
+import numpy as _numpy
+import pytest as _pytest
+
 from hmc_tomography import Distributions as _Distributions
-from hmc_tomography.Helpers.CustomExceptions import (
-    AbstractMethodError as _AbstractMethodError,
-)
 from hmc_tomography.Helpers.CustomExceptions import (
     InvalidCaseError as _InvalidCaseError,
 )
-import pytest as _pytest
-from pytest_harvest import saved_fixture as _saved_fixture
-import numpy as _numpy
-import matplotlib.pyplot as _plt
 
 dimensions = [1, 2, 10, 100]
 subclasses = _Distributions._AbstractDistribution.__subclasses__()
@@ -121,7 +118,7 @@ def test_misfit_bounds_impossible(
 
     # Try to switch the bounds s.t. lower > upper
     try:
-        distribution.update_bounds(lower_bounds=upper_bounds, upper_bounds=upper_bounds)
+        distribution.update_bounds(lower_bounds=upper_bounds, upper_bounds=lower_bounds)
     except ValueError as e:
         # Assert that the exception is raised by the bounds
         assert e.args[0] == "Bounds vectors are incompatible."
@@ -166,7 +163,7 @@ def test_gradient(
         )
         try:
             assert abs(relative_error) < 1e-2
-        except AssertionError as e:
+        except AssertionError:
             _pytest.xfail("Error bigger than 10% in gradient test, not failing pytest.")
 
         results_bag.relative_error = relative_error
