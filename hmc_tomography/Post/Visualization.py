@@ -1,13 +1,14 @@
 """A module with assorted visualization functions.
 """
-import matplotlib.pyplot as _plt
+import os
 from typing import List as _List
+
+import matplotlib.gridspec as _gridspec
+import matplotlib.pyplot as _plt
+import numpy as _numpy
 
 from hmc_tomography.Post import Processing as _Processing
 from hmc_tomography.Post import Samples as _Samples
-import matplotlib.gridspec as _gridspec
-import numpy as _numpy
-import os
 
 
 def marginal_grid(
@@ -20,7 +21,7 @@ def marginal_grid(
     figsize=(8, 8),
 ):
     """Method to visualize 1D and 2D marginals for multiple dimensions simultaneously.
-    
+
     """
     number_of_plots = len(dimensions_list)
 
