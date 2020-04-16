@@ -20,6 +20,10 @@ from abc import abstractmethod as _abstractmethod
 
 import numpy as _numpy
 
+from hmc_tomography.Helpers.CustomExceptions import (
+    AbstractMethodError as _AbstractMethodError,
+)
+
 
 class _AbstractMassMatrix(_ABC):
     """Abstract base class for mass matrices.
@@ -59,6 +63,10 @@ class _AbstractMassMatrix(_ABC):
     def generate_momentum(self) -> _numpy.ndarray:
         return _numpy.ndarray(())
 
+    @staticmethod
+    def create_default(dimensions: int) -> "_AbstractMassMatrix":
+        raise _AbstractMethodError()
+
 
 class Unit(_AbstractMassMatrix):
     """The unit mass matrix.
@@ -93,7 +101,7 @@ class Unit(_AbstractMassMatrix):
                 f"The passed momentum vector is not of the right dimensions, "
                 f"which would be ({momentum.size, 1})."
             )
-        return 0.5 * (momentum.T @ momentum).item(0)  # TODO optimize
+        return 0.5 * (momentum.T @ momentum).item(0)
 
     def kinetic_energy_gradient(self, momentum: _numpy.ndarray) -> _numpy.ndarray:
         """
@@ -127,6 +135,10 @@ class Unit(_AbstractMassMatrix):
         """
         return _numpy.eye(self.dimensions)
 
+    @staticmethod
+    def create_default(dimensions: int) -> "Unit":
+        return Unit(dimensions)
+
 
 class Diagonal(_AbstractMassMatrix):
     """The diagonal mass matrix.
@@ -137,20 +149,15 @@ class Diagonal(_AbstractMassMatrix):
 
     """
 
-    # TODO remove dimensions
     def __init__(self, diagonal: _numpy.ndarray):
         """Constructor for diagonal mass matrices.
 
         """
         self.name = "diagonal mass matrix"
 
-        if diagonal is None:
-            _warnings.warn(
-                f"The diagonal mass matrix did not receive a diagonal. We will generate"
-                f"a linearly increasing diagonal (1, 2, 3, 4, ...) for the mass "
-                "matrix.",
-                Warning,
-            )
+        if diagonal is None or type(diagonal) != _numpy.ndarray:
+            raise ValueError("The diagonal mass matrix did not receive a diagonal")
+
         self.dimensions = diagonal.size
         self.diagonal = diagonal
         self.inverse_diagonal = 1.0 / self.diagonal
@@ -193,6 +200,11 @@ class Diagonal(_AbstractMassMatrix):
     @property
     def matrix(self) -> _numpy.ndarray:
         return _numpy.diagflat(self.diagonal)
+
+    @staticmethod
+    def create_default(dimensions: int) -> "Diagonal":
+        diagonal = _numpy.ones((dimensions, 1))
+        return Diagonal(diagonal)
 
 
 class LBFGS(_AbstractMassMatrix):
@@ -308,7 +320,6 @@ class LBFGS(_AbstractMassMatrix):
             if self.currently_stored_gradients < self.number_of_vectors:
                 self.currently_stored_gradients += 1
             else:
-                # TODO get rid of this abysmal thing
                 # self.s[:, 1:-1] = self.s[:, 2:]
                 # self.y[:, 1:-1] = self.y[:, 2:]
                 # self.u[:, 1:-1] = self.u[:, 2:]
@@ -400,3 +411,7 @@ class LBFGS(_AbstractMassMatrix):
             logdet += _numpy.log(alpha ** 2)
 
         return logdet
+
+    @staticmethod
+    def create_default(dimensions: int) -> "LBFGS":
+        return LBFGS(dimensions)
