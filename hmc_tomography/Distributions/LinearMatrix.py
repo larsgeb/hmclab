@@ -118,7 +118,7 @@ class LinearMatrix(_AbstractDistribution):
         return self.Distribution.generate()
 
     @staticmethod
-    def create_default(dimensions: int):
+    def create_default(dimensions: int) -> "LinearMatrix":
         G = _numpy.eye(dimensions)
         d = _numpy.arange(dimensions)[:, None]
         data_variance = 1.0
@@ -200,7 +200,9 @@ class _LinearMatrix_dense_forward_simple_covariance(_AbstractDistribution):
         raise NotImplementedError()
 
     @staticmethod
-    def create_default(dimensions: int):
+    def create_default(
+        dimensions: int,
+    ) -> "_LinearMatrix_dense_forward_simple_covariance":
         G = _numpy.eye(dimensions)
         d = _numpy.arange(dimensions)[:, None]
         data_variance = _numpy.ones((dimensions, 1))
@@ -279,7 +281,9 @@ class _LinearMatrix_dense_forward_dense_covariance(_AbstractDistribution):
         raise NotImplementedError()
 
     @staticmethod
-    def create_default(dimensions: int):
+    def create_default(
+        dimensions: int,
+    ) -> "_LinearMatrix_dense_forward_dense_covariance":
         G = _numpy.eye(dimensions)
         d = _numpy.arange(dimensions)[:, None]
         data_variance = _random_matrices.random_correlation_matrix(dimensions)
@@ -412,7 +416,9 @@ class _LinearMatrix_sparse_forward_simple_covariance(_AbstractDistribution):
         raise NotImplementedError()
 
     @staticmethod
-    def create_default(dimensions: int):
+    def create_default(
+        dimensions: int,
+    ) -> "_LinearMatrix_sparse_forward_simple_covariance":
         G = _sparse.eye(dimensions)
         d = _numpy.arange(dimensions)[:, None]
         data_variance = _numpy.ones((dimensions, 1))
@@ -459,7 +465,9 @@ class _LinearMatrix_sparse_forward_sparse_covariance(_AbstractDistribution):
         raise NotImplementedError()
 
     @staticmethod
-    def create_default(dimensions: int):
+    def create_default(
+        dimensions: int,
+    ) -> "_LinearMatrix_sparse_forward_sparse_covariance":
         G = _sparse.eye(dimensions)
         d = _numpy.arange(dimensions)[:, None]
         data_variance = _sparse.eye(dimensions)

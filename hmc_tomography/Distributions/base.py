@@ -123,7 +123,7 @@ class _AbstractDistribution(metaclass=_ABCMeta):
         pass
 
     @staticmethod
-    def create_default(dimensions: int):
+    def create_default(dimensions: int) -> "_AbstractDistribution":
         raise _AbstractMethodError()
 
     def corrector(self, coordinates: _numpy.ndarray, momentum: _numpy.ndarray):
@@ -277,7 +277,7 @@ class StandardNormal1D(_AbstractDistribution):
         raise NotImplementedError()
 
     @staticmethod
-    def create_default(dimensions: int):
+    def create_default(dimensions: int) -> "StandardNormal1D":
         if dimensions == 1:
             return StandardNormal1D()
         else:
@@ -428,7 +428,7 @@ class Normal(_AbstractDistribution):
         raise NotImplementedError()
 
     @staticmethod
-    def create_default(dimensions: int):
+    def create_default(dimensions: int) -> "Normal":
 
         # Create random means
         means = _numpy.random.rand(dimensions, 1)
@@ -475,8 +475,6 @@ class Laplace(_AbstractDistribution):
 
         self.update_bounds(lower_bounds, upper_bounds)
 
-        # TODO generate random distribution if means and dispersions are not provided.
-
     def misfit(self, coordinates) -> float:
         """Method to compute the misfit of a L1 distribution distribution.
         """
@@ -509,7 +507,7 @@ class Laplace(_AbstractDistribution):
         raise NotImplementedError()
 
     @staticmethod
-    def create_default(dimensions: int):
+    def create_default(dimensions: int) -> "Laplace":
 
         # Create random means
         means = _numpy.random.rand(dimensions, 1)
@@ -545,8 +543,6 @@ class Uniform(_AbstractDistribution):
         self.dimensions = dimensions
         """TODO description"""
 
-        # TODO add empty initialization
-
         self.update_bounds(lower_bounds, upper_bounds)
 
     def misfit(self, coordinates: _numpy.ndarray) -> float:
@@ -563,7 +559,7 @@ class Uniform(_AbstractDistribution):
         raise NotImplementedError("This function is not implemented yet.")
 
     @staticmethod
-    def create_default(dimensions: int):
+    def create_default(dimensions: int) -> "Uniform":
 
         lower_bounds = _numpy.random.rand(dimensions, 1) * 5 - 10
         upper_bounds = _numpy.random.rand(dimensions, 1) * 5 + 10
@@ -744,7 +740,7 @@ class CompositeDistribution(_AbstractDistribution):
                     split_momenta[i_distribution][too_high] *= -1.0
 
     @staticmethod
-    def create_default(dimensions: int):
+    def create_default(dimensions: int) -> "CompositeDistribution":
 
         # Create a list of all possible distributions
         available_distributions = _AbstractDistribution.__subclasses__()
@@ -934,7 +930,7 @@ class AdditiveDistribution(_AbstractDistribution):
         #             split_momenta[i_dis][too_high] *= -1.0
 
     @staticmethod
-    def create_default(dimensions: int):
+    def create_default(dimensions: int) -> "AdditiveDistribution":
 
         # Create a list of all possible distributions
         available_distributions = _AbstractDistribution.__subclasses__()
@@ -1017,7 +1013,7 @@ class Himmelblau(_AbstractDistribution):
         raise NotImplementedError()
 
     @staticmethod
-    def create_default(dimensions: int):
+    def create_default(dimensions: int) -> "Himmelblau":
 
         if dimensions != 2:
             raise _InvalidCaseError()
