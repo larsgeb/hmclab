@@ -4,29 +4,26 @@ import matplotlib.pyplot as _plt
 import numpy as _numpy
 import pytest as _pytest
 
-from hmc_tomography import Distributions as _Distributions
-from hmc_tomography.Helpers.CustomExceptions import (
-    InvalidCaseError as _InvalidCaseError,
+from hmc_tomography.Distributions.LinearMatrix import (
+    _LinearMatrix_sparse_forward_simple_covariance,
 )
 
-dimensions = [1, 2, 10, 100]
-subclasses = _Distributions._AbstractDistribution.__subclasses__()
+dimensions = [100, 10000]
 deltas = [1e-10, 1e-4, 1e-2, -1e-10, -1e-4, -1e-2]
+dtype = [_numpy.dtype("float64"), _numpy.dtype("float32")]
+use_mkl = [True, False]
 
 
-@_pytest.mark.parametrize("pclass", subclasses)
 @_pytest.mark.parametrize("dimensions", dimensions)
-def test_creation(pclass: _Distributions._AbstractDistribution, dimensions: int):
+@_pytest.mark.parametrize("use_mkl", use_mkl)
+@_pytest.mark.parametrize("dtype", dtype)
+def test_creation(dimensions: int, use_mkl: bool, dtype):
     # Create the object
-    try:
-        distribution: _Distributions._AbstractDistribution = pclass.create_default(
-            dimensions
-        )
-    except _InvalidCaseError:
-        return 0
+    distribution = _LinearMatrix_sparse_forward_simple_covariance.create_default(
+        dimensions, use_mkl=use_mkl, dtype=dtype
+    )
 
-    # Check if a subtype of mass matrices
-    assert issubclass(type(distribution), _Distributions._AbstractDistribution)
+    assert distribution.use_mkl == use_mkl
 
     # Check if the right amount of dimensions
     assert distribution.dimensions == dimensions
@@ -34,34 +31,34 @@ def test_creation(pclass: _Distributions._AbstractDistribution, dimensions: int)
     return True
 
 
-@_pytest.mark.parametrize("pclass", subclasses)
 @_pytest.mark.parametrize("dimensions", dimensions)
-def test_misfit(pclass: _Distributions._AbstractDistribution, dimensions: int):
-    try:
-        distribution: _Distributions._AbstractDistribution = pclass.create_default(
-            dimensions
-        )
-    except _InvalidCaseError:
-        return 0
+@_pytest.mark.parametrize("use_mkl", use_mkl)
+@_pytest.mark.parametrize("dtype", dtype)
+def test_misfit(dimensions: int, use_mkl: bool, dtype):
+    distribution = _LinearMatrix_sparse_forward_simple_covariance.create_default(
+        dimensions, use_mkl=use_mkl, dtype=dtype
+    )
+
+    assert distribution.use_mkl == use_mkl
 
     location = _numpy.ones((dimensions, 1)) + _numpy.random.rand(1)
 
     misfit = distribution.misfit(location)
 
-    assert type(misfit) == float
+    assert type(misfit) == dtype or type(misfit) == _numpy.dtype("float64")
 
     return True
 
 
-@_pytest.mark.parametrize("pclass", subclasses)
 @_pytest.mark.parametrize("dimensions", dimensions)
-def test_misfit_bounds(pclass: _Distributions._AbstractDistribution, dimensions: int):
-    try:
-        distribution: _Distributions._AbstractDistribution = pclass.create_default(
-            dimensions
-        )
-    except _InvalidCaseError:
-        return 0
+@_pytest.mark.parametrize("use_mkl", use_mkl)
+@_pytest.mark.parametrize("dtype", dtype)
+def test_misfit_bounds(dimensions: int, use_mkl: bool, dtype):
+    distribution = _LinearMatrix_sparse_forward_simple_covariance.create_default(
+        dimensions, use_mkl=use_mkl, dtype=dtype
+    )
+
+    assert distribution.use_mkl == use_mkl
 
     lower_bounds = _numpy.ones((dimensions, 1))
     distribution.update_bounds(lower_bounds=lower_bounds)
@@ -71,7 +68,7 @@ def test_misfit_bounds(pclass: _Distributions._AbstractDistribution, dimensions:
     location = _numpy.ones((dimensions, 1)) + _numpy.random.rand(1) + 0.1
     misfit = distribution.misfit(location)
 
-    assert type(misfit) == float
+    assert type(misfit) == dtype or type(misfit) == _numpy.dtype("float64")
 
     # Compute misfit below lower bounds
 
@@ -90,7 +87,7 @@ def test_misfit_bounds(pclass: _Distributions._AbstractDistribution, dimensions:
     location = _numpy.ones((dimensions, 1)) + _numpy.random.rand(1) + 0.1
     misfit = distribution.misfit(location)
 
-    assert type(misfit) == float
+    assert type(misfit) == dtype or type(misfit) == _numpy.dtype("float64")
 
     # Compute misfit above the upper limit
 
@@ -101,17 +98,15 @@ def test_misfit_bounds(pclass: _Distributions._AbstractDistribution, dimensions:
     return True
 
 
-@_pytest.mark.parametrize("pclass", subclasses)
 @_pytest.mark.parametrize("dimensions", dimensions)
-def test_misfit_bounds_impossible(
-    pclass: _Distributions._AbstractDistribution, dimensions: int
-):
-    try:
-        distribution: _Distributions._AbstractDistribution = pclass.create_default(
-            dimensions
-        )
-    except _InvalidCaseError:
-        return 0
+@_pytest.mark.parametrize("use_mkl", use_mkl)
+@_pytest.mark.parametrize("dtype", dtype)
+def test_misfit_bounds_impossible(dimensions: int, use_mkl: bool, dtype):
+    distribution = _LinearMatrix_sparse_forward_simple_covariance.create_default(
+        dimensions, use_mkl=use_mkl, dtype=dtype
+    )
+
+    assert distribution.use_mkl == use_mkl
 
     lower_bounds = _numpy.ones((dimensions, 1))
     upper_bounds = 3 * _numpy.ones((dimensions, 1))
@@ -127,27 +122,22 @@ def test_misfit_bounds_impossible(
         _pytest.xfail("Impossible test case, failure is required")
 
 
-@_pytest.mark.parametrize("pclass", subclasses)
 @_pytest.mark.parametrize("dimensions", dimensions)
 @_pytest.mark.parametrize("delta", deltas)
-def test_gradient(
-    pclass: _Distributions._AbstractDistribution,
-    dimensions: int,
-    delta: float,
-    results_bag,
-):
+@_pytest.mark.parametrize("use_mkl", use_mkl)
+@_pytest.mark.parametrize("dtype", dtype)
+def test_gradient(dimensions: int, delta: float, results_bag, use_mkl: bool, dtype):
 
     results_bag.test_type = "gradient"
-    results_bag.class_name = pclass.__name__
+    results_bag.class_name = "Using mkl" if use_mkl else "Not using mkl"
 
-    try:
-        distribution: _Distributions._AbstractDistribution = pclass.create_default(
-            dimensions
-        )
-    except _InvalidCaseError:
-        return 0
+    distribution = _LinearMatrix_sparse_forward_simple_covariance.create_default(
+        dimensions, use_mkl=use_mkl, dtype=dtype
+    )
 
-    location = _numpy.ones((dimensions, 1)) + _numpy.random.rand(1)
+    assert distribution.use_mkl == use_mkl
+
+    location = (_numpy.ones((dimensions, 1)) + _numpy.random.rand(1)).astype(dtype)
     gradient = distribution.gradient(location)
 
     assert gradient.dtype == _numpy.dtype("float32") or gradient.dtype == _numpy.dtype(
@@ -169,9 +159,12 @@ def test_gradient(
             _pytest.xfail("Error bigger than 10% in gradient test, not failing pytest.")
 
         results_bag.relative_error = relative_error
+    elif _numpy.allclose(location + delta * location, location):
+        # This means that the delta in location is so small that we are up to machine
+        # precision in the same point
+        results_bag.relative_error = 0
     else:
         assert _numpy.allclose(gradient, 0.0)
-
         results_bag.relative_error = 0
 
     return True

@@ -9,7 +9,7 @@ import scipy.sparse as _sparse
 import scipy.sparse.linalg as _sparse_linalg
 
 from hmc_tomography.Distributions import _AbstractDistribution
-from hmc_tomography.Helpers import random_matrices as _random_matrices
+from hmc_tomography.Helpers import RandomMatrices as _RandomMatrices
 
 
 class LinearMatrix(_AbstractDistribution):
@@ -118,11 +118,13 @@ class LinearMatrix(_AbstractDistribution):
         return self.Distribution.generate()
 
     @staticmethod
-    def create_default(dimensions: int) -> "LinearMatrix":
-        G = _numpy.eye(dimensions)
-        d = _numpy.arange(dimensions)[:, None]
+    def create_default(
+        dimensions: int, dtype=_numpy.dtype("float64")
+    ) -> "LinearMatrix":
+        G = _numpy.eye(dimensions, dtype=dtype)
+        d = _numpy.ones(dimensions)[:, None]
         data_variance = 1.0
-        return LinearMatrix(G, d, data_variance)
+        return LinearMatrix(G, d, data_variance, dtype=dtype)
 
 
 # 1 - Dense G, scalar/vector covariance
@@ -201,12 +203,14 @@ class _LinearMatrix_dense_forward_simple_covariance(_AbstractDistribution):
 
     @staticmethod
     def create_default(
-        dimensions: int,
+        dimensions: int, dtype=_numpy.dtype("float64")
     ) -> "_LinearMatrix_dense_forward_simple_covariance":
-        G = _numpy.eye(dimensions)
-        d = _numpy.arange(dimensions)[:, None]
+        G = _numpy.eye(dimensions, dtype=dtype)
+        d = _numpy.ones(dimensions)[:, None]
         data_variance = _numpy.ones((dimensions, 1))
-        return _LinearMatrix_dense_forward_simple_covariance(G, d, data_variance)
+        return _LinearMatrix_dense_forward_simple_covariance(
+            G, d, data_variance, dtype=dtype
+        )
 
 
 # 2 - Dense G, dense covariance
@@ -282,12 +286,14 @@ class _LinearMatrix_dense_forward_dense_covariance(_AbstractDistribution):
 
     @staticmethod
     def create_default(
-        dimensions: int,
+        dimensions: int, dtype=_numpy.dtype("float64")
     ) -> "_LinearMatrix_dense_forward_dense_covariance":
-        G = _numpy.eye(dimensions)
-        d = _numpy.arange(dimensions)[:, None]
-        data_variance = _random_matrices.random_correlation_matrix(dimensions)
-        return _LinearMatrix_dense_forward_dense_covariance(G, d, data_variance)
+        G = _numpy.eye(dimensions, dtype=dtype)
+        d = _numpy.ones(dimensions)[:, None]
+        data_variance = _RandomMatrices.random_correlation_matrix(dimensions)
+        return _LinearMatrix_dense_forward_dense_covariance(
+            G, d, data_variance, dtype=dtype
+        )
 
 
 # 3 - Sparse G, scalar vector covariance
@@ -312,6 +318,7 @@ class _LinearMatrix_sparse_forward_simple_covariance(_AbstractDistribution):
             self.data_variance = data_variance
         self.data_sigma = self.data_variance ** 0.5
         self.use_mkl = use_mkl
+        self.dtype = dtype
 
         # Depending on whether the data or the model space dimension is bigger,
         # performance of the misfit and gradient algorithm differs. If the data
@@ -339,17 +346,17 @@ class _LinearMatrix_sparse_forward_simple_covariance(_AbstractDistribution):
             # Free up unnecessary variables
             del self.G, self.d, self.data_variance, self.data_sigma
         else:
-            self.Gt: _scipy.sparse.spmatrix = self.G.T
+            self.Gt: _scipy.sparse.spmatrix = self.G.T.astype(dtype)
 
             # Import MKL
             if use_mkl:
                 try:
                     # Fails with OSError if MKL is not found
-                    from hmc_tomography.Helpers.mkl_interface import sparse_gemv
+                    from hmc_tomography.Helpers.InterfaceMKL import sparse_gemv
 
                     # MKL binding works only for sparse matrices
                     if type(G) != _sparse.csr_matrix:
-                        self.G = _sparse.csr_matrix(G)
+                        self.G = _sparse.csr_matrix(G).astype(dtype)
 
                     self.use_mkl = True
 
@@ -378,16 +385,12 @@ class _LinearMatrix_sparse_forward_simple_covariance(_AbstractDistribution):
                 ).item()
             )
         elif self.use_mkl:
-            return (
-                self.misfit_bounds(coordinates)
-                + (
-                    0.5
-                    * _numpy.linalg.norm(
-                        (self.sparse_gemv(self.G, coordinates) - self.d)
-                        / self.data_sigma
-                    )
-                    ** 2
-                ).item()
+            return self.misfit_bounds(coordinates) + (
+                0.5
+                * _numpy.linalg.norm(
+                    (self.sparse_gemv(self.G, coordinates) - self.d) / self.data_sigma
+                )
+                ** 2
             )
         else:
             return (
@@ -417,12 +420,14 @@ class _LinearMatrix_sparse_forward_simple_covariance(_AbstractDistribution):
 
     @staticmethod
     def create_default(
-        dimensions: int,
+        dimensions: int, use_mkl=False, dtype=_numpy.dtype("float32")
     ) -> "_LinearMatrix_sparse_forward_simple_covariance":
-        G = _sparse.eye(dimensions)
-        d = _numpy.arange(dimensions)[:, None]
+        G = _sparse.eye(dimensions, dtype=dtype)
+        d = _numpy.ones(dimensions)[:, None]
         data_variance = _numpy.ones((dimensions, 1))
-        return _LinearMatrix_sparse_forward_simple_covariance(G, d, data_variance)
+        return _LinearMatrix_sparse_forward_simple_covariance(
+            G, d, data_variance, use_mkl=use_mkl, dtype=dtype
+        )
 
 
 # 4 - Sparse G, sparse covariance
@@ -466,9 +471,12 @@ class _LinearMatrix_sparse_forward_sparse_covariance(_AbstractDistribution):
 
     @staticmethod
     def create_default(
-        dimensions: int,
+        dimensions: int, dtype=_numpy.dtype("float64")
     ) -> "_LinearMatrix_sparse_forward_sparse_covariance":
-        G = _sparse.eye(dimensions)
-        d = _numpy.arange(dimensions)[:, None]
+        G = _sparse.eye(dimensions, dtype=dtype)
+        d = _numpy.ones(dimensions)[:, None]
         data_variance = _sparse.eye(dimensions)
-        return _LinearMatrix_sparse_forward_sparse_covariance(G, d, data_variance)
+        return _LinearMatrix_sparse_forward_sparse_covariance(
+            G, d, data_variance, dtype=dtype
+        )
+
