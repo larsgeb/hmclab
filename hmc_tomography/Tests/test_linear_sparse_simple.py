@@ -15,7 +15,14 @@ dtype = [_numpy.dtype("float64"), _numpy.dtype("float32")]
 premultiplication = [True, False, None]
 variance_type = ["scalar", "vector"]
 density = [0.001, 0.01, 0.1]
-use_mkl = [True, False]
+
+try:
+    from ctypes import cdll
+
+    mkl = cdll.LoadLibrary("libmkl_rt.so")
+    use_mkl = [True, False]
+except OSError:
+    use_mkl = [False]
 
 
 @_pytest.mark.parametrize("dimension_data", dimension_data)

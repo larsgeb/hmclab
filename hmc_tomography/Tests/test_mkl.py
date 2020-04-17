@@ -11,7 +11,14 @@ from hmc_tomography.Distributions.LinearMatrix import (
 dimensions = [100, 10000]
 deltas = [1e-10, 1e-4, 1e-2, -1e-10, -1e-4, -1e-2]
 dtype = [_numpy.dtype("float64"), _numpy.dtype("float32")]
-use_mkl = [True, False]
+
+try:
+    from ctypes import cdll
+
+    mkl = cdll.LoadLibrary("libmkl_rt.so")
+    use_mkl = [True, False]
+except OSError:
+    use_mkl = [False]
 
 
 @_pytest.mark.parametrize("dimensions", dimensions)
