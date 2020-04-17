@@ -24,6 +24,8 @@ from hmc_tomography.Helpers.CustomExceptions import (
     AbstractMethodError as _AbstractMethodError,
 )
 
+from hmc_tomography.Helpers.CustomExceptions import Assertions
+
 
 class _AbstractMassMatrix(_ABC):
     """Abstract base class for mass matrices.
@@ -282,8 +284,8 @@ class LBFGS(_AbstractMassMatrix):
         s_update = m - self.current_position
         y_update = g - self.current_gradient
 
-        assert s_update.shape == (self.dimensions, 1)
-        assert y_update.shape == (self.dimensions, 1)
+        assert s_update.shape == (self.dimensions, 1), Assertions.v_shape
+        assert y_update.shape == (self.dimensions, 1), Assertions.v_shape
 
         rho = 1.0 / _numpy.vdot(s_update, y_update)
         # Do nothing unless rho is positive.
@@ -306,8 +308,8 @@ class LBFGS(_AbstractMassMatrix):
             u_update = a
             v_update = -self.H(b + theta * a)
 
-            assert u_update.shape == (self.dimensions, 1)
-            assert v_update.shape == (self.dimensions, 1)
+            assert u_update.shape == (self.dimensions, 1), Assertions.v_shape
+            assert v_update.shape == (self.dimensions, 1), Assertions.v_shape
 
             sigma_threshold = (1.0 / (1.0 + _numpy.vdot(u_update, v_update))) ** 2
 
@@ -342,10 +344,10 @@ class LBFGS(_AbstractMassMatrix):
                 self.v = _numpy.roll(self.v, -1, axis=1)
                 self.vTu = _numpy.roll(self.vTu, -1, axis=0)
 
-            assert s_update.shape == (self.dimensions, 1)
-            assert y_update.shape == (self.dimensions, 1)
-            assert u_update.shape == (self.dimensions, 1)
-            assert v_update.shape == (self.dimensions, 1)
+            assert s_update.shape == (self.dimensions, 1), Assertions.v_shape
+            assert y_update.shape == (self.dimensions, 1), Assertions.v_shape
+            assert u_update.shape == (self.dimensions, 1), Assertions.v_shape
+            assert v_update.shape == (self.dimensions, 1), Assertions.v_shape
 
             self.s[:, self.currently_stored_gradients - 1] = s_update.flatten()
             self.y[:, self.currently_stored_gradients - 1] = y_update.flatten()
@@ -364,7 +366,7 @@ class LBFGS(_AbstractMassMatrix):
                 h
                 - self.v[:, i, None] * _numpy.vdot(self.u[:, i, None], h) / self.vTu[i]
             )
-        assert h.shape == (self.dimensions, 1)
+        assert h.shape == (self.dimensions, 1), Assertions.v_shape
         return h
 
     def ST(self, h):
@@ -374,33 +376,33 @@ class LBFGS(_AbstractMassMatrix):
                 h
                 - self.u[:, i, None] * _numpy.vdot(self.v[:, i, None], h) / self.vTu[i]
             )
-        assert h.shape == (self.dimensions, 1)
+        assert h.shape == (self.dimensions, 1), Assertions.v_shape
         return h
 
     def Sinv(self, h):
 
         for i in range(self.currently_stored_gradients - 1, -1, -1):
             h = h + self.v[:, i, None] * _numpy.vdot(self.u[:, i, None], h)
-        assert h.shape == (self.dimensions, 1)
+        assert h.shape == (self.dimensions, 1), Assertions.v_shape
         return h
 
     def SinvT(self, h):
 
         for i in range(self.currently_stored_gradients):
             h = h + self.u[:, i, None] * _numpy.vdot(self.v[:, i, None], h)
-        assert h.shape == (self.dimensions, 1)
+        assert h.shape == (self.dimensions, 1), Assertions.v_shape
         return h
 
     def H(self, h):
 
         h = self.ST(h)
-        assert h.shape == (self.dimensions, 1)
+        assert h.shape == (self.dimensions, 1), Assertions.v_shape
         return self.S(h)
 
     def Hinv(self, h):
 
         h = self.Sinv(h)
-        assert h.shape == (self.dimensions, 1)
+        assert h.shape == (self.dimensions, 1), Assertions.v_shape
         return self.SinvT(h)
 
     def logdet(self):

@@ -1,19 +1,16 @@
 import warnings as _warnings
-from abc import ABCMeta as _ABCMeta
+
+# from abc import ABCMeta as _ABCMeta
 from abc import abstractmethod as _abstractmethod
 from typing import List as _List
 from typing import Union as _Union
 
 import numpy as _numpy
 
-from hmc_tomography.Helpers import random_matrices as _random_matrices
-from hmc_tomography.Helpers.better_abc import abstract_attribute as _abstract_attribute
-from hmc_tomography.Helpers.CustomExceptions import (
-    AbstractMethodError as _AbstractMethodError,
-)
-from hmc_tomography.Helpers.CustomExceptions import (
-    InvalidCaseError as _InvalidCaseError,
-)
+from hmc_tomography.Helpers import RandomMatrices as _RandomMatrices
+from hmc_tomography.Helpers.BetterABC import abstractattribute as _abstractattribute
+from hmc_tomography.Helpers.BetterABC import ABCMeta as _ABCMeta
+from hmc_tomography.Helpers import CustomExceptions as _CustomExceptions
 
 
 class _AbstractDistribution(metaclass=_ABCMeta):
@@ -24,7 +21,7 @@ class _AbstractDistribution(metaclass=_ABCMeta):
     name: str = "abstract distribution"
     """Name of the distribution."""
 
-    @_abstract_attribute
+    @_abstractattribute
     def dimensions(self):
         """Number of dimensions of the model space.
 
@@ -65,7 +62,11 @@ class _AbstractDistribution(metaclass=_ABCMeta):
         This method is called many times in an HMC appraisal. It is therefore
         beneficial to optimize the implementation.
         """
-        pass
+        raise _CustomExceptions.AbstractMethodError(
+            "You tried accessing an abstract method directly through a class. This is "
+            "not allowed. Create an instance of this object and call this method from "
+            "the instance."
+        )
 
     @_abstractmethod
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
@@ -95,7 +96,11 @@ class _AbstractDistribution(metaclass=_ABCMeta):
         This method is called many times in an HMC appraisal. It is therefore
         beneficial to optimize the implementation.
         """
-        pass
+        raise _CustomExceptions.AbstractMethodError(
+            "You tried accessing an abstract method directly through a class. This is "
+            "not allowed. Create an instance of this object and call this method from "
+            "the instance."
+        )
 
     @_abstractmethod
     def generate(self) -> _numpy.ndarray:
@@ -120,11 +125,21 @@ class _AbstractDistribution(metaclass=_ABCMeta):
                 raise NotImplementedError("This function is not implemented.")
 
         """
-        pass
+        raise _CustomExceptions.AbstractMethodError(
+            "You tried accessing an abstract method directly through a class. This is "
+            "not allowed. Create an instance of this object and call this method from "
+            "the instance."
+        )
 
     @staticmethod
+    @_abstractmethod
     def create_default(dimensions: int) -> "_AbstractDistribution":
-        raise _AbstractMethodError()
+        raise NotImplementedError(
+            "You tried creating a default distribution. Although you have used this "
+            "method correctly, it wasn't implemented in the derived class. Create the "
+            "static method `create_default(dimensions)` which returns a distribution, "
+            "and try calling this method again."
+        )
 
     def corrector(self, coordinates: _numpy.ndarray, momentum: _numpy.ndarray):
         """Method to correct an HMC particle, which is called after every time
@@ -262,26 +277,26 @@ class StandardNormal1D(_AbstractDistribution):
     name = "Standard normal distribution in 1 dimension."
 
     def misfit(self, m: _numpy.ndarray) -> float:
-        assert m.shape == (1, 1)
+        _CustomExceptions.Assertions.assert_shape(m, (1, 1))
 
-        # return 0.5 * (m - mean) ** 2 / std ** 2
         return self.misfit_bounds(m) + float(0.5 * m[0, 0] ** 2)
 
     def gradient(self, m: _numpy.ndarray) -> _numpy.ndarray:
-        assert m.shape == (1, 1)
+        _CustomExceptions.Assertions.assert_shape(m, (1, 1))
 
-        # return 2 * (m - mean) / std ** 2
         return m
 
     def generate(self) -> _numpy.ndarray:
-        raise NotImplementedError()
+        raise NotImplementedError(
+            "Generating samples from this distribution is not implemented or supported."
+        )
 
     @staticmethod
     def create_default(dimensions: int) -> "StandardNormal1D":
         if dimensions == 1:
             return StandardNormal1D()
         else:
-            raise _InvalidCaseError()
+            raise _CustomExceptions.InvalidCaseError()
 
 
 class Normal(_AbstractDistribution):
@@ -319,9 +334,7 @@ class Normal(_AbstractDistribution):
         self.name = "Gaussian (normal) distribution"
 
         # Automatically get dimensionality from means
-        dimensions = means.size
-
-        self.dimensions = dimensions
+        self.dimensions = means.size
         """Amount of dimensions on which the distribution is defined, should agree with
         means and covariance, and optionally coordinate_transformation."""
 
@@ -425,7 +438,9 @@ class Normal(_AbstractDistribution):
             ) + self.misfit_bounds(coordinates)
 
     def generate(self) -> _numpy.ndarray:
-        raise NotImplementedError()
+        raise NotImplementedError(
+            "Generating samples from this distribution is not implemented or supported."
+        )
 
     @staticmethod
     def create_default(dimensions: int) -> "Normal":
@@ -434,7 +449,7 @@ class Normal(_AbstractDistribution):
         means = _numpy.random.rand(dimensions, 1)
 
         # Create a PD matrix with some extra definiteness by adding the identity
-        correlation = _random_matrices.random_correlation_matrix(dimensions)
+        correlation = _RandomMatrices.random_correlation_matrix(dimensions)
 
         # Standard deviations between 1 and 2
         standard_deviations = _numpy.diag(_numpy.random.rand(dimensions,) + 1)
@@ -459,28 +474,27 @@ class Laplace(_AbstractDistribution):
         upper_bounds: _numpy.ndarray = None,
     ):
         # Automatically get dimensionality from means
-        dimensions = means.size
-
-        self.dimensions = dimensions
-        """TODO description"""
+        self.dimensions = means.size
 
         self.means = means
-        """TODO description"""
+        """A float or numpy.ndarray of shape (dimensions, 1) of floats describing the
+        mean of the uncorrelated multivariate Laplace distribution."""
 
         self.dispersions = dispersions
-        """TODO description"""
+        """A positive float or numpy.ndarray of shape (dimensions, 1) of positive floats
+        describing the dispersion of the uncorrelated multivariate Laplace
+        distribution."""
 
         self.inverse_dispersions = 1.0 / dispersions
-        """TODO description"""
+        """A positive float or numpy.ndarray of shape (dimensions, 1) of positive floats
+        describing the inverse dispersion of the uncorrelated multivariate Laplace
+        distribution. Used to accelerate computations at the cost of memory usage."""
 
         self.update_bounds(lower_bounds, upper_bounds)
 
     def misfit(self, coordinates) -> float:
         """Method to compute the misfit of a L1 distribution distribution.
         """
-
-        # if self.coordinate_transformation is not None:
-        #     coordinates = self.coordinate_transformation @ coordinates
 
         return (
             self.misfit_bounds(coordinates)
@@ -493,9 +507,6 @@ class Laplace(_AbstractDistribution):
         """Method to compute the gradient of a L1 distribution distribution.
         """
 
-        # if self.operator is not None:
-        #     coordinates = self.operator @ coordinates
-
         # The derivative of the function |x| is simply 1 or -1, depending on the sign
         # of x, subsequently scaled by the dispersion.
         return (
@@ -503,8 +514,10 @@ class Laplace(_AbstractDistribution):
             + _numpy.sign(coordinates - self.means) * self.inverse_dispersions
         )
 
-    def generate(self):
-        raise NotImplementedError()
+    def generate(self) -> _numpy.ndarray:
+        raise NotImplementedError(
+            "Generating samples from this distribution is not implemented or supported."
+        )
 
     @staticmethod
     def create_default(dimensions: int) -> "Laplace":
@@ -541,7 +554,6 @@ class Uniform(_AbstractDistribution):
         dimensions = lower_bounds.size
 
         self.dimensions = dimensions
-        """TODO description"""
 
         self.update_bounds(lower_bounds, upper_bounds)
 
@@ -556,7 +568,9 @@ class Uniform(_AbstractDistribution):
         return _numpy.zeros((self.dimensions, 1)) + self.misfit_bounds(coordinates)
 
     def generate(self) -> _numpy.ndarray:
-        raise NotImplementedError("This function is not implemented yet.")
+        raise NotImplementedError(
+            "Generating samples from this distribution is not implemented or supported."
+        )
 
     @staticmethod
     def create_default(dimensions: int) -> "Uniform":
@@ -665,7 +679,9 @@ class CompositeDistribution(_AbstractDistribution):
         return gradient + self.misfit_bounds(coordinates)
 
     def generate(self) -> _numpy.ndarray:
-        raise NotImplementedError("This function is not implemented yet.")
+        raise NotImplementedError(
+            "Generating samples from this distribution is not implemented or supported."
+        )
 
     def collapse_bounds(self):
         """Method to restructure all composite bounds into top level object.
@@ -813,7 +829,9 @@ class AdditiveDistribution(_AbstractDistribution):
         return gradient + self.misfit_bounds(coordinates)
 
     def generate(self) -> _numpy.ndarray:
-        raise NotImplementedError("This function is not implemented yet.")
+        raise NotImplementedError(
+            "Generating samples from this distribution is not implemented or supported."
+        )
 
     def collapse_bounds(self):
         """Method to restructure all composite bounds into top level object.
@@ -1010,13 +1028,15 @@ class Himmelblau(_AbstractDistribution):
         return gradient / self.temperature
 
     def generate(self) -> _numpy.ndarray:
-        raise NotImplementedError()
+        raise NotImplementedError(
+            "Generating samples from this distribution is not implemented or supported."
+        )
 
     @staticmethod
     def create_default(dimensions: int) -> "Himmelblau":
 
         if dimensions != 2:
-            raise _InvalidCaseError()
+            raise _CustomExceptions.InvalidCaseError()
 
         temperature = 1.0
         return Himmelblau(temperature=temperature)
