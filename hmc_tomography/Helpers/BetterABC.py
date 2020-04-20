@@ -19,7 +19,8 @@ class DummyAttribute:
     pass
 
 
-def abstract_attribute(obj=None):
+def abstractattribute(obj=None):
+    """Decorator to create abstract attributes."""
     if obj is None:
         obj = DummyAttribute()
     obj.__is_abstract_attribute__ = True
@@ -27,6 +28,8 @@ def abstract_attribute(obj=None):
 
 
 class ABCMeta(NativeABCMeta):
+    """Meta-class extending ABCMeta to allow for abstract attributes."""
+
     def __call__(cls, *args, **kwargs):
         instance = NativeABCMeta.__call__(cls, *args, **kwargs)
 

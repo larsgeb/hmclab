@@ -14,7 +14,7 @@ subclasses = _MassMatrices._AbstractMassMatrix.__subclasses__()
 def test_creation(mmclass: _MassMatrices._AbstractMassMatrix, dimensions: int):
 
     # Create the object
-    mass_matrix: _MassMatrices._AbstractMassMatrix = mmclass(dimensions)
+    mass_matrix: _MassMatrices._AbstractMassMatrix = mmclass.create_default(dimensions)
 
     # Check if a subtype of mass matrices
     assert issubclass(type(mass_matrix), _MassMatrices._AbstractMassMatrix)
@@ -30,7 +30,7 @@ def test_creation(mmclass: _MassMatrices._AbstractMassMatrix, dimensions: int):
 def test_generate(mmclass: _MassMatrices._AbstractMassMatrix, dimensions: int):
 
     # Create the object
-    mass_matrix: _MassMatrices._AbstractMassMatrix = mmclass(dimensions)
+    mass_matrix: _MassMatrices._AbstractMassMatrix = mmclass.create_default(dimensions)
 
     # Generate momentum
     momentum = mass_matrix.generate_momentum()
@@ -49,7 +49,7 @@ def test_generate(mmclass: _MassMatrices._AbstractMassMatrix, dimensions: int):
 def test_kinetic_energy(mmclass: _MassMatrices._AbstractMassMatrix, dimensions: int):
 
     # Create the object
-    mass_matrix: _MassMatrices._AbstractMassMatrix = mmclass(dimensions)
+    mass_matrix: _MassMatrices._AbstractMassMatrix = mmclass.create_default(dimensions)
 
     # Generate momentum
     momentum = mass_matrix.generate_momentum()
@@ -69,7 +69,7 @@ def test_kinetic_energy_gradient(
 ):
 
     # Create the object
-    mass_matrix: _MassMatrices._AbstractMassMatrix = mmclass(dimensions)
+    mass_matrix: _MassMatrices._AbstractMassMatrix = mmclass.create_default(dimensions)
 
     # Generate momentum
     momentum = mass_matrix.generate_momentum()

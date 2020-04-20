@@ -40,8 +40,6 @@ from hmc_tomography.Distributions import _AbstractDistribution
 from hmc_tomography.MassMatrices import Unit as _Unit
 from hmc_tomography.MassMatrices import _AbstractMassMatrix
 
-# TODO Write type, shape and instance checkers
-
 
 class _AbstractSampler(_ABC):
     """Abstract base class for Markov chain Monte Carlo samplers.
@@ -615,10 +613,20 @@ class RWMH(_AbstractSampler):
         # matrix / diagonal
         try:
             self.step_length = float(self.step_length)
-            assert self.step_length > 0.0
+            assert self.step_length > 0.0, (
+                "RW-MH step length should be a positive float or a numpy.ndarray. The "
+                "passed argument is a float equal to or smaller than zero."
+            )
         except TypeError:
-            assert type(self.step_length) == _numpy.ndarray
-            assert self.step_length.shape == (self.dimensions, 1)
+            assert type(self.step_length) == _numpy.ndarray, (
+                "RW-MH step length should be a numpy.ndarray of shape (dimensions, 1) "
+                "or a positive float. The passed argument is neither."
+            )
+            assert self.step_length.shape == (self.dimensions, 1), (
+                "RW-MH step length should be a numpy.ndarray of shape (dimensions, 1) "
+                "or a positive float. The passed argument is an ndarray of the wrong "
+                "shape."
+            )
 
     def _write_tuning_settings(self):
         # TODO Write this function

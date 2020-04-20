@@ -61,7 +61,6 @@ def sparse_gemv(A: sparse.csr_matrix, x: np.ndarray) -> np.ndarray:
     elif A.dtype == "float32":
         return single_sparse_gemv_via_MKL(A, x)
     else:
-        # TODO implement complex and complex double when needed
         raise ValueError("Data type of the matrix not understood")
 
 
