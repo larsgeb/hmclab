@@ -618,6 +618,7 @@ class RWMH(_AbstractSampler):
                 "passed argument is a float equal to or smaller than zero."
             )
         except TypeError:
+            self.step_length = _numpy.asarray(self.step_length)
             assert type(self.step_length) == _numpy.ndarray, (
                 "RW-MH step length should be a numpy.ndarray of shape (dimensions, 1) "
                 "or a positive float. The passed argument is neither."

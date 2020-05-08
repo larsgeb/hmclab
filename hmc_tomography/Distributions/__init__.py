@@ -27,6 +27,8 @@ from hmc_tomography.Distributions.base import (
 )
 from hmc_tomography.Distributions.LinearMatrix import LinearMatrix
 
+from hmc_tomography.Distributions.SourceLocation import SourceLocation
+
 try:
     from hmc_tomography.Distributions.LasifFWI import LasifFWI
 except ModuleNotFoundError as e:
@@ -45,4 +47,5 @@ __all__ = [
     "BayesRule",
     "LinearMatrix",
     "LasifFWI",
+    "SourceLocation",
 ]
