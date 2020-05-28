@@ -879,6 +879,8 @@ class HMC(_AbstractSampler):
         self.proposed_k = self.mass_matrix.kinetic_energy(self.proposed_momentum)
         self.proposed_h = self.proposed_x + self.proposed_k
 
+        print(f"current: {self.current_h} proposed: {self.proposed_h}")
+
         # Evaluate acceptence rate
         if _numpy.exp(self.current_h - self.proposed_h) > _numpy.random.uniform(0, 1):
             self.current_model = _numpy.copy(self.proposed_model)
