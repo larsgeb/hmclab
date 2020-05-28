@@ -26,7 +26,7 @@ class pyWave(_AbstractDistribution):
 
     @staticmethod
     def create_default() -> "pyWave":
-        ini_file = "/home/larsgebraad/Documents/hmc-tomography/hmc_tomography/Tests/configurations/forward_configuration.ini"
+        ini_file = "hmc_tomography/Tests/configurations/forward_configuration.ini"
 
         # Create temporary simulation object to fake observed waveforms
         model = pyWave_cpp.fdModel(ini_file)
