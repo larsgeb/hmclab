@@ -338,6 +338,20 @@ class LasifFWI(_AbstractDistribution):
         if self.verbosity > 0:
             print("Destructor called, closing mesh file.")
 
+    def write_current_mesh(self, mesh_output_filename: str):
+
+        mesh_filename = self.mesh.filename
+        mesh_h5_mode = self.mesh.mode
+
+        # Close the mesh
+        self.mesh.close()
+
+        # Copy the file
+        _copyfile(mesh_filename, mesh_output_filename)
+
+        # Re-open the mesh
+        self.mesh = _h5py.File(mesh_filename, mesh_h5_mode)
+
     @staticmethod
     def create_default() -> "LasifFWI":
         raise NotImplementedError()
