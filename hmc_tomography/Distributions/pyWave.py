@@ -4,10 +4,11 @@ import warnings as _warnings
 from typing import Union as _Union
 
 import numpy as _numpy
+import pyWave_cpp
 
 from hmc_tomography.Distributions import _AbstractDistribution
+from hmc_tomography.Helpers import CustomExceptions as _CustomExceptions
 
-import pyWave_cpp
 
 
 class pyWave(_AbstractDistribution):
@@ -25,11 +26,14 @@ class pyWave(_AbstractDistribution):
         self.temperature = temperature
 
     @staticmethod
-    def create_default() -> "pyWave":
+    def create_default(dimensions: int) -> "pyWave":
         ini_file = "hmc_tomography/Tests/configurations/forward_configuration.ini"
 
         # Create temporary simulation object to fake observed waveforms
         model = pyWave_cpp.fdModel(ini_file)
+
+        if model.free_parameters != dimensions:
+            raise _CustomExceptions.InvalidCaseError()
 
         # Create target model
         # Get the coordinates of every grid point

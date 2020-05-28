@@ -8,7 +8,7 @@ import hmc_tomography as _hmc_tomography
 
 
 def test_pyWave_creation():
-    dist = _hmc_tomography.Distributions.pyWave.create_default()
+    dist = _hmc_tomography.Distributions.pyWave.create_default(32400)
 
     dist.temperature = 1.0
 
@@ -24,7 +24,7 @@ def test_pyWave_creation():
 
 
 def test_pyWave_sampling():
-    likelihood = _hmc_tomography.Distributions.pyWave.create_default()
+    likelihood = _hmc_tomography.Distributions.pyWave.create_default(32400)
     likelihood.temperature = 100.0
 
     template = _numpy.ones((int(likelihood.dimensions / 3), 1))
