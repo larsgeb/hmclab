@@ -100,7 +100,7 @@ install:
 
 script:
   - echo $OS_PY
-  - coverage run -m pytest
+  - coverage run -m pytest --ignore=hmc_tomography/Tests/ignore/
 
 after_success:
   - codecov
