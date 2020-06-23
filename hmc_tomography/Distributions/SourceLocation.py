@@ -10,10 +10,6 @@ from hmc_tomography.Helpers.CustomExceptions import (
 )
 import math as _math
 
-# import line_profiler
-
-# profile = line_profiler.LineProfiler()
-
 
 class SourceLocation(_AbstractDistribution):
     """Earthquake source location in 2D using a single velocity for the subsurface.

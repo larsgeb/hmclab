@@ -3,17 +3,17 @@ import numpy as _numpy
 import numpy.matlib
 import os as _os
 
-from line_profiler import LineProfiler
+# from line_profiler import LineProfiler
 
 SourceLocation = _hmc_tomography.Distributions.SourceLocation
 
-profile = LineProfiler()
-profile.add_function(_hmc_tomography.Distributions.SourceLocation.gradient)
-profile.add_function(_hmc_tomography.Distributions.SourceLocation.forward)
-profile.add_function(_hmc_tomography.Distributions.SourceLocation.forward_gradient)
+# profile = LineProfiler()
+# profile.add_function(_hmc_tomography.Distributions.SourceLocation.gradient)
+# profile.add_function(_hmc_tomography.Distributions.SourceLocation.forward)
+# profile.add_function(_hmc_tomography.Distributions.SourceLocation.forward_gradient)
 
 
-@profile
+# @profile
 def test_basic():
 
     stations_x = _numpy.array([-10.0, 5.0, 10.0])[None, :]
