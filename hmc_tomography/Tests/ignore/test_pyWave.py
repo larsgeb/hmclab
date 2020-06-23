@@ -7,7 +7,7 @@ import pytest as _pytest
 import hmc_tomography as _hmc_tomography
 
 
-def test_pyWave_creation():
+def skip_pyWave_creation():
     dist = _hmc_tomography.Distributions.pyWave.create_default(32400)
 
     dist.temperature = 1.0
@@ -43,15 +43,22 @@ def test_pyWave_sampling():
 
     posterior = _hmc_tomography.Distributions.BayesRule([prior, likelihood])
 
-    starting_model = likelihood.get_model_vector()
+    previous_samples = _hmc_tomography.Post.Samples(
+        "/home/larsgebraad/Documents/Hamiltonian Monte Carlo/hmc-tomography/samplesFWI_3.h5"
+    )
+
+    last_sample_previous = previous_samples[:, :][:-1, -1][:, None]
+
+    # print(last_sample_previous)
+    # print(last_sample_previous.shape)
 
     _hmc_tomography.Samplers.HMC.sample(
-        "samplesFWI",
+        "samplesFWI_4",
         posterior,
-        proposals=1000,
+        proposals=5000,
         ram_buffer_size=1,
         amount_of_steps=10,
-        initial_model=starting_model,
-        time_step=0.025,
+        initial_model=last_sample_previous,
+        time_step=0.03,
         overwrite_existing_file=False,
     )

@@ -10,7 +10,6 @@ from hmc_tomography.Distributions import _AbstractDistribution
 from hmc_tomography.Helpers import CustomExceptions as _CustomExceptions
 
 
-
 class pyWave(_AbstractDistribution):
     forward_up_to_date: bool = False
     temperature: float = 1.0
@@ -49,6 +48,7 @@ class pyWave(_AbstractDistribution):
         x_middle = (IX.max() + IX.min()) / 2
         z_middle = (IZ.max() + IZ.min()) / 2
 
+        # Add a circular negative anomaly to the 'true' model
         circle = ((IX - x_middle) ** 2 + (IZ - z_middle) ** 2) ** 0.5 < 15
         vs = vs * (1 - 0.1 * circle)
         vp = vp * (1 - 0.1 * circle)
@@ -60,14 +60,16 @@ class pyWave(_AbstractDistribution):
 
         model.set_parameter_fields(vp_target, vs_target, rho_target)
 
-        # Create true data
+        # Create 'true' data
         # print("Faking observed data")
         for i_shot in range(model.n_shots):
             model.forward_simulate(i_shot)
 
         # Cheating of course, as this is synthetically generated data.
         ux_obs, uz_obs = model.get_synthetic_data()
+        # Noise free data, to change this, add noise below
 
+        # Return the create wave simulation object
         return pyWave(ini_file, ux_obs, uz_obs)
 
     def generate(self) -> _numpy.ndarray:

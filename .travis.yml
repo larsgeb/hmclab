@@ -74,6 +74,13 @@ matrix:
       env:
         - OS_PY=windows37
         - PATH=/c/Python37:/c/Python37/Scripts:$PATH
+    - stage: deploy
+      script: echo Deploy
+      os: linux
+      dist: xenial
+      env: OS_PY=xenial37_deploy
+      language: python
+      python: 3.7
   allow_failures:
     - name: "Python 3.6 on Trusty"
       os: linux
@@ -97,13 +104,3 @@ script:
 
 after_success:
   - codecov
-
-jobs:
-  include:
-    - stage: deploy
-      script: echo Deploy
-      os: linux
-      dist: xenial
-      env: OS_PY=xenial37
-      language: python
-      python: 3.7

@@ -66,6 +66,9 @@ class _AbstractSampler(_ABC):
     """A string containing the HDF5 group of the hdf5 file to which samples will be
     stored. """
 
+    ram_buffer_size: int = None
+    """A positive integer indicating the size of the RAM buffer in amount of samples."""
+
     ram_buffer: _numpy.ndarray = None
     """A NumPy ndarray containing the samples that are as of yet not written to disk."""
 
@@ -175,6 +178,11 @@ class _AbstractSampler(_ABC):
 
             assert type(self.ram_buffer_size) == int
 
+        # Check if writing to RAM occurs more often than updating the progress bar.
+        if self.ram_buffer_size < self.progressbar_refresh_rate:
+            # If so, update progress bar during ram writes
+            self.progressbar_refresh_rate = self.ram_buffer_size
+
         shape = (self.dimensions + 1, self.ram_buffer_size)
 
         self.ram_buffer = _numpy.empty(shape, dtype=_numpy.float64)
@@ -254,20 +262,23 @@ class _AbstractSampler(_ABC):
 
         # Run the Markov process -------------------------------------------------------
         try:
-
-            # If we are given a maximum time, start timer now
+            # If the sampler is given a maximum time, start timer now
             if self.max_time is not None:
                 t_end = _time() + self.max_time
 
+            # Iterate through amount of proposals
             for self.current_proposal in self.proposals_iterator:
 
-                # Propose a new sample
+                # Propose a new sample.
+                # The underlying method changes when different algorithms are selected.
                 self._propose()
 
-                # Evaluate acceptance criterium
+                # Evaluate acceptance criterium.
+                # The underlying method changes when different algorithms are selected.
                 self._evaluate_acceptance()
 
-                # If we are on a thinning number (i.e. one of the non-discarded samples)
+                # If we are on a thinning number ... (i.e. one of the non-discarded
+                # samples)
                 if self.current_proposal % self.online_thinning == 0:
 
                     # Write sample to ram array
@@ -276,7 +287,7 @@ class _AbstractSampler(_ABC):
                     # Calculate the index this sample has after thinning
                     after_thinning = int(self.current_proposal / self.online_thinning)
 
-                    # Check if this number is at the end of the buffer
+                    # Check if this number is at the end of the buffer ...
                     if (
                         after_thinning % self.ram_buffer_size
                     ) == self.ram_buffer_size - 1:
