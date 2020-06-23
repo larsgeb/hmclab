@@ -479,4 +479,3 @@ class _LinearMatrix_sparse_forward_sparse_covariance(_AbstractDistribution):
         return _LinearMatrix_sparse_forward_sparse_covariance(
             G, d, data_variance, dtype=dtype
         )
-

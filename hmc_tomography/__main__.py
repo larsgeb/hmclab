@@ -1,7 +1,9 @@
 def cli():
     import sys
+    import hmc_tomography
 
     print("hmc_tomography cli interface")
+    print(f"Version: {hmc_tomography.__version__}")
 
     # CLI interface
     if len(sys.argv) > 1 and sys.argv[1] == "test":

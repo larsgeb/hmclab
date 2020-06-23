@@ -14,6 +14,7 @@
 
 import os
 import sys
+import hmc_tomography
 
 sys.path.insert(0, os.path.abspath("../../"))
 sys.path.insert(0, os.path.abspath("../../hmc_tomography/Tests"))
@@ -40,9 +41,9 @@ copyright = "2019-2020, Andrea Zunino, Andreas Fichtner, Lars Gebraad"
 author = "Andrea Zunino, Andreas Fichtner, Lars Gebraad"
 
 # The short X.Y version
-version = "0.2"
+version = hmc_tomography.__version__
 # The full version, including alpha/beta/rc tags
-release = "0.2.1"
+release = hmc_tomography.__version__
 
 
 # -- General configuration ---------------------------------------------------
@@ -65,6 +66,7 @@ extensions = [
     "IPython.sphinxext.ipython_console_highlighting",
     "IPython.sphinxext.ipython_directive",
     "nbsphinx",
+    'sphinx_git',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
