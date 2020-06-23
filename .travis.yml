@@ -75,7 +75,14 @@ matrix:
         - OS_PY=windows37
         - PATH=/c/Python37:/c/Python37/Scripts:$PATH
     - stage: deploy
-      script: echo Deploy
+      install: echo Install
+      script:
+        - echo Script
+        - ls
+        - cd ..
+        - ls
+        - ls /
+      after_success: echo Succes
       os: linux
       dist: xenial
       env: OS_PY=xenial37_deploy
