@@ -46,8 +46,16 @@ setuptools.setup(
             "codecov",
             "pytest",
             "pytest-harvest",
+            "pandas",
         ],
-        "testing": ["black", "pre-commit", "codecov", "pytest", "pytest-harvest"],
+        "testing": [
+            "black",
+            "pre-commit",
+            "codecov",
+            "pytest",
+            "pytest-harvest",
+            "pandas",
+        ],
     },
     entry_points={"console_scripts": ["hmc_tomography=hmc_tomography.__main__:cli"]},
 )

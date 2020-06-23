@@ -11,3 +11,4 @@ versioneer
 codecov
 pytest
 pytest-harvest
+pandas
