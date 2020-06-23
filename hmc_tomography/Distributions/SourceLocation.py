@@ -92,7 +92,9 @@ class SourceLocation(_AbstractDistribution):
             x, z, T, v, self.receiver_array_x, self.receiver_array_z
         ).reshape(self.number_of_datums, 1)
 
-        return self.misfit_model.misfit(synthetic_data)
+        return self.misfit_bounds(coordinates) + self.misfit_model.misfit(
+            synthetic_data
+        )
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
 
