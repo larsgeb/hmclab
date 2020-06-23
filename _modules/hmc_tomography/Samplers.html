@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>hmc_tomography.Samplers &mdash; HMC Tom 0.2.1 documentation</title>
+  <title>hmc_tomography.Samplers &mdash; HMC Tom 0.2.2-alpha-9-gcdc085f-dirty documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                0.2
+                0.2.2-alpha-9-gcdc085f-dirty
               </div>
             
           
@@ -246,7 +246,7 @@
     <span class="n">current_x</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="sd">&quot;&quot;&quot;A NumPy array containing :math:`\chi = -\log\left( p\\right)` (i.e. the misfit,</span>
 <span class="sd">    negative log probability) of the distribution at the current state of the</span>
-<span class="sd">    Markov chain. &quot;&quot;&quot;</span>
+<span class="sd">    Markov chain.&quot;&quot;&quot;</span>
 
     <span class="n">proposed_x</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="sd">&quot;&quot;&quot;A NumPy array containing :math:`\chi = -\log\left( p\\right)` (i.e. the misfit,</span>
@@ -813,6 +813,7 @@
                 <span class="s2">&quot;passed argument is a float equal to or smaller than zero.&quot;</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">step_length</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step_length</span><span class="p">)</span>
             <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step_length</span><span class="p">)</span> <span class="o">==</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="p">(</span>
                 <span class="s2">&quot;RW-MH step length should be a numpy.ndarray of shape (dimensions, 1) &quot;</span>
                 <span class="s2">&quot;or a positive float. The passed argument is neither.&quot;</span>

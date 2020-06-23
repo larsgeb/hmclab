@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>hmc_tomography.Distributions.base &mdash; HMC Tom 0.2.1 documentation</title>
+  <title>hmc_tomography.Distributions.base &mdash; HMC Tom 0.2.2-alpha-9-gcdc085f-dirty documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                0.2
+                0.2.2-alpha-9-gcdc085f-dirty
               </div>
             
           
@@ -499,7 +499,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Gaussian (normal) distribution&quot;</span>
 
         <span class="c1"># Automatically get dimensionality from means</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">means</span><span class="o">.</span><span class="n">size</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">means</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">means</span><span class="o">.</span><span class="n">size</span>
         <span class="sd">&quot;&quot;&quot;Amount of dimensions on which the distribution is defined, should agree with</span>
 <span class="sd">        means and covariance, and optionally coordinate_transformation.&quot;&quot;&quot;</span>
 
@@ -714,6 +717,11 @@
         <span class="bp">self</span><span class="p">,</span> <span class="n">lower_bounds</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;uniform distribution&quot;</span>
+
+        <span class="n">lower_bounds</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">lower_bounds</span><span class="p">)</span>
+        <span class="n">lower_bounds</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">lower_bounds</span><span class="p">,</span> <span class="p">(</span><span class="n">lower_bounds</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">upper_bounds</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">upper_bounds</span><span class="p">)</span>
+        <span class="n">upper_bounds</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">upper_bounds</span><span class="p">,</span> <span class="p">(</span><span class="n">upper_bounds</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
         <span class="c1"># Automatically get dimensionality from bounds</span>
         <span class="n">dimensions</span> <span class="o">=</span> <span class="n">lower_bounds</span><span class="o">.</span><span class="n">size</span>
