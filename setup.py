@@ -33,8 +33,12 @@ setuptools.setup(
         "dev": [
             "black",
             "pre-commit",
+            "ipython",
             "sphinx",
+            "nbsphinx",
+            "sphinx_rtd_theme",
             "numpydoc",
+            "pandoc",
             "codecov",
             "pytest",
             "pytest-harvest",

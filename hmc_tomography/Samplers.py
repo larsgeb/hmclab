@@ -66,6 +66,9 @@ class _AbstractSampler(_ABC):
     """A string containing the HDF5 group of the hdf5 file to which samples will be
     stored. """
 
+    ram_buffer_size: int = None
+    """A positive integer indicating the size of the RAM buffer in amount of samples."""
+
     ram_buffer: _numpy.ndarray = None
     """A NumPy ndarray containing the samples that are as of yet not written to disk."""
 
@@ -175,6 +178,11 @@ class _AbstractSampler(_ABC):
 
             assert type(self.ram_buffer_size) == int
 
+        # Check if writing to RAM occurs more often than updating the progress bar.
+        if self.ram_buffer_size < self.progressbar_refresh_rate:
+            # If so, update progress bar during ram writes
+            self.progressbar_refresh_rate = self.ram_buffer_size
+
         shape = (self.dimensions + 1, self.ram_buffer_size)
 
         self.ram_buffer = _numpy.empty(shape, dtype=_numpy.float64)
@@ -226,11 +234,18 @@ class _AbstractSampler(_ABC):
         # Write out the tuning settings
         self._write_tuning_settings()
 
+        # Create attributes before sampling, such that SWMR works
+        self.samples_hdf5_dataset.attrs["write_index"] = -1
+        self.samples_hdf5_dataset.attrs["last_written_sample"] = -1
+
     def _close_sampler(self):
         self.samples_hdf5_filehandle.close()
 
     def _sample_loop(self):
         """The actual sampling code."""
+
+        # As soon as all attributes and datasets are created, enable SWMR mode.
+        self.samples_hdf5_filehandle.swmr_mode = True
 
         # Create progressbar -----------------------------------------------------------
         try:
@@ -247,20 +262,23 @@ class _AbstractSampler(_ABC):
 
         # Run the Markov process -------------------------------------------------------
         try:
-
-            # If we are given a maximum time, start timer now
+            # If the sampler is given a maximum time, start timer now
             if self.max_time is not None:
                 t_end = _time() + self.max_time
 
+            # Iterate through amount of proposals
             for self.current_proposal in self.proposals_iterator:
 
-                # Propose a new sample
+                # Propose a new sample.
+                # The underlying method changes when different algorithms are selected.
                 self._propose()
 
-                # Evaluate acceptance criterium
+                # Evaluate acceptance criterium.
+                # The underlying method changes when different algorithms are selected.
                 self._evaluate_acceptance()
 
-                # If we are on a thinning number (i.e. one of the non-discarded samples)
+                # If we are on a thinning number ... (i.e. one of the non-discarded
+                # samples)
                 if self.current_proposal % self.online_thinning == 0:
 
                     # Write sample to ram array
@@ -269,7 +287,7 @@ class _AbstractSampler(_ABC):
                     # Calculate the index this sample has after thinning
                     after_thinning = int(self.current_proposal / self.online_thinning)
 
-                    # Check if this number is at the end of the buffer
+                    # Check if this number is at the end of the buffer ...
                     if (
                         after_thinning % self.ram_buffer_size
                     ) == self.ram_buffer_size - 1:
@@ -319,7 +337,7 @@ class _AbstractSampler(_ABC):
                 flag = "w-"
 
             # Create file, fail if exists and flag == w-
-            self.samples_hdf5_filehandle = _h5py.File(name, flag)
+            self.samples_hdf5_filehandle = _h5py.File(name, flag, libver="latest")
 
         except OSError:
             # Catch error on file creations, likely that the file already exists
@@ -370,7 +388,9 @@ class _AbstractSampler(_ABC):
                     # Create file, truncate if exists. This should never give an
                     # error on file exists, but could fail for other reasons. Therefore,
                     # no try-catch block.
-                    self.samples_hdf5_filehandle = _h5py.File(name, "w")
+                    self.samples_hdf5_filehandle = _h5py.File(
+                        name, "w", libver="latest"
+                    )
 
                 elif input_choice == "a":
                     # User wants to abort sampling
@@ -386,13 +406,14 @@ class _AbstractSampler(_ABC):
         # Create dataset
         self.samples_hdf5_dataset = self.samples_hdf5_filehandle.create_dataset(
             "samples_0",
-            (self.dimensions + 1, length),  # one extra for misfit
+            (self.dimensions + 1, 1),
+            maxshape=(self.dimensions + 1, length),  # one extra for misfit
             dtype=dtype,
             chunks=True,
         )
 
         # Set the current index of samples to the start of the file
-        self.samples_hdf5_dataset.attrs["write_index"] = 0
+        self.samples_hdf5_dataset.attrs["write_index"] = -1
         self.samples_hdf5_dataset.attrs["last_written_sample"] = -1
 
     def _update_progressbar(self):
@@ -442,7 +463,10 @@ class _AbstractSampler(_ABC):
         end = current_proposal_after_thinning + 1
 
         # If there is something to write
-        if self.samples_hdf5_dataset.attrs["write_index"] == robust_start:
+        if (
+            self.samples_hdf5_dataset.attrs["write_index"] == robust_start
+            or self.samples_hdf5_dataset.attrs["write_index"] == -1
+        ):
 
             # Some sanity checks on the indices
             assert (
@@ -454,6 +478,11 @@ class _AbstractSampler(_ABC):
             # Update the amount of writes
             self.amount_of_writes += 1
 
+            # Update the size in the h5 file
+            self.samples_hdf5_dataset.resize(
+                (self.dimensions + 1, current_proposal_after_thinning + 1)
+            )
+
             # Write samples to disk
             self.samples_hdf5_dataset[:, robust_start:end] = self.ram_buffer[
                 :, : end - robust_start
@@ -462,6 +491,7 @@ class _AbstractSampler(_ABC):
             # Reset the markers in the HDF5 file
             self.samples_hdf5_dataset.attrs["write_index"] = end
             self.samples_hdf5_dataset.attrs["last_written_sample"] = end - 1
+            self.samples_hdf5_dataset.flush()
 
     @_abstractmethod
     def _propose(self):
