@@ -38,6 +38,7 @@ setuptools.setup(
             "nbsphinx",
             "sphinx_rtd_theme",
             "numpydoc",
+            "pandoc",
             "codecov",
             "pytest",
             "pytest-harvest",
