@@ -23,7 +23,7 @@ def skip_pyWave_creation():
     print(f"Misfit 2: {X2:.2f}")
 
 
-def test_pyWave_sampling():
+def skip_pyWave_sampling():
     likelihood = _hmc_tomography.Distributions.pyWave.create_default(32400)
     likelihood.temperature = 100.0
 
