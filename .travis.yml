@@ -76,8 +76,8 @@ matrix:
         - PATH=/c/Python37:/c/Python37/Scripts:$PATH
     - stage: deploy
       install:
-        - apt-get update && apt-get upgrade -y
-        - apt-get install pandoc -y
+        - sudo apt-get update && sudo apt-get upgrade -y
+        - sudo apt-get install pandoc -y
         - pip install -e .[dev]
       script:
         - commit_hash=$(git rev-parse HEAD)
