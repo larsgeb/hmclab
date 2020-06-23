@@ -34,6 +34,7 @@ setuptools.setup(
             "black",
             "pre-commit",
             "ipython",
+            "nbsphinx",
             "sphinx",
             "numpydoc",
             "codecov",
