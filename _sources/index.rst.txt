@@ -24,4 +24,4 @@ HMC Tomography
 
 .. centered:: Andrea Zunino, Andreas Fichtner, Lars Gebraad
 
-This documentation is built on top of commit `a133f84 <https://github.com/larsgeb/hmc-tomography/commit/a133f84>`_.
+This documentation is built on top of commit `COMMIT_HASH <https://github.com/larsgeb/hmc-tomography/commit/COMMIT_HASH>`_.
