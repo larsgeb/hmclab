@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,19 @@
   
 
   
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -26,17 +32,12 @@
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Unit" href="Unit.html" />
@@ -54,7 +55,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> HMC Tom
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> HMC Tom
           
 
           
@@ -84,6 +85,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -117,6 +119,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -155,7 +158,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../index.html">API reference</a> &raquo;</li>
         
@@ -206,30 +209,14 @@
 </style>
 <div class="section" id="abstractmassmatrix">
 <h1>_AbstractMassMatrix<a class="headerlink" href="#abstractmassmatrix" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
+<dl class="py class">
 <dt id="hmc_tomography.MassMatrices._AbstractMassMatrix">
 <em class="property">class </em><code class="sig-prename descclassname">hmc_tomography.MassMatrices.</code><code class="sig-name descname">_AbstractMassMatrix</code><a class="reference internal" href="../../_modules/hmc_tomography/MassMatrices.html#_AbstractMassMatrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.MassMatrices._AbstractMassMatrix" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
-<p>Abstract base class for mass matrices.</p>
+<dd><p>Abstract base class for mass matrices.</p>
 <p>Defines all required methods for derived classes.</p>
-<dl class="attribute">
-<dt id="hmc_tomography.MassMatrices._AbstractMassMatrix.name">
-<code class="sig-name descname">name</code><em class="property">: str</em><em class="property"> = 'mass matrix abstract base class'</em><a class="headerlink" href="#hmc_tomography.MassMatrices._AbstractMassMatrix.name" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="hmc_tomography.MassMatrices._AbstractMassMatrix.dimensions">
-<code class="sig-name descname">dimensions</code><em class="property">: int</em><em class="property"> = -1</em><a class="headerlink" href="#hmc_tomography.MassMatrices._AbstractMassMatrix.dimensions" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="hmc_tomography.MassMatrices._AbstractMassMatrix.full_name">
-<code class="sig-name descname">full_name</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; str<a class="reference internal" href="../../_modules/hmc_tomography/MassMatrices.html#_AbstractMassMatrix.full_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.MassMatrices._AbstractMassMatrix.full_name" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
+<dl class="py method">
 <dt id="hmc_tomography.MassMatrices._AbstractMassMatrix.kinetic_energy">
-<em class="property">abstract </em><code class="sig-name descname">kinetic_energy</code><span class="sig-paren">(</span><em class="sig-param">momentum: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="../../_modules/hmc_tomography/MassMatrices.html#_AbstractMassMatrix.kinetic_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.MassMatrices._AbstractMassMatrix.kinetic_energy" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">kinetic_energy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">momentum</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="../../_modules/hmc_tomography/MassMatrices.html#_AbstractMassMatrix.kinetic_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.MassMatrices._AbstractMassMatrix.kinetic_energy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Abstract method for computing kinetic energy for a given momentum.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -238,9 +225,9 @@
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="hmc_tomography.MassMatrices._AbstractMassMatrix.kinetic_energy_gradient">
-<em class="property">abstract </em><code class="sig-name descname">kinetic_energy_gradient</code><span class="sig-paren">(</span><em class="sig-param">momentum: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="../../_modules/hmc_tomography/MassMatrices.html#_AbstractMassMatrix.kinetic_energy_gradient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.MassMatrices._AbstractMassMatrix.kinetic_energy_gradient" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">kinetic_energy_gradient</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">momentum</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="../../_modules/hmc_tomography/MassMatrices.html#_AbstractMassMatrix.kinetic_energy_gradient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.MassMatrices._AbstractMassMatrix.kinetic_energy_gradient" title="Permalink to this definition">¶</a></dt>
 <dd><p>Abstract method for computing kinetic energy gradient for a given
 momentum.</p>
 <dl class="field-list simple">
@@ -249,11 +236,6 @@ momentum.</p>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="method">
-<dt id="hmc_tomography.MassMatrices._AbstractMassMatrix.generate_momentum">
-<em class="property">abstract </em><code class="sig-name descname">generate_momentum</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="../../_modules/hmc_tomography/MassMatrices.html#_AbstractMassMatrix.generate_momentum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.MassMatrices._AbstractMassMatrix.generate_momentum" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 </dd></dl>
 
@@ -279,11 +261,19 @@ momentum.</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2019-2020, Andrea Zunino, Andreas Fichtner, Lars Gebraad
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -294,7 +284,6 @@ momentum.</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

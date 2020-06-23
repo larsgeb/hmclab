@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,19 @@
   
 
   
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -26,17 +32,12 @@
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="gradient_descent" href="gradient_descent.html" />
@@ -54,7 +55,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> HMC Tom
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> HMC Tom
           
 
           
@@ -84,6 +85,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -115,6 +117,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -153,7 +156,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../index.html">API reference</a> &raquo;</li>
         
@@ -204,27 +207,11 @@
 </style>
 <div class="section" id="abstractoptimizer">
 <h1>_AbstractOptimizer<a class="headerlink" href="#abstractoptimizer" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
+<dl class="py class">
 <dt id="hmc_tomography.Optimizers._AbstractOptimizer">
 <em class="property">class </em><code class="sig-prename descclassname">hmc_tomography.Optimizers.</code><code class="sig-name descname">_AbstractOptimizer</code><a class="reference internal" href="../../_modules/hmc_tomography/Optimizers.html#_AbstractOptimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Optimizers._AbstractOptimizer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
-<p>Abstract base class for optimization routines.</p>
-<dl class="attribute">
-<dt id="hmc_tomography.Optimizers._AbstractOptimizer.name">
-<code class="sig-name descname">name</code><em class="property">: str</em><em class="property"> = 'Optimizer abstract base class'</em><a class="headerlink" href="#hmc_tomography.Optimizers._AbstractOptimizer.name" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="hmc_tomography.Optimizers._AbstractOptimizer.dimensions">
-<code class="sig-name descname">dimensions</code><em class="property">: int</em><em class="property"> = -1</em><a class="headerlink" href="#hmc_tomography.Optimizers._AbstractOptimizer.dimensions" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="hmc_tomography.Optimizers._AbstractOptimizer.target">
-<code class="sig-name descname">target</code><em class="property">: _AbstractDistribution</em><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Optimizers._AbstractOptimizer.target" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
+<dd><p>Abstract base class for optimization routines.</p>
+<dl class="py method">
 <dt id="hmc_tomography.Optimizers._AbstractOptimizer.iterate_once">
 <em class="property">abstract </em><code class="sig-name descname">iterate_once</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="../../_modules/hmc_tomography/Optimizers.html#_AbstractOptimizer.iterate_once"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Optimizers._AbstractOptimizer.iterate_once" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
@@ -239,7 +226,7 @@
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="hmc_tomography.Optimizers._AbstractOptimizer.iterate">
 <em class="property">abstract </em><code class="sig-name descname">iterate</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="../../_modules/hmc_tomography/Optimizers.html#_AbstractOptimizer.iterate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Optimizers._AbstractOptimizer.iterate" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
@@ -278,11 +265,19 @@
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2019-2020, Andrea Zunino, Andreas Fichtner, Lars Gebraad
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -293,7 +288,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

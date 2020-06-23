@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,19 @@
   
 
   
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
@@ -26,17 +32,12 @@
         <script src="../_static/doctools.js"></script>
         <script src="../_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="API reference" href="../api/index.html" />
@@ -54,7 +55,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> HMC Tom
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> HMC Tom
           
 
           
@@ -84,6 +85,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -117,6 +119,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -155,7 +158,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../index.html">Docs</a> &raquo;</li>
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../examples.html">Examples and tutorials</a> &raquo;</li>
         
@@ -244,20 +247,33 @@ div.nboutput.container div.prompt pre {
 /* all prompts */
 div.nbinput.container div.prompt,
 div.nboutput.container div.prompt {
-    min-width: 5ex;
-    padding-top: 0.3rem;
-    padding-right: 0.3rem;
-    text-align: right;
-    flex: 0;
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
 }
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
 @media (max-width: 540px) {
     div.nbinput.container div.prompt,
     div.nboutput.container div.prompt {
+        width: unset;
         text-align: left;
         padding: 0.4em;
     }
     div.nboutput.container div.prompt.empty {
         padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
     }
 }
 
@@ -350,7 +366,7 @@ div.nboutput.container div.output_area div[class*=highlight].math,
 div.nboutput.container div.output_area.rendered_html,
 div.nboutput.container div.output_area > div.output_javascript,
 div.nboutput.container div.output_area:not(.rendered_html) > img{
-    padding: 0.3rem;
+    padding: 5px;
 }
 
 /* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
@@ -461,7 +477,7 @@ div.rendered_html tbody tr:hover {
 <span></span><span class="k">try</span><span class="p">:</span>
     <span class="n">target</span> <span class="o">=</span> <span class="n">my_inverse_problem_class</span><span class="p">()</span>
 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-    <span class="k">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -485,10 +501,10 @@ Can&#39;t instantiate abstract class my_inverse_problem_class with abstract meth
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">print</span><span class="p">(</span>
-    <span class="n">f</span><span class="s2">&quot;Function: {hmc_tomography.Distributions._AbstractDistribution.generate.__name__}&quot;</span>
+<span></span><span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;Function: </span><span class="si">{</span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Distributions</span><span class="o">.</span><span class="n">_AbstractDistribution</span><span class="o">.</span><span class="n">generate</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
 <span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Distributions</span><span class="o">.</span><span class="n">_AbstractDistribution</span><span class="o">.</span><span class="n">generate</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Distributions</span><span class="o">.</span><span class="n">_AbstractDistribution</span><span class="o">.</span><span class="n">generate</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -528,13 +544,13 @@ Method to draw samples from the distribution.
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">print</span><span class="p">(</span>
-    <span class="n">f</span><span class="s2">&quot;Function: {hmc_tomography.Distributions._AbstractDistribution.gradient.__name__}&quot;</span>
+<span></span><span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;Function: </span><span class="si">{</span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Distributions</span><span class="o">.</span><span class="n">_AbstractDistribution</span><span class="o">.</span><span class="n">gradient</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
 <span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Distributions</span><span class="o">.</span><span class="n">_AbstractDistribution</span><span class="o">.</span><span class="n">gradient</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Distributions</span><span class="o">.</span><span class="n">_AbstractDistribution</span><span class="o">.</span><span class="n">gradient</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span>
 
-<span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Function: {hmc_tomography.Distributions._AbstractDistribution.misfit.__name__}&quot;</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Distributions</span><span class="o">.</span><span class="n">_AbstractDistribution</span><span class="o">.</span><span class="n">misfit</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Function: </span><span class="si">{</span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Distributions</span><span class="o">.</span><span class="n">_AbstractDistribution</span><span class="o">.</span><span class="n">misfit</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Distributions</span><span class="o">.</span><span class="n">_AbstractDistribution</span><span class="o">.</span><span class="n">misfit</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -630,7 +646,7 @@ Computes the misfit of the distribution at the given coordinates.
 <span></span><span class="k">try</span><span class="p">:</span>
     <span class="n">target</span> <span class="o">=</span> <span class="n">my_inverse_problem_class</span><span class="p">()</span>
 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-    <span class="k">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -671,7 +687,7 @@ Can&#39;t instantiate abstract class my_inverse_problem_class with abstract attr
 <span></span><span class="k">try</span><span class="p">:</span>
     <span class="n">target</span> <span class="o">=</span> <span class="n">my_inverse_problem_class</span><span class="p">()</span>
 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-    <span class="k">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -683,7 +699,7 @@ Can&#39;t instantiate abstract class my_inverse_problem_class with abstract attr
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">HMC</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
-    <span class="n">target</span><span class="p">,</span> <span class="s2">&quot;bin_samples/tutorial_4_empty.h5&quot;</span><span class="p">,</span> <span class="n">proposals</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span> <span class="n">overwrite_samples</span><span class="o">=</span><span class="bp">True</span>
+    <span class="n">target</span><span class="p">,</span> <span class="s2">&quot;bin_samples/tutorial_4_empty.h5&quot;</span><span class="p">,</span> <span class="n">proposals</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span> <span class="n">overwrite_samples</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -729,10 +745,10 @@ the temperature.</p>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="k">class</span> <span class="nc">StyblinskiTang</span><span class="p">(</span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Distributions</span><span class="o">.</span><span class="n">_AbstractDistribution</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimensions</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">20.0</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimensions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">20.0</span><span class="p">):</span>
 
         <span class="c1"># Default to 2 dimensions if not specified</span>
-        <span class="k">if</span> <span class="n">dimensions</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dimensions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="mi">2</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">dimensions</span>
@@ -771,7 +787,7 @@ the temperature.</p>
     <span class="s2">&quot;bin_samples/tutorial_4_StyblinskiTang_20.h5&quot;</span><span class="p">,</span>
     <span class="n">proposals</span><span class="o">=</span><span class="mi">20000</span><span class="p">,</span>
     <span class="n">time_step</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">overwrite_samples</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">overwrite_samples</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -819,7 +835,7 @@ Tot. acc rate: 0.47. Last 100 acc rate: 0.47. Progress: 100%|██████�
     <span class="s2">&quot;bin_samples/tutorial_4_StyblinskiTang_5.h5&quot;</span><span class="p">,</span>
     <span class="n">proposals</span><span class="o">=</span><span class="mi">20000</span><span class="p">,</span>
     <span class="n">time_step</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
-    <span class="n">overwrite_samples</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">overwrite_samples</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -876,11 +892,19 @@ Tot. acc rate: 0.57. Last 100 acc rate: 0.61. Progress: 100%|██████�
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2019-2020, Andrea Zunino, Andreas Fichtner, Lars Gebraad
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -891,7 +915,6 @@ Tot. acc rate: 0.57. Last 100 acc rate: 0.61. Progress: 100%|██████�
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

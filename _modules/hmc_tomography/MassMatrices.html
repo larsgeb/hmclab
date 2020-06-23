@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,19 @@
   
 
   
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -26,17 +32,12 @@
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
@@ -52,7 +53,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> HMC Tom
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> HMC Tom
           
 
           
@@ -82,6 +83,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -102,6 +104,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -140,7 +143,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
@@ -162,29 +165,36 @@
   <h1>Source code for hmc_tomography.MassMatrices</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Mass matrix classes and associated methods.</span>
 
-<span class="sd">The classes in this module describe the metric used in HMC algorithms. Changing the </span>
+<span class="sd">The classes in this module describe the metric used in HMC algorithms. Changing the</span>
 <span class="sd">metric alters the shape of trajectories the HMC algorithm generates, thereby impacting</span>
 <span class="sd">convergence performance.</span>
 
 <span class="sd">All of the classes inherit from :class:`._AbstractMassMatrix`; a base class outlining</span>
-<span class="sd">required methods and their signatures (required in- and outputs). </span>
+<span class="sd">required methods and their signatures (required in- and outputs).</span>
 
 <span class="sd">.. note::</span>
 
-<span class="sd">    The mass matrix is vitally important for the performance of HMC algorithms A </span>
-<span class="sd">    tutorial on the tuning parameters of HMC can be found at </span>
+<span class="sd">    The mass matrix is vitally important for the performance of HMC algorithms A</span>
+<span class="sd">    tutorial on the tuning parameters of HMC can be found at</span>
 <span class="sd">    :ref:`/examples/0.2 - Tuning Hamiltonian Monte Carlo.ipynb`.</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">ABC</span> <span class="k">as</span> <span class="n">_ABC</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">abstractmethod</span> <span class="k">as</span> <span class="n">_abstractmethod</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">_numpy</span>
 <span class="kn">import</span> <span class="nn">warnings</span> <span class="k">as</span> <span class="nn">_warnings</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span> <span class="k">as</span> <span class="n">_ABC</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span> <span class="k">as</span> <span class="n">_abstractmethod</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">_numpy</span>
+
+<span class="kn">from</span> <span class="nn">hmc_tomography.Helpers.CustomExceptions</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AbstractMethodError</span> <span class="k">as</span> <span class="n">_AbstractMethodError</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">hmc_tomography.Helpers.CustomExceptions</span> <span class="kn">import</span> <span class="n">Assertions</span>
 
 
 <div class="viewcode-block" id="_AbstractMassMatrix"><a class="viewcode-back" href="../../api/massmatrices/_AbstractMassMatrix.html#hmc_tomography.MassMatrices._AbstractMassMatrix">[docs]</a><span class="k">class</span> <span class="nc">_AbstractMassMatrix</span><span class="p">(</span><span class="n">_ABC</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Abstract base class for mass matrices. </span>
-<span class="sd">    </span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class for mass matrices.</span>
+
 <span class="sd">    Defines all required methods for derived classes.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -192,8 +202,8 @@
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mass matrix abstract base class&quot;</span>
     <span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 
-<div class="viewcode-block" id="_AbstractMassMatrix.full_name"><a class="viewcode-back" href="../../api/massmatrices/_AbstractMassMatrix.html#hmc_tomography.MassMatrices._AbstractMassMatrix.full_name">[docs]</a>    <span class="k">def</span> <span class="nf">full_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span></div>
+    <span class="k">def</span> <span class="nf">full_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
 
 <div class="viewcode-block" id="_AbstractMassMatrix.kinetic_energy"><a class="viewcode-back" href="../../api/massmatrices/_AbstractMassMatrix.html#hmc_tomography.MassMatrices._AbstractMassMatrix.kinetic_energy">[docs]</a>    <span class="nd">@_abstractmethod</span>
     <span class="k">def</span> <span class="nf">kinetic_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">momentum</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -216,9 +226,13 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">(())</span></div>
 
-<div class="viewcode-block" id="_AbstractMassMatrix.generate_momentum"><a class="viewcode-back" href="../../api/massmatrices/_AbstractMassMatrix.html#hmc_tomography.MassMatrices._AbstractMassMatrix.generate_momentum">[docs]</a>    <span class="nd">@_abstractmethod</span>
+    <span class="nd">@_abstractmethod</span>
     <span class="k">def</span> <span class="nf">generate_momentum</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">(())</span></div></div>
+        <span class="k">return</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">(())</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create_default</span><span class="p">(</span><span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;_AbstractMassMatrix&quot;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">_AbstractMethodError</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="Unit"><a class="viewcode-back" href="../../api/massmatrices/Unit.html#hmc_tomography.MassMatrices.Unit">[docs]</a><span class="k">class</span> <span class="nc">Unit</span><span class="p">(</span><span class="n">_AbstractMassMatrix</span><span class="p">):</span>
@@ -226,12 +240,12 @@
 
 <span class="sd">    This mass matrix or metric does not perform any scaling on the target distribution.</span>
 <span class="sd">    It is the default setting for the HMC algorithms and is optimal when all parameters</span>
-<span class="sd">    of your target distribution are expected to have the same variance and no </span>
+<span class="sd">    of your target distribution are expected to have the same variance and no</span>
 <span class="sd">    trade-offs.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Constructor for unit mass matrices</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -251,10 +265,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">momentum</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="n">momentum</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="n">f</span><span class="s2">&quot;The passed momentum vector is not of the right dimensions, &quot;</span>
-                <span class="n">f</span><span class="s2">&quot;which would be ({momentum.size, 1}).&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;The passed momentum vector is not of the right dimensions, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;which would be (</span><span class="si">{</span><span class="n">momentum</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="si">}</span><span class="s2">).&quot;</span>
             <span class="p">)</span>
-        <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">momentum</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">momentum</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># TODO optimize</span></div>
+        <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">momentum</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">momentum</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Unit.kinetic_energy_gradient"><a class="viewcode-back" href="../../api/massmatrices/Unit.html#hmc_tomography.MassMatrices.Unit.kinetic_energy_gradient">[docs]</a>    <span class="k">def</span> <span class="nf">kinetic_energy_gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">momentum</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -286,40 +300,33 @@
 <span class="sd">        -------</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create_default</span><span class="p">(</span><span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Unit&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Unit</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Diagonal"><a class="viewcode-back" href="../../api/massmatrices/Diagonal.html#hmc_tomography.MassMatrices.Diagonal">[docs]</a><span class="k">class</span> <span class="nc">Diagonal</span><span class="p">(</span><span class="n">_AbstractMassMatrix</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;The diagonal mass matrix.</span>
 
 <span class="sd">    This mass matrix or metric does only performs scaling on each dimension separately.</span>
-<span class="sd">    It is optimal when all parameters of your target distribution are expected to be </span>
+<span class="sd">    It is optimal when all parameters of your target distribution are expected to be</span>
 <span class="sd">    independent (not have trade-offs) but still varying scales of disperion / variance.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># TODO remove dimensions</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">diagonal</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">diagonal</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Constructor for diagonal mass matrices.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;diagonal mass matrix&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">dimensions</span>
 
-        <span class="k">if</span> <span class="n">diagonal</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">_warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="n">f</span><span class="s2">&quot;The diagonal mass matrix did not receive a diagonal. We will generate&quot;</span>
-                <span class="n">f</span><span class="s2">&quot;a linearly increasing diagonal (1, 2, 3, 4, ...) for the mass matrix.&quot;</span><span class="p">,</span>
-                <span class="ne">Warning</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">diagonal</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="n">f</span><span class="s2">&quot;The passed diagonal vector is not of the right&quot;</span>
-                    <span class="n">f</span><span class="s2">&quot;dimensions, which would be ({self.dimensions, 1}).&quot;</span>
-                <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span> <span class="o">=</span> <span class="n">diagonal</span>
+        <span class="k">if</span> <span class="n">diagonal</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">diagonal</span><span class="p">)</span> <span class="o">!=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The diagonal mass matrix did not receive a diagonal&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">diagonal</span><span class="o">.</span><span class="n">size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span> <span class="o">=</span> <span class="n">diagonal</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inverse_diagonal</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span>
 
 <div class="viewcode-block" id="Diagonal.kinetic_energy"><a class="viewcode-back" href="../../api/massmatrices/Diagonal.html#hmc_tomography.MassMatrices.Diagonal.kinetic_energy">[docs]</a>    <span class="k">def</span> <span class="nf">kinetic_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">momentum</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -359,7 +366,12 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">diagflat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">diagflat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create_default</span><span class="p">(</span><span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Diagonal&quot;</span><span class="p">:</span>
+        <span class="n">diagonal</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">Diagonal</span><span class="p">(</span><span class="n">diagonal</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="LBFGS"><a class="viewcode-back" href="../../api/massmatrices/LBFGS.html#hmc_tomography.MassMatrices.LBFGS">[docs]</a><span class="k">class</span> <span class="nc">LBFGS</span><span class="p">(</span><span class="n">_AbstractMassMatrix</span><span class="p">):</span>
@@ -371,7 +383,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">number_of_vectors</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
@@ -386,18 +398,18 @@
 
         <span class="k">if</span> <span class="n">starting_position</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">starting_gradient</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">_warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="n">f</span><span class="s2">&quot;The LBFGS-style mass matrix did either not receive a starting &quot;</span>
-                <span class="n">f</span><span class="s2">&quot;coordinate or a starting gradient. We will use a random initial &quot;</span>
-                <span class="n">f</span><span class="s2">&quot;point and gradient.&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">&quot;The LBFGS-style mass matrix did either not receive a starting &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;coordinate or a starting gradient. We will use a unit initial &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;point (m=1) and gradient (g=1).&quot;</span><span class="p">,</span>
                 <span class="ne">Warning</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">starting_gradient</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)</span>
-            <span class="n">starting_position</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)</span>
+            <span class="n">starting_gradient</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">starting_position</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;LBFGS-style mass matrix&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">dimensions</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">number_of_vectors</span> <span class="o">=</span> <span class="n">number_of_vectors</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">current_number_of_gradients</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currently_stored_gradients</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">current_position</span> <span class="o">=</span> <span class="n">starting_position</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_gradient</span> <span class="o">=</span> <span class="n">starting_gradient</span>
@@ -413,162 +425,163 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">max_determinant_change</span> <span class="o">=</span> <span class="n">max_determinant_change</span>
 
-<div class="viewcode-block" id="LBFGS.kinetic_energy"><a class="viewcode-back" href="../../api/massmatrices/LBFGS.html#hmc_tomography.MassMatrices.LBFGS.kinetic_energy">[docs]</a>    <span class="k">def</span> <span class="nf">kinetic_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">momentum</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">vdot</span><span class="p">(</span><span class="n">momentum</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Hinv</span><span class="p">(</span><span class="n">momentum</span><span class="p">))</span></div>
+    <span class="k">def</span> <span class="nf">kinetic_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">momentum</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">vdot</span><span class="p">(</span><span class="n">momentum</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Hinv</span><span class="p">(</span><span class="n">momentum</span><span class="p">))</span>
 
-<div class="viewcode-block" id="LBFGS.kinetic_energy_gradient"><a class="viewcode-back" href="../../api/massmatrices/LBFGS.html#hmc_tomography.MassMatrices.LBFGS.kinetic_energy_gradient">[docs]</a>    <span class="k">def</span> <span class="nf">kinetic_energy_gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">momentum</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Hinv</span><span class="p">(</span><span class="n">momentum</span><span class="p">)</span></div>
+    <span class="k">def</span> <span class="nf">kinetic_energy_gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">momentum</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Hinv</span><span class="p">(</span><span class="n">momentum</span><span class="p">)</span>
 
-<div class="viewcode-block" id="LBFGS.generate_momentum"><a class="viewcode-back" href="../../api/massmatrices/LBFGS.html#hmc_tomography.MassMatrices.LBFGS.generate_momentum">[docs]</a>    <span class="k">def</span> <span class="nf">generate_momentum</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">(</span><span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span></div>
+    <span class="k">def</span> <span class="nf">generate_momentum</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">(</span><span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
-<div class="viewcode-block" id="LBFGS.update"><a class="viewcode-back" href="../../api/massmatrices/LBFGS.html#hmc_tomography.MassMatrices.LBFGS.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">update_attempt</span> <span class="o">+=</span> <span class="mi">1</span>
 
-        <span class="k">if</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">current_number_of_gradients</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_vectors</span>
-            <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_attempt</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_interval</span>
-        <span class="p">):</span>
-            <span class="k">return</span>
+        <span class="c1"># if (</span>
+        <span class="c1">#     self.currently_stored_gradients == self.number_of_vectors</span>
+        <span class="c1">#     or self.update_attempt % self.update_interval</span>
+        <span class="c1"># ):</span>
+        <span class="c1">#     # Do nothing if we shouldn&#39;t do anything</span>
+        <span class="c1">#     return</span>
 
-        <span class="n">s</span> <span class="o">=</span> <span class="n">m</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_position</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">g</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_gradient</span>
+        <span class="c1"># Calculate separation and gradient change</span>
+        <span class="n">s_update</span> <span class="o">=</span> <span class="n">m</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_position</span>
+        <span class="n">y_update</span> <span class="o">=</span> <span class="n">g</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_gradient</span>
 
-        <span class="k">assert</span> <span class="n">s</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">s_update</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">Assertions</span><span class="o">.</span><span class="n">v_shape</span>
+        <span class="k">assert</span> <span class="n">y_update</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">Assertions</span><span class="o">.</span><span class="n">v_shape</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">current_position</span> <span class="o">=</span> <span class="n">m</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">current_gradient</span> <span class="o">=</span> <span class="n">g</span>
-
-        <span class="c1"># Compute auxiliary stuff</span>
-
-        <span class="n">rho</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">vdot</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-
+        <span class="n">rho</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">vdot</span><span class="p">(</span><span class="n">s_update</span><span class="p">,</span> <span class="n">y_update</span><span class="p">)</span>
         <span class="c1"># Do nothing unless rho is positive.</span>
-        <span class="k">if</span> <span class="n">rho</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
 
-            <span class="n">Hinv_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Hinv</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-            <span class="n">gamma2</span> <span class="o">=</span> <span class="n">rho</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">vdot</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="n">rho</span>
-            <span class="n">beta</span> <span class="o">=</span> <span class="n">gamma2</span> <span class="o">*</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">vdot</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">rho</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">rho</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">rho</span><span class="p">):</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_position</span> <span class="o">=</span> <span class="n">m</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_gradient</span> <span class="o">=</span> <span class="n">g</span>
+
+            <span class="n">Hinv_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Hinv</span><span class="p">(</span><span class="n">y_update</span><span class="p">)</span>
+
+            <span class="n">gamma2</span> <span class="o">=</span> <span class="n">rho</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">vdot</span><span class="p">(</span><span class="n">y_update</span><span class="p">,</span> <span class="n">y_update</span><span class="p">)</span> <span class="o">+</span> <span class="n">rho</span>
+
+            <span class="n">beta</span> <span class="o">=</span> <span class="n">gamma2</span> <span class="o">*</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">vdot</span><span class="p">(</span><span class="n">s_update</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">(</span><span class="n">s_update</span><span class="p">))</span>
             <span class="n">theta</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rho</span> <span class="o">/</span> <span class="p">(</span><span class="n">beta</span> <span class="o">*</span> <span class="n">gamma2</span><span class="p">))</span>
 
-            <span class="n">a</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">gamma2</span><span class="p">)</span> <span class="o">*</span> <span class="n">s</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">gamma2</span><span class="p">)</span> <span class="o">*</span> <span class="n">s_update</span>
             <span class="n">b</span> <span class="o">=</span> <span class="p">(</span><span class="n">rho</span> <span class="o">/</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">gamma2</span><span class="p">))</span> <span class="o">*</span> <span class="n">Hinv_y</span>
 
-            <span class="n">u</span> <span class="o">=</span> <span class="n">a</span>
-            <span class="n">v</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">(</span><span class="n">b</span> <span class="o">+</span> <span class="n">theta</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span>
+            <span class="n">u_update</span> <span class="o">=</span> <span class="n">a</span>
+            <span class="n">v_update</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">(</span><span class="n">b</span> <span class="o">+</span> <span class="n">theta</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span>
 
-            <span class="k">assert</span> <span class="n">u</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="k">assert</span> <span class="n">v</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">u_update</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">Assertions</span><span class="o">.</span><span class="n">v_shape</span>
+            <span class="k">assert</span> <span class="n">v_update</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">Assertions</span><span class="o">.</span><span class="n">v_shape</span>
 
-            <span class="n">sigma_threshold</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">vdot</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)))</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="n">sigma_threshold</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">vdot</span><span class="p">(</span><span class="n">u_update</span><span class="p">,</span> <span class="n">v_update</span><span class="p">)))</span> <span class="o">**</span> <span class="mi">2</span>
 
             <span class="k">if</span> <span class="n">sigma_threshold</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_determinant_change</span><span class="p">:</span>
                 <span class="n">r</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_determinant_change</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">max_determinant_change</span> <span class="o">*</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">vdot</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">max_determinant_change</span> <span class="o">*</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">vdot</span><span class="p">(</span><span class="n">u_update</span><span class="p">,</span> <span class="n">v_update</span><span class="p">)</span>
                 <span class="p">)</span>
-                <span class="n">v</span> <span class="o">=</span> <span class="n">r</span> <span class="o">*</span> <span class="n">v</span>
+                <span class="n">v_update</span> <span class="o">=</span> <span class="n">r</span> <span class="o">*</span> <span class="n">v_update</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_number_of_gradients</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_vectors</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">current_number_of_gradients</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currently_stored_gradients</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_vectors</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">currently_stored_gradients</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># todo get rid of this abysmal thing</span>
+                <span class="c1"># self.s[:, 1:-1] = self.s[:, 2:]</span>
+                <span class="c1"># self.y[:, 1:-1] = self.y[:, 2:]</span>
+                <span class="c1"># self.u[:, 1:-1] = self.u[:, 2:]</span>
+                <span class="c1"># self.v[:, 1:-1] = self.v[:, 2:]</span>
+                <span class="c1"># self.vTu[1:-1] = self.vTu[2:]</span>
+
+                <span class="c1"># Next two blocks are equivalent</span>
+
+                <span class="c1"># 1</span>
+                <span class="c1"># self.s[:, :-1] = self.s[:, 1:]</span>
+                <span class="c1"># self.y[:, :-1] = self.y[:, 1:]</span>
+                <span class="c1"># self.u[:, :-1] = self.u[:, 1:]</span>
+                <span class="c1"># self.v[:, :-1] = self.v[:, 1:]</span>
+                <span class="c1"># self.vTu[:-1] = self.vTu[1:]</span>
+
+                <span class="c1"># 2</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">s</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">u</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">u</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">vTu</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vTu</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vTu</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vTu</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-            <span class="k">assert</span> <span class="n">s</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="k">assert</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="k">assert</span> <span class="n">u</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="k">assert</span> <span class="n">v</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">s_update</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">Assertions</span><span class="o">.</span><span class="n">v_shape</span>
+            <span class="k">assert</span> <span class="n">y_update</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">Assertions</span><span class="o">.</span><span class="n">v_shape</span>
+            <span class="k">assert</span> <span class="n">u_update</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">Assertions</span><span class="o">.</span><span class="n">v_shape</span>
+            <span class="k">assert</span> <span class="n">v_update</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">Assertions</span><span class="o">.</span><span class="n">v_shape</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_number_of_gradients</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_number_of_gradients</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">u</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_number_of_gradients</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">u</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_number_of_gradients</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">vTu</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_number_of_gradients</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">vdot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">u</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currently_stored_gradients</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">s_update</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currently_stored_gradients</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_update</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">u</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currently_stored_gradients</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">u_update</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currently_stored_gradients</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">v_update</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vTu</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">currently_stored_gradients</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">vdot</span><span class="p">(</span>
+                <span class="n">v_update</span><span class="p">,</span> <span class="n">u_update</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not updating. Rho: </span><span class="si">{</span><span class="n">rho</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="LBFGS.S"><a class="viewcode-back" href="../../api/massmatrices/LBFGS.html#hmc_tomography.MassMatrices.LBFGS.S">[docs]</a>    <span class="k">def</span> <span class="nf">S</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">S</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
 
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_number_of_gradients</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currently_stored_gradients</span><span class="p">):</span>
             <span class="n">h</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">h</span>
                 <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">vdot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">u</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">h</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">vTu</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="p">)</span>
-        <span class="k">assert</span> <span class="n">h</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">h</span></div>
+        <span class="k">assert</span> <span class="n">h</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">Assertions</span><span class="o">.</span><span class="n">v_shape</span>
+        <span class="k">return</span> <span class="n">h</span>
 
-<div class="viewcode-block" id="LBFGS.ST"><a class="viewcode-back" href="../../api/massmatrices/LBFGS.html#hmc_tomography.MassMatrices.LBFGS.ST">[docs]</a>    <span class="k">def</span> <span class="nf">ST</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">ST</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
 
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_number_of_gradients</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currently_stored_gradients</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
             <span class="n">h</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">h</span>
                 <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">u</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">vdot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">h</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">vTu</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="p">)</span>
-        <span class="k">assert</span> <span class="n">h</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">h</span></div>
+        <span class="k">assert</span> <span class="n">h</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">Assertions</span><span class="o">.</span><span class="n">v_shape</span>
+        <span class="k">return</span> <span class="n">h</span>
 
-<div class="viewcode-block" id="LBFGS.Sinv"><a class="viewcode-back" href="../../api/massmatrices/LBFGS.html#hmc_tomography.MassMatrices.LBFGS.Sinv">[docs]</a>    <span class="k">def</span> <span class="nf">Sinv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">Sinv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
 
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_number_of_gradients</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currently_stored_gradients</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
             <span class="n">h</span> <span class="o">=</span> <span class="n">h</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">vdot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">u</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">h</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="n">h</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">h</span></div>
+        <span class="k">assert</span> <span class="n">h</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">Assertions</span><span class="o">.</span><span class="n">v_shape</span>
+        <span class="k">return</span> <span class="n">h</span>
 
-<div class="viewcode-block" id="LBFGS.SinvT"><a class="viewcode-back" href="../../api/massmatrices/LBFGS.html#hmc_tomography.MassMatrices.LBFGS.SinvT">[docs]</a>    <span class="k">def</span> <span class="nf">SinvT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">SinvT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
 
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_number_of_gradients</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currently_stored_gradients</span><span class="p">):</span>
             <span class="n">h</span> <span class="o">=</span> <span class="n">h</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">u</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">vdot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">h</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="n">h</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">h</span></div>
+        <span class="k">assert</span> <span class="n">h</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">Assertions</span><span class="o">.</span><span class="n">v_shape</span>
+        <span class="k">return</span> <span class="n">h</span>
 
-<div class="viewcode-block" id="LBFGS.H"><a class="viewcode-back" href="../../api/massmatrices/LBFGS.html#hmc_tomography.MassMatrices.LBFGS.H">[docs]</a>    <span class="k">def</span> <span class="nf">H</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">H</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
 
         <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ST</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="n">h</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">(</span><span class="n">h</span><span class="p">)</span></div>
+        <span class="k">assert</span> <span class="n">h</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">Assertions</span><span class="o">.</span><span class="n">v_shape</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
 
-<div class="viewcode-block" id="LBFGS.Hinv"><a class="viewcode-back" href="../../api/massmatrices/LBFGS.html#hmc_tomography.MassMatrices.LBFGS.Hinv">[docs]</a>    <span class="k">def</span> <span class="nf">Hinv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">Hinv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
 
         <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Sinv</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="n">h</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">SinvT</span><span class="p">(</span><span class="n">h</span><span class="p">)</span></div>
+        <span class="k">assert</span> <span class="n">h</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">Assertions</span><span class="o">.</span><span class="n">v_shape</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">SinvT</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
 
-<div class="viewcode-block" id="LBFGS.logdet"><a class="viewcode-back" href="../../api/massmatrices/LBFGS.html#hmc_tomography.MassMatrices.LBFGS.logdet">[docs]</a>    <span class="k">def</span> <span class="nf">logdet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">logdet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="n">logdet</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_number_of_gradients</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currently_stored_gradients</span><span class="p">):</span>
             <span class="n">alpha</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">u</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]))</span>
             <span class="n">logdet</span> <span class="o">+=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">alpha</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">logdet</span></div></div>
+        <span class="k">return</span> <span class="n">logdet</span>
 
-
-<span class="c1"># class SparseDecomposed(_AbstractMassMatrix):</span>
-<span class="c1">#     def __init__(self, decomposition):</span>
-<span class="c1">#         raise NotImplementedError(&quot;This class is not production ready&quot;)</span>
-<span class="c1">#         self.decomposition = decomposition</span>
-<span class="c1">#         self.dimensions = self.decomposition.shape[0]</span>
-
-<span class="c1">#     def kinetic_energy(self, momentum: _numpy.ndarray) -&gt; float:</span>
-<span class="c1">#         raise NotImplementedError(&quot;This class is not production ready&quot;)</span>
-<span class="c1">#         return (</span>
-<span class="c1">#             0.5 * _numpy.linalg.norm(_spsolve(self.decomposition, momentum)) ** 2</span>
-<span class="c1">#         ).item()</span>
-
-<span class="c1">#     def kinetic_energy_gradient(self, momentum: _numpy.ndarray) -&gt; _numpy.ndarray:</span>
-<span class="c1">#         raise NotImplementedError(&quot;This class is not production ready&quot;)</span>
-<span class="c1">#         return _spsolve(self.decomposition, momentum)[:, _numpy.newaxis]</span>
-
-<span class="c1">#     def generate_momentum(self) -&gt; _numpy.ndarray:</span>
-<span class="c1">#         raise NotImplementedError(&quot;This class is not production ready&quot;)</span>
-<span class="c1">#         return (</span>
-<span class="c1">#             self.decomposition</span>
-<span class="c1">#             @ _numpy.random.randn(self.decomposition.shape[0])[:, _numpy.newaxis]</span>
-<span class="c1">#         )</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create_default</span><span class="p">(</span><span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;LBFGS&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">LBFGS</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)</span></div>
 </pre></div>
 
            </div>
@@ -581,11 +594,19 @@
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2019-2020, Andrea Zunino, Andreas Fichtner, Lars Gebraad
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -596,7 +617,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,19 @@
   
 
   
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -26,17 +32,12 @@
         <script src="../../../_static/doctools.js"></script>
         <script src="../../../_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
@@ -52,7 +53,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> HMC Tom
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> HMC Tom
           
 
           
@@ -82,6 +83,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -102,6 +104,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -140,7 +143,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
@@ -162,16 +165,16 @@
   <h1>Source code for hmc_tomography.Distributions.LinearMatrix</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Distribution classes and associated methods.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">ABC</span> <span class="k">as</span> <span class="n">_ABC</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">abstractmethod</span> <span class="k">as</span> <span class="n">_abstractmethod</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">List</span> <span class="k">as</span> <span class="n">_List</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Union</span> <span class="k">as</span> <span class="n">_Union</span>
 <span class="kn">import</span> <span class="nn">warnings</span> <span class="k">as</span> <span class="nn">_warnings</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span> <span class="k">as</span> <span class="n">_Union</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">_numpy</span>
 <span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">_scipy</span>
-<span class="kn">import</span> <span class="nn">scipy.sparse.linalg</span> <span class="k">as</span> <span class="nn">_sparse_linalg</span>
 <span class="kn">import</span> <span class="nn">scipy.sparse</span> <span class="k">as</span> <span class="nn">_sparse</span>
-<span class="kn">from</span> <span class="nn">hmc_tomography.Distributions</span> <span class="k">import</span> <span class="n">_AbstractDistribution</span>
+<span class="kn">import</span> <span class="nn">scipy.sparse.linalg</span> <span class="k">as</span> <span class="nn">_sparse_linalg</span>
+
+<span class="kn">from</span> <span class="nn">hmc_tomography.Distributions</span> <span class="kn">import</span> <span class="n">_AbstractDistribution</span>
+<span class="kn">from</span> <span class="nn">hmc_tomography.Helpers</span> <span class="kn">import</span> <span class="n">RandomMatrices</span> <span class="k">as</span> <span class="n">_RandomMatrices</span>
 
 
 <div class="viewcode-block" id="LinearMatrix"><a class="viewcode-back" href="../../../api/distributions/LinearMatrix.html#hmc_tomography.Distributions.LinearMatrix">[docs]</a><span class="k">class</span> <span class="nc">LinearMatrix</span><span class="p">(</span><span class="n">_AbstractDistribution</span><span class="p">):</span>
@@ -179,11 +182,11 @@
 <span class="sd">    :math:`G \\mathbf{m} = \\mathbf{d}` coupled with Gaussian observational errors.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">G</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">_sparse</span><span class="o">.</span><span class="n">spmatrix</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">d</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">data_covariance</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">_sparse</span><span class="o">.</span><span class="n">spmatrix</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">G</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">_sparse</span><span class="o">.</span><span class="n">spmatrix</span><span class="p">],</span>
+        <span class="n">d</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">data_covariance</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">_sparse</span><span class="o">.</span><span class="n">spmatrix</span><span class="p">],</span>
         <span class="n">dtype</span><span class="o">=</span><span class="n">_numpy</span><span class="o">.</span><span class="n">single</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
@@ -204,7 +207,7 @@
                 <span class="s2">&quot;Didn&#39;t understand the data vector object. &quot;</span>
                 <span class="s2">&quot;Should be a &quot;</span>
                 <span class="s2">&quot;NumPy column vector (ndarray: [datapoints, 1]). &quot;</span>
-                <span class="n">f</span><span class="s2">&quot;{type(d)}, </span><span class="si">{d.shape}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">d</span><span class="p">)</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">d</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
 
         <span class="c1"># Check forward model matrix ---------------------------------------------------</span>
@@ -221,8 +224,9 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;Didn&#39;t understand the forward model matrix object.&quot;</span>
                 <span class="s2">&quot;Should either be &quot;</span>
-                <span class="s2">&quot;a NumPy square matrix (ndarray: [self.dimensions, self.dimensions]) or &quot;</span>
-                <span class="s2">&quot;a SciPy spmatrix derived type (spmatrix: [self.dimensions, self.dimensions]).&quot;</span>
+                <span class="s2">&quot;a NumPy square matrix (ndarray: [self.dimensions, self.dimensions]) &quot;</span>
+                <span class="s2">&quot;or a SciPy spmatrix derived type (spmatrix: [self.dimensions, &quot;</span>
+                <span class="s2">&quot;self.dimensions]).&quot;</span>
             <span class="p">)</span>
 
         <span class="c1"># Check data covariance --------------------------------------------------------</span>
@@ -268,33 +272,46 @@
 <div class="viewcode-block" id="LinearMatrix.misfit"><a class="viewcode-back" href="../../../api/distributions/LinearMatrix.html#hmc_tomography.Distributions.LinearMatrix.misfit">[docs]</a>    <span class="k">def</span> <span class="nf">misfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Distribution</span><span class="o">.</span><span class="n">misfit</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Distribution</span><span class="o">.</span><span class="n">misfit</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="LinearMatrix.gradient"><a class="viewcode-back" href="../../../api/distributions/LinearMatrix.html#hmc_tomography.Distributions.LinearMatrix.gradient">[docs]</a>    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Distribution</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="LinearMatrix.generate"><a class="viewcode-back" href="../../../api/distributions/LinearMatrix.html#hmc_tomography.Distributions.LinearMatrix.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Distribution</span><span class="o">.</span><span class="n">generate</span><span class="p">()</span></div></div>
+    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Distribution</span><span class="o">.</span><span class="n">generate</span><span class="p">()</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create_default</span><span class="p">(</span>
+        <span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">_numpy</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;LinearMatrix&quot;</span><span class="p">:</span>
+        <span class="n">G</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">dimensions</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">data_variance</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">return</span> <span class="n">LinearMatrix</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">data_variance</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span></div>
 
 
 <span class="c1"># 1 - Dense G, scalar/vector covariance</span>
 <span class="k">class</span> <span class="nc">_LinearMatrix_dense_forward_simple_covariance</span><span class="p">(</span><span class="n">_AbstractDistribution</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">G</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">d</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">G</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">d</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">data_variance</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span>
             <span class="nb">float</span><span class="p">,</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># The name variance is justified, as only used on diagonal</span>
+        <span class="p">],</span>  <span class="c1"># The name variance is justified, as only used on diagonal</span>
         <span class="n">dtype</span><span class="o">=</span><span class="n">_numpy</span><span class="o">.</span><span class="n">single</span><span class="p">,</span>
         <span class="n">premultiplication</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_variance</span> <span class="o">=</span> <span class="n">data_variance</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">data_variance</span><span class="p">)</span> <span class="o">==</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_variance</span> <span class="o">=</span> <span class="n">data_variance</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># There are no float32 for normal numeric instances</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_variance</span> <span class="o">=</span> <span class="n">data_variance</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_variance</span> <span class="o">**</span> <span class="mf">0.5</span>
 
         <span class="c1"># Depending on whether the data or the model space dimension is bigger,</span>
@@ -322,7 +339,7 @@
 
     <span class="k">def</span> <span class="nf">misfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">premultiplication</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">(</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span>
                 <span class="mf">0.5</span>
                 <span class="o">*</span> <span class="p">(</span>
                     <span class="n">coordinates</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GtG</span> <span class="o">@</span> <span class="n">coordinates</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Gtd0</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtd</span>
@@ -330,9 +347,14 @@
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span>
-                <span class="mf">0.5</span>
-                <span class="o">*</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">@</span> <span class="n">coordinates</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_sigma</span><span class="p">)</span>
-                <span class="o">**</span> <span class="mi">2</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+                <span class="o">+</span> <span class="p">(</span>
+                    <span class="mf">0.5</span>
+                    <span class="o">*</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span>
+                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">@</span> <span class="n">coordinates</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_sigma</span>
+                    <span class="p">)</span>
+                    <span class="o">**</span> <span class="mi">2</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
             <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
@@ -344,21 +366,32 @@
     <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create_default</span><span class="p">(</span>
+        <span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">_numpy</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;_LinearMatrix_dense_forward_simple_covariance&quot;</span><span class="p">:</span>
+        <span class="n">G</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">dimensions</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">data_variance</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">_LinearMatrix_dense_forward_simple_covariance</span><span class="p">(</span>
+            <span class="n">G</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">data_variance</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span>
+        <span class="p">)</span>
+
 
 <span class="c1"># 2 - Dense G, dense covariance</span>
 <span class="k">class</span> <span class="nc">_LinearMatrix_dense_forward_dense_covariance</span><span class="p">(</span><span class="n">_AbstractDistribution</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">G</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">d</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">data_covariance</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">G</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">d</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">data_covariance</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">dtype</span><span class="o">=</span><span class="n">_numpy</span><span class="o">.</span><span class="n">single</span><span class="p">,</span>
         <span class="n">premultiplication</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_covariance</span> <span class="o">=</span> <span class="n">data_covariance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_covariance</span> <span class="o">=</span> <span class="n">data_covariance</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
 
         <span class="c1"># Depending on whether the data or the model space dimension is bigger,</span>
         <span class="c1"># performance of the misfit and gradient algorithm differs. If the data</span>
@@ -370,25 +403,25 @@
 
         <span class="c1"># Inverse of the data covariance as needed both with and without</span>
         <span class="c1"># premultiplication</span>
-        <span class="n">invcov</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_covariance</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">invcov</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_covariance</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">premultiplication</span><span class="p">:</span>
             <span class="c1"># Precompute factors</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">GtG</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">invcov</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Gtd0</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">invcov</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dtd</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">invcov</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">GtG</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">invcov</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Gtd0</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">invcov</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dtd</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">invcov</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
 
             <span class="c1"># Free up unnecessary variables</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_covariance</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">Gt</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">T</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">cholesky_upper_inv_covariance</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cholesky</span><span class="p">(</span>
-                <span class="n">invcov</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cholesky_upper_inv_covariance</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cholesky</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">invcov</span>
             <span class="p">)</span><span class="o">.</span><span class="n">T</span>
 
     <span class="k">def</span> <span class="nf">misfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">premultiplication</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">(</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span>
                 <span class="mf">0.5</span>
                 <span class="o">*</span> <span class="p">(</span>
                     <span class="n">coordinates</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GtG</span> <span class="o">@</span> <span class="n">coordinates</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Gtd0</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtd</span>
@@ -396,30 +429,47 @@
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span>
-                <span class="mf">0.5</span>
-                <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cholesky_upper_inv_covariance</span> <span class="o">@</span> <span class="p">(</span><span class="n">G</span> <span class="o">@</span> <span class="n">m</span> <span class="o">-</span> <span class="n">d0</span><span class="p">))</span>
-                <span class="o">**</span> <span class="mi">2</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+                <span class="o">+</span> <span class="p">(</span>
+                    <span class="mf">0.5</span>
+                    <span class="o">*</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">cholesky_upper_inv_covariance</span>
+                        <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">@</span> <span class="n">coordinates</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="o">**</span> <span class="mi">2</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
             <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">premultiplication</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GtG</span> <span class="o">@</span> <span class="n">coordinates</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">Gtd0</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Gt</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">inv_covariance</span> <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">@</span> <span class="n">coordinates</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Gt</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">invcov</span> <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">@</span> <span class="n">coordinates</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create_default</span><span class="p">(</span>
+        <span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">_numpy</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;_LinearMatrix_dense_forward_dense_covariance&quot;</span><span class="p">:</span>
+        <span class="n">G</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">dimensions</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">data_variance</span> <span class="o">=</span> <span class="n">_RandomMatrices</span><span class="o">.</span><span class="n">random_correlation_matrix</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_LinearMatrix_dense_forward_dense_covariance</span><span class="p">(</span>
+            <span class="n">G</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">data_variance</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span>
+        <span class="p">)</span>
+
 
 <span class="c1"># 3 - Sparse G, scalar vector covariance</span>
 <span class="k">class</span> <span class="nc">_LinearMatrix_sparse_forward_simple_covariance</span><span class="p">(</span><span class="n">_AbstractDistribution</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">G</span><span class="p">:</span> <span class="n">_scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">spmatrix</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">d</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">G</span><span class="p">:</span> <span class="n">_scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">spmatrix</span><span class="p">,</span>
+        <span class="n">d</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">data_variance</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span>
             <span class="nb">float</span><span class="p">,</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># The name variance is justified, as only used on diagonal</span>
+        <span class="p">],</span>  <span class="c1"># The name variance is justified, as only used on diagonal</span>
         <span class="n">dtype</span><span class="o">=</span><span class="n">_numpy</span><span class="o">.</span><span class="n">single</span><span class="p">,</span>
         <span class="n">premultiplication</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">use_mkl</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -427,9 +477,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">_scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_variance</span> <span class="o">=</span> <span class="n">data_variance</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">data_variance</span><span class="p">)</span> <span class="o">==</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_variance</span> <span class="o">=</span> <span class="n">data_variance</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_variance</span> <span class="o">=</span> <span class="n">data_variance</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_variance</span> <span class="o">**</span> <span class="mf">0.5</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_mkl</span> <span class="o">=</span> <span class="n">use_mkl</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">dtype</span>
 
         <span class="c1"># Depending on whether the data or the model space dimension is bigger,</span>
         <span class="c1"># performance of the misfit and gradient algorithm differs. If the data</span>
@@ -457,17 +511,17 @@
             <span class="c1"># Free up unnecessary variables</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_variance</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_sigma</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Gt</span><span class="p">:</span> <span class="n">_scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">spmatrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">T</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Gt</span><span class="p">:</span> <span class="n">_scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">spmatrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
 
             <span class="c1"># Import MKL</span>
             <span class="k">if</span> <span class="n">use_mkl</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="c1"># Fails with OSError if MKL is not found</span>
-                    <span class="kn">from</span> <span class="nn">hmc_tomography.Helpers.mkl_interface</span> <span class="k">import</span> <span class="n">sparse_gemv</span>
+                    <span class="kn">from</span> <span class="nn">hmc_tomography.Helpers.InterfaceMKL</span> <span class="kn">import</span> <span class="n">sparse_gemv</span>
 
                     <span class="c1"># MKL binding works only for sparse matrices</span>
                     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">G</span><span class="p">)</span> <span class="o">!=</span> <span class="n">_sparse</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">_sparse</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">_sparse</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">(</span><span class="n">G</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
 
                     <span class="bp">self</span><span class="o">.</span><span class="n">use_mkl</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -478,24 +532,25 @@
 
                 <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
                     <span class="n">_warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                        <span class="n">f</span><span class="s2">&quot;MKL not found, will evaluate matrix-vector products using SciPy.&quot;</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s2">&quot;MKL not found, will evaluate matrix-vector products using &quot;</span>
+                        <span class="s2">&quot;SciPy.&quot;</span><span class="p">,</span>
                         <span class="ne">Warning</span><span class="p">,</span>
                     <span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">use_mkl</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="n">_warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Not using MKL because: </span><span class="si">{e}</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="ne">Warning</span><span class="p">)</span>
+                    <span class="n">_warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not using MKL because: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="ne">Warning</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">use_mkl</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="nf">misfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">premultiplication</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">(</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span>
                 <span class="mf">0.5</span>
                 <span class="o">*</span> <span class="p">(</span>
                     <span class="n">coordinates</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GtG</span> <span class="o">@</span> <span class="n">coordinates</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Gtd0</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtd</span>
                 <span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_mkl</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">(</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span>
                 <span class="mf">0.5</span>
                 <span class="o">*</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span>
                     <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sparse_gemv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_sigma</span>
@@ -504,9 +559,14 @@
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span>
-                <span class="mf">0.5</span>
-                <span class="o">*</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">@</span> <span class="n">coordinates</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_sigma</span><span class="p">)</span>
-                <span class="o">**</span> <span class="mi">2</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+                <span class="o">+</span> <span class="p">(</span>
+                    <span class="mf">0.5</span>
+                    <span class="o">*</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span>
+                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">@</span> <span class="n">coordinates</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_sigma</span>
+                    <span class="p">)</span>
+                    <span class="o">**</span> <span class="mi">2</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
             <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
@@ -523,14 +583,25 @@
     <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create_default</span><span class="p">(</span>
+        <span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">use_mkl</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">_numpy</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;_LinearMatrix_sparse_forward_simple_covariance&quot;</span><span class="p">:</span>
+        <span class="n">G</span> <span class="o">=</span> <span class="n">_sparse</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">dimensions</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">data_variance</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">_LinearMatrix_sparse_forward_simple_covariance</span><span class="p">(</span>
+            <span class="n">G</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">data_variance</span><span class="p">,</span> <span class="n">use_mkl</span><span class="o">=</span><span class="n">use_mkl</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span>
+        <span class="p">)</span>
+
 
 <span class="c1"># 4 - Sparse G, sparse covariance</span>
 <span class="k">class</span> <span class="nc">_LinearMatrix_sparse_forward_sparse_covariance</span><span class="p">(</span><span class="n">_AbstractDistribution</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">G</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">d</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">data_covariance</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">G</span><span class="p">:</span> <span class="n">_scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">spmatrix</span><span class="p">,</span>
+        <span class="n">d</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">data_covariance</span><span class="p">:</span> <span class="n">_scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">spmatrix</span><span class="p">,</span>
         <span class="n">dtype</span><span class="o">=</span><span class="n">_numpy</span><span class="o">.</span><span class="n">single</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -538,16 +609,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">data_covariance</span><span class="p">),</span> <span class="n">_scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">spmatrix</span><span class="p">):</span>
-            <span class="n">data_covariance</span> <span class="o">=</span> <span class="n">_scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">(</span><span class="n">data_covariance</span><span class="p">)</span>
+            <span class="n">data_covariance</span> <span class="o">=</span> <span class="n">_scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">(</span><span class="n">data_covariance</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">data_covariance</span> <span class="o">=</span> <span class="n">data_covariance</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">Gt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">tocsr</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">T</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">factorized_covariance</span> <span class="o">=</span> <span class="n">_sparse_linalg</span><span class="o">.</span><span class="n">factorized</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_covariance</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">factorized_covariance</span> <span class="o">=</span> <span class="n">_sparse_linalg</span><span class="o">.</span><span class="n">factorized</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_covariance</span><span class="o">.</span><span class="n">tocsc</span><span class="p">()</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">misfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">(</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span>
             <span class="mf">0.5</span>
             <span class="o">*</span> <span class="p">(</span>
                 <span class="p">(</span><span class="n">coordinates</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">Gt</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">)</span>
@@ -560,6 +633,18 @@
 
     <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create_default</span><span class="p">(</span>
+        <span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">_numpy</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;_LinearMatrix_sparse_forward_sparse_covariance&quot;</span><span class="p">:</span>
+        <span class="n">G</span> <span class="o">=</span> <span class="n">_sparse</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">dimensions</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">data_variance</span> <span class="o">=</span> <span class="n">_sparse</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_LinearMatrix_sparse_forward_sparse_covariance</span><span class="p">(</span>
+            <span class="n">G</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">data_variance</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span>
+        <span class="p">)</span>
+
 </pre></div>
 
            </div>
@@ -572,11 +657,19 @@
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2019-2020, Andrea Zunino, Andreas Fichtner, Lars Gebraad
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -587,7 +680,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

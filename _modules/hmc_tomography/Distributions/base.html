@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,19 @@
   
 
   
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -26,17 +32,12 @@
         <script src="../../../_static/doctools.js"></script>
         <script src="../../../_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
@@ -52,7 +53,7 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home"> HMC Tom
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> HMC Tom
           
 
           
@@ -82,6 +83,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -102,6 +104,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -140,7 +143,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
@@ -160,17 +163,19 @@
            <div itemprop="articleBody">
             
   <h1>Source code for hmc_tomography.Distributions.base</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">ABC</span> <span class="k">as</span> <span class="n">_ABC</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">ABCMeta</span> <span class="k">as</span> <span class="n">_ABCMeta</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">abstractmethod</span> <span class="k">as</span> <span class="n">_abstractmethod</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">List</span> <span class="k">as</span> <span class="n">_List</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Union</span> <span class="k">as</span> <span class="n">_Union</span>
-<span class="kn">import</span> <span class="nn">warnings</span> <span class="k">as</span> <span class="nn">_warnings</span>
+<span></span><span class="kn">import</span> <span class="nn">warnings</span> <span class="k">as</span> <span class="nn">_warnings</span>
+
+<span class="c1"># from abc import ABCMeta as _ABCMeta</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span> <span class="k">as</span> <span class="n">_abstractmethod</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span> <span class="k">as</span> <span class="n">_List</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span> <span class="k">as</span> <span class="n">_Union</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">_numpy</span>
-<span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">_scipy</span>
-<span class="kn">import</span> <span class="nn">scipy.sparse</span> <span class="k">as</span> <span class="nn">_sparse</span>
-<span class="kn">from</span> <span class="nn">hmc_tomography.Helpers.better_abc</span> <span class="k">import</span> <span class="n">ABCMeta</span> <span class="k">as</span> <span class="n">_ABCMeta</span>
-<span class="kn">from</span> <span class="nn">hmc_tomography.Helpers.better_abc</span> <span class="k">import</span> <span class="n">abstract_attribute</span> <span class="k">as</span> <span class="n">_abstract_attribute</span>
+
+<span class="kn">from</span> <span class="nn">hmc_tomography.Helpers</span> <span class="kn">import</span> <span class="n">RandomMatrices</span> <span class="k">as</span> <span class="n">_RandomMatrices</span>
+<span class="kn">from</span> <span class="nn">hmc_tomography.Helpers.BetterABC</span> <span class="kn">import</span> <span class="n">abstractattribute</span> <span class="k">as</span> <span class="n">_abstractattribute</span>
+<span class="kn">from</span> <span class="nn">hmc_tomography.Helpers.BetterABC</span> <span class="kn">import</span> <span class="n">ABCMeta</span> <span class="k">as</span> <span class="n">_ABCMeta</span>
+<span class="kn">from</span> <span class="nn">hmc_tomography.Helpers</span> <span class="kn">import</span> <span class="n">CustomExceptions</span> <span class="k">as</span> <span class="n">_CustomExceptions</span>
 
 
 <div class="viewcode-block" id="_AbstractDistribution"><a class="viewcode-back" href="../../../api/distributions/_AbstractDistribution.html#hmc_tomography.Distributions._AbstractDistribution">[docs]</a><span class="k">class</span> <span class="nc">_AbstractDistribution</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">_ABCMeta</span><span class="p">):</span>
@@ -181,12 +186,12 @@
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;abstract distribution&quot;</span>
     <span class="sd">&quot;&quot;&quot;Name of the distribution.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="_AbstractDistribution.dimensions"><a class="viewcode-back" href="../../../api/distributions/_AbstractDistribution.html#hmc_tomography.Distributions._AbstractDistribution.dimensions">[docs]</a>    <span class="nd">@_abstract_attribute</span>
+<div class="viewcode-block" id="_AbstractDistribution.dimensions"><a class="viewcode-back" href="../../../api/distributions/_AbstractDistribution.html#hmc_tomography.Distributions._AbstractDistribution.dimensions">[docs]</a>    <span class="nd">@_abstractattribute</span>
     <span class="k">def</span> <span class="nf">dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Number of dimensions of the model space.</span>
-<span class="sd">        </span>
+
 <span class="sd">        This is an abstract parameter. If it is not defined either in your class</span>
-<span class="sd">        directly or in its constructor (the __init__ function) then attempting to use </span>
+<span class="sd">        directly or in its constructor (the __init__ function) then attempting to use</span>
 <span class="sd">        the class will raise a NotImplementedError.&quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
@@ -222,7 +227,11 @@
 <span class="sd">        This method is called many times in an HMC appraisal. It is therefore</span>
 <span class="sd">        beneficial to optimize the implementation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
+        <span class="k">raise</span> <span class="n">_CustomExceptions</span><span class="o">.</span><span class="n">AbstractMethodError</span><span class="p">(</span>
+            <span class="s2">&quot;You tried accessing an abstract method directly through a class. This is &quot;</span>
+            <span class="s2">&quot;not allowed. Create an instance of this object and call this method from &quot;</span>
+            <span class="s2">&quot;the instance.&quot;</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="_AbstractDistribution.gradient"><a class="viewcode-back" href="../../../api/distributions/_AbstractDistribution.html#hmc_tomography.Distributions._AbstractDistribution.gradient">[docs]</a>    <span class="nd">@_abstractmethod</span>
     <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
@@ -240,7 +249,7 @@
 <span class="sd">            The distribution misfit gradient :math:`\\nabla_\\mathbf{m}\\chi`.</span>
 
 
-<span class="sd">        The distribution misfit gradient is related to the distribution probability </span>
+<span class="sd">        The distribution misfit gradient is related to the distribution probability</span>
 <span class="sd">        density as:</span>
 
 <span class="sd">        .. math::</span>
@@ -252,7 +261,11 @@
 <span class="sd">        This method is called many times in an HMC appraisal. It is therefore</span>
 <span class="sd">        beneficial to optimize the implementation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
+        <span class="k">raise</span> <span class="n">_CustomExceptions</span><span class="o">.</span><span class="n">AbstractMethodError</span><span class="p">(</span>
+            <span class="s2">&quot;You tried accessing an abstract method directly through a class. This is &quot;</span>
+            <span class="s2">&quot;not allowed. Create an instance of this object and call this method from &quot;</span>
+            <span class="s2">&quot;the instance.&quot;</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="_AbstractDistribution.generate"><a class="viewcode-back" href="../../../api/distributions/_AbstractDistribution.html#hmc_tomography.Distributions._AbstractDistribution.generate">[docs]</a>    <span class="nd">@_abstractmethod</span>
     <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
@@ -277,7 +290,21 @@
 <span class="sd">                raise NotImplementedError(&quot;This function is not implemented.&quot;)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
+        <span class="k">raise</span> <span class="n">_CustomExceptions</span><span class="o">.</span><span class="n">AbstractMethodError</span><span class="p">(</span>
+            <span class="s2">&quot;You tried accessing an abstract method directly through a class. This is &quot;</span>
+            <span class="s2">&quot;not allowed. Create an instance of this object and call this method from &quot;</span>
+            <span class="s2">&quot;the instance.&quot;</span>
+        <span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="nd">@_abstractmethod</span>
+    <span class="k">def</span> <span class="nf">create_default</span><span class="p">(</span><span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;_AbstractDistribution&quot;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">&quot;You tried creating a default distribution. Although you have used this &quot;</span>
+            <span class="s2">&quot;method correctly, it wasn&#39;t implemented in the derived class. Create the &quot;</span>
+            <span class="s2">&quot;static method `create_default(dimensions)` which returns a distribution, &quot;</span>
+            <span class="s2">&quot;and try calling this method again.&quot;</span>
+        <span class="p">)</span>
 
 <div class="viewcode-block" id="_AbstractDistribution.corrector"><a class="viewcode-back" href="../../../api/distributions/_AbstractDistribution.html#hmc_tomography.Distributions._AbstractDistribution.corrector">[docs]</a>    <span class="k">def</span> <span class="nf">corrector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">momentum</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Method to correct an HMC particle, which is called after every time</span>
@@ -312,8 +339,8 @@
 
 <div class="viewcode-block" id="_AbstractDistribution.update_bounds"><a class="viewcode-back" href="../../../api/distributions/_AbstractDistribution.html#hmc_tomography.Distributions._AbstractDistribution.update_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">update_bounds</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">lower_bounds</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
-        <span class="n">upper_bounds</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+        <span class="n">lower_bounds</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">upper_bounds</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Method to update bounds of a distribution distribution.</span>
 
@@ -341,17 +368,32 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># Check the types --------------------------------------------------------------</span>
-        <span class="k">if</span> <span class="n">lower_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">lower_bounds</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Lower bounds object not understood.&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">upper_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">upper_bounds</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Upper bounds object not understood.&quot;</span><span class="p">)</span>
+        <span class="n">old_limits</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span><span class="p">)</span>
 
         <span class="c1"># Set the bounds ---------------------------------------------------------------</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span> <span class="o">=</span> <span class="n">upper_bounds</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span> <span class="o">=</span> <span class="n">lower_bounds</span>
 
-        <span class="c1"># Check for both arrays, if they are not None, if the dimension is correct. ----</span>
+        <span class="c1"># Check the types --------------------------------------------------------------</span>
+        <span class="k">if</span> <span class="n">lower_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">lower_bounds</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+            <span class="c1"># Lower bound is wrong</span>
+
+            <span class="c1"># Reset bounds</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span> <span class="o">=</span> <span class="n">old_limits</span>
+
+            <span class="c1"># Raise error</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Lower bounds object not understood.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">upper_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">upper_bounds</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+            <span class="c1"># Upper bound is wrong</span>
+
+            <span class="c1"># Reset bounds</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span> <span class="o">=</span> <span class="n">old_limits</span>
+
+            <span class="c1"># Raise error</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Upper bounds object not understood.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Check for both arrays; if they are not None, if the dimension is correct. ----</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -359,7 +401,11 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Bounds vectors are of incorrect size.&quot;</span><span class="p">)</span>
+            <span class="c1"># Reset bounds</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span> <span class="o">=</span> <span class="n">old_limits</span>
+
+            <span class="c1"># Raise error</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bounds vectors are of incorrect size.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Check that all upper bounds are (finitely) above lower bounds ----------------</span>
         <span class="k">if</span> <span class="p">(</span>
@@ -367,6 +413,10 @@
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="ow">and</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span><span class="p">)</span>
         <span class="p">):</span>
+            <span class="c1"># Reset bounds</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span> <span class="o">=</span> <span class="n">old_limits</span>
+
+            <span class="c1"># Raise error</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Bounds vectors are incompatible.&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="_AbstractDistribution.misfit_bounds"><a class="viewcode-back" href="../../../api/distributions/_AbstractDistribution.html#hmc_tomography.Distributions._AbstractDistribution.misfit_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">misfit_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -392,19 +442,26 @@
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Standard normal distribution in 1 dimension.&quot;</span>
 
     <span class="k">def</span> <span class="nf">misfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="n">m</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">_CustomExceptions</span><span class="o">.</span><span class="n">Assertions</span><span class="o">.</span><span class="n">assert_shape</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
-        <span class="c1"># return 0.5 * (m - mean) ** 2 / std ** 2</span>
-        <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">m</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="n">m</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">_CustomExceptions</span><span class="o">.</span><span class="n">Assertions</span><span class="o">.</span><span class="n">assert_shape</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
-        <span class="c1"># return 2 * (m - mean) / std ** 2</span>
         <span class="k">return</span> <span class="n">m</span>
 
     <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">&quot;Generating samples from this distribution is not implemented or supported.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create_default</span><span class="p">(</span><span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;StandardNormal1D&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dimensions</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">StandardNormal1D</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">_CustomExceptions</span><span class="o">.</span><span class="n">InvalidCaseError</span><span class="p">()</span>
 
 
 <div class="viewcode-block" id="Normal"><a class="viewcode-back" href="../../../api/distributions/Normal.html#hmc_tomography.Distributions.Normal">[docs]</a><span class="k">class</span> <span class="nc">Normal</span><span class="p">(</span><span class="n">_AbstractDistribution</span><span class="p">):</span>
@@ -430,27 +487,19 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">means</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">covariance</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">means</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">covariance</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
         <span class="n">inverse_covariance</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">lower_bounds</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">upper_bounds</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">override_dimensions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
     <span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Gaussian (normal) distribution&quot;</span>
 
-        <span class="c1"># Automatically get dimensionality ...</span>
-        <span class="k">if</span> <span class="n">means</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># ... from means</span>
-            <span class="n">dimensions</span> <span class="o">=</span> <span class="n">means</span><span class="o">.</span><span class="n">size</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># If no means is provided, use 2 dimensions, and later randomly create</span>
-            <span class="c1"># distribution</span>
-            <span class="n">dimensions</span> <span class="o">=</span> <span class="n">override_dimensions</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">dimensions</span>
+        <span class="c1"># Automatically get dimensionality from means</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">means</span><span class="o">.</span><span class="n">size</span>
         <span class="sd">&quot;&quot;&quot;Amount of dimensions on which the distribution is defined, should agree with</span>
 <span class="sd">        means and covariance, and optionally coordinate_transformation.&quot;&quot;&quot;</span>
 
@@ -467,59 +516,46 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">inverse_covariance</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="sd">&quot;&quot;&quot;Inverse covariance matrix&quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="n">means</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">covariance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># Neither means nor covariance is provided ---------------------------------</span>
+        <span class="c1"># Parse means</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">means</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">means</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
             <span class="n">_warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s2">&quot;Neither means or covariance matrix provided. &quot;</span>
-                <span class="s2">&quot;Generating random means and variances with dimensions 2.&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;Seems that you only passed a float/int as the means vector. &quot;</span>
+                <span class="s2">&quot;It will be used as a single mean for all dimensions.&quot;</span><span class="p">,</span>
                 <span class="ne">Warning</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">covariance</span> <span class="o">=</span> <span class="n">_make_spd_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span> <span class="o">+</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span>
+            <span class="n">means</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="n">means</span>
+        <span class="k">elif</span> <span class="n">means</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Incorrect size of means vector.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">means</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">means</span>
+
+        <span class="c1"># Parse covariance</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="nb">type</span><span class="p">(</span><span class="n">covariance</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span>
+            <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">covariance</span><span class="p">)</span> <span class="o">==</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">float64</span>
+            <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">covariance</span><span class="p">)</span> <span class="o">==</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">float32</span>
+            <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">covariance</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span>
+        <span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">_warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;Seems that you only passed a float/int as the covariance matrix. &quot;</span>
+                <span class="s2">&quot;It will be used as a single covariance for all dimensions.&quot;</span><span class="p">,</span>
+                <span class="ne">Warning</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">means</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">covariance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># Only one of means or covariance is provided ------------------------------</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Only one of means or covariance matrix provided. Not sure what to do!&quot;</span>
+        <span class="k">elif</span> <span class="n">covariance</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">means</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">means</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+            <span class="c1"># Supplied a full covariance matrix, could be either NumPy or SciPy</span>
+            <span class="c1"># matrix.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">elif</span> <span class="n">covariance</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">means</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="c1"># Supplied a diagonal of a covariance matrix</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">_warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;Seems that you only passed a vector as the covariance matrix. &quot;</span>
+                <span class="s2">&quot;It will be used as the covariance diagonal.&quot;</span><span class="p">,</span>
+                <span class="ne">Warning</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Both means and covariance are provided -----------------------------------</span>
-
-            <span class="c1"># Parse means</span>
-            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">means</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">means</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
-                <span class="n">_warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                    <span class="s2">&quot;Seems that you only passed a float/int as the means vector. &quot;</span>
-                    <span class="s2">&quot;It will be used as a single mean for all dimensions.&quot;</span><span class="p">,</span>
-                    <span class="ne">Warning</span><span class="p">,</span>
-                <span class="p">)</span>
-            <span class="k">elif</span> <span class="n">means</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Incorrect size of means vector.&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">means</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">means</span>
-
-            <span class="c1"># Parse covariance</span>
-            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">covariance</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">covariance</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="n">_warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                    <span class="s2">&quot;Seems that you only passed a float/int as the covariance matrix. &quot;</span>
-                    <span class="s2">&quot;It will be used as a single covariance for all dimensions.&quot;</span><span class="p">,</span>
-                    <span class="ne">Warning</span><span class="p">,</span>
-                <span class="p">)</span>
-            <span class="k">elif</span> <span class="n">covariance</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">means</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">means</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
-                <span class="c1"># Supplied a full covariance matrix, could be either NumPy or SciPy</span>
-                <span class="c1"># matrix.</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">elif</span> <span class="n">covariance</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">means</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
-                <span class="c1"># Supplied a diagonal of a covariance matrix</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="n">_warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                    <span class="s2">&quot;Seems that you only passed a vector as the covariance matrix. &quot;</span>
-                    <span class="s2">&quot;It will be used as the covariance diagonal.&quot;</span><span class="p">,</span>
-                    <span class="ne">Warning</span><span class="p">,</span>
-                <span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Covariance matrix shape not understood.&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">covariance</span> <span class="o">=</span> <span class="n">covariance</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Covariance matrix shape not understood.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">covariance</span> <span class="o">=</span> <span class="n">covariance</span>
 
         <span class="c1"># Precomputing inverses to speed up misfit and gradient computation ------------</span>
         <span class="k">if</span> <span class="n">inverse_covariance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -531,7 +567,7 @@
             <span class="c1"># is diagonal, which makes computation of the inverse scale much better.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">inverse_covariance</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">covariance</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Else, brute force calculate the inverse using numpy.</span>
+            <span class="c1"># Else, brute force calculation of the inverse using numpy.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">inverse_covariance</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">covariance</span><span class="p">)</span>
 
         <span class="c1"># Process optional bounds ------------------------------------------------------</span>
@@ -566,8 +602,26 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">coordinates</span>
             <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Normal.generate"><a class="viewcode-back" href="../../../api/distributions/Normal.html#hmc_tomography.Distributions.Normal.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div></div>
+    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">&quot;Generating samples from this distribution is not implemented or supported.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create_default</span><span class="p">(</span><span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Normal&quot;</span><span class="p">:</span>
+
+        <span class="c1"># Create random means</span>
+        <span class="n">means</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Create a PD matrix with some extra definiteness by adding the identity</span>
+        <span class="n">correlation</span> <span class="o">=</span> <span class="n">_RandomMatrices</span><span class="o">.</span><span class="n">random_correlation_matrix</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)</span>
+
+        <span class="c1"># Standard deviations between 1 and 2</span>
+        <span class="n">standard_deviations</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">dimensions</span><span class="p">,)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">covariance</span> <span class="o">=</span> <span class="n">standard_deviations</span> <span class="o">@</span> <span class="n">correlation</span> <span class="o">@</span> <span class="n">standard_deviations</span>
+
+        <span class="k">return</span> <span class="n">Normal</span><span class="p">(</span><span class="n">means</span><span class="p">,</span> <span class="n">covariance</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Laplace"><a class="viewcode-back" href="../../../api/distributions/Laplace.html#hmc_tomography.Distributions.Laplace">[docs]</a><span class="k">class</span> <span class="nc">Laplace</span><span class="p">(</span><span class="n">_AbstractDistribution</span><span class="p">):</span>
@@ -577,54 +631,46 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">means</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">dispersions</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">means</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">dispersions</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
         <span class="n">lower_bounds</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">upper_bounds</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">override_dimensions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="c1"># Automatically get dimensionality ...</span>
-        <span class="k">if</span> <span class="n">means</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># ... from means</span>
-            <span class="n">dimensions</span> <span class="o">=</span> <span class="n">means</span><span class="o">.</span><span class="n">size</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># If no means is provided, use 2 dimensions</span>
-            <span class="n">dimensions</span> <span class="o">=</span> <span class="n">override_dimensions</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">dimensions</span>
-        <span class="sd">&quot;&quot;&quot;TODO description&quot;&quot;&quot;</span>
+        <span class="c1"># Automatically get dimensionality from means</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">means</span><span class="o">.</span><span class="n">size</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">=</span> <span class="n">means</span>
-        <span class="sd">&quot;&quot;&quot;TODO description&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;A float or numpy.ndarray of shape (dimensions, 1) of floats describing the</span>
+<span class="sd">        mean of the uncorrelated multivariate Laplace distribution.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">dispersions</span> <span class="o">=</span> <span class="n">dispersions</span>
-        <span class="sd">&quot;&quot;&quot;TODO description&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;A positive float or numpy.ndarray of shape (dimensions, 1) of positive floats</span>
+<span class="sd">        describing the dispersion of the uncorrelated multivariate Laplace</span>
+<span class="sd">        distribution.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">inverse_dispersions</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">dispersions</span>
-        <span class="sd">&quot;&quot;&quot;TODO description&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;A positive float or numpy.ndarray of shape (dimensions, 1) of positive floats</span>
+<span class="sd">        describing the inverse dispersion of the uncorrelated multivariate Laplace</span>
+<span class="sd">        distribution. Used to accelerate computations at the cost of memory usage.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">update_bounds</span><span class="p">(</span><span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">)</span>
-
-        <span class="c1"># TODO generate random distribution if means and dispersions are not provided.</span>
 
 <div class="viewcode-block" id="Laplace.misfit"><a class="viewcode-back" href="../../../api/distributions/Laplace.html#hmc_tomography.Distributions.Laplace.misfit">[docs]</a>    <span class="k">def</span> <span class="nf">misfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Method to compute the misfit of a L1 distribution distribution.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># if self.coordinate_transformation is not None:</span>
-        <span class="c1">#     coordinates = self.coordinate_transformation @ coordinates</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span> <span class="o">+</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-            <span class="n">_numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">coordinates</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">means</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse_dispersions</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                <span class="n">_numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">coordinates</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">means</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse_dispersions</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Laplace.gradient"><a class="viewcode-back" href="../../../api/distributions/Laplace.html#hmc_tomography.Distributions.Laplace.gradient">[docs]</a>    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Method to compute the gradient of a L1 distribution distribution.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># if self.operator is not None:</span>
-        <span class="c1">#     coordinates = self.operator @ coordinates</span>
 
         <span class="c1"># The derivative of the function |x| is simply 1 or -1, depending on the sign</span>
         <span class="c1"># of x, subsequently scaled by the dispersion.</span>
@@ -633,165 +679,21 @@
             <span class="o">+</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">coordinates</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">means</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse_dispersions</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Laplace.generate"><a class="viewcode-back" href="../../../api/distributions/Laplace.html#hmc_tomography.Distributions.Laplace.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div></div>
-
-
-<span class="c1"># Unfinished</span>
-<span class="k">class</span> <span class="nc">L05</span><span class="p">(</span><span class="n">_AbstractDistribution</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;L05</span>
-
-<span class="sd">    TODO: Implement distribution&#39;s location other than the 0-vector.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">dispersion</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="n">lower_bounds</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">upper_bounds</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">override_dimensions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-    <span class="p">):</span>
-
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Not finished yet.&quot;</span><span class="p">)</span>
-
-        <span class="c1"># TODO Add location functionality to distribution</span>
-
-        <span class="k">if</span> <span class="n">dispersion</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># ... from dispersion</span>
-            <span class="n">dimensions</span> <span class="o">=</span> <span class="n">dispersion</span><span class="o">.</span><span class="n">size</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># If no means is provided, use 2 dimensions</span>
-            <span class="n">dimensions</span> <span class="o">=</span> <span class="n">override_dimensions</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">dimensions</span>
-        <span class="sd">&quot;&quot;&quot;TODO description&quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">dispersion</span> <span class="o">=</span> <span class="n">dispersion</span>
-        <span class="sd">&quot;&quot;&quot;TODO description&quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">update_bounds</span><span class="p">(</span><span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">)</span>
-        <span class="sd">&quot;&quot;&quot;TODO description&quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="nf">misfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Method to compute the misfit of a L1 distribution distribution.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span> <span class="o">+</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-            <span class="n">_numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">coordinates</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dispersion</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span>
-        <span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Method to compute the gradient of a L1 distribution distribution.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># The derivative of the function |x| is simply 1 or -1, depending on the sign</span>
-        <span class="c1"># of x.</span>
-        <span class="k">return</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
-            <span class="o">+</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
-            <span class="o">*</span> <span class="mf">0.5</span>
-            <span class="o">/</span> <span class="p">(</span><span class="n">_numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">coordinates</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dispersion</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span>
-        <span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
-
-
-<span class="c1"># Unfinished</span>
-<span class="k">class</span> <span class="nc">LogNormal</span><span class="p">(</span><span class="n">Normal</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Normal distribution in logarithmic model space.</span>
-
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    dimensions : int</span>
-<span class="sd">        Dimension of the distribution.</span>
-<span class="sd">    means : numpy.ndarray</span>
-<span class="sd">        Numpy array shaped as (dimensions, 1) containing the means of the distribution</span>
-<span class="sd">        in logarithmic model space.</span>
-<span class="sd">    covariance : numpy.ndarray</span>
-<span class="sd">        Numpy array shaped as either as (dimensions, dimensions) or (dimensions, 1).</span>
-<span class="sd">        This array represents either the full covariance matrix for a multivariate</span>
-<span class="sd">        Gaussian, or an column vector with variances for `dimensions` separate</span>
-<span class="sd">        uncorrelated Gaussians, all in logarithmic model space.</span>
-<span class="sd">    lower_bounds: numpy.ndarray</span>
-<span class="sd">        Numpy array of shape (dimensions, 1) that contains the lower limits of each</span>
-<span class="sd">        parameter.</span>
-<span class="sd">    upper_bounds: numpy.ndarray</span>
-<span class="sd">        Numpy array of shape (dimensions, 1) that contains the upper limits of each</span>
-<span class="sd">        parameter.</span>
-
-
-<span class="sd">    TODO Validate this class&#39; methods.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;log Gaussian distribution&quot;</span>
-
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Not finished yet.&quot;</span><span class="p">)</span>
-
-        <span class="c1"># Re-use the constructor of the superclass (Normal).</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">LogNormal</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">misfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Method to compute the misfit of a log Normal distribution distribution.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># This distribution is only non-zero for positive values of the coordinates. ----------</span>
-        <span class="k">if</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">coordinates</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">inf</span>
-
-        <span class="c1"># Compute logarithmic coordinates and misfit -----------------------------------</span>
-        <span class="n">logarithmic_coordinates</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">(</span>
-                <span class="n">_numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">logarithmic_coordinates</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-                <span class="o">+</span> <span class="mf">0.5</span>
-                <span class="o">*</span> <span class="p">(</span>
-                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">logarithmic_coordinates</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-                    <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inverse_covariance</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">logarithmic_coordinates</span><span class="p">))</span>
-                <span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-                <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">(</span>
-                <span class="n">_numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">logarithmic_coordinates</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-                <span class="o">+</span> <span class="mf">0.5</span>
-                <span class="o">*</span> <span class="p">(</span>
-                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">logarithmic_coordinates</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-                    <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse_covariance</span>
-                    <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">logarithmic_coordinates</span><span class="p">)</span>
-                <span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-                <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
-            <span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Method to compute the gradient of a log Normal distribution distribution.</span>
-
-<span class="sd">        TODO Verify these formulas!</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Compute logarithmic coordinates and gradient ---------------------------------</span>
-        <span class="n">logarithmic_coordinates</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">(</span>
-                <span class="p">(</span>
-                    <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inverse_covariance</span>
-                    <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">logarithmic_coordinates</span><span class="p">)</span>
-                    <span class="o">/</span> <span class="n">coordinates</span>
-                <span class="p">)</span>
-                <span class="o">+</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">coordinates</span><span class="p">)</span>
-                <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">(</span>
-                <span class="p">(</span>
-                    <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inverse_covariance</span>
-                    <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">logarithmic_coordinates</span><span class="p">)</span>
-                    <span class="o">/</span> <span class="n">coordinates</span>
-                <span class="p">)</span>
-                <span class="o">+</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">coordinates</span><span class="p">)</span>
-                <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
-            <span class="p">)</span>
-
     <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This function is not implemented yet.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">&quot;Generating samples from this distribution is not implemented or supported.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create_default</span><span class="p">(</span><span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Laplace&quot;</span><span class="p">:</span>
+
+        <span class="c1"># Create random means</span>
+        <span class="n">means</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Create a PD matrix with some extra definiteness by adding the identity</span>
+        <span class="n">dispersions</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Laplace</span><span class="p">(</span><span class="n">means</span><span class="p">,</span> <span class="n">dispersions</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Uniform"><a class="viewcode-back" href="../../../api/distributions/Uniform.html#hmc_tomography.Distributions.Uniform">[docs]</a><span class="k">class</span> <span class="nc">Uniform</span><span class="p">(</span><span class="n">_AbstractDistribution</span><span class="p">):</span>
@@ -808,25 +710,15 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">lower_bounds</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">upper_bounds</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">override_dimensions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">lower_bounds</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;uniform distribution&quot;</span>
 
-        <span class="c1"># Automatically get dimensionality ...</span>
-        <span class="k">if</span> <span class="n">lower_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># ... from means</span>
-            <span class="n">dimensions</span> <span class="o">=</span> <span class="n">lower_bounds</span><span class="o">.</span><span class="n">size</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># If no means is provided, use 2 dimensions</span>
-            <span class="n">dimensions</span> <span class="o">=</span> <span class="n">override_dimensions</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">dimensions</span>
-        <span class="sd">&quot;&quot;&quot;TODO description&quot;&quot;&quot;</span>
+        <span class="c1"># Automatically get dimensionality from bounds</span>
+        <span class="n">dimensions</span> <span class="o">=</span> <span class="n">lower_bounds</span><span class="o">.</span><span class="n">size</span>
 
-        <span class="c1"># TODO add empty initialization</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">dimensions</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">update_bounds</span><span class="p">(</span><span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">)</span>
 
@@ -840,8 +732,18 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Uniform.generate"><a class="viewcode-back" href="../../../api/distributions/Uniform.html#hmc_tomography.Distributions.Uniform.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This function is not implemented yet.&quot;</span><span class="p">)</span></div></div>
+    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">&quot;Generating samples from this distribution is not implemented or supported.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create_default</span><span class="p">(</span><span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Uniform&quot;</span><span class="p">:</span>
+
+        <span class="n">lower_bounds</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">5</span> <span class="o">-</span> <span class="mi">10</span>
+        <span class="n">upper_bounds</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">5</span> <span class="o">+</span> <span class="mi">10</span>
+
+        <span class="k">return</span> <span class="n">Uniform</span><span class="p">(</span><span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="CompositeDistribution"><a class="viewcode-back" href="../../../api/distributions/CompositeDistribution.html#hmc_tomography.Distributions.CompositeDistribution">[docs]</a><span class="k">class</span> <span class="nc">CompositeDistribution</span><span class="p">(</span><span class="n">_AbstractDistribution</span><span class="p">):</span>
@@ -863,51 +765,32 @@
 
 
 <span class="sd">    This class can be used when two or more sets of coordinates should be described by</span>
-<span class="sd">    different distributions, e.g. when one set requires a Normal distribution and another a</span>
-<span class="sd">    uniform distribution.</span>
+<span class="sd">    different distributions, e.g. when one set requires a Normal distribution and</span>
+<span class="sd">    another a uniform distribution.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">list_of_distributions</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">_AbstractDistribution</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">lower_bounds</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">upper_bounds</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">override_dimensions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;composite distribution&quot;</span>
 
-        <span class="k">if</span> <span class="n">list_of_distributions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">separate_distributions</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span>
-                <span class="n">_AbstractDistribution</span>
-            <span class="p">]</span> <span class="o">=</span> <span class="n">list_of_distributions</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">dimensions</span> <span class="o">=</span> <span class="n">override_dimensions</span>
-
-            <span class="n">_warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="n">f</span><span class="s2">&quot;No subdistributions were passed, generating </span><span class="si">{dimensions}</span><span class="s2"> random subdistributions.&quot;</span><span class="p">,</span>
-                <span class="ne">Warning</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="n">available_distributions</span> <span class="o">=</span> <span class="n">_AbstractDistribution</span><span class="o">.</span><span class="n">__subclasses__</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">distribution_to_remove</span> <span class="ow">in</span> <span class="p">[</span>
-                <span class="n">CompositeDistribution</span><span class="p">,</span>
-                <span class="n">AdditiveDistribution</span><span class="p">,</span>
-                <span class="n">MultiplicativeDistribution</span><span class="p">,</span>
-            <span class="p">]:</span>
-                <span class="n">available_distributions</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">distribution_to_remove</span><span class="p">)</span>
-            <span class="n">selected_classes</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">available_distributions</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">separate_distributions</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">selected_class</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">selected_class</span> <span class="ow">in</span> <span class="n">selected_classes</span>
-            <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">separate_distributions</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span>
+            <span class="n">_AbstractDistribution</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">list_of_distributions</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">enumerated_dimensions</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span>
             <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">separate_distributions</span><span class="p">))</span>
         <span class="p">)</span>
-        <span class="sd">&quot;&quot;&quot;This object describes how many dimensions each distribution has, ordered according</span>
-<span class="sd">        to ``CompositeDistribution.separate_distributions``. Sums to ``CompositeDistribution.dimesions``.</span>
+        <span class="sd">&quot;&quot;&quot;This object describes how many dimensions each distribution has, ordered</span>
+<span class="sd">        according to ``CompositeDistribution.separate_distributions``. Sums to</span>
+<span class="sd">        ``CompositeDistribution.dimesions``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># Assert that the passed distributions actually do represent the correct amount of</span>
-        <span class="c1"># dimensions, and seperately extract the size of each distribution</span>
+        <span class="c1"># Assert that the passed distributions actually do represent the correct amount</span>
+        <span class="c1"># of dimensions, and seperately extract the size of each distribution</span>
         <span class="n">computed_dimensions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">i_distribution</span><span class="p">,</span> <span class="n">distribution</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">separate_distributions</span><span class="p">):</span>
             <span class="n">computed_dimensions</span> <span class="o">+=</span> <span class="n">distribution</span><span class="o">.</span><span class="n">dimensions</span>
@@ -918,34 +801,38 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">enumerated_dimensions_cumulative</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">enumerated_dimensions</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span>
         <span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="sd">&quot;&quot;&quot;This object describes each separate distribution index in combined model space. Invoking</span>
+        <span class="sd">&quot;&quot;&quot;This object describes each separate distribution index in combined model</span>
+<span class="sd">        space. Invoking</span>
 <span class="sd">        ``numpy.split(m, CompositeDistribution.enumerated_dimensions_cumulative)[:-1])``</span>
 <span class="sd">        splits a vector appropriately for all separate distributions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="CompositeDistribution.misfit"><a class="viewcode-back" href="../../../api/distributions/CompositeDistribution.html#hmc_tomography.Distributions.CompositeDistribution.misfit">[docs]</a>    <span class="k">def</span> <span class="nf">misfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="c1"># Split coordinates for all sub-distributions -----------------------------------------</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span> <span class="o">=</span> <span class="n">lower_bounds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span> <span class="o">=</span> <span class="n">upper_bounds</span>
+
+    <span class="k">def</span> <span class="nf">misfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="c1"># Split coordinates for all sub-distributions ----------------------------------</span>
         <span class="n">split_coordinates</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
             <span class="n">coordinates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">enumerated_dimensions_cumulative</span>
         <span class="p">)</span>
 
         <span class="n">misfit</span> <span class="o">=</span> <span class="mf">0.0</span>
 
-        <span class="c1"># Loop over distributions and add misfit ----------------------------------------------</span>
+        <span class="c1"># Loop over distributions and add misfit ---------------------------------------</span>
         <span class="k">for</span> <span class="n">i_distribution</span><span class="p">,</span> <span class="n">distribution</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">separate_distributions</span><span class="p">):</span>
             <span class="n">misfit</span> <span class="o">+=</span> <span class="n">distribution</span><span class="o">.</span><span class="n">misfit</span><span class="p">(</span><span class="n">split_coordinates</span><span class="p">[</span><span class="n">i_distribution</span><span class="p">])</span>
 
-        <span class="k">return</span> <span class="n">misfit</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">misfit</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
 
-<div class="viewcode-block" id="CompositeDistribution.gradient"><a class="viewcode-back" href="../../../api/distributions/CompositeDistribution.html#hmc_tomography.Distributions.CompositeDistribution.gradient">[docs]</a>    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="c1"># Split coordinates for all sub-distributions -----------------------------------------</span>
+    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="c1"># Split coordinates for all sub-distributions ----------------------------------</span>
         <span class="n">split_coordinates</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
             <span class="n">coordinates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">enumerated_dimensions_cumulative</span>
         <span class="p">)</span>
 
         <span class="n">gradients</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="c1"># Loop over distributions and compute gradient ----------------------------------------</span>
+        <span class="c1"># Loop over distributions and compute gradient ---------------------------------</span>
         <span class="k">for</span> <span class="n">i_distribution</span><span class="p">,</span> <span class="n">distribution</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">separate_distributions</span><span class="p">):</span>
             <span class="n">gradients</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">distribution</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">split_coordinates</span><span class="p">[</span><span class="n">i_distribution</span><span class="p">]))</span>
 
@@ -954,10 +841,12 @@
 
         <span class="k">assert</span> <span class="n">gradient</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">coordinates</span><span class="o">.</span><span class="n">shape</span>
 
-        <span class="k">return</span> <span class="n">gradient</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">gradient</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
 
-<div class="viewcode-block" id="CompositeDistribution.generate"><a class="viewcode-back" href="../../../api/distributions/CompositeDistribution.html#hmc_tomography.Distributions.CompositeDistribution.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This function is not implemented yet.&quot;</span><span class="p">)</span></div>
+    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">&quot;Generating samples from this distribution is not implemented or supported.&quot;</span>
+        <span class="p">)</span>
 
 <div class="viewcode-block" id="CompositeDistribution.collapse_bounds"><a class="viewcode-back" href="../../../api/distributions/CompositeDistribution.html#hmc_tomography.Distributions.CompositeDistribution.collapse_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">collapse_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Method to restructure all composite bounds into top level object.</span>
@@ -965,9 +854,9 @@
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="CompositeDistribution.corrector"><a class="viewcode-back" href="../../../api/distributions/CompositeDistribution.html#hmc_tomography.Distributions.CompositeDistribution.corrector">[docs]</a>    <span class="k">def</span> <span class="nf">corrector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">momentum</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Override method to correct an HMC particle for composite distribution, which is</span>
-<span class="sd">        called after every time integration step. Calls all sub-correctors only if the</span>
-<span class="sd">        object does not have bounds itself.</span>
+        <span class="sd">&quot;&quot;&quot;Override method to correct an HMC particle for composite distribution, which</span>
+<span class="sd">        is called after every time integration step. Calls all sub-correctors only if</span>
+<span class="sd">        the object does not have bounds itself.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -981,7 +870,7 @@
 <span class="sd">            reference.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Start with bounds of CompositeDistribution ------------------------------------------</span>
+        <span class="c1"># Start with bounds of CompositeDistribution -----------------------------------</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Lower bound correction</span>
             <span class="n">too_low</span> <span class="o">=</span> <span class="n">coordinates</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span>
@@ -999,7 +888,7 @@
 
         <span class="c1"># If they are not set, check subdistributions.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># Split coordinates and momenta for all sub-distributions -------------------------</span>
+            <span class="c1"># Split coordinates and momenta for all sub-distributions ------------------</span>
             <span class="n">split_coordinates</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
                 <span class="n">coordinates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">enumerated_dimensions_cumulative</span>
             <span class="p">)</span>
@@ -1029,52 +918,54 @@
                         <span class="n">distribution</span><span class="o">.</span><span class="n">upper_bounds</span><span class="p">[</span><span class="n">too_high</span><span class="p">]</span>
                         <span class="o">-</span> <span class="n">split_coordinates</span><span class="p">[</span><span class="n">i_distribution</span><span class="p">][</span><span class="n">too_high</span><span class="p">]</span>
                     <span class="p">)</span>
-                    <span class="n">split_momenta</span><span class="p">[</span><span class="n">i_distribution</span><span class="p">][</span><span class="n">too_high</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mf">1.0</span></div></div>
+                    <span class="n">split_momenta</span><span class="p">[</span><span class="n">i_distribution</span><span class="p">][</span><span class="n">too_high</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mf">1.0</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create_default</span><span class="p">(</span><span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;CompositeDistribution&quot;</span><span class="p">:</span>
+
+        <span class="c1"># Create a list of all possible distributions</span>
+        <span class="n">available_distributions</span> <span class="o">=</span> <span class="n">_AbstractDistribution</span><span class="o">.</span><span class="n">__subclasses__</span><span class="p">()</span>
+
+        <span class="c1"># We don&#39;t want to recursively create many distributions, so remove those</span>
+        <span class="k">for</span> <span class="n">distribution_to_remove</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="n">CompositeDistribution</span><span class="p">,</span>
+            <span class="n">AdditiveDistribution</span><span class="p">,</span>
+        <span class="p">]:</span>
+            <span class="n">available_distributions</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">distribution_to_remove</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dimensions</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="c1"># This guy only supports 2 dimensions</span>
+            <span class="n">available_distributions</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">Himmelblau</span><span class="p">)</span>
+
+        <span class="c1"># We select distributions at random</span>
+        <span class="n">selected_classes</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">available_distributions</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">)</span>
+
+        <span class="n">list_of_instances</span> <span class="o">=</span> <span class="p">[</span><span class="n">d_class</span><span class="o">.</span><span class="n">create_default</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">d_class</span> <span class="ow">in</span> <span class="n">selected_classes</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">CompositeDistribution</span><span class="p">(</span><span class="n">list_of_instances</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="AdditiveDistribution"><a class="viewcode-back" href="../../../api/distributions/AdditiveDistribution.html#hmc_tomography.Distributions.AdditiveDistribution">[docs]</a><span class="k">class</span> <span class="nc">AdditiveDistribution</span><span class="p">(</span><span class="n">_AbstractDistribution</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Distribution generated by summing the characteristic functions of two other </span>
+    <span class="sd">&quot;&quot;&quot;Distribution generated by summing the characteristic functions of two other</span>
 <span class="sd">    distributions.</span>
-<span class="sd">    </span>
+
 <span class="sd">    This is essentially the unnormalized Bayes&#39; rule.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">list_of_distributions</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">_AbstractDistribution</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">list_of_distributions</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span><span class="n">_AbstractDistribution</span><span class="p">],</span>
         <span class="n">lower_bounds</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">upper_bounds</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">overrie_dimensions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;additive distribution&quot;</span>
 
-        <span class="c1"># Automatically get dimensionality ...</span>
-        <span class="k">if</span> <span class="n">list_of_distributions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># ... from first distribution</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">list_of_distributions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dimensions</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># If no means is provided, use 2 dimensions</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">override_dimensions</span>
+        <span class="c1"># Automatically get dimensionality  from first distribution</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">list_of_distributions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dimensions</span>
 
-        <span class="k">if</span> <span class="n">list_of_distributions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">separate_distributions</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span>
-                <span class="n">_AbstractDistribution</span>
-            <span class="p">]</span> <span class="o">=</span> <span class="n">list_of_distributions</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">_warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="n">f</span><span class="s2">&quot;No subdistributions were passed, generating 3 random subdistributions.&quot;</span><span class="p">,</span>
-                <span class="ne">Warning</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="n">available_distributions</span> <span class="o">=</span> <span class="n">_AbstractDistribution</span><span class="o">.</span><span class="n">__subclasses__</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">distribution_to_remove</span> <span class="ow">in</span> <span class="p">[</span>
-                <span class="n">CompositeDistribution</span><span class="p">,</span>
-                <span class="n">AdditiveDistribution</span><span class="p">,</span>
-            <span class="p">]:</span>
-                <span class="n">available_distributions</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">distribution_to_remove</span><span class="p">)</span>
-            <span class="n">selected_classes</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">available_distributions</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">separate_distributions</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">selected_class</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)</span> <span class="k">for</span> <span class="n">selected_class</span> <span class="ow">in</span> <span class="n">selected_classes</span>
-            <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">separate_distributions</span><span class="p">:</span> <span class="n">_List</span><span class="p">[</span>
+            <span class="n">_AbstractDistribution</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">list_of_distributions</span>
 
         <span class="c1"># Assert that the passed distributions are of the right dimension</span>
         <span class="k">for</span> <span class="n">i_distribution</span><span class="p">,</span> <span class="n">distribution</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">separate_distributions</span><span class="p">):</span>
@@ -1082,28 +973,30 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">collapse_bounds</span><span class="p">()</span>
 
-<div class="viewcode-block" id="AdditiveDistribution.misfit"><a class="viewcode-back" href="../../../api/distributions/AdditiveDistribution.html#hmc_tomography.Distributions.AdditiveDistribution.misfit">[docs]</a>    <span class="k">def</span> <span class="nf">misfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">misfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="n">misfit</span> <span class="o">=</span> <span class="mf">0.0</span>
 
-        <span class="c1"># Loop over distributions and add misfit ----------------------------------------------</span>
+        <span class="c1"># Loop over distributions and add misfit ---------------------------------------</span>
         <span class="k">for</span> <span class="n">i_distribution</span><span class="p">,</span> <span class="n">distribution</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">separate_distributions</span><span class="p">):</span>
             <span class="n">misfit</span> <span class="o">+=</span> <span class="n">distribution</span><span class="o">.</span><span class="n">misfit</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">misfit</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">misfit</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
 
-<div class="viewcode-block" id="AdditiveDistribution.gradient"><a class="viewcode-back" href="../../../api/distributions/AdditiveDistribution.html#hmc_tomography.Distributions.AdditiveDistribution.gradient">[docs]</a>    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="n">gradient</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
-        <span class="c1"># Loop over distributions and compute gradient ----------------------------------------</span>
+        <span class="c1"># Loop over distributions and compute gradient ---------------------------------</span>
         <span class="k">for</span> <span class="n">i_distribution</span><span class="p">,</span> <span class="n">distribution</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">separate_distributions</span><span class="p">):</span>
             <span class="n">gradient</span> <span class="o">+=</span> <span class="n">distribution</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
 
         <span class="k">assert</span> <span class="n">gradient</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">coordinates</span><span class="o">.</span><span class="n">shape</span>
 
-        <span class="k">return</span> <span class="n">gradient</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">gradient</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
 
-<div class="viewcode-block" id="AdditiveDistribution.generate"><a class="viewcode-back" href="../../../api/distributions/AdditiveDistribution.html#hmc_tomography.Distributions.AdditiveDistribution.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This function is not implemented yet.&quot;</span><span class="p">)</span></div>
+    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">&quot;Generating samples from this distribution is not implemented or supported.&quot;</span>
+        <span class="p">)</span>
 
 <div class="viewcode-block" id="AdditiveDistribution.collapse_bounds"><a class="viewcode-back" href="../../../api/distributions/AdditiveDistribution.html#hmc_tomography.Distributions.AdditiveDistribution.collapse_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">collapse_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Method to restructure all composite bounds into top level object.</span>
@@ -1173,7 +1066,7 @@
 <span class="sd">            reference.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Start with bounds of CompositeDistribution ------------------------------------------</span>
+        <span class="c1"># Start with bounds of CompositeDistribution -----------------------------------</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Lower bound correction</span>
             <span class="n">too_low</span> <span class="o">=</span> <span class="n">coordinates</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span>
@@ -1187,12 +1080,11 @@
             <span class="n">coordinates</span><span class="p">[</span><span class="n">too_high</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span><span class="p">[</span><span class="n">too_high</span><span class="p">]</span> <span class="o">-</span> <span class="n">coordinates</span><span class="p">[</span><span class="n">too_high</span><span class="p">]</span>
             <span class="p">)</span>
-            <span class="n">momentum</span><span class="p">[</span><span class="n">too_high</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mf">1.0</span></div></div>
+            <span class="n">momentum</span><span class="p">[</span><span class="n">too_high</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mf">1.0</span></div>
 
-        <span class="c1"># TODO Fix this mess</span>
         <span class="c1"># # If they are not set, check subdistributions.</span>
         <span class="c1"># if self.lower_bounds is None and self.upper_bounds is None:</span>
-        <span class="c1">#     # Split coordinates and momenta for all sub-distributions -------------------------</span>
+        <span class="c1">#     # Split coordinates and momenta for all sub-distributions ----------------</span>
         <span class="c1">#     split_coordinates = _numpy.split(</span>
         <span class="c1">#         coordinates, self.enumerated_dimensions_cumulative</span>
         <span class="c1">#     )</span>
@@ -1201,24 +1093,50 @@
         <span class="c1">#     )</span>
 
         <span class="c1">#     # And loop over separate distributions to check bounds</span>
-        <span class="c1">#     for i_distribution, distribution in enumerate(self.separate_distributions):</span>
+        <span class="c1">#     for i_dis, distribution in enumerate(self.separate_distributions):</span>
 
         <span class="c1">#         if distribution.lower_bounds is not None:</span>
         <span class="c1">#             # Lower bound correction</span>
-        <span class="c1">#             too_low = split_coordinates[i_distribution] &lt; distribution.lower_bounds</span>
-        <span class="c1">#             split_coordinates[i_distribution][too_low] += 2 * (</span>
+        <span class="c1">#             too_low = split_coordinates[i_dis] &lt; distribution.lower_bounds</span>
+        <span class="c1">#             split_coordinates[i_dis][too_low] += 2 * (</span>
         <span class="c1">#                 distribution.lower_bounds[too_low]</span>
-        <span class="c1">#                 - split_coordinates[i_distribution][too_low]</span>
+        <span class="c1">#                 - split_coordinates[i_dis][too_low]</span>
         <span class="c1">#             )</span>
-        <span class="c1">#             split_momenta[i_distribution][too_low] *= -1.0</span>
+        <span class="c1">#             split_momenta[i_dis][too_low] *= -1.0</span>
         <span class="c1">#         if distribution.upper_bounds is not None:</span>
         <span class="c1">#             # Upper bound correction</span>
-        <span class="c1">#             too_high = split_coordinates[i_distribution] &gt; distribution.upper_bounds</span>
-        <span class="c1">#             split_coordinates[i_distribution][too_high] += 2 * (</span>
+        <span class="c1">#             too_high = split_coordinates[i_dis] &gt; distribution.upper_bounds</span>
+        <span class="c1">#             split_coordinates[i_dis][too_high] += 2 * (</span>
         <span class="c1">#                 distribution.upper_bounds[too_high]</span>
-        <span class="c1">#                 - split_coordinates[i_distribution][too_high]</span>
+        <span class="c1">#                 - split_coordinates[i_dis][too_high]</span>
         <span class="c1">#             )</span>
-        <span class="c1">#             split_momenta[i_distribution][too_high] *= -1.0</span>
+        <span class="c1">#             split_momenta[i_dis][too_high] *= -1.0</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create_default</span><span class="p">(</span><span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;AdditiveDistribution&quot;</span><span class="p">:</span>
+
+        <span class="c1"># Create a list of all possible distributions</span>
+        <span class="n">available_distributions</span> <span class="o">=</span> <span class="n">_AbstractDistribution</span><span class="o">.</span><span class="n">__subclasses__</span><span class="p">()</span>
+
+        <span class="c1"># We don&#39;t want to recursively create many distributions, so remove those</span>
+        <span class="k">for</span> <span class="n">distribution_to_remove</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="n">CompositeDistribution</span><span class="p">,</span>
+            <span class="n">AdditiveDistribution</span><span class="p">,</span>
+        <span class="p">]:</span>
+            <span class="n">available_distributions</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">distribution_to_remove</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dimensions</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="c1"># This guy only supports 2 dimensions</span>
+            <span class="n">available_distributions</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">Himmelblau</span><span class="p">)</span>
+
+        <span class="c1"># We select distributions at random</span>
+        <span class="n">selected_classes</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">available_distributions</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+        <span class="n">list_of_instances</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">d_class</span><span class="o">.</span><span class="n">create_default</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)</span> <span class="k">for</span> <span class="n">d_class</span> <span class="ow">in</span> <span class="n">selected_classes</span>
+        <span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">AdditiveDistribution</span><span class="p">(</span><span class="n">list_of_instances</span><span class="p">)</span></div>
 
 
 <span class="c1"># This creates an alias for AdditiveDistribution</span>
@@ -1243,7 +1161,7 @@
     <span class="n">temperature</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="sd">&quot;&quot;&quot;Float representing the temperature (or annealing, :math:`T`) of Himmelblau&#39;s</span>
 <span class="sd">    function.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Alters the misfit function in the following way:</span>
 
 <span class="sd">    .. math::</span>
@@ -1251,7 +1169,7 @@
 <span class="sd">        f(x,y)_T=\\frac{f(x,y)}{T}</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temperature</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temperature</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">temperature</span>
 
 <div class="viewcode-block" id="Himmelblau.misfit"><a class="viewcode-back" href="../../../api/distributions/Himmelblau.html#hmc_tomography.Distributions.Himmelblau.misfit">[docs]</a>    <span class="k">def</span> <span class="nf">misfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -1260,7 +1178,9 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">()</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">coordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">coordinates</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-        <span class="k">return</span> <span class="p">((</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">y</span> <span class="o">-</span> <span class="mi">11</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">7</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span> <span class="o">+</span> <span class="nb">float</span><span class="p">(</span>
+            <span class="p">((</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">y</span> <span class="o">-</span> <span class="mi">11</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">7</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Himmelblau.gradient"><a class="viewcode-back" href="../../../api/distributions/Himmelblau.html#hmc_tomography.Distributions.Himmelblau.gradient">[docs]</a>    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Returns a numpy.ndarray shaped as (dimensions, 1) containing the gradient of</span>
@@ -1270,29 +1190,21 @@
         <span class="n">gradient</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
         <span class="n">gradient</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">x</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">y</span> <span class="o">-</span> <span class="mi">11</span><span class="p">)</span> <span class="o">+</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">7</span><span class="p">)</span>
         <span class="n">gradient</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">y</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">7</span><span class="p">)</span> <span class="o">+</span> <span class="n">y</span> <span class="o">-</span> <span class="mi">11</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">gradient</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span></div></div>
+        <span class="k">return</span> <span class="n">gradient</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span></div>
 
+    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">&quot;Generating samples from this distribution is not implemented or supported.&quot;</span>
+        <span class="p">)</span>
 
-<span class="k">def</span> <span class="nf">_make_spd_matrix</span><span class="p">(</span><span class="n">dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Generate a random symmetric, positive-definite matrix.</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create_default</span><span class="p">(</span><span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Himmelblau&quot;</span><span class="p">:</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    dim : int</span>
-<span class="sd">        The matrix dimension.</span>
+        <span class="k">if</span> <span class="n">dimensions</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">_CustomExceptions</span><span class="o">.</span><span class="n">InvalidCaseError</span><span class="p">()</span>
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    x : array of shape [n_dim, n_dim]</span>
-<span class="sd">        The random symmetric, positive-definite matrix.</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Create random matrix</span>
-    <span class="n">a</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span>
-    <span class="c1"># Create random PD matrix and extract correlation structure</span>
-    <span class="n">u</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">_numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">a</span><span class="p">))</span>
-    <span class="c1"># Reconstruct a new matrix with random variances.</span>
-    <span class="k">return</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">_numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">dim</span><span class="p">))),</span> <span class="n">v</span><span class="p">)</span>
+        <span class="n">temperature</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">return</span> <span class="n">Himmelblau</span><span class="p">(</span><span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">)</span></div>
 </pre></div>
 
            </div>
@@ -1305,11 +1217,19 @@
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2019-2020, Andrea Zunino, Andreas Fichtner, Lars Gebraad
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -1320,7 +1240,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

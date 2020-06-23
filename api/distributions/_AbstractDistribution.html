@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,19 @@
   
 
   
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -26,17 +32,12 @@
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Normal" href="Normal.html" />
@@ -54,7 +55,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> HMC Tom
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> HMC Tom
           
 
           
@@ -84,6 +85,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -122,6 +124,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -160,7 +163,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../index.html">API reference</a> &raquo;</li>
         
@@ -211,18 +214,17 @@
 </style>
 <div class="section" id="abstractdistribution">
 <h1>_AbstractDistribution<a class="headerlink" href="#abstractdistribution" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
+<dl class="py class">
 <dt id="hmc_tomography.Distributions._AbstractDistribution">
-<em class="property">class </em><code class="sig-prename descclassname">hmc_tomography.Distributions.</code><code class="sig-name descname">_AbstractDistribution</code><a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#_AbstractDistribution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Distributions._AbstractDistribution" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Abstract base class for distributions.</p>
-<dl class="attribute">
+<em class="property">class </em><code class="sig-prename descclassname">hmc_tomography.Distributions.</code><code class="sig-name descname">_AbstractDistribution</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#_AbstractDistribution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Distributions._AbstractDistribution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abstract base class for distributions.</p>
+<dl class="py attribute">
 <dt id="hmc_tomography.Distributions._AbstractDistribution.name">
 <code class="sig-name descname">name</code><em class="property">: str</em><em class="property"> = 'abstract distribution'</em><a class="headerlink" href="#hmc_tomography.Distributions._AbstractDistribution.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Name of the distribution.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="hmc_tomography.Distributions._AbstractDistribution.dimensions">
 <code class="sig-name descname">dimensions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#_AbstractDistribution.dimensions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Distributions._AbstractDistribution.dimensions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of dimensions of the model space.</p>
@@ -231,21 +233,21 @@ directly or in its constructor (the __init__ function) then attempting to use
 the class will raise a NotImplementedError.</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="hmc_tomography.Distributions._AbstractDistribution.lower_bounds">
-<code class="sig-name descname">lower_bounds</code><em class="property">: Optional[numpy.ndarray]</em><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Distributions._AbstractDistribution.lower_bounds" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">lower_bounds</code><em class="property">: Optional<span class="p">[</span>numpy.ndarray<span class="p">]</span></em><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Distributions._AbstractDistribution.lower_bounds" title="Permalink to this definition">¶</a></dt>
 <dd><p>Lower bounds for every parameter. If initialized to None, no bounds are used.</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="py attribute">
 <dt id="hmc_tomography.Distributions._AbstractDistribution.upper_bounds">
-<code class="sig-name descname">upper_bounds</code><em class="property">: Optional[numpy.ndarray]</em><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Distributions._AbstractDistribution.upper_bounds" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">upper_bounds</code><em class="property">: Optional<span class="p">[</span>numpy.ndarray<span class="p">]</span></em><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Distributions._AbstractDistribution.upper_bounds" title="Permalink to this definition">¶</a></dt>
 <dd><p>Upper bounds for every parameter. If initialized to None, no bounds are used.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="hmc_tomography.Distributions._AbstractDistribution.misfit">
-<em class="property">abstract </em><code class="sig-name descname">misfit</code><span class="sig-paren">(</span><em class="sig-param">coordinates: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#_AbstractDistribution.misfit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Distributions._AbstractDistribution.misfit" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">misfit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coordinates</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#_AbstractDistribution.misfit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Distributions._AbstractDistribution.misfit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the misfit of the distribution at the given coordinates.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -266,9 +268,9 @@ containing the coordinates <span class="math notranslate nohighlight">\(\mathbf{
 beneficial to optimize the implementation.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="hmc_tomography.Distributions._AbstractDistribution.gradient">
-<em class="property">abstract </em><code class="sig-name descname">gradient</code><span class="sig-paren">(</span><em class="sig-param">coordinates: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#_AbstractDistribution.gradient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Distributions._AbstractDistribution.gradient" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">gradient</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coordinates</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#_AbstractDistribution.gradient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Distributions._AbstractDistribution.gradient" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the misfit gradient of the distribution at the given coordinates.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -291,7 +293,7 @@ density as:</p>
 beneficial to optimize the implementation.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="hmc_tomography.Distributions._AbstractDistribution.generate">
 <em class="property">abstract </em><code class="sig-name descname">generate</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#_AbstractDistribution.generate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Distributions._AbstractDistribution.generate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method to draw samples from the distribution.</p>
@@ -315,9 +317,9 @@ require the implementation. Therefore an implementation as such will suffice:</p
 </div>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="hmc_tomography.Distributions._AbstractDistribution.corrector">
-<code class="sig-name descname">corrector</code><span class="sig-paren">(</span><em class="sig-param">coordinates: numpy.ndarray</em>, <em class="sig-param">momentum: numpy.ndarray</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#_AbstractDistribution.corrector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Distributions._AbstractDistribution.corrector" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">corrector</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coordinates</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">momentum</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#_AbstractDistribution.corrector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Distributions._AbstractDistribution.corrector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method to correct an HMC particle, which is called after every time
 integration step.</p>
 <dl class="field-list simple">
@@ -334,9 +336,9 @@ reference.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="hmc_tomography.Distributions._AbstractDistribution.update_bounds">
-<code class="sig-name descname">update_bounds</code><span class="sig-paren">(</span><em class="sig-param">lower_bounds: Optional[numpy.ndarray], upper_bounds: Optional[numpy.ndarray]</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#_AbstractDistribution.update_bounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Distributions._AbstractDistribution.update_bounds" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">update_bounds</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lower_bounds</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>numpy.ndarray<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">upper_bounds</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>numpy.ndarray<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#_AbstractDistribution.update_bounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Distributions._AbstractDistribution.update_bounds" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method to update bounds of a distribution distribution.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -360,9 +362,9 @@ the current object of the other bound:</p>
 corresponding lower bounds.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="hmc_tomography.Distributions._AbstractDistribution.misfit_bounds">
-<code class="sig-name descname">misfit_bounds</code><span class="sig-paren">(</span><em class="sig-param">coordinates: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#_AbstractDistribution.misfit_bounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Distributions._AbstractDistribution.misfit_bounds" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">misfit_bounds</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coordinates</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#_AbstractDistribution.misfit_bounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Distributions._AbstractDistribution.misfit_bounds" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method to compute the misfit associated with the truncated part of the distribution.</p>
 </dd></dl>
 
@@ -390,11 +392,19 @@ corresponding lower bounds.</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2019-2020, Andrea Zunino, Andreas Fichtner, Lars Gebraad
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -405,7 +415,6 @@ corresponding lower bounds.</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

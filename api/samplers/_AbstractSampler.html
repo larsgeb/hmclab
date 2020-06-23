@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,19 @@
   
 
   
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -26,20 +32,15 @@
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="HMC" href="HMC.html" />
+    <link rel="next" title="RWMH - Random Walk Metropolis Hastings" href="RWMH.html" />
     <link rel="prev" title="Samplers" href="index.html" /> 
 </head>
 
@@ -54,7 +55,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> HMC Tom
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> HMC Tom
           
 
           
@@ -84,6 +85,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -101,7 +103,8 @@
 <li class="toctree-l2"><a class="reference internal" href="../massmatrices/index.html">MassMatrices</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">Samplers</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">_AbstractSampler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="HMC.html">HMC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="RWMH.html">RWMH - Random Walk Metropolis Hastings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="HMC.html">HMC - vanilla Hamiltonian Monte Carlo</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../post/index.html">Post - visualization and processing</a></li>
@@ -115,6 +118,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -153,7 +157,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../index.html">API reference</a> &raquo;</li>
         
@@ -204,62 +208,112 @@
 </style>
 <div class="section" id="abstractsampler">
 <h1>_AbstractSampler<a class="headerlink" href="#abstractsampler" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
+<dl class="py class">
 <dt id="hmc_tomography.Samplers._AbstractSampler">
 <em class="property">class </em><code class="sig-prename descclassname">hmc_tomography.Samplers.</code><code class="sig-name descname">_AbstractSampler</code><a class="reference internal" href="../../_modules/hmc_tomography/Samplers.html#_AbstractSampler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Samplers._AbstractSampler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
-<p>Abstract base class for Markov chain Monte Carlo samplers.</p>
-<dl class="attribute">
+<dd><p>Abstract base class for Markov chain Monte Carlo samplers.</p>
+<dl class="py attribute">
 <dt id="hmc_tomography.Samplers._AbstractSampler.name">
 <code class="sig-name descname">name</code><em class="property">: str</em><em class="property"> = 'Monte Carlo sampler abstract base class'</em><a class="headerlink" href="#hmc_tomography.Samplers._AbstractSampler.name" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="hmc_tomography.Samplers._AbstractSampler.dimensions">
-<code class="sig-name descname">dimensions</code><em class="property">: int</em><em class="property"> = -1</em><a class="headerlink" href="#hmc_tomography.Samplers._AbstractSampler.dimensions" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="hmc_tomography.Samplers._AbstractSampler.target">
-<code class="sig-name descname">target</code><em class="property">: _AbstractDistribution</em><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Samplers._AbstractSampler.target" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="hmc_tomography.Samplers._AbstractSampler.sample_hdf5_file">
-<code class="sig-name descname">sample_hdf5_file</code><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Samplers._AbstractSampler.sample_hdf5_file" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="hmc_tomography.Samplers._AbstractSampler.sample_hdf5_dataset">
-<code class="sig-name descname">sample_hdf5_dataset</code><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Samplers._AbstractSampler.sample_hdf5_dataset" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="hmc_tomography.Samplers._AbstractSampler.sample_ram_buffer">
-<code class="sig-name descname">sample_ram_buffer</code><em class="property">: _numpy.ndarray</em><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Samplers._AbstractSampler.sample_ram_buffer" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="hmc_tomography.Samplers._AbstractSampler.samples_filename">
-<code class="sig-name descname">samples_filename</code><em class="property">: str</em><em class="property"> = ''</em><a class="headerlink" href="#hmc_tomography.Samplers._AbstractSampler.samples_filename" title="Permalink to this definition">¶</a></dt>
-<dd><p>Variable to store the samples filename. This is stored because during sampling
-the filename might be altered. This alteration is never done without user
-interaction.</p>
+<dd><p>The name of the sampler</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="hmc_tomography.Samplers._AbstractSampler.sample">
-<em class="property">abstract </em><code class="sig-name descname">sample</code><span class="sig-paren">(</span><em class="sig-param">samples_filename: str</em>, <em class="sig-param">proposals: int = 100</em>, <em class="sig-param">online_thinning: int = 1</em>, <em class="sig-param">sample_ram_buffer_size: int = 1000</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Samplers.html#_AbstractSampler.sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Samplers._AbstractSampler.sample" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>proposals</strong> – </p></li>
-<li><p><strong>online_thinning</strong> – </p></li>
-<li><p><strong>sample_ram_buffer_size</strong> – </p></li>
-<li><p><strong>samples_filename</strong> – </p></li>
-</ul>
-</dd>
-</dl>
+<dl class="py attribute">
+<dt id="hmc_tomography.Samplers._AbstractSampler.dimensions">
+<code class="sig-name descname">dimensions</code><em class="property">: int</em><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Samplers._AbstractSampler.dimensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>An integer representing the dimensionality in which the MCMC sampler works.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="hmc_tomography.Samplers._AbstractSampler.distribution">
+<code class="sig-name descname">distribution</code><em class="property">: hmc_tomography.Distributions.base._AbstractDistribution</em><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Samplers._AbstractSampler.distribution" title="Permalink to this definition">¶</a></dt>
+<dd><p>The _AbstractDistribution object on which the sampler works.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="hmc_tomography.Samplers._AbstractSampler.samples_hdf5_filename">
+<code class="sig-name descname">samples_hdf5_filename</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Samplers._AbstractSampler.samples_hdf5_filename" title="Permalink to this definition">¶</a></dt>
+<dd><p>A string containing the path+filename of the hdf5 file to which samples will be
+stored.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="hmc_tomography.Samplers._AbstractSampler.samples_hdf5_filehandle">
+<code class="sig-name descname">samples_hdf5_filehandle</code><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Samplers._AbstractSampler.samples_hdf5_filehandle" title="Permalink to this definition">¶</a></dt>
+<dd><p>A HDF5 file handle of the hdf5 file to which samples will be stored.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="hmc_tomography.Samplers._AbstractSampler.samples_hdf5_dataset">
+<code class="sig-name descname">samples_hdf5_dataset</code><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Samplers._AbstractSampler.samples_hdf5_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>A string containing the HDF5 group of the hdf5 file to which samples will be
+stored.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="hmc_tomography.Samplers._AbstractSampler.ram_buffer_size">
+<code class="sig-name descname">ram_buffer_size</code><em class="property">: int</em><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Samplers._AbstractSampler.ram_buffer_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>A positive integer indicating the size of the RAM buffer in amount of samples.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="hmc_tomography.Samplers._AbstractSampler.ram_buffer">
+<code class="sig-name descname">ram_buffer</code><em class="property">: numpy.ndarray</em><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Samplers._AbstractSampler.ram_buffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>A NumPy ndarray containing the samples that are as of yet not written to disk.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="hmc_tomography.Samplers._AbstractSampler.current_model">
+<code class="sig-name descname">current_model</code><em class="property">: numpy.ndarray</em><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Samplers._AbstractSampler.current_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>A NumPy array containing the model at the current state of the Markov chain.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="hmc_tomography.Samplers._AbstractSampler.proposed_model">
+<code class="sig-name descname">proposed_model</code><em class="property">: numpy.ndarray</em><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Samplers._AbstractSampler.proposed_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>A NumPy array containing the model at the proposed state of the Markov chain.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="hmc_tomography.Samplers._AbstractSampler.current_x">
+<code class="sig-name descname">current_x</code><em class="property">: float</em><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Samplers._AbstractSampler.current_x" title="Permalink to this definition">¶</a></dt>
+<dd><p>A NumPy array containing <span class="math notranslate nohighlight">\(\chi = -\log\left( p\right)\)</span> (i.e. the misfit,
+negative log probability) of the distribution at the current state of the
+Markov chain.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="hmc_tomography.Samplers._AbstractSampler.proposed_x">
+<code class="sig-name descname">proposed_x</code><em class="property">: float</em><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Samplers._AbstractSampler.proposed_x" title="Permalink to this definition">¶</a></dt>
+<dd><p>A NumPy array containing <span class="math notranslate nohighlight">\(\chi = -\log\left( p\right)\)</span> (i.e. the misfit,
+negative log probability) of the distribution at the proposed state of the
+Markov chain.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="hmc_tomography.Samplers._AbstractSampler.accepted_proposals">
+<code class="sig-name descname">accepted_proposals</code><em class="property">: int</em><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Samplers._AbstractSampler.accepted_proposals" title="Permalink to this definition">¶</a></dt>
+<dd><p>An integer representing the amount of accepted proposals.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="hmc_tomography.Samplers._AbstractSampler.amount_of_writes">
+<code class="sig-name descname">amount_of_writes</code><em class="property">: int</em><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Samplers._AbstractSampler.amount_of_writes" title="Permalink to this definition">¶</a></dt>
+<dd><p>An integer representing the amount of times the sampler has written to disk.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="hmc_tomography.Samplers._AbstractSampler.progressbar_refresh_rate">
+<code class="sig-name descname">progressbar_refresh_rate</code><em class="property">: int</em><em class="property"> = 1000</em><a class="headerlink" href="#hmc_tomography.Samplers._AbstractSampler.progressbar_refresh_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>An integer representing how many samples lie between an update of the progress
+bar statistics (acceptance rate etc.).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="hmc_tomography.Samplers._AbstractSampler.max_time">
+<code class="sig-name descname">max_time</code><em class="property">: float</em><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Samplers._AbstractSampler.max_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>A float representing the maximum time in seconds that sampling is allowed to take
+before it is automatically terminated. The value None is used for unlimited time.</p>
 </dd></dl>
 
 </dd></dl>
@@ -274,7 +328,7 @@ interaction.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="HMC.html" class="btn btn-neutral float-right" title="HMC" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="RWMH.html" class="btn btn-neutral float-right" title="RWMH - Random Walk Metropolis Hastings" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="index.html" class="btn btn-neutral float-left" title="Samplers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -286,11 +340,19 @@ interaction.</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2019-2020, Andrea Zunino, Andreas Fichtner, Lars Gebraad
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -301,7 +363,6 @@ interaction.</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {
