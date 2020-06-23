@@ -75,6 +75,7 @@ matrix:
         - OS_PY=windows37
         - PATH=/c/Python37:/c/Python37/Scripts:$PATH
     - stage: deploy
+      if: branch = master
       before_install:
         - eval "$(ssh-agent -s)"
         - openssl aes-256-cbc -K $encrypted_8ebb1ef83f64_key -iv $encrypted_8ebb1ef83f64_iv -in github_deploy_key.enc -out github_deploy_key -d
@@ -98,7 +99,8 @@ matrix:
         - git status
         - git config --global user.email "travis@travis-ci.org"
         - git config --global user.name "Travis CI"
-        - git commit -m "Documentation on commit $commit_hash"
+        - git commit -m "Documentation brought to $commit_hash"
+        - git push origin
       after_success: echo Succes
       os: linux
       dist: xenial
