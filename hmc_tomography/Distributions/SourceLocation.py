@@ -4,7 +4,11 @@ from typing import Union as _Union, Tuple as _Tuple
 
 import numpy as _numpy
 
-from hmc_tomography.Distributions import _AbstractDistribution, Normal, Laplace
+from hmc_tomography.Distributions import _AbstractDistribution, Normal
+from hmc_tomography.Helpers.CustomExceptions import (
+    InvalidCaseError as _InvalidCaseError,
+)
+import math as _math
 
 # import line_profiler
 
@@ -209,7 +213,51 @@ class SourceLocation(_AbstractDistribution):
 
     @staticmethod
     def create_default(dimensions):
-        return super().create_default(dimensions)
+        # Possible parameter numbers:
+        # 3, 4, 6, 7, 9, 10
+
+        events = _math.floor(dimensions / 3)
+
+        fixed_medium_velocity = None
+
+        if dimensions < 3:
+            raise _InvalidCaseError()
+        elif dimensions % 3 == 1:
+            infer_velocity = True
+        elif dimensions % 3 == 0:
+            infer_velocity = False
+        else:
+            raise _InvalidCaseError()
+
+        # Create surface stations ------------------------------------------------------
+
+        stations_x = _numpy.array([0.0, 5.0, 10.0])[None, :]
+        stations_z = _numpy.array([0.0, 0.0, 0.0])[None, :]
+
+        # Create the true model and observations ---------------------------------------
+
+        x = _numpy.random.rand(events, 1) * 10
+        z = _numpy.random.rand(events, 1) * 10
+        T = _numpy.random.rand(events, 1) * 10
+        v = _numpy.random.rand(1, 1) * 3 + 1
+
+        if not infer_velocity:
+            fixed_medium_velocity = v
+
+        fake_observed_data = SourceLocation.forward(x, z, T, v, stations_x, stations_z)
+
+        # Create the likelihood --------------------------------------------------------
+
+        data_dispersion = 0.25 * _numpy.ones_like(fake_observed_data)
+
+        return SourceLocation(
+            stations_x,
+            stations_z,
+            fake_observed_data,
+            data_dispersion,
+            infer_velocity=infer_velocity,
+            fixed_medium_velocity=fixed_medium_velocity,
+        )
 
     @staticmethod
     def split_vector(model_vector, velocity=None) -> _Tuple:

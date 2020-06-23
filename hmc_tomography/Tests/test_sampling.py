@@ -80,7 +80,7 @@ def test_samples_file(
     if _os.path.exists(filename):
         _os.remove(filename)
 
-    sampler.sample(filename, distribution, proposals=proposals, max_time=1.0)
+    sampler.sample(filename, distribution, proposals=proposals, max_time=0.5)
 
     # Check if the file was created. If it wasn't, fail
     if not _os.path.exists(filename):
@@ -92,7 +92,10 @@ def test_samples_file(
 
     with _hmc_tomography.Post.Samples(filename) as samples:
         # Assert that the HDF array has the right dimensions
-        assert samples.raw_samples_hdf.shape == (distribution.dimensions + 1, proposals)
+        assert samples.raw_samples_hdf.shape == (
+            distribution.dimensions + 1,
+            samples_written_expected,
+        )
 
         # Assert that the actual written samples have the right dimensions
         assert samples[:, :].shape == (
