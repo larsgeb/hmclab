@@ -76,7 +76,7 @@ matrix:
         - PATH=/c/Python37:/c/Python37/Scripts:$PATH
     - stage: deploy
       install:
-        - sudo apt-get update && sudo apt-get upgrade -y
+        - sudo apt-get update
         - sudo apt-get install pandoc -y
         - pip install -e .[dev]
       script:
