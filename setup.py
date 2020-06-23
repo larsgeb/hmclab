@@ -33,6 +33,7 @@ setuptools.setup(
         "dev": [
             "black",
             "pre-commit",
+            "ipython",
             "sphinx",
             "numpydoc",
             "codecov",

@@ -81,7 +81,7 @@ matrix:
         - cd docs-source
         - make html
         - cd ../..
-        - git --single-branch --branch gh-pages git@github.com:larsgeb/hmc-tomography.git documentation
+        - git --branch gh-pages git@github.com:larsgeb/hmc-tomography.git documentation
         - cd documentation
         - git rm --cached * -r
         - rm * -rf
