@@ -81,7 +81,7 @@ class _AbstractSampler(_ABC):
     current_x: float = None
     """A NumPy array containing :math:`\chi = -\log\left( p\\right)` (i.e. the misfit,
     negative log probability) of the distribution at the current state of the
-    Markov chain. """
+    Markov chain."""
 
     proposed_x: float = None
     """A NumPy array containing :math:`\chi = -\log\left( p\\right)` (i.e. the misfit,

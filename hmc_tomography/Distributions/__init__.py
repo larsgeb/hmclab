@@ -37,9 +37,10 @@ except ModuleNotFoundError as e:
 try:
     from hmc_tomography.Distributions.LasifFWI import LasifFWI
 except ModuleNotFoundError as e:
-    _warnings.warn(
-        f"Couldn't find the required package for LASIF. Detailed error message: {e}"
-    )
+    pass
+    # _warnings.warn(
+    #     f"Couldn't find the required package for LASIF. Detailed error message: {e}"
+    # )
 
 
 __all__ = [
