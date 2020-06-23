@@ -21,6 +21,7 @@ Available classes within `Distributions`:
    AdditiveDistribution
    BayesRule
    Himmelblau
+   SourceLocation
 
 
 .. autosummary:: hmc_tomography.Distributions._AbstractDistribution
@@ -32,3 +33,4 @@ Available classes within `Distributions`:
                  hmc_tomography.Distributions.AdditiveDistribution
                  hmc_tomography.Distributions.BayesRule
                  hmc_tomography.Distributions.Himmelblau
+                 hmc_tomography.Distributions.SourceLocation
