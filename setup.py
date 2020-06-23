@@ -1,11 +1,13 @@
 import setuptools
+import versioneer
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     name="hmc-tomography",
-    version="0.2.1",
     author="Lars Gebraad, Andreas Fichtner, Andrea Zunino",
     author_email="lars.gebraad@erdw.ethz.ch",
     description="An example HMC tomography package",
@@ -33,8 +35,14 @@ setuptools.setup(
         "dev": [
             "black",
             "pre-commit",
+            "ipython",
             "sphinx",
+            "nbsphinx",
+            "sphinx_rtd_theme",
             "numpydoc",
+            "pandoc",
+            "sphinx-git",
+            "versioneer",
             "codecov",
             "pytest",
             "pytest-harvest",

@@ -30,9 +30,20 @@ from hmc_tomography.Distributions.LinearMatrix import LinearMatrix
 from hmc_tomography.Distributions.SourceLocation import SourceLocation
 
 try:
+    from hmc_tomography.Distributions.pyWave import pyWave
+except ModuleNotFoundError as e:
+    pass
+    # _warnings.warn(
+    #     f"Couldn't find the required package for pyWave. Detailed error message: {e}"
+    # )
+
+try:
     from hmc_tomography.Distributions.LasifFWI import LasifFWI
 except ModuleNotFoundError as e:
-    _warnings.warn(f"Couldn't find the required packages. Detailed error message: {e}")
+    pass
+    # _warnings.warn(
+    #     f"Couldn't find the required package for LASIF. Detailed error message: {e}"
+    # )
 
 
 __all__ = [
@@ -48,4 +59,5 @@ __all__ = [
     "LinearMatrix",
     "LasifFWI",
     "SourceLocation",
+    "pyWave",
 ]

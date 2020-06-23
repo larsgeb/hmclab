@@ -9,6 +9,10 @@ from hmc_tomography import (
     Post,
 )
 
+from ._version import get_versions
+__version__ = get_versions()["version"]
+del get_versions
+
 name = "hmc_tomography"
 __all__ = [
     "MassMatrices",
@@ -17,3 +21,7 @@ __all__ = [
     "Optimizers",
     "Post",
 ]
+
+from ._version import get_versions
+__version__ = get_versions()['version']
+del get_versions

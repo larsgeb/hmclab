@@ -1,1 +1,13 @@
+black
 pre-commit
+ipython
+sphinx
+nbsphinx
+sphinx_rtd_theme
+numpydoc
+pandoc
+sphinx-git
+versioneer
+codecov
+pytest
+pytest-harvest

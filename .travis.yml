@@ -74,6 +74,39 @@ matrix:
       env:
         - OS_PY=windows37
         - PATH=/c/Python37:/c/Python37/Scripts:$PATH
+    - stage: deploy
+      if: branch = master
+      before_install:
+        - eval "$(ssh-agent -s)"
+        - openssl aes-256-cbc -K $encrypted_8ebb1ef83f64_key -iv $encrypted_8ebb1ef83f64_iv -in github_deploy_key.enc -out github_deploy_key -d
+        - chmod 600 github_deploy_key
+        - ssh-add github_deploy_key
+      install:
+        - sudo apt-get update
+        - sudo apt-get install pandoc -y
+        - pip install -e .[dev]
+      script:
+        - commit_hash=$(git rev-parse HEAD)
+        - cd docs-source
+        - make html
+        - cd ../..
+        - git clone --single-branch --branch gh-pages git@github.com:larsgeb/hmc-tomography.git documentation
+        - cd documentation
+        - git rm --cached * -r
+        - rm * -rf
+        - cp ../hmc-tomography/docs/build/html/* . -r
+        - git add .
+        - git status
+        - git config --global user.email "travis@travis-ci.org"
+        - git config --global user.name "Travis CI"
+        - git commit -m "Documentation brought to $commit_hash"
+        - git push origin
+      after_success: echo Succes
+      os: linux
+      dist: xenial
+      env: OS_PY=xenial37_deploy
+      language: python
+      python: 3.7
   allow_failures:
     - name: "Python 3.6 on Trusty"
       os: linux
@@ -88,12 +121,14 @@ matrix:
       language: python
       python: 3.6
 
+# Shared install, script, after_succes tasks, only overwritten in deploy task
+
 install:
   - pip install -e .[testing]
 
 script:
   - echo $OS_PY
-  - coverage run -m pytest
+  - coverage run -m pytest --ignore=hmc_tomography/Tests/ignore/
 
 after_success:
   - codecov
