@@ -468,7 +468,7 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<p>We now have a class of this distribution, e.g. a template on how to construct it. To actually use it, we need an instance. Instances of classes are created in the following way:</p>
+<p>We now have a class of this distribution, e.g. a template on how to construct it. To actually use it, we need an instance. Instances of classes are created in the following way:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
@@ -491,7 +491,7 @@ Can&#39;t instantiate abstract class my_inverse_problem_class with abstract meth
 </div>
 <p>Oops, that didn’t work! If we try to decipher the Python error we can actually understand why: the class is missing ‘abstract’ functions. <strong>Abstract functions are functions that we have to implement ourselves.</strong> The abstract base class is asking for the following functions:</p>
 <ol class="arabic simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">generate</span></code> : A function that generates an independent sample from the distrbution (i.e. subsequent samples are i.i.d.).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">generate</span></code> : A function that generates an independent sample from the distrbution (i.e. subsequent samples are i.i.d.).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">gradient</span></code> : A function to compute the gradient of the misfit function.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">misfit</span></code> : A function to compute the misfit function.</p></li>
 </ol>
@@ -735,7 +735,7 @@ Tot. acc rate: 1.00. Last 100 acc rate: 1.00. Progress: 100%|██████�
 </div>
 <div class="section" id="The-Styblinsky-Tang-Function">
 <h2>The Styblinsky-Tang Function<a class="headerlink" href="#The-Styblinsky-Tang-Function" title="Permalink to this headline">¶</a></h2>
-<p>A more complete example would be to inplement some function as misfit and its derivative. One thing the following class implements is tempering, i.e. annealing. This changes a distribution to amplify or surpress local minima. This is a technique used in algorithms such as <a class="reference external" href="https://en.wikipedia.org/wiki/Parallel_tempering">parallel tempering</a> and <a class="reference external" href="https://en.wikipedia.org/wiki/Simulated_annealing">simulated annealing</a>. Tempering is implemented simply by dividing the misfit (and gradient) by
+<p>A more complete example would be to inplement some function as misfit and its derivative. One thing the following class implements is tempering, i.e. annealing. This changes a distribution to amplify or surpress local minima. This is a technique used in algorithms such as <a class="reference external" href="https://en.wikipedia.org/wiki/Parallel_tempering">parallel tempering</a> and <a class="reference external" href="https://en.wikipedia.org/wiki/Simulated_annealing">simulated annealing</a>. Tempering is implemented simply by dividing the misfit (and gradient) by
 the temperature.</p>
 <p>You’re completely free to do the implementation of the gradient in any way you want (analytical derivatives, backpropagation, finite differences), however the accuracy to which the gradient is computed has direct influence on the performance of HMC. Getting it right (and fast) is typically essential to performant sampling with HMC.</p>
 <p>The example demonstrated here is the n-dimensional tempered Styblinsky-Tang function. Its misfit is a sum of the same expression on every separate dimension, making the expression of the misfit and gradient rather simple. We don’t implement a generate function (as I wouldn’t know an effective way of generating samples), and we leave the dimensionality open to each instance.</p>

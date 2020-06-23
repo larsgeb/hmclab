@@ -557,7 +557,7 @@ shape: (64495, 1)
 \[\mathbf{\sigma} \sim \mathcal{N} (\mathbf{0} , \Sigma)\]</div>
 <p>which makes inference in general much easier.</p>
 <p>The description of the noise may depend strongly on which datapoint we look at. There could be correlations and strong differences in standard deviation for each datum <span class="math notranslate nohighlight">\(d_i\)</span>, as captured in the covariance matrix <span class="math notranslate nohighlight">\(\Sigma\)</span>. We will first start with a diagonal (non-correlated) data covariance matrix.</p>
-<p>Now we have everything we need to define our (non-regularized / prior-less) inference problem using a provided class. This object analyses the supplied objects and determines the appropriate methods (i.e. sparse vs dense <span class="math notranslate nohighlight">\(G\)</span>, dense vs diagonal <span class="math notranslate nohighlight">\(\Sigma\)</span>, etc.).</p>
+<p>Now we have everything we need to define our (non-regularized / prior-less) inference problem using a provided class. This object analyses the supplied objects and determines the appropriate methods (i.e. sparse vs dense <span class="math notranslate nohighlight">\(G\)</span>, dense vs diagonal <span class="math notranslate nohighlight">\(\Sigma\)</span>, etc.).</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
@@ -669,7 +669,7 @@ shape: (64495, 1)
 </div>
 <div class="section" id="Act-2:-using-a-Laplace-distribution-as-a-prior">
 <h2>Act 2: using a Laplace distribution as a prior<a class="headerlink" href="#Act-2:-using-a-Laplace-distribution-as-a-prior" title="Permalink to this headline">¶</a></h2>
-<p>Another interesting prior is the Laplace distribution. Putting this prior on something basically minimizes the amount of parameters that are non-zero, i.e. promotes sparsity. Let’s define it:</p>
+<p>Another interesting prior is the Laplace distribution. Putting this prior on something basically minimizes the amount of parameters that are non-zero, i.e. promotes sparsity. Let’s define it:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
@@ -1009,7 +1009,7 @@ shape: (64495, 1)
 <img alt="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_50_0.png" src="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_50_0.png" />
 </div>
 </div>
-<p>Looking good! Let’s recycle the burn-in covariance to precondition HMC, i.e. we integrate the observed variability to accelerate sampling.</p>
+<p>Looking good! Let’s recycle the burn-in covariance to precondition HMC, i.e. we integrate the observed variability to accelerate sampling.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[187]:
 </pre></div>

@@ -104,7 +104,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#Accessing-the-raw-samples-and-misfits">Accessing the raw samples and misfits</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Interrupting-sampling:-no-big-deal">Interrupting sampling: no big deal</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Interpreting-multidimensional-results">Interpreting multidimensional results</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Using-Bayes’-rule">Using Bayes’ rule</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Using-Bayes'-rule">Using Bayes’ rule</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="0.2 - Tuning Hamiltonian Monte Carlo.html">Tutorial 0.2 - Tuning Hamiltonian Monte Carlo</a></li>
@@ -775,7 +775,7 @@ Silently overwriting samples file (bin_samples/tutorial_01_standard_normal.h5) i
 Sampling. Acceptance rate::  40%|███▉      | 39506/100000 [00:03&lt;00:05, 11546.42it/s]
 </pre></div></div>
 </div>
-<p>When we now inspect the resulting samples file, we see that because we interrupted the kernel, the <code class="docutils literal notranslate"><span class="pre">proposals</span> <span class="pre">saved</span> <span class="pre">to</span> <span class="pre">disk</span></code> is less than we would expect after dividing <code class="docutils literal notranslate"><span class="pre">requested</span> <span class="pre">proposals</span></code> by <code class="docutils literal notranslate"><span class="pre">online</span> <span class="pre">thinning</span></code> (i.e. the number we would expect if the sampler finished).</p>
+<p>When we now inspect the resulting samples file, we see that because we interrupted the kernel, the <code class="docutils literal notranslate"><span class="pre">proposals</span> <span class="pre">saved</span> <span class="pre">to</span> <span class="pre">disk</span></code> is less than we would expect after dividing <code class="docutils literal notranslate"><span class="pre">requested</span> <span class="pre">proposals</span></code> by <code class="docutils literal notranslate"><span class="pre">online</span> <span class="pre">thinning</span></code> (i.e. the number we would expect if the sampler finished).</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
@@ -913,8 +913,8 @@ Tot. acc rate: 0.69. Last 100 acc rate: 0.64. Progress: 100%|██████�
 </div>
 </div>
 </div>
-<div class="section" id="Using-Bayes’-rule">
-<h2>Using Bayes’ rule<a class="headerlink" href="#Using-Bayes’-rule" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="Using-Bayes'-rule">
+<h2>Using Bayes’ rule<a class="headerlink" href="#Using-Bayes'-rule" title="Permalink to this headline">¶</a></h2>
 <p>One of the main operations users of Bayesian inference do is applying Bayes’ rule to two distributions. Bayes’ rule combines two distributions (typically a likelihood and a prior) to a combined state of information, the posterior. We provide a simple interface to combine two or more distributions using Bayes’ rule in the following way.</p>
 <p>First we create two distributions we wish to combine. The first distribution is a 2D uniform distribution bounded between <span class="math notranslate nohighlight">\([0, 1]\)</span> for both parameters:</p>
 <div class="nbinput nblast docutils container">

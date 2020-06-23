@@ -445,7 +445,7 @@ div.rendered_html tbody tr:hover {
 <div class="section" id="Tutorial-3---Separate-priors-per-dimension">
 <h1>Tutorial 3 - Separate priors per dimension<a class="headerlink" href="#Tutorial-3---Separate-priors-per-dimension" title="Permalink to this headline">¶</a></h1>
 <p>Sometimes the parameters that we try to infer are sufficiently different such that we can’t describe our prior knowledge using only one type of distribution. For example, trying to find an Earthquake hypocenter and origin time might mean that we have a Gaussian prior on its depth, but no clear preference of the origin time (as an Earthquake might of course occur anytime, before the observed arrival times at least).</p>
-<p>The HMCTomo package has a simple interface for doing this: 1. We create the priors for all relevant parameter groups separately; 2. We combine these distributions using <code class="docutils literal notranslate"><span class="pre">hmc_tomography.Distributions.CompositeDistribution</span></code>. This leaves the order in which the distributions intact; 3. We use the resulting distribution as a prior or directly sample on it, i.e. what we would normally do with a prior.</p>
+<p>The HMCTomo package has a simple interface for doing this: 1. We create the priors for all relevant parameter groups separately; 2. We combine these distributions using <code class="docutils literal notranslate"><span class="pre">hmc_tomography.Distributions.CompositeDistribution</span></code>. This leaves the order in which the distributions intact; 3. We use the resulting distribution as a prior or directly sample on it, i.e. what we would normally do with a prior.</p>
 <p>Below we illustrate the process.</p>
 <p>Create prior 1, a Normal distribution on one dimension.</p>
 <div class="nbinput nblast docutils container">
@@ -486,7 +486,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="admonition note">
 <p class="admonition-title fa fa-exclamation-circle">Note:</p>
-<p>When combining e.g. distribution on parameter 1 and parameter 2 in this way, the function <code class="docutils literal notranslate"><span class="pre">CompositeDistribution</span></code> returns the following mathematical construct:</p>
+<p>When combining e.g. distribution on parameter 1 and parameter 2 in this way, the function <code class="docutils literal notranslate"><span class="pre">CompositeDistribution</span></code> returns the following mathematical construct:</p>
 <div class="math notranslate nohighlight">
 \[\chi_\text{total} (m_1, m_2)= \chi_{m_1} (m_1) + \chi_{m_2} (m_2)\]</div>
 <p>where the various <span class="math notranslate nohighlight">\(\chi\)</span>’s represent negative logarithms of probabilities (misfit functions).</p>

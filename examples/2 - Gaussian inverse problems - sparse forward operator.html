@@ -545,7 +545,7 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<p>Now we have everything we need to define our (non-regularized / prior-less) inference problem using a provided class. This object analyses the supplied objects and determines the appropriate methods (i.e. sparse vs dense <span class="math notranslate nohighlight">\(G\)</span>, dense vs diagonal <span class="math notranslate nohighlight">\(\Sigma\)</span>, etc.).</p>
+<p>Now we have everything we need to define our (non-regularized / prior-less) inference problem using a provided class. This object analyses the supplied objects and determines the appropriate methods (i.e. sparse vs dense <span class="math notranslate nohighlight">\(G\)</span>, dense vs diagonal <span class="math notranslate nohighlight">\(\Sigma\)</span>, etc.).</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
@@ -1457,12 +1457,12 @@ Difference:
 <p>Again, our sampling corresponds to our analytical solution! The prior has two main impacts on the posterior:</p>
 <ol class="arabic simple">
 <li><p>The prior reduces variation (uncertainty) in the posterior by decreasing variances for parameters as well as tuning the correlation matrix to that of the prior. The amount the posterior correlation correspond to the prior correlation (which in this case was the identity matrix, no correlation) depends on the prior variance. Try changing it and visualizing the posterior correlation matrix (<strong>If you do this, also remember to re-tune the algorithm!</strong>).</p></li>
-<li><p>The prior ‘pulls’ posterior means towards prior means. But, because there are correlations introduced through the data covariance matrix and the forward model matrix, a pull in one dimension might trade-off with a ‘push’ for another parameter. In more mathematical terms; in e.g. 2d, a Gaussian unit prior prefers the point (0.5, 0.5) to (1.0, 0.0).</p></li>
+<li><p>The prior ‘pulls’ posterior means towards prior means. But, because there are correlations introduced through the data covariance matrix and the forward model matrix, a pull in one dimension might trade-off with a ‘push’ for another parameter. In more mathematical terms; in e.g. 2d, a Gaussian unit prior prefers the point (0.5, 0.5) to (1.0, 0.0).</p></li>
 </ol>
 </div>
 <div class="section" id="Case-4---A-non-Gaussian-prior">
 <h2>Case 4 - A non-Gaussian prior<a class="headerlink" href="#Case-4---A-non-Gaussian-prior" title="Permalink to this headline">¶</a></h2>
-<p>In this final example we’ll test the influence of using a non-Gaussian prior. In this case, we can not solve the inverse problem analytically anymore. Our comparison can now only be done to a different posterior (i.e. the posterior from the previous case) to assess the impact of the prior.</p>
+<p>In this final example we’ll test the influence of using a non-Gaussian prior. In this case, we can not solve the inverse problem analytically anymore. Our comparison can now only be done to a different posterior (i.e. the posterior from the previous case) to assess the impact of the prior.</p>
 <p>We’ll use a prior that promotes sparsity. What this means, is that this prior ‘prefers’ solutions where many entries are zero (or many entries are at its mean, we can define what value that is). This is quantified by the Laplace distribution. In 1 dimensions it’s probability density function is proportional to the exponent of the L1 distance to a mean scaled by a disperion <span class="math notranslate nohighlight">\(b\)</span>:</p>
 <div class="math notranslate nohighlight">
 \[\text{Laplace}(x;\: \mu, b) \propto \exp \left( - \frac{|x-\mu|}{b}  \right)\]</div>
