@@ -77,11 +77,17 @@ matrix:
     - stage: deploy
       install: echo Install
       script:
-        - echo Script
-        - ls
-        - cd ..
-        - ls
-        - ls /
+        - pip install -e .[dev]
+        - cd docs-source
+        - make html
+        - cd ../..
+        - git --single-branch --branch gh-pages git@github.com:larsgeb/hmc-tomography.git documentation
+        - cd documentation
+        - git rm --cached * -r
+        - rm * -rf
+        - cp ../hmc-tomography/docs/build/html/* . -r
+        - git add .
+        - git status
       after_success: echo Succes
       os: linux
       dist: xenial
@@ -101,6 +107,8 @@ matrix:
       env: OS_PY=precise36
       language: python
       python: 3.6
+
+# Shared install, script, after_succes tasks, only overwritten in deploy task
 
 install:
   - pip install -e .[testing]
