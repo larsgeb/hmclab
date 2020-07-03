@@ -7,8 +7,8 @@ import pytest as _pytest
 import hmc_tomography as _hmc_tomography
 
 
-def skip_pyWave_creation():
-    dist = _hmc_tomography.Distributions.pyWave.create_default(32400)
+def skip_psvWave_creation():
+    dist = _hmc_tomography.Distributions.psvWave.create_default(32400)
 
     dist.temperature = 1.0
 
@@ -23,8 +23,8 @@ def skip_pyWave_creation():
     print(f"Misfit 2: {X2:.2f}")
 
 
-def skip_pyWave_sampling():
-    likelihood = _hmc_tomography.Distributions.pyWave.create_default(32400)
+def skip_psvWave_sampling():
+    likelihood = _hmc_tomography.Distributions.psvWave.create_default(32400)
     likelihood.temperature = 100.0
 
     template = _numpy.ones((int(likelihood.dimensions / 3), 1))

@@ -30,10 +30,10 @@ from hmc_tomography.Distributions.LinearMatrix import LinearMatrix
 from hmc_tomography.Distributions.SourceLocation import SourceLocation
 
 try:
-    from hmc_tomography.Distributions.pyWave import pyWave
+    from hmc_tomography.Distributions.psvWave import psvWave
 except ModuleNotFoundError as e:
     _warnings.warn(
-        f"Couldn't find the required package for pyWave. Detailed error message: {e}"
+        f"Couldn't find the required package for psvWave. Detailed error message: {e}"
     )
 
 try:

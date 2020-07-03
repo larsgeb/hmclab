@@ -4,32 +4,80 @@ import warnings as _warnings
 from typing import Union as _Union
 
 import numpy as _numpy
-import pyWave_cpp
+import psvWave as _psvWave
 
 from hmc_tomography.Distributions import _AbstractDistribution
 from hmc_tomography.Helpers import CustomExceptions as _CustomExceptions
 
 
-class pyWave(_AbstractDistribution):
+class psvWave(_AbstractDistribution):
     forward_up_to_date: bool = False
     temperature: float = 1.0
+    omp_threads_override: int = 0
 
-    def __init__(self, ini_file, ux_obs, uz_obs, temperature: float = 1.0):
+    def __init__(
+        self,
+        _input: _Union[str, "psvWave"],
+        ux_obs: _numpy.ndarray = None,
+        uz_obs: _numpy.ndarray = None,
+        temperature: float = None,
+        omp_threads_override: int = None,
+    ):
 
-        self.fdModel = pyWave_cpp.fdModel(ini_file)
+        if type(_input) == str:
+            make_copy = False
+        elif self.__class__ == type(_input):
+            make_copy = True
+        else:
+            raise ValueError()
 
-        self.fdModel.set_observed_data(ux_obs, uz_obs)
+        # Check if we are creating a new object or copying an existing one
+        if not make_copy:
+            # If passed, create object from the passed .ini file.
+            self.fdModel = _psvWave.fdModel(_input)
+        else:
+            # If an object was passed, copy it.
+            self.fdModel = _input.fdModel.copy()
+
+        # Check if we need to set new data.
+        if ux_obs is not None and uz_obs is not None:
+            self.fdModel.set_observed_data(ux_obs, uz_obs)
+        elif not make_copy:
+            raise ValueError(
+                "No passed observed data. Could not construct an inverse problem."
+            )
 
         self.dimensions = self.fdModel.free_parameters
 
-        self.temperature = temperature
+        if temperature is not None:
+            # Use passed temperature
+            self.temperature = temperature
+        elif make_copy:
+            # Copy from object
+            self.temperature = _input.temperature
+        else:
+            # Default temperature
+            self.temperature = 1.0
+
+        if omp_threads_override is not None:
+            # Use passed override
+            self.omp_threads_override = omp_threads_override
+        elif make_copy:
+            # Copy from object
+            self.omp_threads_override = _input.omp_threads_override
+        else:
+            # Default omp_threads_override
+            self.omp_threads_override = 0
 
     @staticmethod
-    def create_default(dimensions: int) -> "pyWave":
-        ini_file = "hmc_tomography/Tests/configurations/forward_configuration.ini"
+    def create_default(
+        dimensions: int, ini_file: str, omp_threads_override: int = 0
+    ) -> "psvWave":
+        if ini_file is None:
+            ini_file = "hmc_tomography/Tests/configurations/forward_configuration.ini"
 
         # Create temporary simulation object to fake observed waveforms
-        model = pyWave_cpp.fdModel(ini_file)
+        model = _psvWave.fdModel(ini_file)
 
         if model.free_parameters != dimensions:
             raise _CustomExceptions.InvalidCaseError()
@@ -63,14 +111,19 @@ class pyWave(_AbstractDistribution):
         # Create 'true' data
         # print("Faking observed data")
         for i_shot in range(model.n_shots):
-            model.forward_simulate(i_shot)
+            model.forward_simulate(i_shot, omp_threads_override=omp_threads_override)
 
         # Cheating of course, as this is synthetically generated data.
         ux_obs, uz_obs = model.get_synthetic_data()
         # Noise free data, to change this, add noise below
 
         # Return the create wave simulation object
-        return pyWave(ini_file, ux_obs, uz_obs)
+        return psvWave(
+            ini_file,
+            ux_obs=ux_obs,
+            uz_obs=uz_obs,
+            omp_threads_override=omp_threads_override,
+        )
 
     def generate(self) -> _numpy.ndarray:
         pass
@@ -89,7 +142,9 @@ class pyWave(_AbstractDistribution):
 
         self.fdModel.reset_kernels()
         for i_shot in range(self.fdModel.n_shots):
-            self.fdModel.adjoint_simulate(i_shot)
+            self.fdModel.adjoint_simulate(
+                i_shot, omp_threads_override=self.omp_threads_override
+            )
         self.fdModel.map_kernels_to_velocity()
 
         return self.fdModel.get_gradient_vector()[:, None] / self.temperature
@@ -107,7 +162,9 @@ class pyWave(_AbstractDistribution):
             return self.fdModel.misfit
 
         for i_shot in range(self.fdModel.n_shots):
-            self.fdModel.forward_simulate(i_shot)
+            self.fdModel.forward_simulate(
+                i_shot, omp_threads_override=self.omp_threads_override
+            )
 
         self.fdModel.calculate_l2_misfit()
         self.fdModel.calculate_l2_adjoint_sources()
