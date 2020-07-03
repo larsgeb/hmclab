@@ -34,70 +34,7 @@ class Samples:
 
         The operator overload takes care of the burn-in phase sample discard."""
 
-        if type(key) == int:
-            # Check if the indexed sample is actual drawn.
-            if key > self.last_sample:
-                raise ValueError("Index out of range")
-            # Access a single samples. The none keyword forces a column vector.
-            return self.raw_samples_hdf[:, self.burn_in + key][:, None]
-
-        elif type(key) == slice:
-
-            start = None
-            stop = None
-            step = key.step
-
-            if key.start is not None:
-                start = key.start + self.burn_in
-            else:
-                start = self.burn_in
-            if key.stop is not None:
-                stop = key.stop + self.burn_in
-
-            # Correct for the possible sampling termination
-            if stop is None:
-                stop = self.last_sample
-
-            if start > stop:
-                raise ValueError("Index out of range")
-
-            key = slice(start, stop, step)
-
-            print(key, self.last_sample)
-
-            # Access multiple samples
-            return self.raw_samples_hdf[:, key]
-
-        elif type(key) == tuple:
-
-            key1 = key[0]
-            key2 = key[1]
-
-            if type(key2) == int:
-                key2 = slice(key2 + self.burn_in, key2 + self.burn_in + 1, None)
-            else:
-                start = None
-                stop = None
-                step = key2.step
-
-                if key2.start is not None:
-                    start = key2.start + self.burn_in
-                else:
-                    start = self.burn_in
-                if key2.stop is not None:
-                    stop = key2.stop + self.burn_in
-
-                # Correct for the possible sampling termination
-                if stop is None:
-                    stop = self.last_sample
-
-                if start > stop:
-                    raise ValueError("Index out of range")
-
-                key2 = slice(start, stop, step)
-
-            # Access multiple samples
-            return self.raw_samples_hdf[key1, key2]
+        return self.file_handle[self.datasetname][key]
 
     def __enter__(self):
         return self
@@ -113,17 +50,11 @@ class Samples:
         return self.file_handle[self.datasetname][-1, :][:, None]
 
     @property
-    def raw_samples(self):
+    def samples(self):
         return self.file_handle[self.datasetname][:-1, :].T
 
-    @property
-    def raw_samples_hdf(self):
-        return self.file_handle[self.datasetname]
-
     def print_details(self):
-
-        size = _shutil.get_terminal_size((80, 20))  # pass fallback
-
+        size = _shutil.get_terminal_size((80, 20))
         print()
         print("{:^{width}}".format("H5 file details", width=size[0]))
         print("━" * size[0])
@@ -145,6 +76,12 @@ class Samples:
         print("{0:30} {1}".format("Acceptance rate", details["acceptance_rate"]))
         print("{0:30} {1}".format("Online thinning", details["online_thinning"]))
         print("{0:30} {1}".format("Sampling start time", details["start_time"]))
+        print("{0:30} {1}".format("Sampling end time", details["end_time"]))
+        print(
+            "{0:30} {1}".format(
+                "Last sample (zero-indexed)", details["last_written_sample"]
+            )
+        )
 
         details.pop("sampler")
         details.pop("proposals")
@@ -152,6 +89,8 @@ class Samples:
         details.pop("acceptance_rate")
         details.pop("online_thinning")
         details.pop("start_time")
+        details.pop("end_time")
+        details.pop("last_written_sample")
 
         print()
         print("{:^{width}}".format("Sampler specific attributes", width=size[0]))
