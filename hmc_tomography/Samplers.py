@@ -30,6 +30,7 @@ import warnings as _warnings
 from abc import ABC as _ABC
 from abc import abstractmethod as _abstractmethod
 from time import time as _time
+from datetime import datetime as _datetime
 from typing import Union as _Union
 
 import h5py as _h5py
@@ -94,9 +95,9 @@ class _AbstractSampler(_ABC):
     amount_of_writes: int = None
     """An integer representing the amount of times the sampler has written to disk."""
 
-    progressbar_refresh_rate: int = 1000
-    """An integer representing how many samples lie between an update of the progress
-    bar statistics (acceptance rate etc.)."""
+    progressbar_refresh_rate: float = 0.25
+    """A float representing how long lies between an update of the progress bar
+    statistics (acceptance rate etc.)."""
 
     max_time: float = None
     """A float representing the maximum time in seconds that sampling is allowed to take
@@ -178,11 +179,6 @@ class _AbstractSampler(_ABC):
 
             assert type(self.ram_buffer_size) == int
 
-        # Check if writing to RAM occurs more often than updating the progress bar.
-        if self.ram_buffer_size < self.progressbar_refresh_rate:
-            # If so, update progress bar during ram writes
-            self.progressbar_refresh_rate = self.ram_buffer_size
-
         shape = (self.dimensions + 1, self.ram_buffer_size)
 
         self.ram_buffer = _numpy.empty(shape, dtype=_numpy.float64)
@@ -237,15 +233,36 @@ class _AbstractSampler(_ABC):
         # Create attributes before sampling, such that SWMR works
         self.samples_hdf5_dataset.attrs["write_index"] = -1
         self.samples_hdf5_dataset.attrs["last_written_sample"] = -1
+        self.samples_hdf5_dataset.attrs["proposals"] = self.proposals
+        self.samples_hdf5_dataset.attrs["acceptance_rate"] = 0
+        self.samples_hdf5_dataset.attrs["online_thinning"] = self.online_thinning
+        self.samples_hdf5_dataset.attrs["start_time"] = _datetime.now().strftime(
+            "%d-%b-%Y (%H:%M:%S.%f)"
+        )
+        self.samples_hdf5_dataset.attrs["sampler"] = self.name
 
     def _close_sampler(self):
+
+        self.samples_hdf5_dataset.attrs["acceptance_rate"] = self.accepted_proposals / (
+            self.current_proposal + 1
+        )
+        self.samples_hdf5_dataset.attrs["end_time"] = _datetime.now().strftime(
+            "%d-%b-%Y (%H:%M:%S.%f)"
+        )
+        self.samples_hdf5_dataset.attrs["runtime"] = str(
+            self.end_time - self.start_time
+        )
+        self.samples_hdf5_dataset.attrs["runtime_seconds"] = (
+            self.end_time - self.start_time
+        ).total_seconds()
+
         self.samples_hdf5_filehandle.close()
 
     def _sample_loop(self):
         """The actual sampling code."""
 
         # As soon as all attributes and datasets are created, enable SWMR mode.
-        self.samples_hdf5_filehandle.swmr_mode = True
+        # self.samples_hdf5_filehandle.swmr_mode = True
 
         # Create progressbar -----------------------------------------------------------
         try:
@@ -260,7 +277,11 @@ class _AbstractSampler(_ABC):
                 self.proposals, desc="Sampling. Acceptance rate:", leave=True,
             )
 
+        # Start time for updating progressbar
+        self.last_update_time = _time()
+
         # Run the Markov process -------------------------------------------------------
+        self.start_time = _datetime.now()
         try:
             # If the sampler is given a maximum time, start timer now
             if self.max_time is not None:
@@ -308,6 +329,7 @@ class _AbstractSampler(_ABC):
             self.proposals_iterator.close()
         finally:  # Write out the last samples not on a full buffer --------------------
             self._samples_to_disk()
+            self.end_time = _datetime.now()
 
         self._close_sampler()
 
@@ -344,7 +366,7 @@ class _AbstractSampler(_ABC):
 
             # If it exists, prompt the user with a warning
             _warnings.warn(
-                f"\r\nIt seems that the samples file ({name}) already exists, or the"
+                f"\r\nIt seems that the samples file ({name}) already exists, or the "
                 f"file could otherwise not be created.",
                 Warning,
                 stacklevel=100,
@@ -418,7 +440,13 @@ class _AbstractSampler(_ABC):
 
     def _update_progressbar(self):
 
-        if self.current_proposal % self.progressbar_refresh_rate:
+        if (
+            self.current_proposal == 0
+            or (_time() - self.last_update_time) > self.progressbar_refresh_rate
+            or self.current_proposal == self.proposals - 1
+        ):
+            self.last_update_time = _time()
+
             # Calculate acceptance rate
             acceptance_rate = self.accepted_proposals / (self.current_proposal + 1)
 
@@ -524,6 +552,8 @@ class RWMH(_AbstractSampler):
     _numpy.ndarray column vector (shape dimensions × 1) will give every dimensions a
     unique step length. Correlations in the MVN are not yet implemented. Has a strong
     influence on acceptance rate. **An essential tuning parameter.**"""
+
+    name = "Random Walk Metropolis Hastings"
 
     def _sample(
         self,
@@ -635,9 +665,14 @@ class RWMH(_AbstractSampler):
     def _init_sampler_specific(self, **kwargs):
 
         # Parse all possible kwargs
-        for key in ("step_length", "example_extra_option"):
-            if key in kwargs:
-                setattr(self, key, kwargs[key])
+        for key in ["step_length"]:
+            setattr(self, key, kwargs[key])
+            kwargs.pop(key)
+
+        if len(kwargs) != 0:
+            raise TypeError(
+                f"Unidentified argument(s) not applicable to sampler: {kwargs}"
+            )
 
         # Assert that step length is either a float and bigger than zero, or a full
         # matrix / diagonal
@@ -660,8 +695,12 @@ class RWMH(_AbstractSampler):
             )
 
     def _write_tuning_settings(self):
-        # TODO Write this function
-        pass
+        if type(self.step_length) == float:
+            self.samples_hdf5_dataset.attrs["step_length"] = self.step_length
+        else:
+            self.samples_hdf5_dataset.attrs[
+                "step_length"
+            ] = self.step_length.__class__.__name__
 
     def _propose(self):
 
@@ -725,6 +764,8 @@ class HMC(_AbstractSampler):
 
     proposed_h: float = _numpy.nan
     """A float representing the total energy associated with the proposed state."""
+
+    name = "Hamiltonian Monte Carlo"
 
     def _sample(
         self,
@@ -889,8 +930,12 @@ class HMC(_AbstractSampler):
             )
 
     def _write_tuning_settings(self):
-        # TODO Write this function
-        pass
+        self.samples_hdf5_dataset.attrs["time_step"] = self.time_step
+        self.samples_hdf5_dataset.attrs["amount_of_steps"] = self.amount_of_steps
+        self.samples_hdf5_dataset.attrs["mass_matrix"] = self.mass_matrix.name
+        self.samples_hdf5_dataset.attrs["integrator"] = self.integrators_full_names[
+            self.integrator
+        ]
 
     def _propose(self):
 
@@ -910,7 +955,14 @@ class HMC(_AbstractSampler):
         self.proposed_k = self.mass_matrix.kinetic_energy(self.proposed_momentum)
         self.proposed_h = self.proposed_x + self.proposed_k
 
-        # Evaluate acceptence rate
+        # Evaluate Metrpolis-Hastings acceptance rule
+
+        # print(f"Rate: {_numpy.exp(self.current_h - self.proposed_h)}")
+        # print(f"H: {self.current_h} H_new: {self.proposed_h}")
+        # print(f"X: {self.current_x} X_new: {self.proposed_x}")
+        # print(f"K: {self.current_k} K_new: {self.proposed_k}")
+        # print()
+
         if _numpy.exp(self.current_h - self.proposed_h) > _numpy.random.uniform(0, 1):
             self.current_model = _numpy.copy(self.proposed_model)
             self.current_x = self.proposed_x
@@ -929,30 +981,36 @@ class HMC(_AbstractSampler):
 
         self.distribution.corrector(position, momentum)
 
+        # verbose_integration
+        verbose_integration = False
+        if verbose_integration:
+            integration_iterator = _tqdm_au.trange(
+                self.amount_of_steps - 1,
+                position=2,
+                leave=False,
+                desc="Leapfrog integration",
+            )
+        else:
+            integration_iterator = range(self.amount_of_steps - 1)
+
         # Integration loop
-        for i in range(self.amount_of_steps - 1):
-
-            # Calculate gradient
-            potential_gradient = self.distribution.gradient(position)
-
-            momentum -= self.time_step * potential_gradient
+        for i in integration_iterator:
+            # Momentum step
+            momentum -= self.time_step * self.distribution.gradient(position)
+            # Position step
             position += self.time_step * self.mass_matrix.kinetic_energy_gradient(
                 momentum
             )
-
             # Correct bounds
             self.distribution.corrector(position, momentum)
 
         # Full momentum and half step position after loop ------------------------------
-
-        # Calculate gradient
-        potential_gradient = self.distribution.gradient(position)
-
-        momentum -= self.time_step * potential_gradient
+        # Momentum step
+        momentum -= self.time_step * self.distribution.gradient(position)
+        # Position step
         position += (
             0.5 * self.time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
         )
-
         self.distribution.corrector(position, momentum)
 
         self.proposed_model = position.copy()
@@ -1074,5 +1132,10 @@ class HMC(_AbstractSampler):
         "lf": _propagate_leapfrog,
         "3s": _propagate_3_stage_simplified,
         "4s": _propagate_4_stage_simplified,
+    }
+    integrators_full_names = {
+        "lf": "leapfrog integrator",
+        "3s": "three stage integrator",
+        "4s": "four stage integrator",
     }
     available_integrators = integrators.keys()

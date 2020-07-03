@@ -30,10 +30,12 @@ setuptools.setup(
         "tqdm",
         "h5py",
         "pyyaml",
+        "psvWave",
     ],
     extras_require={
         "dev": [
             "black",
+            "flake8",
             "pre-commit",
             "ipython",
             "sphinx",

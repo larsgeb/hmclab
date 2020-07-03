@@ -54,10 +54,15 @@ class Samples:
         return self.file_handle[self.datasetname][:-1, :].T
 
     def print_details(self):
-        size = _shutil.get_terminal_size((80, 20))
+
+        size = _shutil.get_terminal_size((40, 20))
+        width = size[0]
+        if _in_notebook():
+            width = 80
+
         print()
-        print("{:^{width}}".format("H5 file details", width=size[0]))
-        print("━" * size[0])
+        print("{:^{width}}".format("H5 file details", width=width))
+        print("━" * width)
         print("{0:30} {1}".format("Filename", self.filename))
         print("{0:30} {1}".format("Dataset", self.datasetname))
 
@@ -68,20 +73,23 @@ class Samples:
 
         # Print common attributes
         print()
-        print("{:^{width}}".format("Sampling attributes", width=size[0]))
-        print("━" * size[0])
+        print("{:^{width}}".format("Sampling attributes", width=width))
+        print("━" * width)
         print("{0:30} {1}".format("Sampler", details["sampler"]))
         print("{0:30} {1}".format("Requested proposals", details["proposals"]))
-        print("{0:30} {1}".format("Proposals saved to disk", details["write_index"]))
-        print("{0:30} {1}".format("Acceptance rate", details["acceptance_rate"]))
         print("{0:30} {1}".format("Online thinning", details["online_thinning"]))
-        print("{0:30} {1}".format("Sampling start time", details["start_time"]))
-        print("{0:30} {1}".format("Sampling end time", details["end_time"]))
         print(
-            "{0:30} {1}".format(
-                "Last sample (zero-indexed)", details["last_written_sample"]
+            "{0:30} {1:.2f}".format(
+                "Proposals per second",
+                details["online_thinning"]
+                * details["write_index"]
+                / details["runtime_seconds"],
             )
         )
+        print("{0:30} {1}".format("Proposals saved to disk", details["write_index"]))
+        print("{0:30} {1:.2f}".format("Acceptance rate", details["acceptance_rate"]))
+        print("{0:30} {1}".format("Sampler initiate time", details["start_time"]))
+        print("{0:30} {1}".format("Sampler terminate time", details["end_time"]))
 
         details.pop("sampler")
         details.pop("proposals")
@@ -91,9 +99,22 @@ class Samples:
         details.pop("start_time")
         details.pop("end_time")
         details.pop("last_written_sample")
+        details.pop("runtime_seconds")
+        details.pop("runtime")
 
         print()
-        print("{:^{width}}".format("Sampler specific attributes", width=size[0]))
-        print("━" * size[0])
+        print("{:^{width}}".format("Sampler specific attributes", width=width))
+        print("━" * width)
         for key in details:
             print("{0:30} {1}".format(key, details[key]))
+
+
+def _in_notebook():
+    try:
+        from IPython import get_ipython
+
+        if "IPKernelApp" not in get_ipython().config:  # pragma: no cover
+            return False
+    except ImportError:
+        return False
+    return True
