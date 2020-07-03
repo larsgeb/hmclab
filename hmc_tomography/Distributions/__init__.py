@@ -36,12 +36,12 @@ except ModuleNotFoundError as e:
         f"Couldn't find the required package for psvWave. Detailed error message: {e}"
     )
 
-try:
-    from hmc_tomography.Distributions.LasifFWI import LasifFWI
-except ModuleNotFoundError as e:
-    _warnings.warn(
-        f"Couldn't find the required package for LASIF. Detailed error message: {e}"
-    )
+# try:
+#     from hmc_tomography.Distributions.LasifFWI import LasifFWI
+# except ModuleNotFoundError as e:
+#     _warnings.warn(
+#         f"Couldn't find the required package for LASIF. Detailed error message: {e}"
+#     )
 
 
 __all__ = [
@@ -55,7 +55,7 @@ __all__ = [
     "Himmelblau",
     "BayesRule",
     "LinearMatrix",
-    "LasifFWI",
+    # "LasifFWI",
     "SourceLocation",
     "pyWave",
 ]

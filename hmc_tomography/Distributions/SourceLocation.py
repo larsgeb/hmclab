@@ -31,8 +31,7 @@ class SourceLocation(_AbstractDistribution):
         receiver_array_x: _numpy.ndarray,
         receiver_array_z: _numpy.ndarray,
         observed_data: _numpy.ndarray,
-        data_dispersion: _Union[_numpy.ndarray, float],
-        misfit_function: str = "L2",
+        data_std: _Union[_numpy.ndarray, float],
         infer_velocity: bool = True,
         fixed_medium_velocity=None,
     ):
@@ -62,72 +61,73 @@ class SourceLocation(_AbstractDistribution):
         self.number_of_stations: int = self.receiver_array_z.size
         self.number_of_datums: int = self.number_of_events * self.number_of_stations
 
-        if observed_data.shape == (self.number_of_events, self.number_of_stations):
-            observed_data = observed_data.reshape(observed_data.size, 1)
+        assert observed_data.shape == (self.number_of_events, self.number_of_stations)
+        self.observed_data = observed_data
 
-        if data_dispersion.shape == (self.number_of_events, self.number_of_stations):
-            data_dispersion = data_dispersion.reshape(data_dispersion.size, 1)
+        if type(data_std) is float:
+            data_std = _numpy.ones_like(observed_data) * data_std
 
-        # Assert that the data is a column vector
-        assert observed_data.shape == (observed_data.size, 1)
+        assert data_std.shape == (self.number_of_events, self.number_of_stations)
+        self.data_std = data_std
 
         # Assert that the data and data error dispersion are the same shape
-        assert observed_data.shape == data_dispersion.shape
+        assert observed_data.shape == data_std.shape
 
-        if misfit_function == "L2":
-            # Use L2 misfit through a Gaussian distribution
-            self.misfit_model = Normal(observed_data, data_dispersion)
-        else:
-            raise ValueError("Misfit function is not implemented")
-
+        # Set amount of free parameters.
         self.dimensions: int = self.number_of_events * 3 + int(self.infer_velocity)
 
     def misfit(self, coordinates: _numpy.ndarray) -> float:
-
-        # If self.fixed_medium_velocity is None, velocity is extracted from the model
-        # vector.
         x, z, T, v = self.split_vector(coordinates, velocity=self.fixed_medium_velocity)
 
-        synthetic_data = SourceLocation.forward(
-            x, z, T, v, self.receiver_array_x, self.receiver_array_z
-        ).reshape(self.number_of_datums, 1)
+        distances = (
+            (x - self.receiver_array_x) ** 2.0 + (z - self.receiver_array_z) ** 2.0
+        ) ** 0.5
 
-        return self.misfit_bounds(coordinates) + self.misfit_model.misfit(
-            synthetic_data
+        return self.misfit_bounds(coordinates) + 0.5 * _numpy.sum(
+            ((self.observed_data - (T + distances / v)) / self.data_std) ** 2
         )
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
 
-        # Data gradient
         x, z, T, v = self.split_vector(coordinates, velocity=self.fixed_medium_velocity)
 
-        data = self.forward(
-            x, z, T, v, self.receiver_array_x, self.receiver_array_z
-        ).reshape(self.number_of_datums, 1)
+        dx = x - self.receiver_array_x
+        dz = z - self.receiver_array_z
 
-        data_gradient = self.misfit_model.gradient(data).reshape(
-            self.number_of_events, self.number_of_stations
-        )
+        d = (dx ** 2.0 + dz ** 2.0) ** 0.5
 
-        # Forward model gradient
+        # Data
+        t_calc = T + d / v
 
-        dx, dz, dT, dv = self.forward_gradient(
-            x, z, T, v, self.receiver_array_x, self.receiver_array_z
-        )
+        # Data gradients
+        data_grad_x = dx / (v * d)
+        data_grad_z = dz / (v * d)
+        data_grad_v = -d / (v * v)
+        data_grad_T = _numpy.ones_like(data_grad_x)
 
-        total_gradient = _numpy.empty((self.dimensions, 1))
+        # Misfit gradient
+        misfit_grad = (t_calc - self.observed_data) / (self.data_std ** 2)
+
+        # Applying chain rule
+        gx = _numpy.sum(misfit_grad * data_grad_x, axis=1)
+        gz = _numpy.sum(misfit_grad * data_grad_z, axis=1)
+        gT = _numpy.sum(misfit_grad * data_grad_T, axis=1)
+        gv = _numpy.sum(misfit_grad * data_grad_v)
+
+        # Compiling into total gradient
+        total_grad = _numpy.zeros_like(coordinates)
 
         if self.infer_velocity:
-            total_gradient[0:-1:3, 0] = _numpy.sum(data_gradient * dx, axis=1)
-            total_gradient[1:-1:3, 0] = _numpy.sum(data_gradient * dz, axis=1)
-            total_gradient[2:-1:3, 0] = _numpy.sum(data_gradient * dT, axis=1)
-            total_gradient[-1, 0] = _numpy.sum(data_gradient * dT)
+            total_grad[0:-1:3, 0] = gx
+            total_grad[1:-1:3, 0] = gz
+            total_grad[2:-1:3, 0] = gT
+            total_grad[-1, 0] = gv
+            return total_grad
         else:
-            total_gradient[0::3, 0] = _numpy.sum(data_gradient * dx, axis=1)
-            total_gradient[1::3, 0] = _numpy.sum(data_gradient * dz, axis=1)
-            total_gradient[2::3, 0] = _numpy.sum(data_gradient * dT, axis=1)
-
-        return total_gradient
+            total_grad[0::3, 0] = gx
+            total_grad[1::3, 0] = gz
+            total_grad[2::3, 0] = gT
+            return total_grad
 
     def generate(self) -> _numpy.ndarray:
         raise NotImplementedError(
@@ -165,10 +165,7 @@ class SourceLocation(_AbstractDistribution):
             + ((x - receiver_array_x) ** 2.0 + (z - receiver_array_z) ** 2.0) ** 0.5 / v
         )
 
-        # Subsequently we flatten the array to make it compatible with the distributions
-        # to use it with distributions for errors. !<DISABLED FOR NOW>!
-
-        return traveltimes  # .reshape(traveltimes.size, 1)
+        return traveltimes
 
     @staticmethod
     def forward_gradient(
@@ -212,7 +209,7 @@ class SourceLocation(_AbstractDistribution):
     @staticmethod
     def create_default(dimensions):
         # Possible parameter numbers:
-        # 3, 4, 6, 7, 9, 10
+        # 3, 4, 6, 7, 9, 10, etcc
 
         events = _math.floor(dimensions / 3)
 
@@ -229,8 +226,8 @@ class SourceLocation(_AbstractDistribution):
 
         # Create surface stations ------------------------------------------------------
 
-        stations_x = _numpy.array([0.0, 5.0, 10.0])[None, :]
-        stations_z = _numpy.array([0.0, 0.0, 0.0])[None, :]
+        stations_x = _numpy.array([0.0, 5.0, 10.0, 15.0, 20.0])[None, :]
+        stations_z = _numpy.array([0.0, 0.0, 0.0, 0.0, 0.0])[None, :]
 
         # Create the true model and observations ---------------------------------------
 
@@ -246,13 +243,13 @@ class SourceLocation(_AbstractDistribution):
 
         # Create the likelihood --------------------------------------------------------
 
-        data_dispersion = 0.25 * _numpy.ones_like(fake_observed_data)
+        data_std = 0.25 * _numpy.ones_like(fake_observed_data)
 
         return SourceLocation(
             stations_x,
             stations_z,
             fake_observed_data,
-            data_dispersion,
+            data_std,
             infer_velocity=infer_velocity,
             fixed_medium_velocity=fixed_medium_velocity,
         )
