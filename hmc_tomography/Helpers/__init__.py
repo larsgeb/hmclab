@@ -3,6 +3,13 @@ from hmc_tomography.Helpers import (
     RandomMatrices,
     InterfaceMKL,
     CustomExceptions,
+    Processing,
 )
 
-__all__ = ["BetterABC", "RandomMatrices", "InterfaceMKL", "CustomExceptions"]
+__all__ = [
+    "BetterABC",
+    "RandomMatrices",
+    "InterfaceMKL",
+    "CustomExceptions",
+    "Processing",
+]

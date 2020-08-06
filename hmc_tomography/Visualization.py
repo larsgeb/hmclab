@@ -7,8 +7,8 @@ import matplotlib.gridspec as _gridspec
 import matplotlib.pyplot as _plt
 import numpy as _numpy
 
-from hmc_tomography.Post import Processing as _Processing
-from hmc_tomography.Post import Samples as _Samples
+from hmc_tomography.Helpers import Processing as _Processing
+from hmc_tomography import Samples as _Samples
 
 
 def marginal_grid(
@@ -40,6 +40,9 @@ def marginal_grid(
         # print(i_plot, i_plot) # grid indices for diagonal
         axis = _plt.subplot(gs1[i_plot + (number_of_plots) * i_plot])
 
+        _mean = _numpy.mean(samples[dimensions_list[i_plot], :])
+        _std = _numpy.std(samples[dimensions_list[i_plot], :])
+
         # Modify axes
         if i_plot != number_of_plots - 1:
             axis.set_xticklabels([])
@@ -48,9 +51,9 @@ def marginal_grid(
             axis.set_xlabel(
                 f"dimension {dimensions_list[number_of_plots-1]}"
                 f"{os.linesep}"
-                f"mean: {_numpy.mean(samples[dimensions_list[i_plot], :]):.2f}"
+                f"mean: {_mean:.2f}"
                 f"{os.linesep}"
-                f"std: {_numpy.std(samples[dimensions_list[i_plot], :]):.2f}"
+                f"std: {_std:.2f}"
             )
 
         axis.set_yticklabels([])
@@ -66,13 +69,16 @@ def marginal_grid(
             range=dim_range[i_plot],
             color=color_1d,
         )
-        # axis.text(
-        #     0.15,
-        #     0.9,
-        #     horizontalalignment="center",
-        #     verticalalignment="center",
-        #     transform=axis.transAxes,
-        # )
+
+        xlim = axis.get_xlim()
+
+        x_axis = _numpy.arange(xlim[0], xlim[1], 0.01)
+        from scipy.stats import norm as _norm
+
+        _pdf = _norm.pdf(x_axis, _mean, _std)
+
+        _pdf = axis.get_ylim()[1] * _pdf / _pdf.max()
+        axis.plot(x_axis, _pdf)
 
         for j_plot in range(i_plot):
             # print(i_plot, j_plot) # grid indices for lower left
@@ -132,6 +138,7 @@ def marginal_grid(
 
     if show:
         _plt.show()
+    return gs1
 
 
 def marginal(
@@ -188,7 +195,7 @@ def visualize_2_dimensions(
 
     Parameters
     ==========
-    samples : hmc_tomography.Post.Samples
+    samples : hmc_tomography.Samples
         Samples object.
     dim1 : int
         First dimension to investigate.

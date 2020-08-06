@@ -30,10 +30,11 @@ from hmc_tomography.Distributions.LinearMatrix import LinearMatrix
 from hmc_tomography.Distributions.SourceLocation import SourceLocation
 
 try:
-    from hmc_tomography.Distributions.psvWave import psvWave
+    from hmc_tomography.Distributions.ElasticFullWaveform2D import ElasticFullWaveform2D
 except ModuleNotFoundError as e:
     _warnings.warn(
-        f"Couldn't find the required package for psvWave. Detailed error message: {e}"
+        f"Couldn't find the required package for ElasticFullWaveform2D. Detailed error"
+        f"message: {e}"
     )
 
 # try:
@@ -57,5 +58,5 @@ __all__ = [
     "LinearMatrix",
     # "LasifFWI",
     "SourceLocation",
-    "pyWave",
+    "ElasticFullWaveform2D",
 ]

@@ -41,6 +41,10 @@ from hmc_tomography.Distributions import _AbstractDistribution
 from hmc_tomography.MassMatrices import Unit as _Unit
 from hmc_tomography.MassMatrices import _AbstractMassMatrix
 
+dev_assertion_message = (
+    "Something went wrong internally, please report this to the " "developers."
+)
+
 
 class _AbstractSampler(_ABC):
     """Abstract base class for Markov chain Monte Carlo samplers.
@@ -122,37 +126,51 @@ class _AbstractSampler(_ABC):
         # Parse the distribution -------------------------------------------------------
 
         # Store the distribution
-        assert issubclass(type(distribution), _AbstractDistribution)
+        assert issubclass(type(distribution), _AbstractDistribution), (
+            "The passed target distribution should be a derived class of "
+            "_AbstractDistribution."
+        )
         self.distribution = distribution
 
         # Extract dimensionality from the distribution
-        assert distribution.dimensions > 0
-        assert type(distribution.dimensions) == int
+        assert type(distribution.dimensions) == int and distribution.dimensions > 0, (
+            "The passed target distribution should have an integer dimension larger "
+            "than zero."
+        )
         self.dimensions = distribution.dimensions
 
         # Set up proposals -------------------------------------------------------------
 
         # Assert that proposals is a positive integer
-        assert proposals > 0
-        assert type(proposals) == int
+        assert type(proposals) == int and proposals > 0, (
+            "The amount of proposal requested (`proposals`) should be an integer "
+            "number larger than zero."
+        )
         self.proposals = proposals
 
         # Assert that online_thinning is a positive integer
-        assert online_thinning > 0
-        assert type(online_thinning) == int
+        assert type(online_thinning) == int and online_thinning > 0, (
+            "The amount of online thinning (`online_thinning`) should be an integer "
+            "number larger than zero."
+        )
         self.online_thinning = online_thinning
 
         # Assert that we would write out the last sample, preventing wasteful
         # computations
-        assert self.proposals % self.online_thinning == 0
+        assert self.proposals % self.online_thinning == 0, (
+            "The amount of proposals (`proposals`) needs to be a multiple of the "
+            "online thinning (`online_thinning`) number, to prevent sample wastage."
+        )
         self.proposals_after_thinning = int(self.proposals / self.online_thinning)
 
         # Set up the sample RAM buffer -------------------------------------------------
 
         if ram_buffer_size is not None:
             # Assert that ram_buffer_size is a positive integer
-            assert ram_buffer_size > 0
-            assert type(ram_buffer_size) == int
+            assert type(ram_buffer_size) == int and ram_buffer_size > 0, (
+                "The ram buffer size (`ram_buffer_size`) needs to be an integer larger "
+                "than zero."
+            )
 
             # Set the ram buffer size
             self.ram_buffer_size = ram_buffer_size
@@ -177,7 +195,7 @@ class _AbstractSampler(_ABC):
             # actual ram size.
             self.ram_buffer_size = min(ram_buffer_size, self.proposals_after_thinning)
 
-            assert type(self.ram_buffer_size) == int
+            assert type(self.ram_buffer_size) == int, dev_assertion_message
 
         shape = (self.dimensions + 1, self.ram_buffer_size)
 
@@ -186,7 +204,9 @@ class _AbstractSampler(_ABC):
         # Set up the samples file ------------------------------------------------------
 
         # Parse the filename
-        assert type(samples_hdf5_filename) == str
+        assert (
+            type(samples_hdf5_filename) == str
+        ), "The samples filename needs to be a string."
         if samples_hdf5_filename[-3:] != ".h5":
             samples_hdf5_filename += ".h5"
         self.samples_hdf5_filename = samples_hdf5_filename
@@ -203,7 +223,11 @@ class _AbstractSampler(_ABC):
         if initial_model is None:
             initial_model = _numpy.zeros((self.dimensions, 1))
 
-        assert initial_model.shape == (self.dimensions, 1)
+        assert initial_model.shape == (self.dimensions, 1), (
+            f"The initial model (`initial_model`) dimension is incompatible with the "
+            f"target distribution. Supplied model shape: {initial_model.shape}."
+            f"Required shape: {(self.dimensions, 1)}"
+        )
 
         self.current_model = initial_model.astype(_numpy.float64)
         self.current_x = distribution.misfit(self.current_model)
@@ -219,7 +243,9 @@ class _AbstractSampler(_ABC):
 
         if max_time is not None:
             max_time = float(max_time)
-            assert max_time > 0.0
+            assert (
+                max_time > 0.0
+            ), "The maximal runtime (`max_time`) should be a float larger than zero."
             self.max_time = max_time
 
         # Do specific stuff ------------------------------------------------------------
@@ -361,8 +387,14 @@ class _AbstractSampler(_ABC):
             # Create file, fail if exists and flag == w-
             self.samples_hdf5_filehandle = _h5py.File(name, flag, libver="latest")
 
-        except OSError:
+        except OSError as e:
             # Catch error on file creations, likely that the file already exists
+            if (
+                not str(e)
+                == f"Unable to create file (unable to open file: name = '{name}', "
+                f"errno = 17, error message = 'File exists', flags = 15, o_flags = c2)"
+            ):
+                raise e
 
             # If it exists, prompt the user with a warning
             _warnings.warn(
@@ -460,7 +492,7 @@ class _AbstractSampler(_ABC):
             self.current_proposal / self.online_thinning
         )
         # Assert that it's an integer (if we only write on end of buffer)
-        assert self.current_proposal % self.online_thinning == 0
+        assert self.current_proposal % self.online_thinning == 0, dev_assertion_message
 
         # Calculate index for the RAM array
         index_in_ram = current_proposal_after_thinning % self.ram_buffer_size
@@ -499,9 +531,11 @@ class _AbstractSampler(_ABC):
             # Some sanity checks on the indices
             assert (
                 robust_start >= 0 and robust_start <= self.proposals_after_thinning + 1
-            )
-            assert end >= 0 and end <= self.proposals_after_thinning + 1
-            assert end >= robust_start
+            ), dev_assertion_message
+            assert (
+                end >= 0 and end <= self.proposals_after_thinning + 1
+            ), dev_assertion_message
+            assert end >= robust_start, dev_assertion_message
 
             # Update the amount of writes
             self.amount_of_writes += 1
@@ -616,17 +650,21 @@ class RWMH(_AbstractSampler):
 
 
         """
-        self._init_sampler(
-            samples_hdf5_filename=samples_hdf5_filename,
-            distribution=distribution,
-            step_length=step_length,
-            initial_model=initial_model,
-            proposals=proposals,
-            online_thinning=online_thinning,
-            ram_buffer_size=ram_buffer_size,
-            overwrite_existing_file=overwrite_existing_file,
-            max_time=max_time,
-        )
+        try:
+            self._init_sampler(
+                samples_hdf5_filename=samples_hdf5_filename,
+                distribution=distribution,
+                step_length=step_length,
+                initial_model=initial_model,
+                proposals=proposals,
+                online_thinning=online_thinning,
+                ram_buffer_size=ram_buffer_size,
+                overwrite_existing_file=overwrite_existing_file,
+                max_time=max_time,
+            )
+        except Exception as e:
+            self.samples_hdf5_filehandle.close()
+            raise e
 
         self._sample_loop()
 
@@ -710,7 +748,7 @@ class RWMH(_AbstractSampler):
             self.current_model
             + self.step_length * _numpy.random.randn(self.dimensions, 1)
         )
-        assert self.proposed_model.shape == (self.dimensions, 1)
+        assert self.proposed_model.shape == (self.dimensions, 1), dev_assertion_message
 
     def _evaluate_acceptance(self):
 
@@ -835,20 +873,24 @@ class HMC(_AbstractSampler):
 
 
         """
-        self._init_sampler(
-            samples_hdf5_filename=samples_hdf5_filename,
-            distribution=distribution,
-            time_step=time_step,
-            amount_of_steps=amount_of_steps,
-            mass_matrix=mass_matrix,
-            integrator=integrator,
-            initial_model=initial_model,
-            proposals=proposals,
-            online_thinning=online_thinning,
-            ram_buffer_size=ram_buffer_size,
-            overwrite_existing_file=overwrite_existing_file,
-            max_time=max_time,
-        )
+        try:
+            self._init_sampler(
+                samples_hdf5_filename=samples_hdf5_filename,
+                distribution=distribution,
+                time_step=time_step,
+                amount_of_steps=amount_of_steps,
+                mass_matrix=mass_matrix,
+                integrator=integrator,
+                initial_model=initial_model,
+                proposals=proposals,
+                online_thinning=online_thinning,
+                ram_buffer_size=ram_buffer_size,
+                overwrite_existing_file=overwrite_existing_file,
+                max_time=max_time,
+            )
+        except Exception as e:
+            self.samples_hdf5_filehandle.close()
+            raise e
 
         self._sample_loop()
 
@@ -905,12 +947,20 @@ class HMC(_AbstractSampler):
         # Assert that step length for Hamiltons equations is a float and bigger than
         # zero
         self.time_step = float(self.time_step)
-        assert self.time_step > 0.0
+        assert (
+            self.time_step > 0.0
+        ), "Time step (time_step) should be a float larger than zero."
 
         # Step amount ------------------------------------------------------------------
         # Assert that number of steps for Hamiltons equations is a positive integer
-        assert type(self.amount_of_steps) == int
-        assert self.amount_of_steps > 0
+        assert type(self.amount_of_steps) == int, (
+            "The amount of steps (amount_of_steps) the HMC integrator should make "
+            "should be an integer."
+        )
+        assert self.amount_of_steps > 0, (
+            "The amount of steps (amount_of_steps) the HMC integrator should make "
+            "should be larger than zero."
+        )
 
         # Mass matrix ------------------------------------------------------------------
         # Set the mass matrix if it is not yet set using the default: a unit mass
@@ -918,8 +968,15 @@ class HMC(_AbstractSampler):
             self.mass_matrix = _Unit(self.dimensions)
 
         # Assert that the mass matrix is the right type and dimension
-        assert isinstance(self.mass_matrix, _AbstractMassMatrix)
-        assert self.mass_matrix.dimensions == self.dimensions
+        assert isinstance(self.mass_matrix, _AbstractMassMatrix), (
+            "The passed mass matrix (mass_matrix) should be a class derived from "
+            "_AbstractMassMatrix."
+        )
+        assert self.mass_matrix.dimensions == self.dimensions, (
+            f"The passed mass matrix (mass_matrix) should have dimensions equal to the "
+            f"target distribution. Passed: {self.mass_matrix.dimensions}, "
+            f"required: {self.dimensions}."
+        )
 
         # Integrator -------------------------------------------------------------------
         self.integrator = str(self.integrator)

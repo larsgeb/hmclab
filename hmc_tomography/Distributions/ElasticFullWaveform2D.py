@@ -1,6 +1,5 @@
 """Elastic 2D FWI class
 """
-import warnings as _warnings
 from typing import Union as _Union
 
 import numpy as _numpy
@@ -10,14 +9,14 @@ from hmc_tomography.Distributions import _AbstractDistribution
 from hmc_tomography.Helpers import CustomExceptions as _CustomExceptions
 
 
-class psvWave(_AbstractDistribution):
+class ElasticFullWaveform2D(_AbstractDistribution):
     forward_up_to_date: bool = False
     temperature: float = 1.0
     omp_threads_override: int = 0
 
     def __init__(
         self,
-        _input: _Union[str, "psvWave"],
+        _input: _Union[str, "ElasticFullWaveform2D"],
         ux_obs: _numpy.ndarray = None,
         uz_obs: _numpy.ndarray = None,
         temperature: float = None,
@@ -71,10 +70,10 @@ class psvWave(_AbstractDistribution):
 
     @staticmethod
     def create_default(
-        dimensions: int, ini_file: str, omp_threads_override: int = 0
-    ) -> "psvWave":
+        dimensions: int, ini_file: str = None, omp_threads_override: int = 0
+    ) -> "ElasticFullWaveform2D":
         if ini_file is None:
-            ini_file = "hmc_tomography/Tests/configurations/forward_configuration.ini"
+            ini_file = "tests/configurations/default_testing_configuration.ini"
 
         # Create temporary simulation object to fake observed waveforms
         model = _psvWave.fdModel(ini_file)
@@ -118,7 +117,7 @@ class psvWave(_AbstractDistribution):
         # Noise free data, to change this, add noise below
 
         # Return the create wave simulation object
-        return psvWave(
+        return ElasticFullWaveform2D(
             ini_file,
             ux_obs=ux_obs,
             uz_obs=uz_obs,

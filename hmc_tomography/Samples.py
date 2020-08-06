@@ -50,8 +50,8 @@ class Samples:
         return self.file_handle[self.datasetname][-1, :][:, None]
 
     @property
-    def samples(self):
-        return self.file_handle[self.datasetname][:-1, :].T
+    def numpy(self):
+        return self.file_handle[self.datasetname][:, :]
 
     def print_details(self):
 
