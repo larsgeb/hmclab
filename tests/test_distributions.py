@@ -45,10 +45,13 @@ def test_misfit(pclass: _Distributions._AbstractDistribution, dimensions: int):
         return 0
 
     location = _numpy.ones((dimensions, 1)) + _numpy.random.rand(1)
-
     misfit = distribution.misfit(location)
 
-    assert type(misfit) == float
+    assert (
+        type(misfit) == float
+        or type(misfit) == _numpy.float64
+        or type(misfit) == _numpy.float32
+    )
 
     return True
 
@@ -71,7 +74,11 @@ def test_misfit_bounds(pclass: _Distributions._AbstractDistribution, dimensions:
     location = _numpy.ones((dimensions, 1)) + _numpy.random.rand(1) + 0.1
     misfit = distribution.misfit(location)
 
-    assert type(misfit) == float
+    assert (
+        type(misfit) == float
+        or type(misfit) == _numpy.float64
+        or type(misfit) == _numpy.float32
+    )
 
     # Compute misfit below lower bounds
 
@@ -90,7 +97,11 @@ def test_misfit_bounds(pclass: _Distributions._AbstractDistribution, dimensions:
     location = _numpy.ones((dimensions, 1)) + _numpy.random.rand(1) + 0.1
     misfit = distribution.misfit(location)
 
-    assert type(misfit) == float
+    assert (
+        type(misfit) == float
+        or type(misfit) == _numpy.float64
+        or type(misfit) == _numpy.float32
+    )
 
     # Compute misfit above the upper limit
 

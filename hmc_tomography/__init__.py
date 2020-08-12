@@ -6,8 +6,14 @@ from hmc_tomography import (
     Distributions,
     Samplers,
     Optimizers,
-    Post,
+    Visualization,
 )
+from hmc_tomography.Samples import Samples
+
+from ._version import get_versions
+
+__version__ = get_versions()["version"]
+del get_versions
 
 name = "hmc_tomography"
 __all__ = [
@@ -16,4 +22,6 @@ __all__ = [
     "Samplers",
     "Optimizers",
     "Post",
+    "Visualization",
+    "Samples",
 ]

@@ -1,11 +1,13 @@
 import setuptools
+import versioneer
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     name="hmc-tomography",
-    version="0.2.1",
     author="Lars Gebraad, Andreas Fichtner, Andrea Zunino",
     author_email="lars.gebraad@erdw.ethz.ch",
     description="An example HMC tomography package",
@@ -28,18 +30,34 @@ setuptools.setup(
         "tqdm",
         "h5py",
         "pyyaml",
+        "psvWave",
     ],
     extras_require={
         "dev": [
             "black",
+            "flake8",
             "pre-commit",
+            "ipython",
             "sphinx",
+            "nbsphinx",
+            "sphinx_rtd_theme",
             "numpydoc",
+            "pandoc",
+            "sphinx-git",
+            "versioneer",
             "codecov",
             "pytest",
             "pytest-harvest",
+            "pandas",
         ],
-        "testing": ["black", "pre-commit", "codecov", "pytest", "pytest-harvest"],
+        "testing": [
+            "black",
+            "pre-commit",
+            "codecov",
+            "pytest",
+            "pytest-harvest",
+            "pandas",
+        ],
     },
     entry_points={"console_scripts": ["hmc_tomography=hmc_tomography.__main__:cli"]},
 )

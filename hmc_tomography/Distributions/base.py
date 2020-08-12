@@ -102,7 +102,6 @@ class _AbstractDistribution(metaclass=_ABCMeta):
             "the instance."
         )
 
-    @_abstractmethod
     def generate(self) -> _numpy.ndarray:
         """Method to draw samples from the distribution.
 
@@ -132,7 +131,6 @@ class _AbstractDistribution(metaclass=_ABCMeta):
         )
 
     @staticmethod
-    @_abstractmethod
     def create_default(dimensions: int) -> "_AbstractDistribution":
         raise NotImplementedError(
             "You tried creating a default distribution. Although you have used this "
@@ -334,7 +332,10 @@ class Normal(_AbstractDistribution):
         self.name = "Gaussian (normal) distribution"
 
         # Automatically get dimensionality from means
-        self.dimensions = means.size
+        if type(means) == float:
+            self.dimensions: int = 1
+        else:
+            self.dimensions: int = means.size
         """Amount of dimensions on which the distribution is defined, should agree with
         means and covariance, and optionally coordinate_transformation."""
 
@@ -549,6 +550,11 @@ class Uniform(_AbstractDistribution):
         self, lower_bounds: _numpy.ndarray, upper_bounds: _numpy.ndarray,
     ):
         self.name = "uniform distribution"
+
+        lower_bounds = _numpy.asarray(lower_bounds)
+        lower_bounds = _numpy.resize(lower_bounds, (lower_bounds.size, 1))
+        upper_bounds = _numpy.asarray(upper_bounds)
+        upper_bounds = _numpy.resize(upper_bounds, (upper_bounds.size, 1))
 
         # Automatically get dimensionality from bounds
         dimensions = lower_bounds.size

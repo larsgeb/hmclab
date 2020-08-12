@@ -1,2 +1,0 @@
-^\s*assert\s+.*,\s*".*?"$              < Finds all one line assert statements ending with a proper comment
-^\s*assert\s+.*(?!(,\s*".*?"))$        < Finds all one line assert statements NOT ending with a proper comment

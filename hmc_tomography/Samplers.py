@@ -30,6 +30,7 @@ import warnings as _warnings
 from abc import ABC as _ABC
 from abc import abstractmethod as _abstractmethod
 from time import time as _time
+from datetime import datetime as _datetime
 from typing import Union as _Union
 
 import h5py as _h5py
@@ -39,6 +40,10 @@ import tqdm.auto as _tqdm_au
 from hmc_tomography.Distributions import _AbstractDistribution
 from hmc_tomography.MassMatrices import Unit as _Unit
 from hmc_tomography.MassMatrices import _AbstractMassMatrix
+
+dev_assertion_message = (
+    "Something went wrong internally, please report this to the " "developers."
+)
 
 
 class _AbstractSampler(_ABC):
@@ -66,6 +71,9 @@ class _AbstractSampler(_ABC):
     """A string containing the HDF5 group of the hdf5 file to which samples will be
     stored. """
 
+    ram_buffer_size: int = None
+    """A positive integer indicating the size of the RAM buffer in amount of samples."""
+
     ram_buffer: _numpy.ndarray = None
     """A NumPy ndarray containing the samples that are as of yet not written to disk."""
 
@@ -78,7 +86,7 @@ class _AbstractSampler(_ABC):
     current_x: float = None
     """A NumPy array containing :math:`\chi = -\log\left( p\\right)` (i.e. the misfit,
     negative log probability) of the distribution at the current state of the
-    Markov chain. """
+    Markov chain."""
 
     proposed_x: float = None
     """A NumPy array containing :math:`\chi = -\log\left( p\\right)` (i.e. the misfit,
@@ -91,9 +99,9 @@ class _AbstractSampler(_ABC):
     amount_of_writes: int = None
     """An integer representing the amount of times the sampler has written to disk."""
 
-    progressbar_refresh_rate: int = 1000
-    """An integer representing how many samples lie between an update of the progress
-    bar statistics (acceptance rate etc.)."""
+    progressbar_refresh_rate: float = 0.25
+    """A float representing how long lies between an update of the progress bar
+    statistics (acceptance rate etc.)."""
 
     max_time: float = None
     """A float representing the maximum time in seconds that sampling is allowed to take
@@ -118,37 +126,51 @@ class _AbstractSampler(_ABC):
         # Parse the distribution -------------------------------------------------------
 
         # Store the distribution
-        assert issubclass(type(distribution), _AbstractDistribution)
+        assert issubclass(type(distribution), _AbstractDistribution), (
+            "The passed target distribution should be a derived class of "
+            "_AbstractDistribution."
+        )
         self.distribution = distribution
 
         # Extract dimensionality from the distribution
-        assert distribution.dimensions > 0
-        assert type(distribution.dimensions) == int
+        assert type(distribution.dimensions) == int and distribution.dimensions > 0, (
+            "The passed target distribution should have an integer dimension larger "
+            "than zero."
+        )
         self.dimensions = distribution.dimensions
 
         # Set up proposals -------------------------------------------------------------
 
         # Assert that proposals is a positive integer
-        assert proposals > 0
-        assert type(proposals) == int
+        assert type(proposals) == int and proposals > 0, (
+            "The amount of proposal requested (`proposals`) should be an integer "
+            "number larger than zero."
+        )
         self.proposals = proposals
 
         # Assert that online_thinning is a positive integer
-        assert online_thinning > 0
-        assert type(online_thinning) == int
+        assert type(online_thinning) == int and online_thinning > 0, (
+            "The amount of online thinning (`online_thinning`) should be an integer "
+            "number larger than zero."
+        )
         self.online_thinning = online_thinning
 
         # Assert that we would write out the last sample, preventing wasteful
         # computations
-        assert self.proposals % self.online_thinning == 0
+        assert self.proposals % self.online_thinning == 0, (
+            "The amount of proposals (`proposals`) needs to be a multiple of the "
+            "online thinning (`online_thinning`) number, to prevent sample wastage."
+        )
         self.proposals_after_thinning = int(self.proposals / self.online_thinning)
 
         # Set up the sample RAM buffer -------------------------------------------------
 
         if ram_buffer_size is not None:
             # Assert that ram_buffer_size is a positive integer
-            assert ram_buffer_size > 0
-            assert type(ram_buffer_size) == int
+            assert type(ram_buffer_size) == int and ram_buffer_size > 0, (
+                "The ram buffer size (`ram_buffer_size`) needs to be an integer larger "
+                "than zero."
+            )
 
             # Set the ram buffer size
             self.ram_buffer_size = ram_buffer_size
@@ -173,7 +195,7 @@ class _AbstractSampler(_ABC):
             # actual ram size.
             self.ram_buffer_size = min(ram_buffer_size, self.proposals_after_thinning)
 
-            assert type(self.ram_buffer_size) == int
+            assert type(self.ram_buffer_size) == int, dev_assertion_message
 
         shape = (self.dimensions + 1, self.ram_buffer_size)
 
@@ -182,7 +204,9 @@ class _AbstractSampler(_ABC):
         # Set up the samples file ------------------------------------------------------
 
         # Parse the filename
-        assert type(samples_hdf5_filename) == str
+        assert (
+            type(samples_hdf5_filename) == str
+        ), "The samples filename needs to be a string."
         if samples_hdf5_filename[-3:] != ".h5":
             samples_hdf5_filename += ".h5"
         self.samples_hdf5_filename = samples_hdf5_filename
@@ -199,7 +223,11 @@ class _AbstractSampler(_ABC):
         if initial_model is None:
             initial_model = _numpy.zeros((self.dimensions, 1))
 
-        assert initial_model.shape == (self.dimensions, 1)
+        assert initial_model.shape == (self.dimensions, 1), (
+            f"The initial model (`initial_model`) dimension is incompatible with the "
+            f"target distribution. Supplied model shape: {initial_model.shape}."
+            f"Required shape: {(self.dimensions, 1)}"
+        )
 
         self.current_model = initial_model.astype(_numpy.float64)
         self.current_x = distribution.misfit(self.current_model)
@@ -215,7 +243,9 @@ class _AbstractSampler(_ABC):
 
         if max_time is not None:
             max_time = float(max_time)
-            assert max_time > 0.0
+            assert (
+                max_time > 0.0
+            ), "The maximal runtime (`max_time`) should be a float larger than zero."
             self.max_time = max_time
 
         # Do specific stuff ------------------------------------------------------------
@@ -226,11 +256,39 @@ class _AbstractSampler(_ABC):
         # Write out the tuning settings
         self._write_tuning_settings()
 
+        # Create attributes before sampling, such that SWMR works
+        self.samples_hdf5_dataset.attrs["write_index"] = -1
+        self.samples_hdf5_dataset.attrs["last_written_sample"] = -1
+        self.samples_hdf5_dataset.attrs["proposals"] = self.proposals
+        self.samples_hdf5_dataset.attrs["acceptance_rate"] = 0
+        self.samples_hdf5_dataset.attrs["online_thinning"] = self.online_thinning
+        self.samples_hdf5_dataset.attrs["start_time"] = _datetime.now().strftime(
+            "%d-%b-%Y (%H:%M:%S.%f)"
+        )
+        self.samples_hdf5_dataset.attrs["sampler"] = self.name
+
     def _close_sampler(self):
+
+        self.samples_hdf5_dataset.attrs["acceptance_rate"] = self.accepted_proposals / (
+            self.current_proposal + 1
+        )
+        self.samples_hdf5_dataset.attrs["end_time"] = _datetime.now().strftime(
+            "%d-%b-%Y (%H:%M:%S.%f)"
+        )
+        self.samples_hdf5_dataset.attrs["runtime"] = str(
+            self.end_time - self.start_time
+        )
+        self.samples_hdf5_dataset.attrs["runtime_seconds"] = (
+            self.end_time - self.start_time
+        ).total_seconds()
+
         self.samples_hdf5_filehandle.close()
 
     def _sample_loop(self):
         """The actual sampling code."""
+
+        # As soon as all attributes and datasets are created, enable SWMR mode.
+        # self.samples_hdf5_filehandle.swmr_mode = True
 
         # Create progressbar -----------------------------------------------------------
         try:
@@ -245,22 +303,29 @@ class _AbstractSampler(_ABC):
                 self.proposals, desc="Sampling. Acceptance rate:", leave=True,
             )
 
-        # Run the Markov process -------------------------------------------------------
-        try:
+        # Start time for updating progressbar
+        self.last_update_time = _time()
 
-            # If we are given a maximum time, start timer now
+        # Run the Markov process -------------------------------------------------------
+        self.start_time = _datetime.now()
+        try:
+            # If the sampler is given a maximum time, start timer now
             if self.max_time is not None:
                 t_end = _time() + self.max_time
 
+            # Iterate through amount of proposals
             for self.current_proposal in self.proposals_iterator:
 
-                # Propose a new sample
+                # Propose a new sample.
+                # The underlying method changes when different algorithms are selected.
                 self._propose()
 
-                # Evaluate acceptance criterium
+                # Evaluate acceptance criterium.
+                # The underlying method changes when different algorithms are selected.
                 self._evaluate_acceptance()
 
-                # If we are on a thinning number (i.e. one of the non-discarded samples)
+                # If we are on a thinning number ... (i.e. one of the non-discarded
+                # samples)
                 if self.current_proposal % self.online_thinning == 0:
 
                     # Write sample to ram array
@@ -269,7 +334,7 @@ class _AbstractSampler(_ABC):
                     # Calculate the index this sample has after thinning
                     after_thinning = int(self.current_proposal / self.online_thinning)
 
-                    # Check if this number is at the end of the buffer
+                    # Check if this number is at the end of the buffer ...
                     if (
                         after_thinning % self.ram_buffer_size
                     ) == self.ram_buffer_size - 1:
@@ -290,6 +355,7 @@ class _AbstractSampler(_ABC):
             self.proposals_iterator.close()
         finally:  # Write out the last samples not on a full buffer --------------------
             self._samples_to_disk()
+            self.end_time = _datetime.now()
 
         self._close_sampler()
 
@@ -319,14 +385,20 @@ class _AbstractSampler(_ABC):
                 flag = "w-"
 
             # Create file, fail if exists and flag == w-
-            self.samples_hdf5_filehandle = _h5py.File(name, flag)
+            self.samples_hdf5_filehandle = _h5py.File(name, flag, libver="latest")
 
-        except OSError:
+        except OSError as e:
             # Catch error on file creations, likely that the file already exists
+            if (
+                not str(e)
+                == f"Unable to create file (unable to open file: name = '{name}', "
+                f"errno = 17, error message = 'File exists', flags = 15, o_flags = c2)"
+            ):
+                raise e
 
             # If it exists, prompt the user with a warning
             _warnings.warn(
-                f"\r\nIt seems that the samples file ({name}) already exists, or the"
+                f"\r\nIt seems that the samples file ({name}) already exists, or the "
                 f"file could otherwise not be created.",
                 Warning,
                 stacklevel=100,
@@ -370,7 +442,9 @@ class _AbstractSampler(_ABC):
                     # Create file, truncate if exists. This should never give an
                     # error on file exists, but could fail for other reasons. Therefore,
                     # no try-catch block.
-                    self.samples_hdf5_filehandle = _h5py.File(name, "w")
+                    self.samples_hdf5_filehandle = _h5py.File(
+                        name, "w", libver="latest"
+                    )
 
                 elif input_choice == "a":
                     # User wants to abort sampling
@@ -386,18 +460,25 @@ class _AbstractSampler(_ABC):
         # Create dataset
         self.samples_hdf5_dataset = self.samples_hdf5_filehandle.create_dataset(
             "samples_0",
-            (self.dimensions + 1, length),  # one extra for misfit
+            (self.dimensions + 1, 1),
+            maxshape=(self.dimensions + 1, length),  # one extra for misfit
             dtype=dtype,
             chunks=True,
         )
 
         # Set the current index of samples to the start of the file
-        self.samples_hdf5_dataset.attrs["write_index"] = 0
+        self.samples_hdf5_dataset.attrs["write_index"] = -1
         self.samples_hdf5_dataset.attrs["last_written_sample"] = -1
 
     def _update_progressbar(self):
 
-        if self.current_proposal % self.progressbar_refresh_rate:
+        if (
+            self.current_proposal == 0
+            or (_time() - self.last_update_time) > self.progressbar_refresh_rate
+            or self.current_proposal == self.proposals - 1
+        ):
+            self.last_update_time = _time()
+
             # Calculate acceptance rate
             acceptance_rate = self.accepted_proposals / (self.current_proposal + 1)
 
@@ -411,7 +492,7 @@ class _AbstractSampler(_ABC):
             self.current_proposal / self.online_thinning
         )
         # Assert that it's an integer (if we only write on end of buffer)
-        assert self.current_proposal % self.online_thinning == 0
+        assert self.current_proposal % self.online_thinning == 0, dev_assertion_message
 
         # Calculate index for the RAM array
         index_in_ram = current_proposal_after_thinning % self.ram_buffer_size
@@ -442,17 +523,27 @@ class _AbstractSampler(_ABC):
         end = current_proposal_after_thinning + 1
 
         # If there is something to write
-        if self.samples_hdf5_dataset.attrs["write_index"] == robust_start:
+        if (
+            self.samples_hdf5_dataset.attrs["write_index"] == robust_start
+            or self.samples_hdf5_dataset.attrs["write_index"] == -1
+        ):
 
             # Some sanity checks on the indices
             assert (
                 robust_start >= 0 and robust_start <= self.proposals_after_thinning + 1
-            )
-            assert end >= 0 and end <= self.proposals_after_thinning + 1
-            assert end >= robust_start
+            ), dev_assertion_message
+            assert (
+                end >= 0 and end <= self.proposals_after_thinning + 1
+            ), dev_assertion_message
+            assert end >= robust_start, dev_assertion_message
 
             # Update the amount of writes
             self.amount_of_writes += 1
+
+            # Update the size in the h5 file
+            self.samples_hdf5_dataset.resize(
+                (self.dimensions + 1, current_proposal_after_thinning + 1)
+            )
 
             # Write samples to disk
             self.samples_hdf5_dataset[:, robust_start:end] = self.ram_buffer[
@@ -462,6 +553,7 @@ class _AbstractSampler(_ABC):
             # Reset the markers in the HDF5 file
             self.samples_hdf5_dataset.attrs["write_index"] = end
             self.samples_hdf5_dataset.attrs["last_written_sample"] = end - 1
+            self.samples_hdf5_dataset.flush()
 
     @_abstractmethod
     def _propose(self):
@@ -494,6 +586,8 @@ class RWMH(_AbstractSampler):
     _numpy.ndarray column vector (shape dimensions × 1) will give every dimensions a
     unique step length. Correlations in the MVN are not yet implemented. Has a strong
     influence on acceptance rate. **An essential tuning parameter.**"""
+
+    name = "Random Walk Metropolis Hastings"
 
     def _sample(
         self,
@@ -556,17 +650,21 @@ class RWMH(_AbstractSampler):
 
 
         """
-        self._init_sampler(
-            samples_hdf5_filename=samples_hdf5_filename,
-            distribution=distribution,
-            step_length=step_length,
-            initial_model=initial_model,
-            proposals=proposals,
-            online_thinning=online_thinning,
-            ram_buffer_size=ram_buffer_size,
-            overwrite_existing_file=overwrite_existing_file,
-            max_time=max_time,
-        )
+        try:
+            self._init_sampler(
+                samples_hdf5_filename=samples_hdf5_filename,
+                distribution=distribution,
+                step_length=step_length,
+                initial_model=initial_model,
+                proposals=proposals,
+                online_thinning=online_thinning,
+                ram_buffer_size=ram_buffer_size,
+                overwrite_existing_file=overwrite_existing_file,
+                max_time=max_time,
+            )
+        except Exception as e:
+            self.samples_hdf5_filehandle.close()
+            raise e
 
         self._sample_loop()
 
@@ -605,9 +703,14 @@ class RWMH(_AbstractSampler):
     def _init_sampler_specific(self, **kwargs):
 
         # Parse all possible kwargs
-        for key in ("step_length", "example_extra_option"):
-            if key in kwargs:
-                setattr(self, key, kwargs[key])
+        for key in ["step_length"]:
+            setattr(self, key, kwargs[key])
+            kwargs.pop(key)
+
+        if len(kwargs) != 0:
+            raise TypeError(
+                f"Unidentified argument(s) not applicable to sampler: {kwargs}"
+            )
 
         # Assert that step length is either a float and bigger than zero, or a full
         # matrix / diagonal
@@ -618,6 +721,7 @@ class RWMH(_AbstractSampler):
                 "passed argument is a float equal to or smaller than zero."
             )
         except TypeError:
+            self.step_length = _numpy.asarray(self.step_length)
             assert type(self.step_length) == _numpy.ndarray, (
                 "RW-MH step length should be a numpy.ndarray of shape (dimensions, 1) "
                 "or a positive float. The passed argument is neither."
@@ -629,8 +733,12 @@ class RWMH(_AbstractSampler):
             )
 
     def _write_tuning_settings(self):
-        # TODO Write this function
-        pass
+        if type(self.step_length) == float:
+            self.samples_hdf5_dataset.attrs["step_length"] = self.step_length
+        else:
+            self.samples_hdf5_dataset.attrs[
+                "step_length"
+            ] = self.step_length.__class__.__name__
 
     def _propose(self):
 
@@ -640,7 +748,7 @@ class RWMH(_AbstractSampler):
             self.current_model
             + self.step_length * _numpy.random.randn(self.dimensions, 1)
         )
-        assert self.proposed_model.shape == (self.dimensions, 1)
+        assert self.proposed_model.shape == (self.dimensions, 1), dev_assertion_message
 
     def _evaluate_acceptance(self):
 
@@ -694,6 +802,8 @@ class HMC(_AbstractSampler):
 
     proposed_h: float = _numpy.nan
     """A float representing the total energy associated with the proposed state."""
+
+    name = "Hamiltonian Monte Carlo"
 
     def _sample(
         self,
@@ -763,20 +873,24 @@ class HMC(_AbstractSampler):
 
 
         """
-        self._init_sampler(
-            samples_hdf5_filename=samples_hdf5_filename,
-            distribution=distribution,
-            time_step=time_step,
-            amount_of_steps=amount_of_steps,
-            mass_matrix=mass_matrix,
-            integrator=integrator,
-            initial_model=initial_model,
-            proposals=proposals,
-            online_thinning=online_thinning,
-            ram_buffer_size=ram_buffer_size,
-            overwrite_existing_file=overwrite_existing_file,
-            max_time=max_time,
-        )
+        try:
+            self._init_sampler(
+                samples_hdf5_filename=samples_hdf5_filename,
+                distribution=distribution,
+                time_step=time_step,
+                amount_of_steps=amount_of_steps,
+                mass_matrix=mass_matrix,
+                integrator=integrator,
+                initial_model=initial_model,
+                proposals=proposals,
+                online_thinning=online_thinning,
+                ram_buffer_size=ram_buffer_size,
+                overwrite_existing_file=overwrite_existing_file,
+                max_time=max_time,
+            )
+        except Exception as e:
+            self.samples_hdf5_filehandle.close()
+            raise e
 
         self._sample_loop()
 
@@ -833,12 +947,20 @@ class HMC(_AbstractSampler):
         # Assert that step length for Hamiltons equations is a float and bigger than
         # zero
         self.time_step = float(self.time_step)
-        assert self.time_step > 0.0
+        assert (
+            self.time_step > 0.0
+        ), "Time step (time_step) should be a float larger than zero."
 
         # Step amount ------------------------------------------------------------------
         # Assert that number of steps for Hamiltons equations is a positive integer
-        assert type(self.amount_of_steps) == int
-        assert self.amount_of_steps > 0
+        assert type(self.amount_of_steps) == int, (
+            "The amount of steps (amount_of_steps) the HMC integrator should make "
+            "should be an integer."
+        )
+        assert self.amount_of_steps > 0, (
+            "The amount of steps (amount_of_steps) the HMC integrator should make "
+            "should be larger than zero."
+        )
 
         # Mass matrix ------------------------------------------------------------------
         # Set the mass matrix if it is not yet set using the default: a unit mass
@@ -846,8 +968,15 @@ class HMC(_AbstractSampler):
             self.mass_matrix = _Unit(self.dimensions)
 
         # Assert that the mass matrix is the right type and dimension
-        assert isinstance(self.mass_matrix, _AbstractMassMatrix)
-        assert self.mass_matrix.dimensions == self.dimensions
+        assert isinstance(self.mass_matrix, _AbstractMassMatrix), (
+            "The passed mass matrix (mass_matrix) should be a class derived from "
+            "_AbstractMassMatrix."
+        )
+        assert self.mass_matrix.dimensions == self.dimensions, (
+            f"The passed mass matrix (mass_matrix) should have dimensions equal to the "
+            f"target distribution. Passed: {self.mass_matrix.dimensions}, "
+            f"required: {self.dimensions}."
+        )
 
         # Integrator -------------------------------------------------------------------
         self.integrator = str(self.integrator)
@@ -858,8 +987,12 @@ class HMC(_AbstractSampler):
             )
 
     def _write_tuning_settings(self):
-        # TODO Write this function
-        pass
+        self.samples_hdf5_dataset.attrs["time_step"] = self.time_step
+        self.samples_hdf5_dataset.attrs["amount_of_steps"] = self.amount_of_steps
+        self.samples_hdf5_dataset.attrs["mass_matrix"] = self.mass_matrix.name
+        self.samples_hdf5_dataset.attrs["integrator"] = self.integrators_full_names[
+            self.integrator
+        ]
 
     def _propose(self):
 
@@ -879,7 +1012,14 @@ class HMC(_AbstractSampler):
         self.proposed_k = self.mass_matrix.kinetic_energy(self.proposed_momentum)
         self.proposed_h = self.proposed_x + self.proposed_k
 
-        # Evaluate acceptence rate
+        # Evaluate Metrpolis-Hastings acceptance rule
+
+        # print(f"Rate: {_numpy.exp(self.current_h - self.proposed_h)}")
+        # print(f"H: {self.current_h} H_new: {self.proposed_h}")
+        # print(f"X: {self.current_x} X_new: {self.proposed_x}")
+        # print(f"K: {self.current_k} K_new: {self.proposed_k}")
+        # print()
+
         if _numpy.exp(self.current_h - self.proposed_h) > _numpy.random.uniform(0, 1):
             self.current_model = _numpy.copy(self.proposed_model)
             self.current_x = self.proposed_x
@@ -898,30 +1038,36 @@ class HMC(_AbstractSampler):
 
         self.distribution.corrector(position, momentum)
 
+        # verbose_integration
+        verbose_integration = False
+        if verbose_integration:
+            integration_iterator = _tqdm_au.trange(
+                self.amount_of_steps - 1,
+                position=2,
+                leave=False,
+                desc="Leapfrog integration",
+            )
+        else:
+            integration_iterator = range(self.amount_of_steps - 1)
+
         # Integration loop
-        for i in range(self.amount_of_steps - 1):
-
-            # Calculate gradient
-            potential_gradient = self.distribution.gradient(position)
-
-            momentum -= self.time_step * potential_gradient
+        for i in integration_iterator:
+            # Momentum step
+            momentum -= self.time_step * self.distribution.gradient(position)
+            # Position step
             position += self.time_step * self.mass_matrix.kinetic_energy_gradient(
                 momentum
             )
-
             # Correct bounds
             self.distribution.corrector(position, momentum)
 
         # Full momentum and half step position after loop ------------------------------
-
-        # Calculate gradient
-        potential_gradient = self.distribution.gradient(position)
-
-        momentum -= self.time_step * potential_gradient
+        # Momentum step
+        momentum -= self.time_step * self.distribution.gradient(position)
+        # Position step
         position += (
             0.5 * self.time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
         )
-
         self.distribution.corrector(position, momentum)
 
         self.proposed_model = position.copy()
@@ -1043,5 +1189,10 @@ class HMC(_AbstractSampler):
         "lf": _propagate_leapfrog,
         "3s": _propagate_3_stage_simplified,
         "4s": _propagate_4_stage_simplified,
+    }
+    integrators_full_names = {
+        "lf": "leapfrog integrator",
+        "3s": "three stage integrator",
+        "4s": "four stage integrator",
     }
     available_integrators = integrators.keys()
