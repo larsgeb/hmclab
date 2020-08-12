@@ -102,7 +102,6 @@ class _AbstractDistribution(metaclass=_ABCMeta):
             "the instance."
         )
 
-    @_abstractmethod
     def generate(self) -> _numpy.ndarray:
         """Method to draw samples from the distribution.
 
@@ -132,7 +131,6 @@ class _AbstractDistribution(metaclass=_ABCMeta):
         )
 
     @staticmethod
-    @_abstractmethod
     def create_default(dimensions: int) -> "_AbstractDistribution":
         raise NotImplementedError(
             "You tried creating a default distribution. Although you have used this "
