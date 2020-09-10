@@ -1,7 +1,7 @@
 # Common imports
 import pathlib as _pathlib
 from shutil import copyfile as _copyfile
-from time import sleep as _sleep
+import os as _os
 from time import time as _time
 from typing import Dict as _Dict, Union as _Union
 import numpy as _numpy
@@ -14,6 +14,11 @@ import lasif.salvus_utils as _salvus_utils
 from hmc_tomography.Distributions import _AbstractDistribution
 from salvus.flow.sites.salvus_job import SalvusJob
 from salvus.flow.sites.salvus_job_array import SalvusJobArray
+
+from hmc_tomography.Helpers.CaptureStdout import stdout_redirector as _stdout_redirector
+
+from contextlib import redirect_stderr as _redirect_stderr
+from contextlib import redirect_stdout as _redirect_stdout
 
 
 class LasifFWI(_AbstractDistribution):
@@ -41,7 +46,7 @@ class LasifFWI(_AbstractDistribution):
     """Attribute containing the job (array) object of the currently running simulations,
     or None if no simulation is running currently."""
 
-    salvus_verbosity: int = 1
+    salvus_verbosity: int = 0
     """Verbosity level of Salvus. Use 1 for output, use 0 for quiet."""
 
     verbosity: int = 0
@@ -60,6 +65,8 @@ class LasifFWI(_AbstractDistribution):
     """A list of strings describing the contents of the columns in the mesh data array:
     mesh["MODEL"]["data"].attrs.get("DIMENSION_LABELS")."""
 
+    # current_iteration = None
+
     def __init__(self, path_to_project: str, verbosity: int = 0):
 
         # Set verbosity
@@ -69,7 +76,10 @@ class LasifFWI(_AbstractDistribution):
         self.lasif_root = _pathlib.Path(path_to_project)
 
         # Set communicator
-        self.communicator = _lasif.api.find_project_comm(path_to_project)
+        self.f1 = open("lasif-salvus.stdout.log", "a", encoding="utf-8")
+        self.f2 = open("lasif-salvus.stderr.log", "a", encoding="utf-8")
+        with _redirect_stdout(self.f1), _redirect_stderr(self.f2):
+            self.communicator = _lasif.api.find_project_comm(path_to_project)
 
         # Load configuration
         config_file_path = self.lasif_root / "lasif_config.toml"
@@ -91,6 +101,9 @@ class LasifFWI(_AbstractDistribution):
         self.working_mesh_file = (
             self.original_mesh_file.replace(".h5", "") + "_working_file.h5"
         )
+
+        if _os.path.exists(self.working_mesh_file):
+            _os.remove(self.working_mesh_file)
 
         # Create the working mesh file from the copy path + name
         _copyfile(
@@ -134,6 +147,16 @@ class LasifFWI(_AbstractDistribution):
             * self.mesh["MODEL"]["data"].shape[2]
         )
 
+        self.current_iteration = f"{_time()}"
+
+        with _redirect_stdout(self.f1), _redirect_stderr(self.f2):
+            _lasif.api.set_up_iteration(
+                self.lasif_root, iteration=self.current_iteration
+            )
+
+        self.forward_job = None
+        self.adjoint_job = None
+
     @property
     def current_model(self):
         """The attribute setter for the current model.
@@ -175,6 +198,22 @@ class LasifFWI(_AbstractDistribution):
                 self.mesh["MODEL"]["data"].shape[2],
             )
 
+            # Set up new iteration
+            if self.current_iteration is not None:
+                with _redirect_stdout(self.f1), _redirect_stderr(self.f2):
+                    _lasif.api.set_up_iteration(
+                        self.lasif_root,
+                        iteration=self.current_iteration,
+                        remove_dirs=True,
+                    )
+
+            self.current_iteration = f"{_time()}"
+
+            with _redirect_stdout(self.f1), _redirect_stderr(self.f2):
+                _lasif.api.set_up_iteration(
+                    self.lasif_root, iteration=self.current_iteration
+                )
+
             self._last_computed_misfit = None
             self._last_computed_gradient = None
 
@@ -187,61 +226,81 @@ class LasifFWI(_AbstractDistribution):
         # The misfit is still stored if we didn't change our model from the last
         # computation, so we can return it without re-running any simulation
         if self._last_computed_misfit is not None:
-
-            print("Model is the same, not re-starting simulation.")
-
             return self._last_computed_misfit
 
-        # Set up new iteration
-        self.current_iteration = f"{_time()}"
+        # Remove previous jobs' files
+        if self.forward_job is not None:
 
-        _lasif.api.set_up_iteration(self.lasif_root, iteration=self.current_iteration)
+            with _redirect_stdout(self.f1), _redirect_stderr(self.f2):
+                self.forward_job.delete()
+            self.forward_job = None
 
         # Get all events to simulate
-        events = _lasif.api.list_events(
-            self.lasif_root,
-            just_list=True,
-            iteration=self.current_iteration,
-            output=True,
-        )
+
+        with _redirect_stdout(self.f1), _redirect_stderr(self.f2):
+            events = _lasif.api.list_events(
+                self.lasif_root,
+                just_list=True,
+                iteration=self.current_iteration,
+                output=True,
+            )
+
+        forward_simulations = []
 
         # Create simulation objects
-        simulations = []
         for event in events:
-            simulation = _salvus_utils.create_salvus_forward_simulation(
-                comm=self.communicator,
-                event=event,
-                iteration=self.current_iteration,
-                side_set="r1",
-            )
-            simulations.append(simulation)
+
+            with _redirect_stdout(self.f1), _redirect_stderr(self.f2):
+                simulation = _salvus_utils.create_salvus_forward_simulation(
+                    comm=self.communicator,
+                    event=event,
+                    iteration=self.current_iteration,
+                    side_set="r1",
+                )
+            forward_simulations.append(simulation)
 
         # Submit the simulations
-        self.running_job = _salvus_utils.submit_salvus_simulation(
-            comm=self.communicator,
-            simulations=simulations,
-            events=events,
-            iteration=self.current_iteration,
-            sim_type="forward",
-            verbosity=self.salvus_verbosity,
-        )
 
-        # Retrieve outputs
-        try:
-            _salvus_utils.retrieve_salvus_simulations_blocking(
+        with _redirect_stdout(self.f1), _redirect_stderr(self.f2):
+            self.running_job = _salvus_utils.submit_salvus_simulation(
                 comm=self.communicator,
+                simulations=forward_simulations,
                 events=events,
                 iteration=self.current_iteration,
                 sim_type="forward",
-                verbosity=self.verbosity,
+                verbosity=self.salvus_verbosity,
             )
+        self.forward_job = self.running_job
+
+        # Retrieve outputs
+        try:
+            with _redirect_stdout(self.f1), _redirect_stderr(self.f2):
+                _salvus_utils.retrieve_salvus_simulations_blocking(
+                    comm=self.communicator,
+                    events=events,
+                    iteration=self.current_iteration,
+                    sim_type="forward",
+                    verbosity=self.verbosity,
+                )
         except Exception as e:
-            # If anything goes bad, at least close the HDF5 file
+            if self.running_job is not None:
+                with _redirect_stdout(self.f1), _redirect_stderr(self.f2):
+                    self.running_job.cancel()
+
+            with _redirect_stdout(self.f1), _redirect_stderr(self.f2):
+                if self.forward_job is not None:
+                    self.forward_job.delete()
+                    self.forward_job = None
+                if self.adjoint_job is not None:
+                    self.adjoint_job.delete()
+                    self.adjoint_job = None
+
+            if self.verbosity > 0:
+                print("--- Closing mesh ---")
             self.mesh.close()
 
-            if self.running_job is not None:
-                self.running_job.cancel()
-                self.running_job = None
+            self.f1.close()
+            self.f2.close()
 
             if self.verbosity > 0:
                 print("Keyboard interrupt during forward run, closing mesh file.")
@@ -249,74 +308,105 @@ class LasifFWI(_AbstractDistribution):
 
         self.running_job = None
 
-        _lasif.api.calculate_adjoint_sources(
-            self.lasif_root, iteration=self.current_iteration, window_set="B",
-        )
-
-        self._last_computed_misfit = _lasif.api.write_misfit(
-            lasif_root=self.lasif_root, iteration=self.current_iteration
-        )
+        with _redirect_stdout(self.f1), _redirect_stderr(self.f2):
+            _lasif.api.calculate_adjoint_sources(
+                self.lasif_root, iteration=self.current_iteration, window_set="B",
+            )
+            self._last_computed_misfit = _lasif.api.write_misfit(
+                lasif_root=self.lasif_root, iteration=self.current_iteration
+            )
 
         return self._last_computed_misfit
 
     def gradient(
-        self, model, iteration=None, override_misfit=False, multiply_mass=False
+        self, model, iteration=None, override_misfit=False, multiply_mass=True
     ):
 
         self.current_model = model
 
-        # if self._last_computed_misfit is not None and not override_misfit:
-        #     print("Model is the same, not re-starting forward simulation.")
-        # else:
-        #     self.misfit(model)
+        if self._last_computed_misfit is not None and not override_misfit:
+            pass
+        else:
+            self.misfit(model)
 
         if self._last_computed_gradient is not None:
-            print("Model is the same, not re-starting gradient simulation.")
             return self._last_computed_gradient
 
         if iteration is None:
             iteration = self.current_iteration
 
+        # Remove previous jobs' files
+        if self.adjoint_job is not None:
+
+            with _redirect_stdout(self.f1), _redirect_stderr(self.f2):
+                self.adjoint_job.delete()
+            self.adjoint_job = None
+
         # Create adjoint simulations ===================================================
-        events = _lasif.api.list_events(
-            self.lasif_root, just_list=True, iteration=iteration, output=True
-        )
-        simulations = []
-        for event in events:
-            simulation = _salvus_utils.create_salvus_adjoint_simulation(
-                comm=self.communicator, event=event, iteration=iteration,
+
+        with _redirect_stdout(self.f1), _redirect_stderr(self.f2):
+            events = _lasif.api.list_events(
+                self.lasif_root, just_list=True, iteration=iteration, output=True
             )
-            simulations.append(simulation)
+
+        adjoint_simulations = []
+
+        for event in events:
+
+            with _redirect_stdout(self.f1), _redirect_stderr(self.f2):
+                simulation = _salvus_utils.create_salvus_adjoint_simulation(
+                    comm=self.communicator, event=event, iteration=iteration,
+                )
+            adjoint_simulations.append(simulation)
 
         # Submit adjoint simulation ====================================================
-        self.running_job = _lasif.salvus_utils.submit_salvus_simulation(
-            comm=self.communicator,
-            simulations=simulations,
-            events=events,
-            iteration=iteration,
-            sim_type="adjoint",
-        )
 
-        # Retrieve =====================================================================
-        events = _lasif.api.list_events(
-            self.lasif_root, just_list=True, iteration=iteration, output=True
-        )
-
-        try:
-            _lasif.salvus_utils.retrieve_salvus_simulations_blocking(
+        with _redirect_stdout(self.f1), _redirect_stderr(self.f2):
+            self.running_job = _lasif.salvus_utils.submit_salvus_simulation(
                 comm=self.communicator,
+                simulations=adjoint_simulations,
                 events=events,
                 iteration=iteration,
                 sim_type="adjoint",
-                verbosity=self.verbosity,
             )
+        self.adjoint_job = self.running_job
+
+        # Retrieve =====================================================================
+
+        with _redirect_stdout(self.f1), _redirect_stderr(self.f2):
+            events = _lasif.api.list_events(
+                self.lasif_root, just_list=True, iteration=iteration, output=True
+            )
+
+        try:
+
+            with _redirect_stdout(self.f1), _redirect_stderr(self.f2):
+                _lasif.salvus_utils.retrieve_salvus_simulations_blocking(
+                    comm=self.communicator,
+                    events=events,
+                    iteration=iteration,
+                    sim_type="adjoint",
+                    verbosity=self.verbosity,
+                )
         except Exception as e:
-            # If anything goes bad, at least close the HDF5 file
+            if self.running_job is not None:
+                with _redirect_stdout(self.f1), _redirect_stderr(self.f2):
+                    self.running_job.cancel()
+
+            with _redirect_stdout(self.f1), _redirect_stderr(self.f2):
+                if self.forward_job is not None:
+                    self.forward_job.delete()
+                    self.forward_job = None
+                if self.adjoint_job is not None:
+                    self.adjoint_job.delete()
+                    self.adjoint_job = None
+
+            if self.verbosity > 0:
+                print("--- Closing mesh ---")
             self.mesh.close()
 
-            if self.running_job is not None:
-                self.running_job.cancel()
-                self.running_job = None
+            self.f1.close()
+            self.f2.close()
 
             if self.verbosity > 0:
                 print("Keyboard interrupt during adjoint run, closing mesh file.")
@@ -330,13 +420,27 @@ class LasifFWI(_AbstractDistribution):
         pass
 
     def __del__(self):
-        self.mesh.close()
 
         if self.running_job is not None:
-            self.running_job.cancel()
+            with _redirect_stdout(self.f1), _redirect_stderr(self.f2):
+                self.running_job.cancel()
+
+        with _redirect_stdout(self.f1), _redirect_stderr(self.f2):
+            if self.forward_job is not None:
+                self.forward_job.delete()
+                self.forward_job = None
+            if self.adjoint_job is not None:
+                self.adjoint_job.delete()
+                self.adjoint_job = None
 
         if self.verbosity > 0:
-            print("Destructor called, closing mesh file.")
+            print("--- Deleting LasifFWI object, closing mesh ---")
+        self.mesh.close()
+
+        self.f1.flush()
+        self.f2.flush()
+        self.f1.close()
+        self.f2.close()
 
     def write_current_mesh(self, mesh_output_filename: str):
 
@@ -356,13 +460,14 @@ class LasifFWI(_AbstractDistribution):
     def create_default() -> "LasifFWI":
         raise NotImplementedError()
 
-    def construct_gradient(self, iteration=None, multiply_mass=False) -> _numpy.ndarray:
+    def construct_gradient(self, iteration=None, multiply_mass=True) -> _numpy.ndarray:
         if iteration is None:
             iteration = self.current_iteration
 
-        events = _lasif.api.list_events(
-            self.lasif_root, just_list=True, iteration=iteration, output=True
-        )
+        with _redirect_stdout(self.f1), _redirect_stderr(self.f2):
+            events = _lasif.api.list_events(
+                self.lasif_root, just_list=True, iteration=iteration, output=True
+            )
 
         gradient = _numpy.zeros((self.dimensions, 1))
 
@@ -378,8 +483,6 @@ class LasifFWI(_AbstractDistribution):
 
             # Open the gradient for the event using a context manager
             with _h5py.File(gradient_path, "r") as gradient_file_handle:
-                gradient_file_handle
-
                 # Get the names of the columns in the mesh data array
                 gradient_parametrization_fields = [
                     string.replace("b'[ ", "").replace(" ]'", "")

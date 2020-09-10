@@ -41,7 +41,7 @@ class ABCMeta(NativeABCMeta):
                     attribute_to_check, "__is_abstract_attribute__", False
                 )
                 if is_abstract:
-                    abstract_attribute.add(name)
+                    abstract_attributes.add(name)
             except AttributeError:
                 # This is to handle LASIF's custom getattr methods.
                 pass

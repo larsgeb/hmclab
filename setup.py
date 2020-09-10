@@ -56,6 +56,7 @@ setuptools.setup(
             "codecov",
             "pytest",
             "pytest-harvest",
+            "pytest-ordering",
             "pandas",
         ],
     },

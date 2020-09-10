@@ -4,6 +4,7 @@ from hmc_tomography.Helpers import (
     InterfaceMKL,
     CustomExceptions,
     Processing,
+    CaptureStdout,
 )
 
 __all__ = [
@@ -12,4 +13,5 @@ __all__ = [
     "InterfaceMKL",
     "CustomExceptions",
     "Processing",
+    "CaptureStdout",
 ]
