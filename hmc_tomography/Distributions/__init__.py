@@ -23,6 +23,7 @@ from hmc_tomography.Distributions.base import (
     Normal,
     StandardNormal1D,
     Uniform,
+    Mixture,
     _AbstractDistribution,
 )
 from hmc_tomography.Distributions.LinearMatrix import LinearMatrix
@@ -59,4 +60,5 @@ __all__ = [
     "LasifFWI",
     "SourceLocation",
     "ElasticFullWaveform2D",
+    "Mixture",
 ]

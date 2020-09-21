@@ -36,6 +36,10 @@ class _AbstractDistribution(metaclass=_ABCMeta):
     upper_bounds: _Union[_numpy.ndarray, None] = None
     """Upper bounds for every parameter. If initialized to None, no bounds are used."""
 
+    normalized: bool = False
+    """Boolean describing if the distribution is normalized, i.e. if we can use it in
+    mixtures of distributions."""
+
     @_abstractmethod
     def misfit(self, coordinates: _numpy.ndarray) -> float:
         """Computes the misfit of the distribution at the given coordinates.
@@ -101,6 +105,9 @@ class _AbstractDistribution(metaclass=_ABCMeta):
             "not allowed. Create an instance of this object and call this method from "
             "the instance."
         )
+
+    def normalize(self):
+        raise AttributeError("This distribution is not normalizable.")
 
     def generate(self) -> _numpy.ndarray:
         """Method to draw samples from the distribution.
@@ -327,6 +334,7 @@ class Normal(_AbstractDistribution):
         inverse_covariance: _Union[_numpy.ndarray, float, None] = None,
         lower_bounds: _numpy.ndarray = None,
         upper_bounds: _numpy.ndarray = None,
+        normalize=False,
     ):
 
         self.name = "Gaussian (normal) distribution"
@@ -352,6 +360,10 @@ class Normal(_AbstractDistribution):
         self.inverse_covariance: _numpy.ndarray = None
         """Inverse covariance matrix"""
 
+        self.normalization_constant = 0.0
+        """Covariance matrix determinant and dimensionality factored in single
+        likelihood term. Uncomputed if normalized() is never called."""
+
         # Parse means
         if type(means) == float or type(means) == int:
             _warnings.warn(
@@ -371,6 +383,7 @@ class Normal(_AbstractDistribution):
             or type(covariance) == _numpy.float32
             or type(covariance) == int
         ):
+            covariance = _numpy.float64(covariance)
             self.diagonal = True
             _warnings.warn(
                 "Seems that you only passed a float/int as the covariance matrix. "
@@ -414,16 +427,26 @@ class Normal(_AbstractDistribution):
         """
 
         if self.diagonal:
-            return self.misfit_bounds(coordinates) + 0.5 * (
-                (self.means - coordinates).T
-                @ (self.inverse_covariance * (self.means - coordinates))
-            ).item(0)
+            return (
+                self.misfit_bounds(coordinates)
+                + 0.5
+                * (
+                    (self.means - coordinates).T
+                    @ (self.inverse_covariance * (self.means - coordinates))
+                ).item(0)
+                + self.normalization_constant
+            )
         else:
-            return self.misfit_bounds(coordinates) + 0.5 * (
-                (self.means - coordinates).T
-                @ self.inverse_covariance
-                @ (self.means - coordinates)
-            ).item(0)
+            return (
+                self.misfit_bounds(coordinates)
+                + 0.5
+                * (
+                    (self.means - coordinates).T
+                    @ self.inverse_covariance
+                    @ (self.means - coordinates)
+                ).item(0)
+                + self.normalization_constant
+            )
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
         """Method to compute the gradient of a Normal distribution distribution.
@@ -437,6 +460,26 @@ class Normal(_AbstractDistribution):
             return -self.inverse_covariance @ (
                 self.means - coordinates
             ) + self.misfit_bounds(coordinates)
+
+    def normalize(self):
+        if (
+            type(self.covariance) == float
+            or type(self.covariance) == _numpy.float64
+            or type(self.covariance) == _numpy.float32
+            or type(self.covariance) == int
+        ):
+            determinant = self.covariance ** self.dimensions
+        elif self.covariance.shape == (self.means.size, self.means.size):
+            determinant = _numpy.linalg.det(self.covariance)
+        elif self.covariance.shape == (self.means.size, 1):
+            determinant = _numpy.prod(self.covariance)
+        else:
+            raise ValueError("Covariance matrix shape not understood.")
+
+        self.normalization_constant = 0.5 * (
+            _numpy.log(_numpy.abs(determinant))
+            + self.dimensions * _numpy.log(2 * _numpy.pi)
+        )
 
     def generate(self) -> _numpy.ndarray:
         raise NotImplementedError(
@@ -491,6 +534,8 @@ class Laplace(_AbstractDistribution):
         describing the inverse dispersion of the uncorrelated multivariate Laplace
         distribution. Used to accelerate computations at the cost of memory usage."""
 
+        self.normalization_constant = 0.0
+
         self.update_bounds(lower_bounds, upper_bounds)
 
     def misfit(self, coordinates) -> float:
@@ -498,7 +543,8 @@ class Laplace(_AbstractDistribution):
         """
 
         return (
-            self.misfit_bounds(coordinates)
+            self.normalization_constant
+            + self.misfit_bounds(coordinates)
             + _numpy.sum(
                 _numpy.abs(coordinates - self.means) * self.inverse_dispersions
             ).item()
@@ -514,6 +560,22 @@ class Laplace(_AbstractDistribution):
             self.misfit_bounds(coordinates)
             + _numpy.sign(coordinates - self.means) * self.inverse_dispersions
         )
+
+    def normalize(self):
+
+        if (
+            type(self.dispersions) == float
+            or type(self.dispersions) == _numpy.float64
+            or type(self.dispersions) == _numpy.float32
+            or type(self.dispersions) == int
+        ):
+            self.normalization_constant = _numpy.log(1.0 / (2.0 * self.dispersions))
+        elif self.dispersions.shape == (self.means.size, 1):
+            self.normalization_constant = _numpy.log(
+                1.0 / (2.0 * (_numpy.prod(self.dispersions) ** (1.0 / self.dimensions)))
+            )
+        else:
+            raise ValueError("Covariance matrix shape not understood.")
 
     def generate(self) -> _numpy.ndarray:
         raise NotImplementedError(
@@ -1046,3 +1108,38 @@ class Himmelblau(_AbstractDistribution):
 
         temperature = 1.0
         return Himmelblau(temperature=temperature)
+
+
+class Mixture(_AbstractDistribution):
+    def __init__(self, distributions, probabilities):
+
+        self.distributions = distributions
+        self.dimensions = self.distributions[0].dimensions
+
+        self.probabilities = probabilities
+
+        for dis in self.distributions:
+
+            if not dis.normalized:
+                dis.normalize()
+
+            assert dis.dimensions == self.dimensions
+
+    def misfit(self, m):
+        misfits = [d.misfit(m) for d in self.distributions]
+        return -_numpy.log(
+            _numpy.sum(_numpy.exp(_numpy.log(self.probabilities) - misfits))
+        )
+
+    def gradient(self, m):
+
+        misfits = [d.misfit(m) for d in self.distributions]
+        gradients = _numpy.array([d.gradient(m) for d in self.distributions])
+        probs = _numpy.exp(_numpy.log(self.probabilities) - misfits)
+
+        gr = _numpy.sum(
+            _numpy.array([prob * (-grad) for prob, grad in zip(probs, gradients)]),
+            axis=0,
+        )
+
+        return -gr / _numpy.sum(probs)
