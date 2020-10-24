@@ -22,6 +22,16 @@ def test_lasif_creation():
     print(f"Inverse problem dimensions: {inv_prob.dimensions}")
 
 
+def test_lasif_creation_spline():
+    inv_prob = _hmc_tomography.Distributions.LasifFWI(
+        project_folder,
+        verbosity,
+        spline={"interfaces": [200], "free_parameters": None, "knot_locations": None},
+    )
+
+    print(f"Inverse problem dimensions: {inv_prob.dimensions}")
+
+
 def test_get_set():
 
     inv_prob = _hmc_tomography.Distributions.LasifFWI(project_folder, verbosity)

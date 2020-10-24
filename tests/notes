@@ -1,0 +1,4 @@
+Too little spacing: indeterminate transformations
+
+For interfaces:not easy to map the correct interface value into the mesh 
+elements , thus making jumpy transitions when viewed in paraview
