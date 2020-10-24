@@ -23,6 +23,7 @@ from hmc_tomography.Distributions.base import (
     Normal,
     StandardNormal1D,
     Uniform,
+    Mixture,
     _AbstractDistribution,
 )
 from hmc_tomography.Distributions.LinearMatrix import LinearMatrix
@@ -37,14 +38,6 @@ except ModuleNotFoundError as e:
         f"message: {e}"
     )
 
-# try:
-#     from hmc_tomography.Distributions.LasifFWI import LasifFWI
-# except ModuleNotFoundError as e:
-#     _warnings.warn(
-#         f"Couldn't find the required package for LASIF. Detailed error message: {e}"
-#     )
-
-
 __all__ = [
     "_AbstractDistribution",
     "StandardNormal1D",
@@ -56,7 +49,7 @@ __all__ = [
     "Himmelblau",
     "BayesRule",
     "LinearMatrix",
-    # "LasifFWI",
     "SourceLocation",
     "ElasticFullWaveform2D",
+    "Mixture",
 ]
