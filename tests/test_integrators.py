@@ -26,7 +26,7 @@ def test_leapfrog():
 
     print(f"Samples written to disk: {samples_written_expected}")
 
-    with _hmc_tomography.Post.Samples(filename) as samples:
+    with _hmc_tomography.Samples(filename) as samples:
         assert samples[:, :].shape == (3, samples_written_expected)
 
     _os.remove(filename)
@@ -53,7 +53,7 @@ def test_four_stage():
 
     print(f"Samples written to disk: {samples_written_expected}")
 
-    with _hmc_tomography.Post.Samples(filename) as samples:
+    with _hmc_tomography.Samples(filename) as samples:
         assert samples[:, :].shape == (3, samples_written_expected)
 
     _os.remove(filename)
@@ -80,7 +80,7 @@ def test_three_stage():
 
     print(f"Samples written to disk: {samples_written_expected}")
 
-    with _hmc_tomography.Post.Samples(filename) as samples:
+    with _hmc_tomography.Samples(filename) as samples:
         assert samples[:, :].shape == (3, samples_written_expected)
 
     _os.remove(filename)

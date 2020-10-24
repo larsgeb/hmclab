@@ -1,4 +1,4 @@
-"""Distribution classes and associated methods.
+"""Linear matrix distribution (quadratic equations) classes and associated methods.
 """
 import warnings as _warnings
 from typing import Union as _Union
@@ -479,4 +479,3 @@ class _LinearMatrix_sparse_forward_sparse_covariance(_AbstractDistribution):
         return _LinearMatrix_sparse_forward_sparse_covariance(
             G, d, data_variance, dtype=dtype
         )
-

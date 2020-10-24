@@ -1,7 +1,9 @@
 def cli():
     import sys
+    import hmc_tomography
 
     print("hmc_tomography cli interface")
+    print(f"Version: {hmc_tomography.__version__}")
 
     # CLI interface
     if len(sys.argv) > 1 and sys.argv[1] == "test":
@@ -16,10 +18,8 @@ def cli():
         sampler = hmc_tomography.Samplers.HMC(target, mass_matrix, prior)
         filename = "samples_himmelblau.h5"
         sampler.sample(filename, proposals=10000, online_thinning=1, time_step=1.1)
-        samples = hmc_tomography.Post.Samples(filename)
-        hmc_tomography.Post.Visualization.visualize_2_dimensions(
-            samples, bins=50, show=True
-        )
+        samples = hmc_tomography.Samples(filename)
+        hmc_tomography.Visualization.visualize_2_dimensions(samples, bins=50, show=True)
 
     exit(0)
 

@@ -1,6 +1,6 @@
 # Minimal makefile for Sphinx documentation
 #
-
+SHELL := '/bin/bash'
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
@@ -13,6 +13,8 @@ help:
 
 .PHONY: help Makefile
 
+
+
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
@@ -21,3 +23,4 @@ help:
 	mkdir source/examples
 	cp ../examples/notebooks/*.ipynb source/examples/
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	git rev-parse --short HEAD | xargs -I {} sed -i 's/COMMIT_HASH/{}/g' ../docs/build/html/index.html 

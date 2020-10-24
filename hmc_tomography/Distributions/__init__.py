@@ -23,15 +23,20 @@ from hmc_tomography.Distributions.base import (
     Normal,
     StandardNormal1D,
     Uniform,
+    Mixture,
     _AbstractDistribution,
 )
 from hmc_tomography.Distributions.LinearMatrix import LinearMatrix
 
-try:
-    from hmc_tomography.Distributions.LasifFWI import LasifFWI
-except ModuleNotFoundError as e:
-    _warnings.warn(f"Couldn't find the required packages. Detailed error message: {e}")
+from hmc_tomography.Distributions.SourceLocation import SourceLocation
 
+try:
+    from hmc_tomography.Distributions.ElasticFullWaveform2D import ElasticFullWaveform2D
+except ModuleNotFoundError as e:
+    _warnings.warn(
+        f"Couldn't find the required package for ElasticFullWaveform2D. Detailed error"
+        f"message: {e}"
+    )
 
 __all__ = [
     "_AbstractDistribution",
@@ -44,5 +49,7 @@ __all__ = [
     "Himmelblau",
     "BayesRule",
     "LinearMatrix",
-    "LasifFWI",
+    "SourceLocation",
+    "ElasticFullWaveform2D",
+    "Mixture",
 ]

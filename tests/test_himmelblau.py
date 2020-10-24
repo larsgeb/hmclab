@@ -28,7 +28,7 @@ def test_sampling_visualization_himmelblau(sampler_class):
 
     print(f"Samples written to disk: {samples_written_expected}")
 
-    with _hmc_tomography.Post.Samples(filename) as samples:
+    with _hmc_tomography.Samples(filename) as samples:
         assert samples[:, :].shape == (3, samples_written_expected)
 
     _os.remove(filename)
@@ -52,7 +52,7 @@ def test_sampling_interrupt_himmelblau(sampler_class):
         _numpy.floor(sampler.current_proposal / sampler.online_thinning) + 1
     )
 
-    with _hmc_tomography.Post.Samples(filename) as samples:
+    with _hmc_tomography.Samples(filename) as samples:
         assert samples[:, :].shape == (3, samples_written_expected)
 
     _os.remove(filename)

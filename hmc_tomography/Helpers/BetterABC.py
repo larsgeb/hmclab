@@ -32,11 +32,20 @@ class ABCMeta(NativeABCMeta):
 
     def __call__(cls, *args, **kwargs):
         instance = NativeABCMeta.__call__(cls, *args, **kwargs)
-        abstract_attributes = {
-            name
-            for name in dir(instance)
-            if getattr(getattr(instance, name), "__is_abstract_attribute__", False)
-        }
+
+        abstract_attributes = set()
+        for name in dir(instance):
+            attribute_to_check = getattr(instance, name)
+            try:
+                is_abstract = getattr(
+                    attribute_to_check, "__is_abstract_attribute__", False
+                )
+                if is_abstract:
+                    abstract_attributes.add(name)
+            except AttributeError:
+                # This is to handle LASIF's custom getattr methods.
+                pass
+
         if abstract_attributes:
             raise NotImplementedError(
                 "Can't instantiate abstract class {} with"

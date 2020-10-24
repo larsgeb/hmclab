@@ -157,8 +157,14 @@ class Diagonal(_AbstractMassMatrix):
         """
         self.name = "diagonal mass matrix"
 
+        diagonal = _numpy.asarray(diagonal)
+
         if diagonal is None or type(diagonal) != _numpy.ndarray:
             raise ValueError("The diagonal mass matrix did not receive a diagonal")
+
+        diagonal.shape = (diagonal.size, 1)
+
+        assert diagonal.shape == (diagonal.size, 1)
 
         self.dimensions = diagonal.size
         self.diagonal = diagonal
