@@ -1127,7 +1127,7 @@ class Mixture(_AbstractDistribution):
 
     def misfit(self, m):
         misfits = [d.misfit(m) for d in self.distributions]
-        return self.misfit_bounds(m) -_numpy.log(
+        return self.misfit_bounds(m) - _numpy.log(
             _numpy.sum(_numpy.exp(_numpy.log(self.probabilities) - misfits))
         )
 

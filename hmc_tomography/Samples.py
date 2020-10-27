@@ -4,7 +4,7 @@ import h5py as _h5py
 
 
 class Samples:
-    """A class to handle generated samples files more easily.
+    """A class to handle generated samples files.
 
     """
 

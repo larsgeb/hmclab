@@ -42,7 +42,7 @@ from hmc_tomography.MassMatrices import Unit as _Unit
 from hmc_tomography.MassMatrices import _AbstractMassMatrix
 
 dev_assertion_message = (
-    "Something went wrong internally, please report this to the " "developers."
+    "Something went wrong internally, please report this to the developers."
 )
 
 
@@ -112,16 +112,29 @@ class _AbstractSampler(_ABC):
 
     def _init_sampler(
         self,
-        samples_hdf5_filename,
-        distribution,
-        initial_model,
-        proposals,
-        online_thinning,
+        samples_hdf5_filename: str,
+        distribution: _AbstractDistribution,
+        initial_model: _numpy.ndarray,
+        proposals: int,
+        online_thinning: int,
         ram_buffer_size,
         overwrite_existing_file,
         max_time,
         **kwargs,
     ):
+        """A method that is called everytime any markov chain sampler object is
+        constructed.
+
+        Args:
+            samples_hdf5_filename ([type]): [description]
+            distribution ([type]): [description]
+            initial_model ([type]): [description]
+            proposals ([type]): [description]
+            online_thinning ([type]): [description]
+            ram_buffer_size ([type]): [description]
+            overwrite_existing_file ([type]): [description]
+            max_time ([type]): [description]
+        """
 
         # Parse the distribution -------------------------------------------------------
 
@@ -287,9 +300,6 @@ class _AbstractSampler(_ABC):
     def _sample_loop(self):
         """The actual sampling code."""
 
-        # As soon as all attributes and datasets are created, enable SWMR mode.
-        # self.samples_hdf5_filehandle.swmr_mode = True
-
         # Create progressbar -----------------------------------------------------------
         try:
             self.proposals_iterator = _tqdm_au.trange(
@@ -305,6 +315,17 @@ class _AbstractSampler(_ABC):
 
         # Start time for updating progressbar
         self.last_update_time = _time()
+
+        # Capture NumPy exceptions -----------------------------------------------------
+        class Log(object):
+            messages = []
+
+            def write(self, msg):
+                self.messages.append(msg)
+
+        self.log = Log()
+        _numpy.seterrcall(self.log)
+        _numpy.seterr(all="log")  # seterr to known value
 
         # Run the Markov process -------------------------------------------------------
         self.start_time = _datetime.now()
@@ -805,6 +826,26 @@ class HMC(_AbstractSampler):
 
     name = "Hamiltonian Monte Carlo"
 
+    autotuning: bool = False
+    """A boolean indicating if the stepsize is tuned towards a specific acceptance rate
+    using diminishing adaptive parameters."""
+
+    learning_rate: float = 0.75
+
+    target_acceptance_rate: float = 0.65
+    """A float representing the optimal acceptance rate used for autotuning, if
+    autotuning is True."""
+
+    acceptance_rates: _numpy.ndarray = _numpy.empty((1, 1))
+    """A NumPy ndarray containing all past acceptance rates. Collected if autotuning is
+    True."""
+
+    stepsizes: _numpy.ndarray = _numpy.empty((1, 1))
+    """A NumPy ndarray containing all past stepsizes for the HMC algorithm. Collected if
+    autotuning is True."""
+
+    minimal_time_step = 1e-18
+
     def _sample(
         self,
         samples_hdf5_filename: str,
@@ -812,6 +853,9 @@ class HMC(_AbstractSampler):
         time_step: float = 0.1,
         amount_of_steps: int = 10,
         mass_matrix: _AbstractMassMatrix = None,
+        autotuning: bool = False,
+        target_acceptance_rate: float = 0.65,
+        learning_rate: float = 0.75,
         integrator: str = "lf",
         initial_model: _numpy.ndarray = None,
         proposals: int = 100,
@@ -882,6 +926,9 @@ class HMC(_AbstractSampler):
                 mass_matrix=mass_matrix,
                 integrator=integrator,
                 initial_model=initial_model,
+                autotuning=autotuning,
+                target_acceptance_rate=target_acceptance_rate,
+                learning_rate=learning_rate,
                 proposals=proposals,
                 online_thinning=online_thinning,
                 ram_buffer_size=ram_buffer_size,
@@ -902,6 +949,9 @@ class HMC(_AbstractSampler):
         time_step: float = 0.1,
         amount_of_steps: int = 10,
         mass_matrix: _AbstractMassMatrix = None,
+        autotuning: bool = False,
+        target_acceptance_rate: float = 0.65,
+        learning_rate: float = 0.75,
         integrator: str = "lf",
         initial_model: _numpy.ndarray = None,
         proposals: int = 100,
@@ -921,6 +971,9 @@ class HMC(_AbstractSampler):
             time_step=time_step,
             amount_of_steps=amount_of_steps,
             mass_matrix=mass_matrix,
+            autotuning=autotuning,
+            target_acceptance_rate=target_acceptance_rate,
+            learning_rate=learning_rate,
             integrator=integrator,
             initial_model=initial_model,
             proposals=proposals,
@@ -934,7 +987,15 @@ class HMC(_AbstractSampler):
 
     def _init_sampler_specific(self, **kwargs):
         # Parse all possible kwargs
-        for key in ("time_step", "amount_of_steps", "mass_matrix", "integrator"):
+        for key in (
+            "time_step",
+            "amount_of_steps",
+            "mass_matrix",
+            "integrator",
+            "autotuning",
+            "target_acceptance_rate",
+            "learning_rate",
+        ):
             setattr(self, key, kwargs[key])
             kwargs.pop(key)
 
@@ -942,6 +1003,16 @@ class HMC(_AbstractSampler):
             raise TypeError(
                 f"Unidentified argument(s) not applicable to sampler: {kwargs}"
             )
+
+        # Autotuning -------------------------------------------------------------------
+        if self.autotuning:
+            assert self.learning_rate > 0.5 and self.learning_rate <= 1.0, (
+                f"The learning rate should be larger than 0.5 and smaller than or "
+                f"equal to 1.0, otherwise the Markov chain does not converge. Chosen: "
+                f"{self.learning_rate}"
+            )
+            self.acceptance_rates = _numpy.empty((self.proposals, 1))
+            self.stepsizes = _numpy.empty((self.proposals, 1))
 
         # Step length ------------------------------------------------------------------
         # Assert that step length for Hamiltons equations is a float and bigger than
@@ -1012,15 +1083,37 @@ class HMC(_AbstractSampler):
         self.proposed_k = self.mass_matrix.kinetic_energy(self.proposed_momentum)
         self.proposed_h = self.proposed_x + self.proposed_k
 
-        # Evaluate Metrpolis-Hastings acceptance rule
+        acceptance_rate = _numpy.exp(self.current_h - self.proposed_h)
+        if self.autotuning:
+            # Write out parameters
+            self.acceptance_rates[self.current_proposal] = acceptance_rate
+            self.stepsizes[self.current_proposal] = self.time_step
 
-        # print(f"Rate: {_numpy.exp(self.current_h - self.proposed_h)}")
-        # print(f"H: {self.current_h} H_new: {self.proposed_h}")
-        # print(f"X: {self.current_x} X_new: {self.proposed_x}")
-        # print(f"K: {self.current_k} K_new: {self.proposed_k}")
-        # print()
+            # Compute weight according to diminishing scheme, see also:
+            # The No-U-Turn Sampler: Adaptively Setting Path Lengths in Hamiltonian
+            # Monte Carlo, Hoffman & Gelman, 2014, equation (5).
+            schedule_weight = (self.current_proposal + 1) ** (-self.learning_rate)
 
-        if _numpy.exp(self.current_h - self.proposed_h) > _numpy.random.uniform(0, 1):
+            if _numpy.isnan(acceptance_rate):
+                acceptance_rate = 0
+
+            # Update stepsize
+            self.time_step -= schedule_weight * (
+                self.target_acceptance_rate - min(acceptance_rate, 1)
+            )
+
+            if self.time_step <= 0:
+                _warnings.warn(
+                    "The timestep of the algorithm went below zero. You possibly "
+                    "started the algorithm in a region with extremely strong "
+                    "gradients. The sampler will now default to a minimum timestep of "
+                    f"{self.minimal_time_step}. If this doesn't work, and if choosing "
+                    "a different initial model does not make this warning go away, try"
+                    "setting a smaller minimal time step and initial time step value."
+                )
+                self.time_step = max(self.time_step, self.minimal_time_step)
+
+        if acceptance_rate > _numpy.random.uniform(0, 1):
             self.current_model = _numpy.copy(self.proposed_model)
             self.current_x = self.proposed_x
             self.accepted_proposals += 1
@@ -1196,3 +1289,19 @@ class HMC(_AbstractSampler):
         "4s": "four stage integrator",
     }
     available_integrators = integrators.keys()
+
+    def plot_stepsizes(self):
+        import matplotlib.pyplot as _plt
+
+        _plt.semilogy(self.stepsizes)
+        _plt.xlabel("iteration")
+        _plt.ylabel("stepsize")
+        return _plt.gca()
+
+    def plot_acceptance_rate(self):
+        import matplotlib.pyplot as _plt
+
+        _plt.semilogy(self.acceptance_rates)
+        _plt.xlabel("iteration")
+        _plt.ylabel("stepsize")
+        return _plt.gca()
