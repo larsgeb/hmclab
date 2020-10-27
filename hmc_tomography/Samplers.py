@@ -40,6 +40,7 @@ import tqdm.auto as _tqdm_au
 from hmc_tomography.Distributions import _AbstractDistribution
 from hmc_tomography.MassMatrices import Unit as _Unit
 from hmc_tomography.MassMatrices import _AbstractMassMatrix
+from hmc_tomography.Helpers.Timers import AccumulatingTimer as _AccumulatingTimer
 
 dev_assertion_message = (
     "Something went wrong internally, please report this to the developers."
@@ -107,6 +108,10 @@ class _AbstractSampler(_ABC):
     """A float representing the maximum time in seconds that sampling is allowed to take
     before it is automatically terminated. The value None is used for unlimited time."""
 
+    diagnostic_mode: bool = True
+    functions_to_diagnose = []
+    sampler_specific_functions_to_diagnose = []
+
     def __init__(self):
         self.sample = self._sample
 
@@ -120,6 +125,7 @@ class _AbstractSampler(_ABC):
         ram_buffer_size,
         overwrite_existing_file,
         max_time,
+        diagnostic_mode: bool = False,
         **kwargs,
     ):
         """A method that is called everytime any markov chain sampler object is
@@ -261,7 +267,25 @@ class _AbstractSampler(_ABC):
             ), "The maximal runtime (`max_time`) should be a float larger than zero."
             self.max_time = max_time
 
-        # Do specific stuff ------------------------------------------------------------
+        # Prepare diagnostic mode if needed --------------------------------------------
+        self.diagnostic_mode = diagnostic_mode
+
+        if self.diagnostic_mode:
+            self._propose = _AccumulatingTimer(self._propose)
+            self._evaluate_acceptance = _AccumulatingTimer(self._evaluate_acceptance)
+            self._sample_to_ram = _AccumulatingTimer(self._sample_to_ram)
+            self._samples_to_disk = _AccumulatingTimer(self._samples_to_disk)
+            self._update_progressbar = _AccumulatingTimer(self._update_progressbar)
+
+            self.functions_to_diagnose = [
+                self._propose,
+                self._evaluate_acceptance,
+                self._sample_to_ram,
+                self._samples_to_disk,
+                self._update_progressbar,
+            ]
+
+        # Do sampler specific operations -----------------------------------------------
 
         # Set up specifics for each algorithm
         self._init_sampler_specific(**kwargs)
@@ -296,6 +320,38 @@ class _AbstractSampler(_ABC):
         ).total_seconds()
 
         self.samples_hdf5_filehandle.close()
+
+        self._close_sampler_specific()
+
+        if self.diagnostic_mode:
+            # This block shows the percentage of time spent in each part of the sampler.
+            percentage_time_spent = {}
+            print("Detailed statistics:")
+
+            total_time = (self.end_time - self.start_time).total_seconds()
+
+            print(f"Total runtime: {total_time:.2f} seconds")
+
+            for fn in self.functions_to_diagnose:
+                percentage_time_spent[fn.function.__name__] = (
+                    100 * fn.time_spent / total_time
+                )
+            print()
+            print("General sampler components:")
+            print("{:<30} {:<30}".format("Function", "percentage of time"))
+            for name, percentage in percentage_time_spent.items():
+                print("{:<30} {:<30.2f}".format(name, percentage))
+
+            percentage_time_spent = {}
+            for fn in self.sampler_specific_functions_to_diagnose:
+                percentage_time_spent[fn.function.__name__] = (
+                    100 * fn.time_spent / total_time
+                )
+            print()
+            print(f"{self.name} specific components:")
+            print("{:<30} {:<30}".format("Function", "percentage of time"))
+            for name, percentage in percentage_time_spent.items():
+                print("{:<30} {:<30.2f}".format(name, percentage))
 
     def _sample_loop(self):
         """The actual sampling code."""
@@ -599,14 +655,44 @@ class _AbstractSampler(_ABC):
         algorithm."""
         pass
 
+    @_abstractmethod
+    def _close_sampler_specific(self):
+        """An abstract method that closesup for the algorithm."""
+        pass
+
 
 class RWMH(_AbstractSampler):
-    step_length: _Union[float, _numpy.ndarray] = 1.0
+    stepsize: _Union[float, _numpy.ndarray] = 1.0
     """A parameter describing the standard deviation of a multivariate normal (MVN) used
     as the proposal distribution for Random Walk Metropolis-Hastings. Using a
     _numpy.ndarray column vector (shape dimensions × 1) will give every dimensions a
     unique step length. Correlations in the MVN are not yet implemented. Has a strong
     influence on acceptance rate. **An essential tuning parameter.**"""
+
+    autotuning: bool = False
+    """A boolean indicating if the stepsize is tuned towards a specific acceptance rate
+    using diminishing adaptive parameters."""
+
+    learning_rate: float = 0.75
+    """A float tuning the rate of decrease at which a new step size is adapted,
+    according to rate = (iteration_number) ** (-learning_rate). Needs to be larger than
+    0.5 and equal to or smaller than 1.0."""
+
+    target_acceptance_rate: float = 0.65
+    """A float representing the optimal acceptance rate used for autotuning, if
+    autotuning is True."""
+
+    acceptance_rates: _numpy.ndarray = None
+    """A NumPy ndarray containing all past acceptance rates. Collected if autotuning is
+    True."""
+
+    stepsizes: _numpy.ndarray = None
+    """A NumPy ndarray containing all past step lengths for the RWMH algorithm.
+    Collected if autotuning is True."""
+
+    minimal_stepsize = 1e-18
+    """Minimal step length which is chosen if timestep becomes zero or negative during
+    autotuning."""
 
     name = "Random Walk Metropolis Hastings"
 
@@ -614,13 +700,17 @@ class RWMH(_AbstractSampler):
         self,
         samples_hdf5_filename: str,
         distribution: _AbstractDistribution,
-        step_length: _Union[float, _numpy.ndarray] = 1.0,
+        stepsize: _Union[float, _numpy.ndarray] = 1.0,
         initial_model: _numpy.ndarray = None,
         proposals: int = 100,
+        diagnostic_mode: bool = False,
         online_thinning: int = 1,
         ram_buffer_size: int = None,
         overwrite_existing_file: bool = False,
         max_time: float = None,
+        autotuning: bool = False,
+        target_acceptance_rate: float = 0.65,
+        learning_rate: float = 0.75,
     ):
         """Sampling using the Metropolis-Hastings algorithm.
 
@@ -632,7 +722,7 @@ class RWMH(_AbstractSampler):
         distribution: _AbstractDistribution
             The distribution to sample. Should be an instance of a subclass of
             _AbstractDistribution. **A required parameter.**
-        step_length: _Union[float, _numpy.ndarray]
+        stepsize: _Union[float, _numpy.ndarray]
             A parameter describing the standard deviation of a multivariate normal (MVN)
             used as the proposal distribution for Random Walk Metropolis-Hastings. Using
             a _numpy.ndarray column vector (shape dimensions × 1) will give every
@@ -675,13 +765,17 @@ class RWMH(_AbstractSampler):
             self._init_sampler(
                 samples_hdf5_filename=samples_hdf5_filename,
                 distribution=distribution,
-                step_length=step_length,
+                stepsize=stepsize,
                 initial_model=initial_model,
                 proposals=proposals,
+                diagnostic_mode=diagnostic_mode,
                 online_thinning=online_thinning,
                 ram_buffer_size=ram_buffer_size,
                 overwrite_existing_file=overwrite_existing_file,
                 max_time=max_time,
+                autotuning=autotuning,
+                target_acceptance_rate=target_acceptance_rate,
+                learning_rate=learning_rate,
             )
         except Exception as e:
             self.samples_hdf5_filehandle.close()
@@ -694,13 +788,17 @@ class RWMH(_AbstractSampler):
         cls,
         samples_hdf5_filename: str,
         distribution: _AbstractDistribution,
-        step_length: float = 1.0,
+        stepsize: float = 1.0,
         initial_model: _numpy.ndarray = None,
         proposals: int = 100,
+        diagnostic_mode: bool = False,
         online_thinning: int = 1,
         ram_buffer_size: int = None,
         overwrite_existing_file: bool = False,
         max_time: float = None,
+        autotuning: bool = False,
+        target_acceptance_rate: float = 0.65,
+        learning_rate: float = 0.75,
     ):
         """Simply a forward to the instance method of the sampler; check out
         _sample()."""
@@ -710,13 +808,17 @@ class RWMH(_AbstractSampler):
         instance._sample(
             samples_hdf5_filename=samples_hdf5_filename,
             distribution=distribution,
-            step_length=step_length,
+            stepsize=stepsize,
             initial_model=initial_model,
             proposals=proposals,
+            diagnostic_mode=diagnostic_mode,
             online_thinning=online_thinning,
             ram_buffer_size=ram_buffer_size,
             overwrite_existing_file=overwrite_existing_file,
             max_time=max_time,
+            autotuning=autotuning,
+            target_acceptance_rate=target_acceptance_rate,
+            learning_rate=learning_rate,
         )
 
         return instance
@@ -724,9 +826,28 @@ class RWMH(_AbstractSampler):
     def _init_sampler_specific(self, **kwargs):
 
         # Parse all possible kwargs
-        for key in ["step_length"]:
+        for key in [
+            "stepsize",
+            "autotuning",
+            "target_acceptance_rate",
+            "learning_rate",
+        ]:
             setattr(self, key, kwargs[key])
             kwargs.pop(key)
+
+        # Autotuning -------------------------------------------------------------------
+        if self.autotuning:
+            assert self.learning_rate > 0.5 and self.learning_rate <= 1.0, (
+                f"The learning rate should be larger than 0.5 and smaller than or "
+                f"equal to 1.0, otherwise the Markov chain does not converge. Chosen: "
+                f"{self.learning_rate}"
+            )
+            assert type(self.stepsize) == float, (
+                "Autotuning RWMH is only implemented for scalar stepsizes. If you need"
+                "it for non-scalar steps, write us an email."
+            )
+            self.acceptance_rates = _numpy.empty((self.proposals, 1))
+            self.stepsizes = _numpy.empty((self.proposals, 1))
 
         if len(kwargs) != 0:
             raise TypeError(
@@ -736,38 +857,87 @@ class RWMH(_AbstractSampler):
         # Assert that step length is either a float and bigger than zero, or a full
         # matrix / diagonal
         try:
-            self.step_length = float(self.step_length)
-            assert self.step_length > 0.0, (
+            self.stepsize = float(self.stepsize)
+            assert self.stepsize > 0.0, (
                 "RW-MH step length should be a positive float or a numpy.ndarray. The "
                 "passed argument is a float equal to or smaller than zero."
             )
         except TypeError:
-            self.step_length = _numpy.asarray(self.step_length)
-            assert type(self.step_length) == _numpy.ndarray, (
+            self.stepsize = _numpy.asarray(self.stepsize)
+            assert type(self.stepsize) == _numpy.ndarray, (
                 "RW-MH step length should be a numpy.ndarray of shape (dimensions, 1) "
                 "or a positive float. The passed argument is neither."
             )
-            assert self.step_length.shape == (self.dimensions, 1), (
+            assert self.stepsize.shape == (self.dimensions, 1), (
                 "RW-MH step length should be a numpy.ndarray of shape (dimensions, 1) "
                 "or a positive float. The passed argument is an ndarray of the wrong "
                 "shape."
             )
 
+        if self.diagnostic_mode:
+            self.distribution.misfit = _AccumulatingTimer(self.distribution.misfit)
+            self.distribution.gradient = _AccumulatingTimer(self.distribution.gradient)
+            self.distribution.corrector = _AccumulatingTimer(
+                self.distribution.corrector
+            )
+            self.sampler_specific_functions_to_diagnose = [
+                self.distribution.misfit,
+                self.distribution.gradient,
+                self.distribution.corrector,
+            ]
+
+            if self.autotuning:
+                self.autotune = _AccumulatingTimer(self.autotune)
+                self.sampler_specific_functions_to_diagnose.append(self.autotune)
+
+    def _close_sampler_specific(self):
+        if self.autotuning:
+            self.acceptance_rates = self.acceptance_rates[: self.current_proposal]
+            self.stepsizes = self.stepsizes[: self.current_proposal]
+
     def _write_tuning_settings(self):
-        if type(self.step_length) == float:
-            self.samples_hdf5_dataset.attrs["step_length"] = self.step_length
+        if type(self.stepsize) == float:
+            self.samples_hdf5_dataset.attrs["stepsize"] = self.stepsize
         else:
             self.samples_hdf5_dataset.attrs[
-                "step_length"
-            ] = self.step_length.__class__.__name__
+                "stepsize"
+            ] = self.stepsize.__class__.__name__
+
+    def autotune(self, acceptance_rate):
+        # Write out parameters
+        self.acceptance_rates[self.current_proposal] = acceptance_rate
+        self.stepsizes[self.current_proposal] = self.stepsize
+
+        # Compute weight according to diminishing scheme, see also:
+        # The No-U-Turn Sampler: Adaptively Setting Path Lengths in Hamiltonian
+        # Monte Carlo, Hoffman & Gelman, 2014, equation (5).
+        schedule_weight = (self.current_proposal + 1) ** (-self.learning_rate)
+
+        if _numpy.isnan(acceptance_rate):
+            acceptance_rate = 0
+
+        # Update stepsize
+        self.stepsize -= schedule_weight * (
+            self.target_acceptance_rate - min(acceptance_rate, 1)
+        )
+
+        if self.stepsize <= 0:
+            _warnings.warn(
+                "The timestep of the algorithm went below zero. You possibly "
+                "started the algorithm in a region with extremely strong "
+                "gradients. The sampler will now default to a minimum timestep of "
+                f"{self.minimal_stepsize}. If this doesn't work, and if choosing "
+                "a different initial model does not make this warning go away, try"
+                "setting a smaller minimal time step and initial time step value."
+            )
+            self.stepsize = max(self.stepsize, self.minimal_stepsize)
 
     def _propose(self):
 
         # Propose a new model according to the MH Random Walk algorithm with a Gaussian
         # proposal distribution
-        self.proposed_model = (
-            self.current_model
-            + self.step_length * _numpy.random.randn(self.dimensions, 1)
+        self.proposed_model = self.current_model + self.stepsize * _numpy.random.randn(
+            self.dimensions, 1
         )
         assert self.proposed_model.shape == (self.dimensions, 1), dev_assertion_message
 
@@ -776,11 +946,32 @@ class RWMH(_AbstractSampler):
         # Compute new misfit
         self.proposed_x = self.distribution.misfit(self.proposed_model)
 
-        # Evaluate acceptance rate
-        if _numpy.exp(self.current_x - self.proposed_x) > _numpy.random.uniform(0, 1):
+        acceptance_rate = _numpy.exp(self.current_x - self.proposed_x)
+
+        if self.autotuning:
+            self.autotune(acceptance_rate)
+
+        # Evaluate MH acceptance rate
+        if acceptance_rate > _numpy.random.uniform(0, 1):
             self.current_model = _numpy.copy(self.proposed_model)
             self.current_x = self.proposed_x
             self.accepted_proposals += 1
+
+    def plot_stepsizes(self):
+        import matplotlib.pyplot as _plt
+
+        _plt.semilogy(self.stepsizes)
+        _plt.xlabel("iteration")
+        _plt.ylabel("stepsize")
+        return _plt.gca()
+
+    def plot_acceptance_rate(self):
+        import matplotlib.pyplot as _plt
+
+        _plt.semilogy(self.acceptance_rates)
+        _plt.xlabel("iteration")
+        _plt.ylabel("stepsize")
+        return _plt.gca()
 
 
 class HMC(_AbstractSampler):
@@ -825,26 +1016,32 @@ class HMC(_AbstractSampler):
     """A float representing the total energy associated with the proposed state."""
 
     name = "Hamiltonian Monte Carlo"
+    """Sampler name."""
 
     autotuning: bool = False
     """A boolean indicating if the stepsize is tuned towards a specific acceptance rate
     using diminishing adaptive parameters."""
 
     learning_rate: float = 0.75
+    """A float tuning the rate of decrease at which a new step size is adapted,
+    according to rate = (iteration_number) ** (-learning_rate). Needs to be larger than
+    0.5 and equal to or smaller than 1.0."""
 
     target_acceptance_rate: float = 0.65
     """A float representing the optimal acceptance rate used for autotuning, if
     autotuning is True."""
 
-    acceptance_rates: _numpy.ndarray = _numpy.empty((1, 1))
+    acceptance_rates: _numpy.ndarray = None
     """A NumPy ndarray containing all past acceptance rates. Collected if autotuning is
     True."""
 
-    stepsizes: _numpy.ndarray = _numpy.empty((1, 1))
+    stepsizes: _numpy.ndarray = None
     """A NumPy ndarray containing all past stepsizes for the HMC algorithm. Collected if
     autotuning is True."""
 
-    minimal_time_step = 1e-18
+    minimal_stepsize = 1e-18
+    """Minimal timestep which is chosen if timestep becomes zero or negative during
+    autotuning."""
 
     def _sample(
         self,
@@ -853,16 +1050,17 @@ class HMC(_AbstractSampler):
         time_step: float = 0.1,
         amount_of_steps: int = 10,
         mass_matrix: _AbstractMassMatrix = None,
-        autotuning: bool = False,
-        target_acceptance_rate: float = 0.65,
-        learning_rate: float = 0.75,
         integrator: str = "lf",
         initial_model: _numpy.ndarray = None,
         proposals: int = 100,
+        diagnostic_mode: bool = False,
         online_thinning: int = 1,
         ram_buffer_size: int = None,
         overwrite_existing_file: bool = False,
         max_time: float = None,
+        autotuning: bool = False,
+        target_acceptance_rate: float = 0.65,
+        learning_rate: float = 0.75,
     ):
         """Sampling using the Metropolis-Hastings algorithm.
 
@@ -930,6 +1128,7 @@ class HMC(_AbstractSampler):
                 target_acceptance_rate=target_acceptance_rate,
                 learning_rate=learning_rate,
                 proposals=proposals,
+                diagnostic_mode=diagnostic_mode,
                 online_thinning=online_thinning,
                 ram_buffer_size=ram_buffer_size,
                 overwrite_existing_file=overwrite_existing_file,
@@ -949,16 +1148,17 @@ class HMC(_AbstractSampler):
         time_step: float = 0.1,
         amount_of_steps: int = 10,
         mass_matrix: _AbstractMassMatrix = None,
-        autotuning: bool = False,
-        target_acceptance_rate: float = 0.65,
-        learning_rate: float = 0.75,
         integrator: str = "lf",
         initial_model: _numpy.ndarray = None,
         proposals: int = 100,
+        diagnostic_mode: bool = False,
         online_thinning: int = 1,
         ram_buffer_size: int = None,
         overwrite_existing_file: bool = False,
         max_time: float = None,
+        autotuning: bool = False,
+        target_acceptance_rate: float = 0.65,
+        learning_rate: float = 0.75,
     ):
         """Simply a forward to the instance method of the sampler; check out
         _sample()."""
@@ -977,6 +1177,7 @@ class HMC(_AbstractSampler):
             integrator=integrator,
             initial_model=initial_model,
             proposals=proposals,
+            diagnostic_mode=diagnostic_mode,
             online_thinning=online_thinning,
             ram_buffer_size=ram_buffer_size,
             overwrite_existing_file=overwrite_existing_file,
@@ -1057,6 +1258,44 @@ class HMC(_AbstractSampler):
                 f"Unknown integrator used. Choices are: {self.available_integrators}"
             )
 
+        if self.diagnostic_mode:
+            self.distribution.misfit = _AccumulatingTimer(self.distribution.misfit)
+            self.distribution.gradient = _AccumulatingTimer(self.distribution.gradient)
+            self.mass_matrix.generate_momentum = _AccumulatingTimer(
+                self.mass_matrix.generate_momentum
+            )
+            self.mass_matrix.kinetic_energy = _AccumulatingTimer(
+                self.mass_matrix.kinetic_energy
+            )
+            self.mass_matrix.kinetic_energy_gradient = _AccumulatingTimer(
+                self.mass_matrix.kinetic_energy_gradient
+            )
+            self.distribution.corrector = _AccumulatingTimer(
+                self.distribution.corrector
+            )
+            self.integrators[self.integrator] = _AccumulatingTimer(
+                self.integrators[self.integrator]
+            )
+
+            self.sampler_specific_functions_to_diagnose = [
+                self.distribution.misfit,
+                self.distribution.gradient,
+                self.integrators[self.integrator],
+                self.mass_matrix.generate_momentum,
+                self.mass_matrix.kinetic_energy,
+                self.mass_matrix.kinetic_energy_gradient,
+                self.distribution.corrector,
+            ]
+
+            if self.autotuning:
+                self.autotune = _AccumulatingTimer(self.autotune)
+                self.sampler_specific_functions_to_diagnose.append(self.autotune)
+
+    def _close_sampler_specific(self):
+        if self.autotuning:
+            self.acceptance_rates = self.acceptance_rates[: self.current_proposal]
+            self.stepsizes = self.stepsizes[: self.current_proposal]
+
     def _write_tuning_settings(self):
         self.samples_hdf5_dataset.attrs["time_step"] = self.time_step
         self.samples_hdf5_dataset.attrs["amount_of_steps"] = self.amount_of_steps
@@ -1084,39 +1323,43 @@ class HMC(_AbstractSampler):
         self.proposed_h = self.proposed_x + self.proposed_k
 
         acceptance_rate = _numpy.exp(self.current_h - self.proposed_h)
+
         if self.autotuning:
-            # Write out parameters
-            self.acceptance_rates[self.current_proposal] = acceptance_rate
-            self.stepsizes[self.current_proposal] = self.time_step
-
-            # Compute weight according to diminishing scheme, see also:
-            # The No-U-Turn Sampler: Adaptively Setting Path Lengths in Hamiltonian
-            # Monte Carlo, Hoffman & Gelman, 2014, equation (5).
-            schedule_weight = (self.current_proposal + 1) ** (-self.learning_rate)
-
-            if _numpy.isnan(acceptance_rate):
-                acceptance_rate = 0
-
-            # Update stepsize
-            self.time_step -= schedule_weight * (
-                self.target_acceptance_rate - min(acceptance_rate, 1)
-            )
-
-            if self.time_step <= 0:
-                _warnings.warn(
-                    "The timestep of the algorithm went below zero. You possibly "
-                    "started the algorithm in a region with extremely strong "
-                    "gradients. The sampler will now default to a minimum timestep of "
-                    f"{self.minimal_time_step}. If this doesn't work, and if choosing "
-                    "a different initial model does not make this warning go away, try"
-                    "setting a smaller minimal time step and initial time step value."
-                )
-                self.time_step = max(self.time_step, self.minimal_time_step)
+            self.autotune(acceptance_rate)
 
         if acceptance_rate > _numpy.random.uniform(0, 1):
             self.current_model = _numpy.copy(self.proposed_model)
             self.current_x = self.proposed_x
             self.accepted_proposals += 1
+
+    def autotune(self, acceptance_rate):
+        # Write out parameters
+        self.acceptance_rates[self.current_proposal] = acceptance_rate
+        self.stepsizes[self.current_proposal] = self.time_step
+
+        # Compute weight according to diminishing scheme, see also:
+        # The No-U-Turn Sampler: Adaptively Setting Path Lengths in Hamiltonian
+        # Monte Carlo, Hoffman & Gelman, 2014, equation (5).
+        schedule_weight = (self.current_proposal + 1) ** (-self.learning_rate)
+
+        if _numpy.isnan(acceptance_rate):
+            acceptance_rate = 0
+
+        # Update stepsize
+        self.time_step -= schedule_weight * (
+            self.target_acceptance_rate - min(acceptance_rate, 1)
+        )
+
+        if self.time_step <= 0:
+            _warnings.warn(
+                "The timestep of the algorithm went below zero. You possibly "
+                "started the algorithm in a region with extremely strong "
+                "gradients. The sampler will now default to a minimum timestep of "
+                f"{self.minimal_stepsize}. If this doesn't work, and if choosing "
+                "a different initial model does not make this warning go away, try"
+                "setting a smaller minimal time step and initial time step value."
+            )
+            self.time_step = max(self.time_step, self.minimal_stepsize)
 
     def _propagate_leapfrog(self,):
 
