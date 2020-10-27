@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>&lt;no title&gt; &mdash; HMC Tom 0.2.2-alpha-5-4-gf09787e documentation</title>
+  <title>&lt;no title&gt; &mdash; HMC Tom 0.2.2-alpha-5-21-gb74f3b8 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                0.2.2-alpha-5-4-gf09787e
+                0.2.2-alpha-5-21-gb74f3b8
               </div>
             
           
@@ -151,7 +151,7 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/examples/LBFGS tests.ipynb.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/examples/LBFGS mass matrix tests.ipynb.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -169,21 +169,35 @@
 /* CSS for nbsphinx extension */
 
 /* remove conflicting styling from Sphinx themes */
-div.nbinput.container,
-div.nbinput.container div.prompt,
-div.nbinput.container div.input_area,
-div.nbinput.container div[class*=highlight],
-div.nbinput.container div[class*=highlight] pre,
-div.nboutput.container,
-div.nboutput.container div.prompt,
-div.nboutput.container div.output_area,
-div.nboutput.container div[class*=highlight],
-div.nboutput.container div[class*=highlight] pre {
-    background: none;
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
     border: none;
-    padding: 0 0;
+    padding: 0;
     margin: 0;
     box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
 }
 
 /* avoid gaps between output lines */
@@ -284,7 +298,7 @@ div.nboutput.container div.output_area {
 div.nbinput.container div.input_area {
     border: 1px solid #e0e0e0;
     border-radius: 2px;
-    background: #f5f5f5;
+    /*background: #f5f5f5;*/
 }
 
 /* override MathJax center alignment in output cells */
@@ -350,6 +364,7 @@ div.nboutput.container div.output_area.rendered_html,
 div.nboutput.container div.output_area > div.output_javascript,
 div.nboutput.container div.output_area:not(.rendered_html) > img{
     padding: 5px;
+    margin: 0;
 }
 
 /* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
@@ -570,14 +585,14 @@ div.rendered_html tbody tr:hover {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_LBFGS_tests_4_1.png" src="../_images/examples_LBFGS_tests_4_1.png" />
+<img alt="../_images/examples_LBFGS_mass_matrix_tests_4_1.png" src="../_images/examples_LBFGS_mass_matrix_tests_4_1.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_LBFGS_tests_4_2.png" src="../_images/examples_LBFGS_tests_4_2.png" />
+<img alt="../_images/examples_LBFGS_mass_matrix_tests_4_2.png" src="../_images/examples_LBFGS_mass_matrix_tests_4_2.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -603,7 +618,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_LBFGS_tests_5_1.png" src="../_images/examples_LBFGS_tests_5_1.png" />
+<img alt="../_images/examples_LBFGS_mass_matrix_tests_5_1.png" src="../_images/examples_LBFGS_mass_matrix_tests_5_1.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -651,7 +666,7 @@ Text(0.5, 1.0, &#39;det: 4.11e-19&#39;)
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_LBFGS_tests_7_1.png" src="../_images/examples_LBFGS_tests_7_1.png" />
+<img alt="../_images/examples_LBFGS_mass_matrix_tests_7_1.png" src="../_images/examples_LBFGS_mass_matrix_tests_7_1.png" />
 </div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -723,7 +738,7 @@ Text(0.5, 1.0, &#39;det: 4.11e-19&#39;)
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_LBFGS_tests_10_0.png" src="../_images/examples_LBFGS_tests_10_0.png" />
+<img alt="../_images/examples_LBFGS_mass_matrix_tests_10_0.png" src="../_images/examples_LBFGS_mass_matrix_tests_10_0.png" />
 </div>
 </div>
 <div class="nbinput nblast docutils container">

@@ -22,14 +22,16 @@ components work together.
    distributions/index
    massmatrices/index
    samplers/index
-   post/index
    optimizers/index
+   samples
+   visualization/index
 
 .. autosummary::
 
     hmc_tomography.Distributions
     hmc_tomography.MassMatrices
     hmc_tomography.Samplers
-    hmc_tomography.Post
     hmc_tomography.Optimizers
+    hmc_tomography.Samples
+    hmc_tomography.Visualization
 

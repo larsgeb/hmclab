@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Tutorial 0.1 - Getting started &mdash; HMC Tom 0.2.2-alpha-5-4-gf09787e documentation</title>
+  <title>Tutorial 0.1 - Getting started &mdash; HMC Tom 0.2.2-alpha-5-21-gb74f3b8 documentation</title>
   
 
   
@@ -40,7 +40,7 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Tutorial 0.2 - Tuning Hamiltonian Monte Carlo" href="0.2 - Tuning Hamiltonian Monte Carlo.html" />
+    <link rel="next" title="Tutorial 0.2 - Tuning Hamiltonian Monte Carlo" href="0.2%20-%20Tuning%20Hamiltonian%20Monte%20Carlo.html" />
     <link rel="prev" title="Examples and tutorials" href="../examples.html" /> 
 </head>
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                0.2.2-alpha-5-4-gf09787e
+                0.2.2-alpha-5-21-gb74f3b8
               </div>
             
           
@@ -107,11 +107,11 @@
 <li class="toctree-l3"><a class="reference internal" href="#Using-Bayes'-rule">Using Bayes’ rule</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="0.2 - Tuning Hamiltonian Monte Carlo.html">Tutorial 0.2 - Tuning Hamiltonian Monte Carlo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="1 - Gaussian inverse problems - dense forward operator.html">Tutorial 1 - Gaussian inverse problems - dense forward operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2 - Gaussian inverse problems - sparse forward operator.html">Tutorial 2 - Gaussian inverse problems - sparse forward operator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3 - Separate priors per dimension.html">Tutorial 3 - Separate priors per dimension</a></li>
-<li class="toctree-l2"><a class="reference internal" href="4 - Creating your own inverse problem.html">Tutorial 4 - Creating your own inverse problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0.2%20-%20Tuning%20Hamiltonian%20Monte%20Carlo.html">Tutorial 0.2 - Tuning Hamiltonian Monte Carlo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1%20-%20Gaussian%20inverse%20problems%20-%20dense%20forward%20operator.html">Tutorial 1 - Gaussian inverse problems - dense forward operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2%20-%20Gaussian%20inverse%20problems%20-%20sparse%20forward%20operator.html">Tutorial 2 - Gaussian inverse problems - sparse forward operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3%20-%20Separate%20priors%20per%20dimension.html">Tutorial 3 - Separate priors per dimension</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4%20-%20Creating%20your%20own%20inverse%20problem.html">Tutorial 4 - Creating your own inverse problem</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../api/index.html">API reference</a></li>
@@ -189,21 +189,35 @@
 /* CSS for nbsphinx extension */
 
 /* remove conflicting styling from Sphinx themes */
-div.nbinput.container,
-div.nbinput.container div.prompt,
-div.nbinput.container div.input_area,
-div.nbinput.container div[class*=highlight],
-div.nbinput.container div[class*=highlight] pre,
-div.nboutput.container,
-div.nboutput.container div.prompt,
-div.nboutput.container div.output_area,
-div.nboutput.container div[class*=highlight],
-div.nboutput.container div[class*=highlight] pre {
-    background: none;
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
     border: none;
-    padding: 0 0;
+    padding: 0;
     margin: 0;
     box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
 }
 
 /* avoid gaps between output lines */
@@ -304,7 +318,7 @@ div.nboutput.container div.output_area {
 div.nbinput.container div.input_area {
     border: 1px solid #e0e0e0;
     border-radius: 2px;
-    background: #f5f5f5;
+    /*background: #f5f5f5;*/
 }
 
 /* override MathJax center alignment in output cells */
@@ -370,6 +384,7 @@ div.nboutput.container div.output_area.rendered_html,
 div.nboutput.container div.output_area > div.output_javascript,
 div.nboutput.container div.output_area:not(.rendered_html) > img{
     padding: 5px;
+    margin: 0;
 }
 
 /* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
@@ -1032,7 +1047,7 @@ Tot. acc rate: 0.52. Last 100 acc rate: 0.57. Progress: 100%|██████�
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="0.2 - Tuning Hamiltonian Monte Carlo.html" class="btn btn-neutral float-right" title="Tutorial 0.2 - Tuning Hamiltonian Monte Carlo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="0.2%20-%20Tuning%20Hamiltonian%20Monte%20Carlo.html" class="btn btn-neutral float-right" title="Tutorial 0.2 - Tuning Hamiltonian Monte Carlo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="../examples.html" class="btn btn-neutral float-left" title="Examples and tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

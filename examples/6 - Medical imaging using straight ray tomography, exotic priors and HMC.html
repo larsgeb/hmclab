@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Tutorial 6 - Medical imaging using straight ray tomography, exotic priors and HMC &mdash; HMC Tom 0.2.2-alpha-5-4-gf09787e documentation</title>
+  <title>Tutorial 6 - Medical imaging using straight ray tomography, exotic priors and HMC &mdash; HMC Tom 0.2.2-alpha-5-21-gb74f3b8 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                0.2.2-alpha-5-4-gf09787e
+                0.2.2-alpha-5-21-gb74f3b8
               </div>
             
           
@@ -169,21 +169,35 @@
 /* CSS for nbsphinx extension */
 
 /* remove conflicting styling from Sphinx themes */
-div.nbinput.container,
-div.nbinput.container div.prompt,
-div.nbinput.container div.input_area,
-div.nbinput.container div[class*=highlight],
-div.nbinput.container div[class*=highlight] pre,
-div.nboutput.container,
-div.nboutput.container div.prompt,
-div.nboutput.container div.output_area,
-div.nboutput.container div[class*=highlight],
-div.nboutput.container div[class*=highlight] pre {
-    background: none;
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
     border: none;
-    padding: 0 0;
+    padding: 0;
     margin: 0;
     box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
 }
 
 /* avoid gaps between output lines */
@@ -284,7 +298,7 @@ div.nboutput.container div.output_area {
 div.nbinput.container div.input_area {
     border: 1px solid #e0e0e0;
     border-radius: 2px;
-    background: #f5f5f5;
+    /*background: #f5f5f5;*/
 }
 
 /* override MathJax center alignment in output cells */
@@ -350,6 +364,7 @@ div.nboutput.container div.output_area.rendered_html,
 div.nboutput.container div.output_area > div.output_javascript,
 div.nboutput.container div.output_area:not(.rendered_html) > img{
     padding: 5px;
+    margin: 0;
 }
 
 /* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
@@ -420,7 +435,7 @@ div.rendered_html tbody tr:hover {
 }
 </style>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -432,6 +447,25 @@ div.rendered_html tbody tr:hover {
 <span class="kn">from</span> <span class="nn">mpl_toolkits.axes_grid1</span> <span class="kn">import</span> <span class="n">make_axes_locatable</span>
 </pre></div>
 </div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">prior_variances</span> <span class="o">=</span> <span class="mf">1e-5</span>
+<span class="n">prior_variances</span><span class="o">**</span><span class="mf">0.5</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+0.0031622776601683794
+</pre></div></div>
 </div>
 <div class="section" id="Tutorial-6---Medical-imaging-using-straight-ray-tomography,-exotic-priors-and-HMC">
 <h1>Tutorial 6 - Medical imaging using straight ray tomography, exotic priors and HMC<a class="headerlink" href="#Tutorial-6---Medical-imaging-using-straight-ray-tomography,-exotic-priors-and-HMC" title="Permalink to this headline">¶</a></h1>
@@ -491,42 +525,23 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Forward model:
+<span class="ansi-red-fg">--------------------------------------------------------------------</span>
+<span class="ansi-red-fg">FileNotFoundError</span>                  Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-2-81d54159eed8&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span> dpoints<span class="ansi-blue-fg">,</span> dimensions <span class="ansi-blue-fg">=</span> G<span class="ansi-blue-fg">.</span>shape
+<span class="ansi-green-intense-fg ansi-bold">      4</span>
+<span class="ansi-green-fg">----&gt; 5</span><span class="ansi-red-fg"> </span>d_obs <span class="ansi-blue-fg">=</span> numpy<span class="ansi-blue-fg">.</span>load<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">&#34;medical_imaging_files/TravelTimeShifts.npy&#34;</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">.</span>astype<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">&#34;float32&#34;</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      6</span> d_obs<span class="ansi-blue-fg">.</span>shape <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">(</span>d_obs<span class="ansi-blue-fg">.</span>size<span class="ansi-blue-fg">,</span> <span class="ansi-cyan-fg">1</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      7</span>
 
- [[0. 0. 0. ... 0. 0. 0.]
- [0. 0. 0. ... 0. 0. 0.]
- [0. 0. 0. ... 0. 0. 0.]
- ...
- [0. 0. 0. ... 0. 0. 0.]
- [0. 0. 0. ... 0. 0. 0.]
- [0. 0. 0. ... 0. 0. 0.]]
+<span class="ansi-green-fg">~/.local/lib/python3.7/site-packages/numpy/lib/npyio.py</span> in <span class="ansi-cyan-fg">load</span><span class="ansi-blue-fg">(file, mmap_mode, allow_pickle, fix_imports, encoding)</span>
+<span class="ansi-green-intense-fg ansi-bold">    426</span>         own_fid <span class="ansi-blue-fg">=</span> <span class="ansi-green-fg">False</span>
+<span class="ansi-green-intense-fg ansi-bold">    427</span>     <span class="ansi-green-fg">else</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-fg">--&gt; 428</span><span class="ansi-red-fg">         </span>fid <span class="ansi-blue-fg">=</span> open<span class="ansi-blue-fg">(</span>os_fspath<span class="ansi-blue-fg">(</span>file<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#34;rb&#34;</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">    429</span>         own_fid <span class="ansi-blue-fg">=</span> <span class="ansi-green-fg">True</span>
+<span class="ansi-green-intense-fg ansi-bold">    430</span>
 
-type: &lt;class &#39;scipy.sparse.csr.csr_matrix&#39;&gt;
-
-dtype: float32
-
-shape: (64495, 50625)
-
-
-
-
-Data:
-
- [[-0.]
- [-0.]
- [-0.]
- ...
- [-0.]
- [-0.]
- [-0.]]
-
-type: &lt;class &#39;numpy.ndarray&#39;&gt;
-
-dtype: float32
-
-shape: (64495, 1)
-
-
+<span class="ansi-red-fg">FileNotFoundError</span>: [Errno 2] No such file or directory: &#39;medical_imaging_files/TravelTimeShifts.npy&#39;
 </pre></div></div>
 </div>
 <p>Next we inspect the data, to get a feeling of the size of datums.</p>
@@ -546,7 +561,7 @@ shape: (64495, 1)
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_8_0.png" src="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_8_0.png" />
+<img alt="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_9_0.png" src="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_9_0.png" />
 </div>
 </div>
 <p>We assume the observed data is controlled by the true medium, and observational uncertainties in the following way:</p>
@@ -662,7 +677,7 @@ shape: (64495, 1)
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_20_0.png" src="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_20_0.png" />
+<img alt="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_21_0.png" src="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_21_0.png" />
 </div>
 </div>
 <p>Looking pretty slick already! On the right, we have the misfit curve as we are descending.</p>
@@ -744,7 +759,7 @@ shape: (64495, 1)
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_30_0.png" src="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_30_0.png" />
+<img alt="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_31_0.png" src="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_31_0.png" />
 </div>
 </div>
 <p>Looking better already, but there still seems to be a lot of noise and variability in the recovery. Maybe we can inject our expectation that the target is smooth in addition to the expectation the the target is sparse?</p>
@@ -905,7 +920,7 @@ shape: (64495, 1)
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_44_0.png" src="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_44_0.png" />
+<img alt="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_45_0.png" src="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_45_0.png" />
 </div>
 </div>
 <p>This looks like a pretty nice posterior. Let’s sample it!</p>
@@ -1006,7 +1021,7 @@ shape: (64495, 1)
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_50_0.png" src="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_50_0.png" />
+<img alt="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_51_0.png" src="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_51_0.png" />
 </div>
 </div>
 <p>Looking good! Let’s recycle the burn-in covariance to precondition HMC, i.e. we integrate the observed variability to accelerate sampling.</p>
@@ -1102,7 +1117,7 @@ shape: (64495, 1)
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_53_0.png" src="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_53_0.png" />
+<img alt="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_54_0.png" src="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_54_0.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -1129,7 +1144,7 @@ shape: (64495, 1)
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_54_1.png" src="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_54_1.png" />
+<img alt="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_55_1.png" src="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_55_1.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -1224,7 +1239,7 @@ It seems that the samples file (bin_samples/third_phase_stronger_laplace.h5) alr
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_56_0.png" src="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_56_0.png" />
+<img alt="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_57_0.png" src="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_57_0.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -1245,7 +1260,7 @@ It seems that the samples file (bin_samples/third_phase_stronger_laplace.h5) alr
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_57_0.png" src="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_57_0.png" />
+<img alt="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_58_0.png" src="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_58_0.png" />
 </div>
 </div>
 <p>When we investigate correlations between parameters, we can interpret these as resolution or point spread functions of the relevant parameters. We first calculate all the correlations in the posterior (which can take a while):</p>
@@ -1311,7 +1326,7 @@ It seems that the samples file (bin_samples/third_phase_stronger_laplace.h5) alr
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_61_1.png" src="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_61_1.png" />
+<img alt="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_62_1.png" src="../_images/examples_6_-_Medical_imaging_using_straight_ray_tomography,_exotic_priors_and_HMC_62_1.png" />
 </div>
 </div>
 </div>

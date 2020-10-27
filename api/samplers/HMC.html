@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>HMC - vanilla Hamiltonian Monte Carlo &mdash; HMC Tom 0.2.2-alpha-5-4-gf09787e documentation</title>
+  <title>HMC - vanilla Hamiltonian Monte Carlo &mdash; HMC Tom 0.2.2-alpha-5-21-gb74f3b8 documentation</title>
   
 
   
@@ -40,7 +40,7 @@
     
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Post - visualization and processing" href="../post/index.html" />
+    <link rel="next" title="Optimizers" href="../optimizers/index.html" />
     <link rel="prev" title="RWMH - Random Walk Metropolis Hastings" href="RWMH.html" /> 
 </head>
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                0.2.2-alpha-5-4-gf09787e
+                0.2.2-alpha-5-21-gb74f3b8
               </div>
             
           
@@ -107,8 +107,9 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">HMC - vanilla Hamiltonian Monte Carlo</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../post/index.html">Post - visualization and processing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../optimizers/index.html">Optimizers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../samples.html">Samples class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../visualization/index.html">Visualization</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../py-modindex.html">Module index</a></li>
@@ -278,9 +279,58 @@ current_momentum, i.e. the state the Markov chain started in.</p>
 <dd><p>A float representing the total energy associated with the proposed state.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt id="hmc_tomography.Samplers.HMC.name">
+<code class="sig-name descname">name</code><em class="property">: str</em><em class="property"> = 'Hamiltonian Monte Carlo'</em><a class="headerlink" href="#hmc_tomography.Samplers.HMC.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sampler name.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="hmc_tomography.Samplers.HMC.autotuning">
+<code class="sig-name descname">autotuning</code><em class="property">: bool</em><em class="property"> = False</em><a class="headerlink" href="#hmc_tomography.Samplers.HMC.autotuning" title="Permalink to this definition">¶</a></dt>
+<dd><p>A boolean indicating if the stepsize is tuned towards a specific acceptance rate
+using diminishing adaptive parameters.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="hmc_tomography.Samplers.HMC.learning_rate">
+<code class="sig-name descname">learning_rate</code><em class="property">: float</em><em class="property"> = 0.75</em><a class="headerlink" href="#hmc_tomography.Samplers.HMC.learning_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>A float tuning the rate of decrease at which a new step size is adapted,
+according to rate = (iteration_number) ** (-learning_rate). Needs to be larger than
+0.5 and equal to or smaller than 1.0.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="hmc_tomography.Samplers.HMC.target_acceptance_rate">
+<code class="sig-name descname">target_acceptance_rate</code><em class="property">: float</em><em class="property"> = 0.65</em><a class="headerlink" href="#hmc_tomography.Samplers.HMC.target_acceptance_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>A float representing the optimal acceptance rate used for autotuning, if
+autotuning is True.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="hmc_tomography.Samplers.HMC.acceptance_rates">
+<code class="sig-name descname">acceptance_rates</code><em class="property">: numpy.ndarray</em><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Samplers.HMC.acceptance_rates" title="Permalink to this definition">¶</a></dt>
+<dd><p>A NumPy ndarray containing all past acceptance rates. Collected if autotuning is
+True.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="hmc_tomography.Samplers.HMC.stepsizes">
+<code class="sig-name descname">stepsizes</code><em class="property">: numpy.ndarray</em><em class="property"> = None</em><a class="headerlink" href="#hmc_tomography.Samplers.HMC.stepsizes" title="Permalink to this definition">¶</a></dt>
+<dd><p>A NumPy ndarray containing all past stepsizes for the HMC algorithm. Collected if
+autotuning is True.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="hmc_tomography.Samplers.HMC.minimal_stepsize">
+<code class="sig-name descname">minimal_stepsize</code><em class="property"> = 1e-18</em><a class="headerlink" href="#hmc_tomography.Samplers.HMC.minimal_stepsize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Minimal timestep which is chosen if timestep becomes zero or negative during
+autotuning.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt id="hmc_tomography.Samplers.HMC.sample">
-<em class="property">classmethod </em><code class="sig-name descname">sample</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">samples_hdf5_filename</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">distribution</span><span class="p">:</span> <span class="n">hmc_tomography.Distributions.base._AbstractDistribution</span></em>, <em class="sig-param"><span class="n">time_step</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">amount_of_steps</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">10</span></em>, <em class="sig-param"><span class="n">mass_matrix</span><span class="p">:</span> <span class="n"><a class="reference internal" href="../massmatrices/_AbstractMassMatrix.html#hmc_tomography.MassMatrices._AbstractMassMatrix" title="hmc_tomography.MassMatrices._AbstractMassMatrix">hmc_tomography.MassMatrices._AbstractMassMatrix</a></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">integrator</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'lf'</span></em>, <em class="sig-param"><span class="n">initial_model</span><span class="p">:</span> <span class="n">numpy.ndarray</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">proposals</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">100</span></em>, <em class="sig-param"><span class="n">online_thinning</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">1</span></em>, <em class="sig-param"><span class="n">ram_buffer_size</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">overwrite_existing_file</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">max_time</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Samplers.html#HMC.sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Samplers.HMC.sample" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">sample</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">samples_hdf5_filename</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">distribution</span><span class="p">:</span> <span class="n">hmc_tomography.Distributions.base._AbstractDistribution</span></em>, <em class="sig-param"><span class="n">time_step</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">amount_of_steps</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">10</span></em>, <em class="sig-param"><span class="n">mass_matrix</span><span class="p">:</span> <span class="n"><a class="reference internal" href="../massmatrices/_AbstractMassMatrix.html#hmc_tomography.MassMatrices._AbstractMassMatrix" title="hmc_tomography.MassMatrices._AbstractMassMatrix">hmc_tomography.MassMatrices._AbstractMassMatrix</a></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">integrator</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'lf'</span></em>, <em class="sig-param"><span class="n">initial_model</span><span class="p">:</span> <span class="n">numpy.ndarray</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">proposals</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">100</span></em>, <em class="sig-param"><span class="n">diagnostic_mode</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">online_thinning</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">1</span></em>, <em class="sig-param"><span class="n">ram_buffer_size</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">overwrite_existing_file</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">max_time</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">autotuning</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">target_acceptance_rate</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.65</span></em>, <em class="sig-param"><span class="n">learning_rate</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.75</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Samplers.html#HMC.sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Samplers.HMC.sample" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simply a forward to the instance method of the sampler; check out
 _sample().</p>
 </dd></dl>
@@ -289,7 +339,7 @@ _sample().</p>
 
 <dl class="py function">
 <dt id="hmc_tomography.Samplers.HMC._sample">
-<code class="sig-prename descclassname">HMC.</code><code class="sig-name descname">_sample</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">samples_hdf5_filename</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">distribution</span><span class="p">:</span> <span class="n">hmc_tomography.Distributions.base._AbstractDistribution</span></em>, <em class="sig-param"><span class="n">time_step</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">amount_of_steps</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">10</span></em>, <em class="sig-param"><span class="n">mass_matrix</span><span class="p">:</span> <span class="n"><a class="reference internal" href="../massmatrices/_AbstractMassMatrix.html#hmc_tomography.MassMatrices._AbstractMassMatrix" title="hmc_tomography.MassMatrices._AbstractMassMatrix">hmc_tomography.MassMatrices._AbstractMassMatrix</a></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">integrator</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'lf'</span></em>, <em class="sig-param"><span class="n">initial_model</span><span class="p">:</span> <span class="n">numpy.ndarray</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">proposals</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">100</span></em>, <em class="sig-param"><span class="n">online_thinning</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">1</span></em>, <em class="sig-param"><span class="n">ram_buffer_size</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">overwrite_existing_file</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">max_time</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Samplers.html#HMC._sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Samplers.HMC._sample" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hmc_tomography.Samplers.HMC.</code><code class="sig-name descname">_sample</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">samples_hdf5_filename</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">distribution</span><span class="p">:</span> <span class="n">hmc_tomography.Distributions.base._AbstractDistribution</span></em>, <em class="sig-param"><span class="n">time_step</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">amount_of_steps</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">10</span></em>, <em class="sig-param"><span class="n">mass_matrix</span><span class="p">:</span> <span class="n"><a class="reference internal" href="../massmatrices/_AbstractMassMatrix.html#hmc_tomography.MassMatrices._AbstractMassMatrix" title="hmc_tomography.MassMatrices._AbstractMassMatrix">hmc_tomography.MassMatrices._AbstractMassMatrix</a></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">integrator</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'lf'</span></em>, <em class="sig-param"><span class="n">initial_model</span><span class="p">:</span> <span class="n">numpy.ndarray</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">proposals</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">100</span></em>, <em class="sig-param"><span class="n">diagnostic_mode</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">online_thinning</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">1</span></em>, <em class="sig-param"><span class="n">ram_buffer_size</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">overwrite_existing_file</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">max_time</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">autotuning</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">target_acceptance_rate</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.65</span></em>, <em class="sig-param"><span class="n">learning_rate</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.75</span></em><span class="sig-paren">)</span><a class="headerlink" href="#hmc_tomography.Samplers.HMC._sample" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sampling using the Metropolis-Hastings algorithm.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -342,7 +392,7 @@ unlimited time.</p></li>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../post/index.html" class="btn btn-neutral float-right" title="Post - visualization and processing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../optimizers/index.html" class="btn btn-neutral float-right" title="Optimizers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="RWMH.html" class="btn btn-neutral float-left" title="RWMH - Random Walk Metropolis Hastings" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

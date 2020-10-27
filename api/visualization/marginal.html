@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Samples class &mdash; HMC Tom 0.2.2-alpha-5-4-gf09787e documentation</title>
+  <title>marginal &mdash; HMC Tom 0.2.2-alpha-5-21-gb74f3b8 documentation</title>
   
 
   
@@ -40,8 +40,8 @@
     
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Processing" href="processing/index.html" />
-    <link rel="prev" title="Post - visualization and processing" href="index.html" /> 
+    <link rel="next" title="marginal_grid" href="marginal_grid.html" />
+    <link rel="prev" title="Visualization" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                0.2.2-alpha-5-4-gf09787e
+                0.2.2-alpha-5-21-gb74f3b8
               </div>
             
           
@@ -102,13 +102,14 @@
 <li class="toctree-l2"><a class="reference internal" href="../distributions/index.html">Distributions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../massmatrices/index.html">MassMatrices</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../samplers/index.html">Samplers</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="index.html">Post - visualization and processing</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Samples class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="processing/index.html">Processing</a></li>
-<li class="toctree-l3"><a class="reference internal" href="visualization/index.html">Visualization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../optimizers/index.html">Optimizers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../samples.html">Samples class</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Visualization</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">marginal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="marginal_grid.html">marginal_grid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualize_2_dimensions.html">visualize_2_dimensions</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../optimizers/index.html">Optimizers</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../py-modindex.html">Module index</a></li>
@@ -161,15 +162,15 @@
         
           <li><a href="../index.html">API reference</a> &raquo;</li>
         
-          <li><a href="index.html">Post - visualization and processing</a> &raquo;</li>
+          <li><a href="index.html">Visualization</a> &raquo;</li>
         
-      <li>Samples class</li>
+      <li>marginal</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../../_sources/api/post/samples.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../_sources/api/visualization/marginal.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -206,12 +207,12 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="samples-class">
-<h1>Samples class<a class="headerlink" href="#samples-class" title="Permalink to this headline">¶</a></h1>
-<dl class="py class">
-<dt id="hmc_tomography.Post.Samples">
-<em class="property">class </em><code class="sig-prename descclassname">hmc_tomography.Post.</code><code class="sig-name descname">Samples</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">burn_in</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Post/Samples.html#Samples"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Post.Samples" title="Permalink to this definition">¶</a></dt>
-<dd><p>A class to handle generated samples files more easily.</p>
+<div class="section" id="marginal">
+<h1>marginal<a class="headerlink" href="#marginal" title="Permalink to this headline">¶</a></h1>
+<dl class="py method">
+<dt id="hmc_tomography.Visualization.marginal">
+<code class="sig-prename descclassname">Visualization.</code><code class="sig-name descname">marginal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dimension</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">bins</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">25</span></em>, <em class="sig-param"><span class="n">show</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">color</span><span class="o">=</span><span class="default_value">'black'</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">8, 8</span></em><span class="sig-paren">)</span><a class="headerlink" href="#hmc_tomography.Visualization.marginal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to visualize 1D marginals.</p>
 </dd></dl>
 
 </div>
@@ -224,10 +225,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="processing/index.html" class="btn btn-neutral float-right" title="Processing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="marginal_grid.html" class="btn btn-neutral float-right" title="marginal_grid" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral float-left" title="Post - visualization and processing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Visualization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

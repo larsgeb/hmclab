@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Post - visualization and processing &mdash; HMC Tom 0.2.2-alpha-5-4-gf09787e documentation</title>
+  <title>visualize_2_dimensions &mdash; HMC Tom 0.2.2-alpha-5-21-gb74f3b8 documentation</title>
   
 
   
@@ -40,8 +40,8 @@
     
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Samples class" href="samples.html" />
-    <link rel="prev" title="HMC - vanilla Hamiltonian Monte Carlo" href="../samplers/HMC.html" /> 
+    <link rel="next" title="Module index" href="../../py-modindex.html" />
+    <link rel="prev" title="marginal_grid" href="marginal_grid.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                0.2.2-alpha-5-4-gf09787e
+                0.2.2-alpha-5-21-gb74f3b8
               </div>
             
           
@@ -102,13 +102,14 @@
 <li class="toctree-l2"><a class="reference internal" href="../distributions/index.html">Distributions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../massmatrices/index.html">MassMatrices</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../samplers/index.html">Samplers</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Post - visualization and processing</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="samples.html">Samples class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="processing/index.html">Processing</a></li>
-<li class="toctree-l3"><a class="reference internal" href="visualization/index.html">Visualization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../optimizers/index.html">Optimizers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../samples.html">Samples class</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Visualization</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="marginal.html">marginal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="marginal_grid.html">marginal_grid</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">visualize_2_dimensions</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../optimizers/index.html">Optimizers</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../py-modindex.html">Module index</a></li>
@@ -161,13 +162,15 @@
         
           <li><a href="../index.html">API reference</a> &raquo;</li>
         
-      <li>Post - visualization and processing</li>
+          <li><a href="index.html">Visualization</a> &raquo;</li>
+        
+      <li>visualize_2_dimensions</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../../_sources/api/post/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../_sources/api/visualization/visualize_2_dimensions.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -204,31 +207,26 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="module-hmc_tomography.Post">
-<span id="post-visualization-and-processing"></span><h1>Post - visualization and processing<a class="headerlink" href="#module-hmc_tomography.Post" title="Permalink to this headline">¶</a></h1>
-<p>Markov chain Monte Carlo post sampling module.</p>
-<p>The classes in this module describe various visualization and post-processing routines
-relavant to MCMC sampling. It is split in two additional submodules for respectively
-Processing and Visualization.</p>
-<div class="toctree-wrapper compound">
-</div>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="samples.html#hmc_tomography.Post.Samples" title="hmc_tomography.Post.Samples"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmc_tomography.Post.Samples</span></code></a>(filename, burn_in)</p></td>
-<td><p>A class to handle generated samples files more easily.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="processing/index.html#module-hmc_tomography.Post.Processing" title="hmc_tomography.Post.Processing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmc_tomography.Post.Processing</span></code></a></p></td>
-<td><p>A module with assorted samples processing functions.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="visualization/index.html#module-hmc_tomography.Post.Visualization" title="hmc_tomography.Post.Visualization"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hmc_tomography.Post.Visualization</span></code></a></p></td>
-<td><p>A module with assorted visualization functions.</p></td>
-</tr>
-</tbody>
-</table>
+<div class="section" id="visualize-2-dimensions">
+<h1>visualize_2_dimensions<a class="headerlink" href="#visualize-2-dimensions" title="Permalink to this headline">¶</a></h1>
+<dl class="py method">
+<dt id="hmc_tomography.Visualization.visualize_2_dimensions">
+<code class="sig-prename descclassname">Visualization.</code><code class="sig-name descname">visualize_2_dimensions</code><span class="sig-paren">(</span><em class="sig-param">dim1: int = 0</em>, <em class="sig-param">dim2: int = 1</em>, <em class="sig-param">bins: int = 25</em>, <em class="sig-param">show: bool = True</em>, <em class="sig-param">colormap_2d=&lt;matplotlib.colors.LinearSegmentedColormap object&gt;</em>, <em class="sig-param">color_1d='black'</em><span class="sig-paren">)</span><a class="headerlink" href="#hmc_tomography.Visualization.visualize_2_dimensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to jointly investigate 2 dimensions of a sampled posterior.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>samples</strong> (<a class="reference internal" href="../samples.html#hmc_tomography.Samples" title="hmc_tomography.Samples"><em>hmc_tomography.Samples</em></a>) – Samples object.</p></li>
+<li><p><strong>dim1</strong> (<em>int</em>) – First dimension to investigate.</p></li>
+<li><p><strong>dim2</strong> (<em>int</em>) – Second dimension to investigate.</p></li>
+<li><p><strong>bins</strong> (<em>int</em>) – Bins used for 1d and 2d histograms.</p></li>
+<li><p><strong>show</strong> (<em>bool</em>) – Whether or not to render the output. If false, the plot is only show after
+using <code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot.show()</span></code>. If true, plot is immediately shown.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 
 
@@ -239,10 +237,10 @@ Processing and Visualization.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="samples.html" class="btn btn-neutral float-right" title="Samples class" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../../py-modindex.html" class="btn btn-neutral float-right" title="Module index" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../samplers/HMC.html" class="btn btn-neutral float-left" title="HMC - vanilla Hamiltonian Monte Carlo" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="marginal_grid.html" class="btn btn-neutral float-left" title="marginal_grid" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

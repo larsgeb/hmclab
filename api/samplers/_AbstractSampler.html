@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>_AbstractSampler &mdash; HMC Tom 0.2.2-alpha-5-4-gf09787e documentation</title>
+  <title>_AbstractSampler &mdash; HMC Tom 0.2.2-alpha-5-21-gb74f3b8 documentation</title>
   
 
   
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                0.2.2-alpha-5-4-gf09787e
+                0.2.2-alpha-5-21-gb74f3b8
               </div>
             
           
@@ -107,8 +107,9 @@
 <li class="toctree-l3"><a class="reference internal" href="HMC.html">HMC - vanilla Hamiltonian Monte Carlo</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../post/index.html">Post - visualization and processing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../optimizers/index.html">Optimizers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../samples.html">Samples class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../visualization/index.html">Visualization</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../py-modindex.html">Module index</a></li>
@@ -304,9 +305,9 @@ Markov chain.</p>
 
 <dl class="py attribute">
 <dt id="hmc_tomography.Samplers._AbstractSampler.progressbar_refresh_rate">
-<code class="sig-name descname">progressbar_refresh_rate</code><em class="property">: int</em><em class="property"> = 1000</em><a class="headerlink" href="#hmc_tomography.Samplers._AbstractSampler.progressbar_refresh_rate" title="Permalink to this definition">¶</a></dt>
-<dd><p>An integer representing how many samples lie between an update of the progress
-bar statistics (acceptance rate etc.).</p>
+<code class="sig-name descname">progressbar_refresh_rate</code><em class="property">: float</em><em class="property"> = 0.25</em><a class="headerlink" href="#hmc_tomography.Samplers._AbstractSampler.progressbar_refresh_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>A float representing how long lies between an update of the progress bar
+statistics (acceptance rate etc.).</p>
 </dd></dl>
 
 <dl class="py attribute">

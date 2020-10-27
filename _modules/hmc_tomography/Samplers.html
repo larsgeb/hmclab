@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>hmc_tomography.Samplers &mdash; HMC Tom 0.2.2-alpha-5-4-gf09787e documentation</title>
+  <title>hmc_tomography.Samplers &mdash; HMC Tom 0.2.2-alpha-5-21-gb74f3b8 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                0.2.2-alpha-5-4-gf09787e
+                0.2.2-alpha-5-21-gb74f3b8
               </div>
             
           
@@ -195,6 +195,7 @@
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span> <span class="k">as</span> <span class="n">_ABC</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span> <span class="k">as</span> <span class="n">_abstractmethod</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span> <span class="k">as</span> <span class="n">_time</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span> <span class="k">as</span> <span class="n">_datetime</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span> <span class="k">as</span> <span class="n">_Union</span>
 
 <span class="kn">import</span> <span class="nn">h5py</span> <span class="k">as</span> <span class="nn">_h5py</span>
@@ -204,6 +205,11 @@
 <span class="kn">from</span> <span class="nn">hmc_tomography.Distributions</span> <span class="kn">import</span> <span class="n">_AbstractDistribution</span>
 <span class="kn">from</span> <span class="nn">hmc_tomography.MassMatrices</span> <span class="kn">import</span> <span class="n">Unit</span> <span class="k">as</span> <span class="n">_Unit</span>
 <span class="kn">from</span> <span class="nn">hmc_tomography.MassMatrices</span> <span class="kn">import</span> <span class="n">_AbstractMassMatrix</span>
+<span class="kn">from</span> <span class="nn">hmc_tomography.Helpers.Timers</span> <span class="kn">import</span> <span class="n">AccumulatingTimer</span> <span class="k">as</span> <span class="n">_AccumulatingTimer</span>
+
+<span class="n">dev_assertion_message</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;Something went wrong internally, please report this to the developers.&quot;</span>
+<span class="p">)</span>
 
 
 <div class="viewcode-block" id="_AbstractSampler"><a class="viewcode-back" href="../../api/samplers/_AbstractSampler.html#hmc_tomography.Samplers._AbstractSampler">[docs]</a><span class="k">class</span> <span class="nc">_AbstractSampler</span><span class="p">(</span><span class="n">_ABC</span><span class="p">):</span>
@@ -259,64 +265,96 @@
     <span class="n">amount_of_writes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="sd">&quot;&quot;&quot;An integer representing the amount of times the sampler has written to disk.&quot;&quot;&quot;</span>
 
-    <span class="n">progressbar_refresh_rate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span>
-    <span class="sd">&quot;&quot;&quot;An integer representing how many samples lie between an update of the progress</span>
-<span class="sd">    bar statistics (acceptance rate etc.).&quot;&quot;&quot;</span>
+    <span class="n">progressbar_refresh_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.25</span>
+    <span class="sd">&quot;&quot;&quot;A float representing how long lies between an update of the progress bar</span>
+<span class="sd">    statistics (acceptance rate etc.).&quot;&quot;&quot;</span>
 
     <span class="n">max_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="sd">&quot;&quot;&quot;A float representing the maximum time in seconds that sampling is allowed to take</span>
 <span class="sd">    before it is automatically terminated. The value None is used for unlimited time.&quot;&quot;&quot;</span>
+
+    <span class="n">diagnostic_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">functions_to_diagnose</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">sampler_specific_functions_to_diagnose</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample</span>
 
     <span class="k">def</span> <span class="nf">_init_sampler</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">samples_hdf5_filename</span><span class="p">,</span>
-        <span class="n">distribution</span><span class="p">,</span>
-        <span class="n">initial_model</span><span class="p">,</span>
-        <span class="n">proposals</span><span class="p">,</span>
-        <span class="n">online_thinning</span><span class="p">,</span>
+        <span class="n">samples_hdf5_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">distribution</span><span class="p">:</span> <span class="n">_AbstractDistribution</span><span class="p">,</span>
+        <span class="n">initial_model</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">proposals</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">online_thinning</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">ram_buffer_size</span><span class="p">,</span>
         <span class="n">overwrite_existing_file</span><span class="p">,</span>
         <span class="n">max_time</span><span class="p">,</span>
+        <span class="n">diagnostic_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A method that is called everytime any markov chain sampler object is</span>
+<span class="sd">        constructed.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            samples_hdf5_filename ([type]): [description]</span>
+<span class="sd">            distribution ([type]): [description]</span>
+<span class="sd">            initial_model ([type]): [description]</span>
+<span class="sd">            proposals ([type]): [description]</span>
+<span class="sd">            online_thinning ([type]): [description]</span>
+<span class="sd">            ram_buffer_size ([type]): [description]</span>
+<span class="sd">            overwrite_existing_file ([type]): [description]</span>
+<span class="sd">            max_time ([type]): [description]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Parse the distribution -------------------------------------------------------</span>
 
         <span class="c1"># Store the distribution</span>
-        <span class="k">assert</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">distribution</span><span class="p">),</span> <span class="n">_AbstractDistribution</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">distribution</span><span class="p">),</span> <span class="n">_AbstractDistribution</span><span class="p">),</span> <span class="p">(</span>
+            <span class="s2">&quot;The passed target distribution should be a derived class of &quot;</span>
+            <span class="s2">&quot;_AbstractDistribution.&quot;</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span> <span class="o">=</span> <span class="n">distribution</span>
 
         <span class="c1"># Extract dimensionality from the distribution</span>
-        <span class="k">assert</span> <span class="n">distribution</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">&gt;</span> <span class="mi">0</span>
-        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">distribution</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">distribution</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span> <span class="ow">and</span> <span class="n">distribution</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span>
+            <span class="s2">&quot;The passed target distribution should have an integer dimension larger &quot;</span>
+            <span class="s2">&quot;than zero.&quot;</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">distribution</span><span class="o">.</span><span class="n">dimensions</span>
 
         <span class="c1"># Set up proposals -------------------------------------------------------------</span>
 
         <span class="c1"># Assert that proposals is a positive integer</span>
-        <span class="k">assert</span> <span class="n">proposals</span> <span class="o">&gt;</span> <span class="mi">0</span>
-        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">proposals</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">proposals</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span> <span class="ow">and</span> <span class="n">proposals</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span>
+            <span class="s2">&quot;The amount of proposal requested (`proposals`) should be an integer &quot;</span>
+            <span class="s2">&quot;number larger than zero.&quot;</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">proposals</span> <span class="o">=</span> <span class="n">proposals</span>
 
         <span class="c1"># Assert that online_thinning is a positive integer</span>
-        <span class="k">assert</span> <span class="n">online_thinning</span> <span class="o">&gt;</span> <span class="mi">0</span>
-        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">online_thinning</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">online_thinning</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span> <span class="ow">and</span> <span class="n">online_thinning</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span>
+            <span class="s2">&quot;The amount of online thinning (`online_thinning`) should be an integer &quot;</span>
+            <span class="s2">&quot;number larger than zero.&quot;</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">online_thinning</span> <span class="o">=</span> <span class="n">online_thinning</span>
 
         <span class="c1"># Assert that we would write out the last sample, preventing wasteful</span>
         <span class="c1"># computations</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">proposals</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">online_thinning</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">proposals</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">online_thinning</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span>
+            <span class="s2">&quot;The amount of proposals (`proposals`) needs to be a multiple of the &quot;</span>
+            <span class="s2">&quot;online thinning (`online_thinning`) number, to prevent sample wastage.&quot;</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">proposals_after_thinning</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proposals</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">online_thinning</span><span class="p">)</span>
 
         <span class="c1"># Set up the sample RAM buffer -------------------------------------------------</span>
 
         <span class="k">if</span> <span class="n">ram_buffer_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Assert that ram_buffer_size is a positive integer</span>
-            <span class="k">assert</span> <span class="n">ram_buffer_size</span> <span class="o">&gt;</span> <span class="mi">0</span>
-            <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">ram_buffer_size</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span>
+            <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">ram_buffer_size</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span> <span class="ow">and</span> <span class="n">ram_buffer_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span>
+                <span class="s2">&quot;The ram buffer size (`ram_buffer_size`) needs to be an integer larger &quot;</span>
+                <span class="s2">&quot;than zero.&quot;</span>
+            <span class="p">)</span>
 
             <span class="c1"># Set the ram buffer size</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ram_buffer_size</span> <span class="o">=</span> <span class="n">ram_buffer_size</span>
@@ -341,12 +379,7 @@
             <span class="c1"># actual ram size.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ram_buffer_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">ram_buffer_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">proposals_after_thinning</span><span class="p">)</span>
 
-            <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ram_buffer_size</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span>
-
-        <span class="c1"># Check if writing to RAM occurs more often than updating the progress bar.</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ram_buffer_size</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">progressbar_refresh_rate</span><span class="p">:</span>
-            <span class="c1"># If so, update progress bar during ram writes</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">progressbar_refresh_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ram_buffer_size</span>
+            <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ram_buffer_size</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dev_assertion_message</span>
 
         <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ram_buffer_size</span><span class="p">)</span>
 
@@ -355,7 +388,9 @@
         <span class="c1"># Set up the samples file ------------------------------------------------------</span>
 
         <span class="c1"># Parse the filename</span>
-        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">samples_hdf5_filename</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="nb">type</span><span class="p">(</span><span class="n">samples_hdf5_filename</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span>
+        <span class="p">),</span> <span class="s2">&quot;The samples filename needs to be a string.&quot;</span>
         <span class="k">if</span> <span class="n">samples_hdf5_filename</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:]</span> <span class="o">!=</span> <span class="s2">&quot;.h5&quot;</span><span class="p">:</span>
             <span class="n">samples_hdf5_filename</span> <span class="o">+=</span> <span class="s2">&quot;.h5&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">samples_hdf5_filename</span> <span class="o">=</span> <span class="n">samples_hdf5_filename</span>
@@ -372,7 +407,11 @@
         <span class="k">if</span> <span class="n">initial_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">initial_model</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
-        <span class="k">assert</span> <span class="n">initial_model</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">initial_model</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;The initial model (`initial_model`) dimension is incompatible with the &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;target distribution. Supplied model shape: </span><span class="si">{</span><span class="n">initial_model</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Required shape: </span><span class="si">{</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">current_model</span> <span class="o">=</span> <span class="n">initial_model</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">_numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_x</span> <span class="o">=</span> <span class="n">distribution</span><span class="o">.</span><span class="n">misfit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_model</span><span class="p">)</span>
@@ -388,10 +427,30 @@
 
         <span class="k">if</span> <span class="n">max_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">max_time</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">max_time</span><span class="p">)</span>
-            <span class="k">assert</span> <span class="n">max_time</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="n">max_time</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
+            <span class="p">),</span> <span class="s2">&quot;The maximal runtime (`max_time`) should be a float larger than zero.&quot;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">max_time</span> <span class="o">=</span> <span class="n">max_time</span>
 
-        <span class="c1"># Do specific stuff ------------------------------------------------------------</span>
+        <span class="c1"># Prepare diagnostic mode if needed --------------------------------------------</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">diagnostic_mode</span> <span class="o">=</span> <span class="n">diagnostic_mode</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">diagnostic_mode</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_propose</span> <span class="o">=</span> <span class="n">_AccumulatingTimer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_propose</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_evaluate_acceptance</span> <span class="o">=</span> <span class="n">_AccumulatingTimer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_evaluate_acceptance</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sample_to_ram</span> <span class="o">=</span> <span class="n">_AccumulatingTimer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sample_to_ram</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_samples_to_disk</span> <span class="o">=</span> <span class="n">_AccumulatingTimer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_samples_to_disk</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_progressbar</span> <span class="o">=</span> <span class="n">_AccumulatingTimer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_update_progressbar</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">functions_to_diagnose</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_propose</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_evaluate_acceptance</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sample_to_ram</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_samples_to_disk</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_update_progressbar</span><span class="p">,</span>
+            <span class="p">]</span>
+
+        <span class="c1"># Do sampler specific operations -----------------------------------------------</span>
 
         <span class="c1"># Set up specifics for each algorithm</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_init_sampler_specific</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -402,15 +461,65 @@
         <span class="c1"># Create attributes before sampling, such that SWMR works</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">samples_hdf5_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;write_index&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">samples_hdf5_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;last_written_sample&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">samples_hdf5_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;proposals&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proposals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">samples_hdf5_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;acceptance_rate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">samples_hdf5_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;online_thinning&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">online_thinning</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">samples_hdf5_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;start_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">%d</span><span class="s2">-%b-%Y (%H:%M:%S.</span><span class="si">%f</span><span class="s2">)&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">samples_hdf5_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;sampler&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
 
     <span class="k">def</span> <span class="nf">_close_sampler</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">samples_hdf5_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;acceptance_rate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">accepted_proposals</span> <span class="o">/</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_proposal</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">samples_hdf5_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;end_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">%d</span><span class="s2">-%b-%Y (%H:%M:%S.</span><span class="si">%f</span><span class="s2">)&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">samples_hdf5_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;runtime&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">end_time</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">samples_hdf5_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;runtime_seconds&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">end_time</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">samples_hdf5_filehandle</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_close_sampler_specific</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">diagnostic_mode</span><span class="p">:</span>
+            <span class="c1"># This block shows the percentage of time spent in each part of the sampler.</span>
+            <span class="n">percentage_time_spent</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Detailed statistics:&quot;</span><span class="p">)</span>
+
+            <span class="n">total_time</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end_time</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total runtime: </span><span class="si">{</span><span class="n">total_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions_to_diagnose</span><span class="p">:</span>
+                <span class="n">percentage_time_spent</span><span class="p">[</span><span class="n">fn</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="mi">100</span> <span class="o">*</span> <span class="n">fn</span><span class="o">.</span><span class="n">time_spent</span> <span class="o">/</span> <span class="n">total_time</span>
+                <span class="p">)</span>
+            <span class="nb">print</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;General sampler components:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{:&lt;30}</span><span class="s2"> </span><span class="si">{:&lt;30}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;Function&quot;</span><span class="p">,</span> <span class="s2">&quot;percentage of time&quot;</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">percentage</span> <span class="ow">in</span> <span class="n">percentage_time_spent</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{:&lt;30}</span><span class="s2"> </span><span class="si">{:&lt;30.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">percentage</span><span class="p">))</span>
+
+            <span class="n">percentage_time_spent</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler_specific_functions_to_diagnose</span><span class="p">:</span>
+                <span class="n">percentage_time_spent</span><span class="p">[</span><span class="n">fn</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="mi">100</span> <span class="o">*</span> <span class="n">fn</span><span class="o">.</span><span class="n">time_spent</span> <span class="o">/</span> <span class="n">total_time</span>
+                <span class="p">)</span>
+            <span class="nb">print</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> specific components:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{:&lt;30}</span><span class="s2"> </span><span class="si">{:&lt;30}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;Function&quot;</span><span class="p">,</span> <span class="s2">&quot;percentage of time&quot;</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">percentage</span> <span class="ow">in</span> <span class="n">percentage_time_spent</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{:&lt;30}</span><span class="s2"> </span><span class="si">{:&lt;30.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">percentage</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">_sample_loop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;The actual sampling code.&quot;&quot;&quot;</span>
-
-        <span class="c1"># As soon as all attributes and datasets are created, enable SWMR mode.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">samples_hdf5_filehandle</span><span class="o">.</span><span class="n">swmr_mode</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="c1"># Create progressbar -----------------------------------------------------------</span>
         <span class="k">try</span><span class="p">:</span>
@@ -425,7 +534,22 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">proposals</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Sampling. Acceptance rate:&quot;</span><span class="p">,</span> <span class="n">leave</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="p">)</span>
 
+        <span class="c1"># Start time for updating progressbar</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_update_time</span> <span class="o">=</span> <span class="n">_time</span><span class="p">()</span>
+
+        <span class="c1"># Capture NumPy exceptions -----------------------------------------------------</span>
+        <span class="k">class</span> <span class="nc">Log</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+            <span class="n">messages</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">Log</span><span class="p">()</span>
+        <span class="n">_numpy</span><span class="o">.</span><span class="n">seterrcall</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+        <span class="n">_numpy</span><span class="o">.</span><span class="n">seterr</span><span class="p">(</span><span class="nb">all</span><span class="o">=</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>  <span class="c1"># seterr to known value</span>
+
         <span class="c1"># Run the Markov process -------------------------------------------------------</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span> <span class="o">=</span> <span class="n">_datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># If the sampler is given a maximum time, start timer now</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -473,6 +597,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">proposals_iterator</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="k">finally</span><span class="p">:</span>  <span class="c1"># Write out the last samples not on a full buffer --------------------</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_samples_to_disk</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">end_time</span> <span class="o">=</span> <span class="n">_datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_close_sampler</span><span class="p">()</span>
 
@@ -504,12 +629,18 @@
             <span class="c1"># Create file, fail if exists and flag == w-</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">samples_hdf5_filehandle</span> <span class="o">=</span> <span class="n">_h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">flag</span><span class="p">,</span> <span class="n">libver</span><span class="o">=</span><span class="s2">&quot;latest&quot;</span><span class="p">)</span>
 
-        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="c1"># Catch error on file creations, likely that the file already exists</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="ow">not</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="o">==</span> <span class="sa">f</span><span class="s2">&quot;Unable to create file (unable to open file: name = &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;errno = 17, error message = &#39;File exists&#39;, flags = 15, o_flags = c2)&quot;</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="n">e</span>
 
             <span class="c1"># If it exists, prompt the user with a warning</span>
             <span class="n">_warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">It seems that the samples file (</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">) already exists, or the&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">It seems that the samples file (</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">) already exists, or the &quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;file could otherwise not be created.&quot;</span><span class="p">,</span>
                 <span class="ne">Warning</span><span class="p">,</span>
                 <span class="n">stacklevel</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
@@ -583,7 +714,13 @@
 
     <span class="k">def</span> <span class="nf">_update_progressbar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_proposal</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">progressbar_refresh_rate</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_proposal</span> <span class="o">==</span> <span class="mi">0</span>
+            <span class="ow">or</span> <span class="p">(</span><span class="n">_time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_update_time</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">progressbar_refresh_rate</span>
+            <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_proposal</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">proposals</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">last_update_time</span> <span class="o">=</span> <span class="n">_time</span><span class="p">()</span>
+
             <span class="c1"># Calculate acceptance rate</span>
             <span class="n">acceptance_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">accepted_proposals</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_proposal</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
@@ -597,7 +734,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">current_proposal</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">online_thinning</span>
         <span class="p">)</span>
         <span class="c1"># Assert that it&#39;s an integer (if we only write on end of buffer)</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_proposal</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">online_thinning</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_proposal</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">online_thinning</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">dev_assertion_message</span>
 
         <span class="c1"># Calculate index for the RAM array</span>
         <span class="n">index_in_ram</span> <span class="o">=</span> <span class="n">current_proposal_after_thinning</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">ram_buffer_size</span>
@@ -636,9 +773,11 @@
             <span class="c1"># Some sanity checks on the indices</span>
             <span class="k">assert</span> <span class="p">(</span>
                 <span class="n">robust_start</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">robust_start</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proposals_after_thinning</span> <span class="o">+</span> <span class="mi">1</span>
-            <span class="p">)</span>
-            <span class="k">assert</span> <span class="n">end</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">end</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proposals_after_thinning</span> <span class="o">+</span> <span class="mi">1</span>
-            <span class="k">assert</span> <span class="n">end</span> <span class="o">&gt;=</span> <span class="n">robust_start</span>
+            <span class="p">),</span> <span class="n">dev_assertion_message</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="n">end</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">end</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proposals_after_thinning</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="p">),</span> <span class="n">dev_assertion_message</span>
+            <span class="k">assert</span> <span class="n">end</span> <span class="o">&gt;=</span> <span class="n">robust_start</span><span class="p">,</span> <span class="n">dev_assertion_message</span>
 
             <span class="c1"># Update the amount of writes</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">amount_of_writes</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -679,28 +818,64 @@
     <span class="k">def</span> <span class="nf">_init_sampler_specific</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;An abstract method that sets up all required attributes and method for the</span>
 <span class="sd">        algorithm.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@_abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_close_sampler_specific</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;An abstract method that closesup for the algorithm.&quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="RWMH"><a class="viewcode-back" href="../../api/samplers/RWMH.html#hmc_tomography.Samplers.RWMH">[docs]</a><span class="k">class</span> <span class="nc">RWMH</span><span class="p">(</span><span class="n">_AbstractSampler</span><span class="p">):</span>
-    <span class="n">step_length</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">stepsize</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
     <span class="sd">&quot;&quot;&quot;A parameter describing the standard deviation of a multivariate normal (MVN) used</span>
 <span class="sd">    as the proposal distribution for Random Walk Metropolis-Hastings. Using a</span>
 <span class="sd">    _numpy.ndarray column vector (shape dimensions × 1) will give every dimensions a</span>
 <span class="sd">    unique step length. Correlations in the MVN are not yet implemented. Has a strong</span>
 <span class="sd">    influence on acceptance rate. **An essential tuning parameter.**&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="RWMH._sample"><a class="viewcode-back" href="../../api/samplers/RWMH.html#hmc_tomography.Samplers.RWMH._sample">[docs]</a>    <span class="k">def</span> <span class="nf">_sample</span><span class="p">(</span>
+    <span class="n">autotuning</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="sd">&quot;&quot;&quot;A boolean indicating if the stepsize is tuned towards a specific acceptance rate</span>
+<span class="sd">    using diminishing adaptive parameters.&quot;&quot;&quot;</span>
+
+    <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.75</span>
+    <span class="sd">&quot;&quot;&quot;A float tuning the rate of decrease at which a new step size is adapted,</span>
+<span class="sd">    according to rate = (iteration_number) ** (-learning_rate). Needs to be larger than</span>
+<span class="sd">    0.5 and equal to or smaller than 1.0.&quot;&quot;&quot;</span>
+
+    <span class="n">target_acceptance_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.65</span>
+    <span class="sd">&quot;&quot;&quot;A float representing the optimal acceptance rate used for autotuning, if</span>
+<span class="sd">    autotuning is True.&quot;&quot;&quot;</span>
+
+    <span class="n">acceptance_rates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;A NumPy ndarray containing all past acceptance rates. Collected if autotuning is</span>
+<span class="sd">    True.&quot;&quot;&quot;</span>
+
+    <span class="n">stepsizes</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;A NumPy ndarray containing all past step lengths for the RWMH algorithm.</span>
+<span class="sd">    Collected if autotuning is True.&quot;&quot;&quot;</span>
+
+    <span class="n">minimal_stepsize</span> <span class="o">=</span> <span class="mf">1e-18</span>
+    <span class="sd">&quot;&quot;&quot;Minimal step length which is chosen if timestep becomes zero or negative during</span>
+<span class="sd">    autotuning.&quot;&quot;&quot;</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Random Walk Metropolis Hastings&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_sample</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">samples_hdf5_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">distribution</span><span class="p">:</span> <span class="n">_AbstractDistribution</span><span class="p">,</span>
-        <span class="n">step_length</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">stepsize</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
         <span class="n">initial_model</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">proposals</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">diagnostic_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">online_thinning</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">ram_buffer_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">overwrite_existing_file</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">max_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">autotuning</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">target_acceptance_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.65</span><span class="p">,</span>
+        <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Sampling using the Metropolis-Hastings algorithm.</span>
 
@@ -712,7 +887,7 @@
 <span class="sd">        distribution: _AbstractDistribution</span>
 <span class="sd">            The distribution to sample. Should be an instance of a subclass of</span>
 <span class="sd">            _AbstractDistribution. **A required parameter.**</span>
-<span class="sd">        step_length: _Union[float, _numpy.ndarray]</span>
+<span class="sd">        stepsize: _Union[float, _numpy.ndarray]</span>
 <span class="sd">            A parameter describing the standard deviation of a multivariate normal (MVN)</span>
 <span class="sd">            used as the proposal distribution for Random Walk Metropolis-Hastings. Using</span>
 <span class="sd">            a _numpy.ndarray column vector (shape dimensions × 1) will give every</span>
@@ -751,32 +926,44 @@
 
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_init_sampler</span><span class="p">(</span>
-            <span class="n">samples_hdf5_filename</span><span class="o">=</span><span class="n">samples_hdf5_filename</span><span class="p">,</span>
-            <span class="n">distribution</span><span class="o">=</span><span class="n">distribution</span><span class="p">,</span>
-            <span class="n">step_length</span><span class="o">=</span><span class="n">step_length</span><span class="p">,</span>
-            <span class="n">initial_model</span><span class="o">=</span><span class="n">initial_model</span><span class="p">,</span>
-            <span class="n">proposals</span><span class="o">=</span><span class="n">proposals</span><span class="p">,</span>
-            <span class="n">online_thinning</span><span class="o">=</span><span class="n">online_thinning</span><span class="p">,</span>
-            <span class="n">ram_buffer_size</span><span class="o">=</span><span class="n">ram_buffer_size</span><span class="p">,</span>
-            <span class="n">overwrite_existing_file</span><span class="o">=</span><span class="n">overwrite_existing_file</span><span class="p">,</span>
-            <span class="n">max_time</span><span class="o">=</span><span class="n">max_time</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_init_sampler</span><span class="p">(</span>
+                <span class="n">samples_hdf5_filename</span><span class="o">=</span><span class="n">samples_hdf5_filename</span><span class="p">,</span>
+                <span class="n">distribution</span><span class="o">=</span><span class="n">distribution</span><span class="p">,</span>
+                <span class="n">stepsize</span><span class="o">=</span><span class="n">stepsize</span><span class="p">,</span>
+                <span class="n">initial_model</span><span class="o">=</span><span class="n">initial_model</span><span class="p">,</span>
+                <span class="n">proposals</span><span class="o">=</span><span class="n">proposals</span><span class="p">,</span>
+                <span class="n">diagnostic_mode</span><span class="o">=</span><span class="n">diagnostic_mode</span><span class="p">,</span>
+                <span class="n">online_thinning</span><span class="o">=</span><span class="n">online_thinning</span><span class="p">,</span>
+                <span class="n">ram_buffer_size</span><span class="o">=</span><span class="n">ram_buffer_size</span><span class="p">,</span>
+                <span class="n">overwrite_existing_file</span><span class="o">=</span><span class="n">overwrite_existing_file</span><span class="p">,</span>
+                <span class="n">max_time</span><span class="o">=</span><span class="n">max_time</span><span class="p">,</span>
+                <span class="n">autotuning</span><span class="o">=</span><span class="n">autotuning</span><span class="p">,</span>
+                <span class="n">target_acceptance_rate</span><span class="o">=</span><span class="n">target_acceptance_rate</span><span class="p">,</span>
+                <span class="n">learning_rate</span><span class="o">=</span><span class="n">learning_rate</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">samples_hdf5_filehandle</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">raise</span> <span class="n">e</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_sample_loop</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sample_loop</span><span class="p">()</span>
 
 <div class="viewcode-block" id="RWMH.sample"><a class="viewcode-back" href="../../api/samplers/RWMH.html#hmc_tomography.Samplers.RWMH.sample">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">samples_hdf5_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">distribution</span><span class="p">:</span> <span class="n">_AbstractDistribution</span><span class="p">,</span>
-        <span class="n">step_length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">stepsize</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
         <span class="n">initial_model</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">proposals</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">diagnostic_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">online_thinning</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">ram_buffer_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">overwrite_existing_file</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">max_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">autotuning</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">target_acceptance_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.65</span><span class="p">,</span>
+        <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Simply a forward to the instance method of the sampler; check out</span>
 <span class="sd">        _sample().&quot;&quot;&quot;</span>
@@ -786,13 +973,17 @@
         <span class="n">instance</span><span class="o">.</span><span class="n">_sample</span><span class="p">(</span>
             <span class="n">samples_hdf5_filename</span><span class="o">=</span><span class="n">samples_hdf5_filename</span><span class="p">,</span>
             <span class="n">distribution</span><span class="o">=</span><span class="n">distribution</span><span class="p">,</span>
-            <span class="n">step_length</span><span class="o">=</span><span class="n">step_length</span><span class="p">,</span>
+            <span class="n">stepsize</span><span class="o">=</span><span class="n">stepsize</span><span class="p">,</span>
             <span class="n">initial_model</span><span class="o">=</span><span class="n">initial_model</span><span class="p">,</span>
             <span class="n">proposals</span><span class="o">=</span><span class="n">proposals</span><span class="p">,</span>
+            <span class="n">diagnostic_mode</span><span class="o">=</span><span class="n">diagnostic_mode</span><span class="p">,</span>
             <span class="n">online_thinning</span><span class="o">=</span><span class="n">online_thinning</span><span class="p">,</span>
             <span class="n">ram_buffer_size</span><span class="o">=</span><span class="n">ram_buffer_size</span><span class="p">,</span>
             <span class="n">overwrite_existing_file</span><span class="o">=</span><span class="n">overwrite_existing_file</span><span class="p">,</span>
             <span class="n">max_time</span><span class="o">=</span><span class="n">max_time</span><span class="p">,</span>
+            <span class="n">autotuning</span><span class="o">=</span><span class="n">autotuning</span><span class="p">,</span>
+            <span class="n">target_acceptance_rate</span><span class="o">=</span><span class="n">target_acceptance_rate</span><span class="p">,</span>
+            <span class="n">learning_rate</span><span class="o">=</span><span class="n">learning_rate</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">instance</span></div>
@@ -800,54 +991,152 @@
     <span class="k">def</span> <span class="nf">_init_sampler_specific</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
         <span class="c1"># Parse all possible kwargs</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;step_length&quot;</span><span class="p">,</span> <span class="s2">&quot;example_extra_option&quot;</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="s2">&quot;stepsize&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;autotuning&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;target_acceptance_rate&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;learning_rate&quot;</span><span class="p">,</span>
+        <span class="p">]:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+        <span class="c1"># Autotuning -------------------------------------------------------------------</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">autotuning</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">&gt;</span> <span class="mf">0.5</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The learning rate should be larger than 0.5 and smaller than or &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;equal to 1.0, otherwise the Markov chain does not converge. Chosen: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stepsize</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span><span class="p">,</span> <span class="p">(</span>
+                <span class="s2">&quot;Autotuning RWMH is only implemented for scalar stepsizes. If you need&quot;</span>
+                <span class="s2">&quot;it for non-scalar steps, write us an email.&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">acceptance_rates</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">proposals</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stepsizes</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">proposals</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unidentified argument(s) not applicable to sampler: </span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Assert that step length is either a float and bigger than zero, or a full</span>
         <span class="c1"># matrix / diagonal</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">step_length</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step_length</span><span class="p">)</span>
-            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_length</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">,</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stepsize</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stepsize</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">stepsize</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">,</span> <span class="p">(</span>
                 <span class="s2">&quot;RW-MH step length should be a positive float or a numpy.ndarray. The &quot;</span>
                 <span class="s2">&quot;passed argument is a float equal to or smaller than zero.&quot;</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">step_length</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step_length</span><span class="p">)</span>
-            <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step_length</span><span class="p">)</span> <span class="o">==</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stepsize</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stepsize</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stepsize</span><span class="p">)</span> <span class="o">==</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="p">(</span>
                 <span class="s2">&quot;RW-MH step length should be a numpy.ndarray of shape (dimensions, 1) &quot;</span>
                 <span class="s2">&quot;or a positive float. The passed argument is neither.&quot;</span>
             <span class="p">)</span>
-            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_length</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">stepsize</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span>
                 <span class="s2">&quot;RW-MH step length should be a numpy.ndarray of shape (dimensions, 1) &quot;</span>
                 <span class="s2">&quot;or a positive float. The passed argument is an ndarray of the wrong &quot;</span>
                 <span class="s2">&quot;shape.&quot;</span>
             <span class="p">)</span>
 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">diagnostic_mode</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">misfit</span> <span class="o">=</span> <span class="n">_AccumulatingTimer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">misfit</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">gradient</span> <span class="o">=</span> <span class="n">_AccumulatingTimer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">gradient</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">corrector</span> <span class="o">=</span> <span class="n">_AccumulatingTimer</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">corrector</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sampler_specific_functions_to_diagnose</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">misfit</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">gradient</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">corrector</span><span class="p">,</span>
+            <span class="p">]</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">autotuning</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">autotune</span> <span class="o">=</span> <span class="n">_AccumulatingTimer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">autotune</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sampler_specific_functions_to_diagnose</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">autotune</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_close_sampler_specific</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">autotuning</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">acceptance_rates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">acceptance_rates</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_proposal</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stepsizes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stepsizes</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_proposal</span><span class="p">]</span>
+
     <span class="k">def</span> <span class="nf">_write_tuning_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># TODO Write this function</span>
-        <span class="k">pass</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stepsize</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">samples_hdf5_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;stepsize&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stepsize</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">samples_hdf5_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span>
+                <span class="s2">&quot;stepsize&quot;</span>
+            <span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stepsize</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+
+    <span class="k">def</span> <span class="nf">autotune</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acceptance_rate</span><span class="p">):</span>
+        <span class="c1"># Write out parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acceptance_rates</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_proposal</span><span class="p">]</span> <span class="o">=</span> <span class="n">acceptance_rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stepsizes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_proposal</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stepsize</span>
+
+        <span class="c1"># Compute weight according to diminishing scheme, see also:</span>
+        <span class="c1"># The No-U-Turn Sampler: Adaptively Setting Path Lengths in Hamiltonian</span>
+        <span class="c1"># Monte Carlo, Hoffman &amp; Gelman, 2014, equation (5).</span>
+        <span class="n">schedule_weight</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_proposal</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">acceptance_rate</span><span class="p">):</span>
+            <span class="n">acceptance_rate</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Update stepsize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stepsize</span> <span class="o">-=</span> <span class="n">schedule_weight</span> <span class="o">*</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target_acceptance_rate</span> <span class="o">-</span> <span class="nb">min</span><span class="p">(</span><span class="n">acceptance_rate</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stepsize</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">_warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;The timestep of the algorithm went below zero. You possibly &quot;</span>
+                <span class="s2">&quot;started the algorithm in a region with extremely strong &quot;</span>
+                <span class="s2">&quot;gradients. The sampler will now default to a minimum timestep of &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">minimal_stepsize</span><span class="si">}</span><span class="s2">. If this doesn&#39;t work, and if choosing &quot;</span>
+                <span class="s2">&quot;a different initial model does not make this warning go away, try&quot;</span>
+                <span class="s2">&quot;setting a smaller minimal time step and initial time step value.&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stepsize</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stepsize</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimal_stepsize</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_propose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="c1"># Propose a new model according to the MH Random Walk algorithm with a Gaussian</span>
         <span class="c1"># proposal distribution</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">proposed_model</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">current_model</span>
-            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_length</span> <span class="o">*</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proposed_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_model</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">stepsize</span> <span class="o">*</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span>
         <span class="p">)</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">proposed_model</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">proposed_model</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dev_assertion_message</span>
 
     <span class="k">def</span> <span class="nf">_evaluate_acceptance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="c1"># Compute new misfit</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">proposed_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">misfit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proposed_model</span><span class="p">)</span>
 
-        <span class="c1"># Evaluate acceptance rate</span>
-        <span class="k">if</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">proposed_x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">acceptance_rate</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">proposed_x</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">autotuning</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">autotune</span><span class="p">(</span><span class="n">acceptance_rate</span><span class="p">)</span>
+
+        <span class="c1"># Evaluate MH acceptance rate</span>
+        <span class="k">if</span> <span class="n">acceptance_rate</span> <span class="o">&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current_model</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proposed_model</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proposed_x</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">accepted_proposals</span> <span class="o">+=</span> <span class="mi">1</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">accepted_proposals</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">plot_stepsizes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">_plt</span>
+
+        <span class="n">_plt</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stepsizes</span><span class="p">)</span>
+        <span class="n">_plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;iteration&quot;</span><span class="p">)</span>
+        <span class="n">_plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;stepsize&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">plot_acceptance_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">_plt</span>
+
+        <span class="n">_plt</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acceptance_rates</span><span class="p">)</span>
+        <span class="n">_plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;iteration&quot;</span><span class="p">)</span>
+        <span class="n">_plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;stepsize&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="HMC"><a class="viewcode-back" href="../../api/samplers/HMC.html#hmc_tomography.Samplers.HMC">[docs]</a><span class="k">class</span> <span class="nc">HMC</span><span class="p">(</span><span class="n">_AbstractSampler</span><span class="p">):</span>
@@ -891,7 +1180,35 @@
     <span class="n">proposed_h</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">nan</span>
     <span class="sd">&quot;&quot;&quot;A float representing the total energy associated with the proposed state.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="HMC._sample"><a class="viewcode-back" href="../../api/samplers/HMC.html#hmc_tomography.Samplers.HMC._sample">[docs]</a>    <span class="k">def</span> <span class="nf">_sample</span><span class="p">(</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Hamiltonian Monte Carlo&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Sampler name.&quot;&quot;&quot;</span>
+
+    <span class="n">autotuning</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="sd">&quot;&quot;&quot;A boolean indicating if the stepsize is tuned towards a specific acceptance rate</span>
+<span class="sd">    using diminishing adaptive parameters.&quot;&quot;&quot;</span>
+
+    <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.75</span>
+    <span class="sd">&quot;&quot;&quot;A float tuning the rate of decrease at which a new step size is adapted,</span>
+<span class="sd">    according to rate = (iteration_number) ** (-learning_rate). Needs to be larger than</span>
+<span class="sd">    0.5 and equal to or smaller than 1.0.&quot;&quot;&quot;</span>
+
+    <span class="n">target_acceptance_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.65</span>
+    <span class="sd">&quot;&quot;&quot;A float representing the optimal acceptance rate used for autotuning, if</span>
+<span class="sd">    autotuning is True.&quot;&quot;&quot;</span>
+
+    <span class="n">acceptance_rates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;A NumPy ndarray containing all past acceptance rates. Collected if autotuning is</span>
+<span class="sd">    True.&quot;&quot;&quot;</span>
+
+    <span class="n">stepsizes</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;A NumPy ndarray containing all past stepsizes for the HMC algorithm. Collected if</span>
+<span class="sd">    autotuning is True.&quot;&quot;&quot;</span>
+
+    <span class="n">minimal_stepsize</span> <span class="o">=</span> <span class="mf">1e-18</span>
+    <span class="sd">&quot;&quot;&quot;Minimal timestep which is chosen if timestep becomes zero or negative during</span>
+<span class="sd">    autotuning.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_sample</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">samples_hdf5_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">distribution</span><span class="p">:</span> <span class="n">_AbstractDistribution</span><span class="p">,</span>
@@ -901,10 +1218,14 @@
         <span class="n">integrator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;lf&quot;</span><span class="p">,</span>
         <span class="n">initial_model</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">proposals</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">diagnostic_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">online_thinning</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">ram_buffer_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">overwrite_existing_file</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">max_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">autotuning</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">target_acceptance_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.65</span><span class="p">,</span>
+        <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Sampling using the Metropolis-Hastings algorithm.</span>
 
@@ -959,22 +1280,30 @@
 
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_init_sampler</span><span class="p">(</span>
-            <span class="n">samples_hdf5_filename</span><span class="o">=</span><span class="n">samples_hdf5_filename</span><span class="p">,</span>
-            <span class="n">distribution</span><span class="o">=</span><span class="n">distribution</span><span class="p">,</span>
-            <span class="n">time_step</span><span class="o">=</span><span class="n">time_step</span><span class="p">,</span>
-            <span class="n">amount_of_steps</span><span class="o">=</span><span class="n">amount_of_steps</span><span class="p">,</span>
-            <span class="n">mass_matrix</span><span class="o">=</span><span class="n">mass_matrix</span><span class="p">,</span>
-            <span class="n">integrator</span><span class="o">=</span><span class="n">integrator</span><span class="p">,</span>
-            <span class="n">initial_model</span><span class="o">=</span><span class="n">initial_model</span><span class="p">,</span>
-            <span class="n">proposals</span><span class="o">=</span><span class="n">proposals</span><span class="p">,</span>
-            <span class="n">online_thinning</span><span class="o">=</span><span class="n">online_thinning</span><span class="p">,</span>
-            <span class="n">ram_buffer_size</span><span class="o">=</span><span class="n">ram_buffer_size</span><span class="p">,</span>
-            <span class="n">overwrite_existing_file</span><span class="o">=</span><span class="n">overwrite_existing_file</span><span class="p">,</span>
-            <span class="n">max_time</span><span class="o">=</span><span class="n">max_time</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_init_sampler</span><span class="p">(</span>
+                <span class="n">samples_hdf5_filename</span><span class="o">=</span><span class="n">samples_hdf5_filename</span><span class="p">,</span>
+                <span class="n">distribution</span><span class="o">=</span><span class="n">distribution</span><span class="p">,</span>
+                <span class="n">time_step</span><span class="o">=</span><span class="n">time_step</span><span class="p">,</span>
+                <span class="n">amount_of_steps</span><span class="o">=</span><span class="n">amount_of_steps</span><span class="p">,</span>
+                <span class="n">mass_matrix</span><span class="o">=</span><span class="n">mass_matrix</span><span class="p">,</span>
+                <span class="n">integrator</span><span class="o">=</span><span class="n">integrator</span><span class="p">,</span>
+                <span class="n">initial_model</span><span class="o">=</span><span class="n">initial_model</span><span class="p">,</span>
+                <span class="n">autotuning</span><span class="o">=</span><span class="n">autotuning</span><span class="p">,</span>
+                <span class="n">target_acceptance_rate</span><span class="o">=</span><span class="n">target_acceptance_rate</span><span class="p">,</span>
+                <span class="n">learning_rate</span><span class="o">=</span><span class="n">learning_rate</span><span class="p">,</span>
+                <span class="n">proposals</span><span class="o">=</span><span class="n">proposals</span><span class="p">,</span>
+                <span class="n">diagnostic_mode</span><span class="o">=</span><span class="n">diagnostic_mode</span><span class="p">,</span>
+                <span class="n">online_thinning</span><span class="o">=</span><span class="n">online_thinning</span><span class="p">,</span>
+                <span class="n">ram_buffer_size</span><span class="o">=</span><span class="n">ram_buffer_size</span><span class="p">,</span>
+                <span class="n">overwrite_existing_file</span><span class="o">=</span><span class="n">overwrite_existing_file</span><span class="p">,</span>
+                <span class="n">max_time</span><span class="o">=</span><span class="n">max_time</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">samples_hdf5_filehandle</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">raise</span> <span class="n">e</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_sample_loop</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sample_loop</span><span class="p">()</span>
 
 <div class="viewcode-block" id="HMC.sample"><a class="viewcode-back" href="../../api/samplers/HMC.html#hmc_tomography.Samplers.HMC.sample">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span>
@@ -987,10 +1316,14 @@
         <span class="n">integrator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;lf&quot;</span><span class="p">,</span>
         <span class="n">initial_model</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">proposals</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">diagnostic_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">online_thinning</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">ram_buffer_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">overwrite_existing_file</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">max_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">autotuning</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">target_acceptance_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.65</span><span class="p">,</span>
+        <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Simply a forward to the instance method of the sampler; check out</span>
 <span class="sd">        _sample().&quot;&quot;&quot;</span>
@@ -1003,9 +1336,13 @@
             <span class="n">time_step</span><span class="o">=</span><span class="n">time_step</span><span class="p">,</span>
             <span class="n">amount_of_steps</span><span class="o">=</span><span class="n">amount_of_steps</span><span class="p">,</span>
             <span class="n">mass_matrix</span><span class="o">=</span><span class="n">mass_matrix</span><span class="p">,</span>
+            <span class="n">autotuning</span><span class="o">=</span><span class="n">autotuning</span><span class="p">,</span>
+            <span class="n">target_acceptance_rate</span><span class="o">=</span><span class="n">target_acceptance_rate</span><span class="p">,</span>
+            <span class="n">learning_rate</span><span class="o">=</span><span class="n">learning_rate</span><span class="p">,</span>
             <span class="n">integrator</span><span class="o">=</span><span class="n">integrator</span><span class="p">,</span>
             <span class="n">initial_model</span><span class="o">=</span><span class="n">initial_model</span><span class="p">,</span>
             <span class="n">proposals</span><span class="o">=</span><span class="n">proposals</span><span class="p">,</span>
+            <span class="n">diagnostic_mode</span><span class="o">=</span><span class="n">diagnostic_mode</span><span class="p">,</span>
             <span class="n">online_thinning</span><span class="o">=</span><span class="n">online_thinning</span><span class="p">,</span>
             <span class="n">ram_buffer_size</span><span class="o">=</span><span class="n">ram_buffer_size</span><span class="p">,</span>
             <span class="n">overwrite_existing_file</span><span class="o">=</span><span class="n">overwrite_existing_file</span><span class="p">,</span>
@@ -1016,7 +1353,15 @@
 
     <span class="k">def</span> <span class="nf">_init_sampler_specific</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1"># Parse all possible kwargs</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;time_step&quot;</span><span class="p">,</span> <span class="s2">&quot;amount_of_steps&quot;</span><span class="p">,</span> <span class="s2">&quot;mass_matrix&quot;</span><span class="p">,</span> <span class="s2">&quot;integrator&quot;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="s2">&quot;time_step&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;amount_of_steps&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;mass_matrix&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;integrator&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;autotuning&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;target_acceptance_rate&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;learning_rate&quot;</span><span class="p">,</span>
+        <span class="p">):</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
             <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
@@ -1025,16 +1370,34 @@
                 <span class="sa">f</span><span class="s2">&quot;Unidentified argument(s) not applicable to sampler: </span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
 
+        <span class="c1"># Autotuning -------------------------------------------------------------------</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">autotuning</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">&gt;</span> <span class="mf">0.5</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The learning rate should be larger than 0.5 and smaller than or &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;equal to 1.0, otherwise the Markov chain does not converge. Chosen: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">acceptance_rates</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">proposals</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stepsizes</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">proposals</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
         <span class="c1"># Step length ------------------------------------------------------------------</span>
         <span class="c1"># Assert that step length for Hamiltons equations is a float and bigger than</span>
         <span class="c1"># zero</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
+        <span class="p">),</span> <span class="s2">&quot;Time step (time_step) should be a float larger than zero.&quot;</span>
 
         <span class="c1"># Step amount ------------------------------------------------------------------</span>
         <span class="c1"># Assert that number of steps for Hamiltons equations is a positive integer</span>
-        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">amount_of_steps</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">amount_of_steps</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">amount_of_steps</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">,</span> <span class="p">(</span>
+            <span class="s2">&quot;The amount of steps (amount_of_steps) the HMC integrator should make &quot;</span>
+            <span class="s2">&quot;should be an integer.&quot;</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">amount_of_steps</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span>
+            <span class="s2">&quot;The amount of steps (amount_of_steps) the HMC integrator should make &quot;</span>
+            <span class="s2">&quot;should be larger than zero.&quot;</span>
+        <span class="p">)</span>
 
         <span class="c1"># Mass matrix ------------------------------------------------------------------</span>
         <span class="c1"># Set the mass matrix if it is not yet set using the default: a unit mass</span>
@@ -1042,8 +1405,15 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span> <span class="o">=</span> <span class="n">_Unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span>
 
         <span class="c1"># Assert that the mass matrix is the right type and dimension</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="p">,</span> <span class="n">_AbstractMassMatrix</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="p">,</span> <span class="n">_AbstractMassMatrix</span><span class="p">),</span> <span class="p">(</span>
+            <span class="s2">&quot;The passed mass matrix (mass_matrix) should be a class derived from &quot;</span>
+            <span class="s2">&quot;_AbstractMassMatrix.&quot;</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;The passed mass matrix (mass_matrix) should have dimensions equal to the &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;target distribution. Passed: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">dimensions</span><span class="si">}</span><span class="s2">, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;required: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="si">}</span><span class="s2">.&quot;</span>
+        <span class="p">)</span>
 
         <span class="c1"># Integrator -------------------------------------------------------------------</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">integrator</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">integrator</span><span class="p">)</span>
@@ -1053,9 +1423,51 @@
                 <span class="sa">f</span><span class="s2">&quot;Unknown integrator used. Choices are: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">available_integrators</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">diagnostic_mode</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">misfit</span> <span class="o">=</span> <span class="n">_AccumulatingTimer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">misfit</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">gradient</span> <span class="o">=</span> <span class="n">_AccumulatingTimer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">gradient</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">generate_momentum</span> <span class="o">=</span> <span class="n">_AccumulatingTimer</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">generate_momentum</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">kinetic_energy</span> <span class="o">=</span> <span class="n">_AccumulatingTimer</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">kinetic_energy</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">kinetic_energy_gradient</span> <span class="o">=</span> <span class="n">_AccumulatingTimer</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">kinetic_energy_gradient</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">corrector</span> <span class="o">=</span> <span class="n">_AccumulatingTimer</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">corrector</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">integrators</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">integrator</span><span class="p">]</span> <span class="o">=</span> <span class="n">_AccumulatingTimer</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">integrators</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">integrator</span><span class="p">]</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">sampler_specific_functions_to_diagnose</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">misfit</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">gradient</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">integrators</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">integrator</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">generate_momentum</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">kinetic_energy</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">kinetic_energy_gradient</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">corrector</span><span class="p">,</span>
+            <span class="p">]</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">autotuning</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">autotune</span> <span class="o">=</span> <span class="n">_AccumulatingTimer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">autotune</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sampler_specific_functions_to_diagnose</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">autotune</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_close_sampler_specific</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">autotuning</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">acceptance_rates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">acceptance_rates</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_proposal</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stepsizes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stepsizes</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_proposal</span><span class="p">]</span>
+
     <span class="k">def</span> <span class="nf">_write_tuning_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># TODO Write this function</span>
-        <span class="k">pass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">samples_hdf5_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;time_step&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">samples_hdf5_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;amount_of_steps&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">amount_of_steps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">samples_hdf5_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;mass_matrix&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">samples_hdf5_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;integrator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">integrators_full_names</span><span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">integrator</span>
+        <span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">_propose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -1075,11 +1487,44 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">proposed_k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">kinetic_energy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proposed_momentum</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">proposed_h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proposed_x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">proposed_k</span>
 
-        <span class="c1"># Evaluate acceptence rate</span>
-        <span class="k">if</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_h</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">proposed_h</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">acceptance_rate</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_h</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">proposed_h</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">autotuning</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">autotune</span><span class="p">(</span><span class="n">acceptance_rate</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">acceptance_rate</span> <span class="o">&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current_model</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proposed_model</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proposed_x</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">accepted_proposals</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">autotune</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acceptance_rate</span><span class="p">):</span>
+        <span class="c1"># Write out parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acceptance_rates</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_proposal</span><span class="p">]</span> <span class="o">=</span> <span class="n">acceptance_rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stepsizes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_proposal</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span>
+
+        <span class="c1"># Compute weight according to diminishing scheme, see also:</span>
+        <span class="c1"># The No-U-Turn Sampler: Adaptively Setting Path Lengths in Hamiltonian</span>
+        <span class="c1"># Monte Carlo, Hoffman &amp; Gelman, 2014, equation (5).</span>
+        <span class="n">schedule_weight</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_proposal</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">acceptance_rate</span><span class="p">):</span>
+            <span class="n">acceptance_rate</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Update stepsize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">-=</span> <span class="n">schedule_weight</span> <span class="o">*</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target_acceptance_rate</span> <span class="o">-</span> <span class="nb">min</span><span class="p">(</span><span class="n">acceptance_rate</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">_warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;The timestep of the algorithm went below zero. You possibly &quot;</span>
+                <span class="s2">&quot;started the algorithm in a region with extremely strong &quot;</span>
+                <span class="s2">&quot;gradients. The sampler will now default to a minimum timestep of &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">minimal_stepsize</span><span class="si">}</span><span class="s2">. If this doesn&#39;t work, and if choosing &quot;</span>
+                <span class="s2">&quot;a different initial model does not make this warning go away, try&quot;</span>
+                <span class="s2">&quot;setting a smaller minimal time step and initial time step value.&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimal_stepsize</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_propagate_leapfrog</span><span class="p">(</span><span class="bp">self</span><span class="p">,):</span>
 
@@ -1094,30 +1539,36 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">corrector</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
 
+        <span class="c1"># verbose_integration</span>
+        <span class="n">verbose_integration</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">verbose_integration</span><span class="p">:</span>
+            <span class="n">integration_iterator</span> <span class="o">=</span> <span class="n">_tqdm_au</span><span class="o">.</span><span class="n">trange</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">amount_of_steps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="n">position</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                <span class="n">leave</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Leapfrog integration&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">integration_iterator</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">amount_of_steps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
         <span class="c1"># Integration loop</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">amount_of_steps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-
-            <span class="c1"># Calculate gradient</span>
-            <span class="n">potential_gradient</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
-
-            <span class="n">momentum</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">*</span> <span class="n">potential_gradient</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">integration_iterator</span><span class="p">:</span>
+            <span class="c1"># Momentum step</span>
+            <span class="n">momentum</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+            <span class="c1"># Position step</span>
             <span class="n">position</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">kinetic_energy_gradient</span><span class="p">(</span>
                 <span class="n">momentum</span>
             <span class="p">)</span>
-
             <span class="c1"># Correct bounds</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">corrector</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
 
         <span class="c1"># Full momentum and half step position after loop ------------------------------</span>
-
-        <span class="c1"># Calculate gradient</span>
-        <span class="n">potential_gradient</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
-
-        <span class="n">momentum</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">*</span> <span class="n">potential_gradient</span>
+        <span class="c1"># Momentum step</span>
+        <span class="n">momentum</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+        <span class="c1"># Position step</span>
         <span class="n">position</span> <span class="o">+=</span> <span class="p">(</span>
             <span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_matrix</span><span class="o">.</span><span class="n">kinetic_energy_gradient</span><span class="p">(</span><span class="n">momentum</span><span class="p">)</span>
         <span class="p">)</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">corrector</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">momentum</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">proposed_model</span> <span class="o">=</span> <span class="n">position</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -1240,7 +1691,28 @@
         <span class="s2">&quot;3s&quot;</span><span class="p">:</span> <span class="n">_propagate_3_stage_simplified</span><span class="p">,</span>
         <span class="s2">&quot;4s&quot;</span><span class="p">:</span> <span class="n">_propagate_4_stage_simplified</span><span class="p">,</span>
     <span class="p">}</span>
-    <span class="n">available_integrators</span> <span class="o">=</span> <span class="n">integrators</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div>
+    <span class="n">integrators_full_names</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;lf&quot;</span><span class="p">:</span> <span class="s2">&quot;leapfrog integrator&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;3s&quot;</span><span class="p">:</span> <span class="s2">&quot;three stage integrator&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;4s&quot;</span><span class="p">:</span> <span class="s2">&quot;four stage integrator&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">available_integrators</span> <span class="o">=</span> <span class="n">integrators</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">plot_stepsizes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">_plt</span>
+
+        <span class="n">_plt</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stepsizes</span><span class="p">)</span>
+        <span class="n">_plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;iteration&quot;</span><span class="p">)</span>
+        <span class="n">_plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;stepsize&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">plot_acceptance_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">_plt</span>
+
+        <span class="n">_plt</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acceptance_rates</span><span class="p">)</span>
+        <span class="n">_plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;iteration&quot;</span><span class="p">)</span>
+        <span class="n">_plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;stepsize&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span></div>
 </pre></div>
 
            </div>

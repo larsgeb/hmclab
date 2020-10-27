@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>hmc_tomography.Distributions.base &mdash; HMC Tom 0.2.2-alpha-5-4-gf09787e documentation</title>
+  <title>hmc_tomography.Distributions.base &mdash; HMC Tom 0.2.2-alpha-5-21-gb74f3b8 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                0.2.2-alpha-5-4-gf09787e
+                0.2.2-alpha-5-21-gb74f3b8
               </div>
             
           
@@ -201,6 +201,10 @@
     <span class="n">upper_bounds</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="sd">&quot;&quot;&quot;Upper bounds for every parameter. If initialized to None, no bounds are used.&quot;&quot;&quot;</span>
 
+    <span class="n">normalized</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="sd">&quot;&quot;&quot;Boolean describing if the distribution is normalized, i.e. if we can use it in</span>
+<span class="sd">    mixtures of distributions.&quot;&quot;&quot;</span>
+
 <div class="viewcode-block" id="_AbstractDistribution.misfit"><a class="viewcode-back" href="../../../api/distributions/_AbstractDistribution.html#hmc_tomography.Distributions._AbstractDistribution.misfit">[docs]</a>    <span class="nd">@_abstractmethod</span>
     <span class="k">def</span> <span class="nf">misfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Computes the misfit of the distribution at the given coordinates.</span>
@@ -267,8 +271,10 @@
             <span class="s2">&quot;the instance.&quot;</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="_AbstractDistribution.generate"><a class="viewcode-back" href="../../../api/distributions/_AbstractDistribution.html#hmc_tomography.Distributions._AbstractDistribution.generate">[docs]</a>    <span class="nd">@_abstractmethod</span>
-    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;This distribution is not normalizable.&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="_AbstractDistribution.generate"><a class="viewcode-back" href="../../../api/distributions/_AbstractDistribution.html#hmc_tomography.Distributions._AbstractDistribution.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Method to draw samples from the distribution.</span>
 
 <span class="sd">        Returns</span>
@@ -297,7 +303,6 @@
         <span class="p">)</span></div>
 
     <span class="nd">@staticmethod</span>
-    <span class="nd">@_abstractmethod</span>
     <span class="k">def</span> <span class="nf">create_default</span><span class="p">(</span><span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;_AbstractDistribution&quot;</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
             <span class="s2">&quot;You tried creating a default distribution. Although you have used this &quot;</span>
@@ -494,6 +499,7 @@
         <span class="n">inverse_covariance</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">lower_bounds</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">upper_bounds</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">normalize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Gaussian (normal) distribution&quot;</span>
@@ -519,6 +525,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">inverse_covariance</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="sd">&quot;&quot;&quot;Inverse covariance matrix&quot;&quot;&quot;</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalization_constant</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="sd">&quot;&quot;&quot;Covariance matrix determinant and dimensionality factored in single</span>
+<span class="sd">        likelihood term. Uncomputed if normalized() is never called.&quot;&quot;&quot;</span>
+
         <span class="c1"># Parse means</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">means</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">means</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
             <span class="n">_warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
@@ -538,6 +548,7 @@
             <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">covariance</span><span class="p">)</span> <span class="o">==</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">float32</span>
             <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">covariance</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span>
         <span class="p">):</span>
+            <span class="n">covariance</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">covariance</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">_warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
                 <span class="s2">&quot;Seems that you only passed a float/int as the covariance matrix. &quot;</span>
@@ -581,16 +592,26 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">diagonal</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span>
-                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">coordinates</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-<div class="viewcode-block" id="Normal.gradient"><a class="viewcode-back" href="../../../api/distributions/Normal.html#hmc_tomography.Distributions.Normal.gradient">[docs]</a>                <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inverse_covariance</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">coordinates</span><span class="p">))</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+                <span class="o">+</span> <span class="mf">0.5</span>
+                <span class="o">*</span> <span class="p">(</span>
+                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">coordinates</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<div class="viewcode-block" id="Normal.gradient"><a class="viewcode-back" href="../../../api/distributions/Normal.html#hmc_tomography.Distributions.Normal.gradient">[docs]</a>                    <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inverse_covariance</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">coordinates</span><span class="p">))</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization_constant</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span>
-                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">coordinates</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-                <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse_covariance</span>
-                <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">coordinates</span><span class="p">)</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+                <span class="o">+</span> <span class="mf">0.5</span>
+                <span class="o">*</span> <span class="p">(</span>
+                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">coordinates</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+                    <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse_covariance</span>
+                    <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">coordinates</span><span class="p">)</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization_constant</span>
+            <span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Method to compute the gradient of a Normal distribution distribution.</span>
@@ -604,6 +625,26 @@
             <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inverse_covariance</span> <span class="o">@</span> <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">-</span> <span class="n">coordinates</span>
             <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">covariance</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span>
+            <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">covariance</span><span class="p">)</span> <span class="o">==</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">float64</span>
+            <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">covariance</span><span class="p">)</span> <span class="o">==</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">float32</span>
+            <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">covariance</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span>
+        <span class="p">):</span>
+            <span class="n">determinant</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">covariance</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">covariance</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">means</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+            <span class="n">determinant</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">covariance</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">covariance</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">determinant</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">covariance</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Covariance matrix shape not understood.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalization_constant</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span>
+            <span class="n">_numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">_numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">determinant</span><span class="p">))</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">*</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
@@ -658,6 +699,8 @@
 <span class="sd">        describing the inverse dispersion of the uncorrelated multivariate Laplace</span>
 <span class="sd">        distribution. Used to accelerate computations at the cost of memory usage.&quot;&quot;&quot;</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalization_constant</span> <span class="o">=</span> <span class="mf">0.0</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">update_bounds</span><span class="p">(</span><span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Laplace.misfit"><a class="viewcode-back" href="../../../api/distributions/Laplace.html#hmc_tomography.Distributions.Laplace.misfit">[docs]</a>    <span class="k">def</span> <span class="nf">misfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -665,7 +708,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">normalization_constant</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
             <span class="o">+</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
                 <span class="n">_numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">coordinates</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">means</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse_dispersions</span>
             <span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
@@ -681,6 +725,22 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
             <span class="o">+</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">coordinates</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">means</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse_dispersions</span>
         <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dispersions</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span>
+            <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dispersions</span><span class="p">)</span> <span class="o">==</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">float64</span>
+            <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dispersions</span><span class="p">)</span> <span class="o">==</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">float32</span>
+            <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dispersions</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span>
+        <span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">normalization_constant</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dispersions</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">dispersions</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">means</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">normalization_constant</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">_numpy</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dispersions</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)))</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Covariance matrix shape not understood.&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
@@ -1213,6 +1273,49 @@
 
         <span class="n">temperature</span> <span class="o">=</span> <span class="mf">1.0</span>
         <span class="k">return</span> <span class="n">Himmelblau</span><span class="p">(</span><span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">Mixture</span><span class="p">(</span><span class="n">_AbstractDistribution</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distributions</span><span class="p">,</span> <span class="n">probabilities</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">distributions</span> <span class="o">=</span> <span class="n">distributions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">distributions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dimensions</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">probabilities</span> <span class="o">=</span> <span class="n">probabilities</span>
+
+        <span class="k">for</span> <span class="n">dis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">distributions</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">dis</span><span class="o">.</span><span class="n">normalized</span><span class="p">:</span>
+                <span class="n">dis</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span>
+
+            <span class="k">assert</span> <span class="n">dis</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span>
+
+    <span class="k">def</span> <span class="nf">misfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+        <span class="n">misfits</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">misfit</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">distributions</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">misfit_bounds</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="o">-</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+            <span class="n">_numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">_numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">_numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">probabilities</span><span class="p">)</span> <span class="o">-</span> <span class="n">misfits</span><span class="p">))</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+
+        <span class="n">misfits</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">misfit</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">distributions</span><span class="p">]</span>
+        <span class="n">gradients</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">d</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">distributions</span><span class="p">])</span>
+        <span class="n">probs</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">_numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">probabilities</span><span class="p">)</span> <span class="o">-</span> <span class="n">misfits</span><span class="p">)</span>
+
+        <span class="n">gr</span> <span class="o">=</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+            <span class="n">_numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">prob</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">grad</span><span class="p">)</span> <span class="k">for</span> <span class="n">prob</span><span class="p">,</span> <span class="n">grad</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">probs</span><span class="p">,</span> <span class="n">gradients</span><span class="p">)]),</span>
+            <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="o">-</span><span class="n">gr</span> <span class="o">/</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">probs</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create_default</span><span class="p">(</span><span class="n">dimensions</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Mixture&quot;</span><span class="p">:</span>
+
+        <span class="n">Normal1</span> <span class="o">=</span> <span class="n">Normal</span><span class="o">.</span><span class="n">create_default</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)</span>
+        <span class="n">Normal2</span> <span class="o">=</span> <span class="n">Normal</span><span class="o">.</span><span class="n">create_default</span><span class="p">(</span><span class="n">dimensions</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Mixture</span><span class="p">([</span><span class="n">Normal1</span><span class="p">,</span> <span class="n">Normal2</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
 </pre></div>
 
            </div>
