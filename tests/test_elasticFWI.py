@@ -6,13 +6,23 @@ import pytest as _pytest
 
 import hmc_tomography as _hmc_tomography
 
+import sys
 
+installed = "psvWave" in sys.modules
+
+
+@_pytest.mark.skipif(
+    not installed, reason="Skipping test for which required packages are not installed."
+)
 def test_elasticFWI_creation():
     _hmc_tomography.Distributions.ElasticFullWaveform2D.create_default(
         4800, "tests/configurations/default_testing_configuration.ini",
     )
 
 
+@_pytest.mark.skipif(
+    not installed, reason="Skipping test for which required packages are not installed."
+)
 def test_elasticFWI_gradient():
     likelihood = _hmc_tomography.Distributions.ElasticFullWaveform2D.create_default(
         4800, "tests/configurations/default_testing_configuration.ini",
@@ -31,6 +41,9 @@ def test_elasticFWI_gradient():
     print(f"Misfit 2: {X2:.2f}")
 
 
+@_pytest.mark.skipif(
+    not installed, reason="Skipping test for which required packages are not installed."
+)
 def test_elasticFWI_sampling():
     likelihood = _hmc_tomography.Distributions.ElasticFullWaveform2D.create_default(
         4800, "tests/configurations/default_testing_configuration.ini",

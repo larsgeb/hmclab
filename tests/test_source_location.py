@@ -60,12 +60,9 @@ def test_basic():
     _hmc_tomography.Samplers.RWMH.sample(
         filename,
         posterior,
-        # mass_matrix=mm,
-        # time_step=0.005,
-        # amount_of_steps=50,
         initial_model=true_model,
         proposals=1000,
-        step_length=0.1,
+        stepsize=0.1,
         online_thinning=1,
         overwrite_existing_file=True,
     )

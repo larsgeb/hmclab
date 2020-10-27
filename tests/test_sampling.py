@@ -16,15 +16,21 @@ _as = _hmc_tomography.Samplers._AbstractSampler
 dimensions = [1, 2, 10]
 distribution_classes = _ad.__subclasses__()
 sampler_classes = _as.__subclasses__()
-proposals = [10, 1000]  # , 731, 1500]
+proposals = [10, 1000]
+autotuning = [True, False]
 
 
 @_pytest.mark.parametrize("sampler_class", sampler_classes)
 @_pytest.mark.parametrize("distribution_class", distribution_classes)
 @_pytest.mark.parametrize("dimensions", dimensions)
 @_pytest.mark.parametrize("proposals", proposals)
+@_pytest.mark.parametrize("autotuning", autotuning)
 def test_basic_sampling(
-    sampler_class: _as, distribution_class: _ad, dimensions: int, proposals: int,
+    sampler_class: _as,
+    distribution_class: _ad,
+    dimensions: int,
+    proposals: int,
+    autotuning: bool,
 ):
 
     try:
@@ -49,6 +55,7 @@ def test_basic_sampling(
         online_thinning=10,
         ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
         max_time=1.0,
+        autotuning=autotuning,
     )
 
     # Check if the file was created. If it wasn't, fail
@@ -63,8 +70,13 @@ def test_basic_sampling(
 @_pytest.mark.parametrize("distribution_class", distribution_classes)
 @_pytest.mark.parametrize("dimensions", dimensions)
 @_pytest.mark.parametrize("proposals", proposals)
+@_pytest.mark.parametrize("autotuning", autotuning)
 def test_samples_file(
-    sampler_class: _as, distribution_class: _ad, dimensions: int, proposals: int,
+    sampler_class: _as,
+    distribution_class: _ad,
+    dimensions: int,
+    proposals: int,
+    autotuning: bool,
 ):
 
     try:
@@ -80,7 +92,9 @@ def test_samples_file(
     if _os.path.exists(filename):
         _os.remove(filename)
 
-    sampler.sample(filename, distribution, proposals=proposals, max_time=0.5)
+    sampler.sample(
+        filename, distribution, proposals=proposals, max_time=0.5, autotuning=autotuning
+    )
 
     # Check if the file was created. If it wasn't, fail
     if not _os.path.exists(filename):
