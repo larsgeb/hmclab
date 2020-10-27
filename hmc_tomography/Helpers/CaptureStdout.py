@@ -9,6 +9,12 @@ try:
     libc = ctypes.CDLL(None)
     c_stdout = ctypes.c_void_p.in_dll(libc, "stdout")
 except ValueError:
+    # These errors are typically given on non UNIX systems, and only relevant to using
+    # LASIF.
+    pass
+except TypeError:
+    # These errors are typically given on non UNIX systems, and only relevant to using
+    # LASIF.
     pass
 
 

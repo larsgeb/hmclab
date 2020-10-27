@@ -38,6 +38,7 @@ matrix:
       env: OS_PY=bionic37
       language: python
       python: 3.7
+      before_install: pip install psvWave
     - name: "Python 3.6 on Xenial"
       os: linux
       dist: xenial
@@ -50,6 +51,7 @@ matrix:
       env: OS_PY=xenial37
       language: python
       python: 3.7
+      before_install: pip install psvWave
     - name: "Python 3.6.8 on Windows"
       os: windows
       language: shell

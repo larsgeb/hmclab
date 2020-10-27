@@ -30,7 +30,6 @@ setuptools.setup(
         "tqdm",
         "h5py",
         "pyyaml",
-        "psvWave",
     ],
     extras_require={
         "dev": [
