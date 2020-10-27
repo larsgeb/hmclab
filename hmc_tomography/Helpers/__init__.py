@@ -5,6 +5,7 @@ from hmc_tomography.Helpers import (
     CustomExceptions,
     Processing,
     CaptureStdout,
+    Timers,
 )
 
 __all__ = [
@@ -14,4 +15,5 @@ __all__ = [
     "CustomExceptions",
     "Processing",
     "CaptureStdout",
+    "Timers",
 ]
