@@ -57,7 +57,7 @@ def test_basic():
     if _os.path.exists(filename):
         _os.remove(filename)
 
-    _hmc_tomography.Samplers.RWMH.sample(
+    _hmc_tomography.Samplers.RWMH().sample(
         filename,
         posterior,
         initial_model=true_model,

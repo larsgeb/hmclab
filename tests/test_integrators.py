@@ -17,7 +17,7 @@ def test_leapfrog():
     sampler = _hmc_tomography.Samplers.HMC()
 
     sampler.sample(
-        filename, dist, proposals=1000, time_step=1.0, integrator="lf", max_time=2.0
+        filename, dist, proposals=1000, stepsize=1.0, integrator="lf", max_time=2.0
     )
 
     samples_written_expected = int(
@@ -44,7 +44,7 @@ def test_four_stage():
     sampler = _hmc_tomography.Samplers.HMC()
 
     sampler.sample(
-        filename, dist, proposals=1000, time_step=3.0, integrator="4s", max_time=2.0
+        filename, dist, proposals=1000, stepsize=3.0, integrator="4s", max_time=2.0
     )
 
     samples_written_expected = int(
@@ -71,7 +71,7 @@ def test_three_stage():
     sampler = _hmc_tomography.Samplers.HMC()
 
     sampler.sample(
-        filename, dist, proposals=1000, time_step=3.0, integrator="3s", max_time=2.0
+        filename, dist, proposals=1000, stepsize=3.0, integrator="3s", max_time=2.0
     )
 
     samples_written_expected = int(

@@ -1,7 +1,6 @@
 import os as _os
 
 import numpy as _numpy
-import matplotlib.pyplot as _plt
 import pytest as _pytest
 
 import hmc_tomography as _hmc_tomography
@@ -72,14 +71,14 @@ def test_elasticFWI_sampling():
     if _os.path.exists(filename):
         _os.remove(filename)
 
-    _hmc_tomography.Samplers.HMC.sample(
+    _hmc_tomography.Samplers.HMC().sample(
         filename,
         posterior,
         proposals=10,
         ram_buffer_size=1,
         amount_of_steps=2,
         initial_model=(upper_bounds + lower_bounds) / 2.0,
-        time_step=0.03,
+        stepsize=0.03,
     )
 
     # Remove the file

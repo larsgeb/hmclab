@@ -38,9 +38,9 @@ def test_basic_sampling(
     except _InvalidCaseError:
         return 0
 
-    sampler = sampler_class()
+    sampler_instance = sampler_class()
 
-    assert isinstance(sampler, _as)
+    assert isinstance(sampler_instance, _as)
 
     filename = "temporary_file.h5"
 
@@ -48,7 +48,7 @@ def test_basic_sampling(
     if _os.path.exists(filename):
         _os.remove(filename)
 
-    sampler.sample(
+    sampler_instance.sample(
         filename,
         distribution,
         proposals=proposals,
@@ -84,7 +84,7 @@ def test_samples_file(
     except _InvalidCaseError:
         return 0
 
-    sampler = sampler_class()
+    sampler_instance = sampler_class()
 
     filename = "temporary_file.h5"
 
@@ -92,7 +92,7 @@ def test_samples_file(
     if _os.path.exists(filename):
         _os.remove(filename)
 
-    sampler.sample(
+    sampler_instance.sample(
         filename, distribution, proposals=proposals, max_time=0.5, autotuning=autotuning
     )
 
@@ -101,7 +101,10 @@ def test_samples_file(
         _pytest.fail("Samples file wasn't created")
 
     samples_written_expected = int(
-        _numpy.floor(sampler.current_proposal / sampler.online_thinning) + 1
+        _numpy.floor(
+            sampler_instance.current_proposal / sampler_instance.online_thinning
+        )
+        + 1
     )
 
     with _hmc_tomography.Samples(filename) as samples:
