@@ -113,7 +113,7 @@ class _AbstractSampler(_ABC):
     sampler_specific_functions_to_diagnose = []
 
     def __init__(self):
-        self.sample = self._sample
+        pass
 
     def _init_sampler(
         self,
@@ -141,6 +141,12 @@ class _AbstractSampler(_ABC):
             overwrite_existing_file ([type]): [description]
             max_time ([type]): [description]
         """
+
+        assert type(samples_hdf5_filename) == str, (
+            f"First argument should be a string containing the path of the file to "
+            f"which to write samples. It was an object of type "
+            f"{type(samples_hdf5_filename)}."
+        )
 
         # Parse the distribution -------------------------------------------------------
 
@@ -387,8 +393,9 @@ class _AbstractSampler(_ABC):
         self.start_time = _datetime.now()
         try:
             # If the sampler is given a maximum time, start timer now
+            scheduled_termination_time = 0
             if self.max_time is not None:
-                t_end = _time() + self.max_time
+                scheduled_termination_time = _time() + self.max_time
 
             # Iterate through amount of proposals
             for self.current_proposal in self.proposals_iterator:
@@ -423,7 +430,7 @@ class _AbstractSampler(_ABC):
                 self._update_progressbar()
 
                 # Check elapsed time
-                if self.max_time is not None and t_end < _time():
+                if self.max_time is not None and scheduled_termination_time < _time():
                     # Raise KeyboardInterrupt if we're over time
                     raise KeyboardInterrupt
 
@@ -651,13 +658,14 @@ class _AbstractSampler(_ABC):
 
     @_abstractmethod
     def _init_sampler_specific(self):
-        """An abstract method that sets up all required attributes and method for the
+        """An abstract method that sets up all required attributes and methods for the
         algorithm."""
         pass
 
     @_abstractmethod
     def _close_sampler_specific(self):
-        """An abstract method that closesup for the algorithm."""
+        """An abstract method that does any post-sampling operations for the
+        algorithm."""
         pass
 
 
@@ -696,7 +704,7 @@ class RWMH(_AbstractSampler):
 
     name = "Random Walk Metropolis Hastings"
 
-    def _sample(
+    def sample(
         self,
         samples_hdf5_filename: str,
         distribution: _AbstractDistribution,
@@ -761,6 +769,8 @@ class RWMH(_AbstractSampler):
 
 
         """
+        # We put the creation of the sampler entirely in a try/catch block, so we can
+        # actually close the hdf5 file if something goes wrong.
         try:
             self._init_sampler(
                 samples_hdf5_filename=samples_hdf5_filename,
@@ -778,50 +788,11 @@ class RWMH(_AbstractSampler):
                 learning_rate=learning_rate,
             )
         except Exception as e:
-            self.samples_hdf5_filehandle.close()
+            if self.samples_hdf5_filehandle is not None:
+                self.samples_hdf5_filehandle.close()
             raise e
 
         self._sample_loop()
-
-    @classmethod
-    def sample(
-        cls,
-        samples_hdf5_filename: str,
-        distribution: _AbstractDistribution,
-        stepsize: float = 1.0,
-        initial_model: _numpy.ndarray = None,
-        proposals: int = 100,
-        diagnostic_mode: bool = False,
-        online_thinning: int = 1,
-        ram_buffer_size: int = None,
-        overwrite_existing_file: bool = False,
-        max_time: float = None,
-        autotuning: bool = False,
-        target_acceptance_rate: float = 0.65,
-        learning_rate: float = 0.75,
-    ):
-        """Simply a forward to the instance method of the sampler; check out
-        _sample()."""
-
-        instance = cls()
-
-        instance._sample(
-            samples_hdf5_filename=samples_hdf5_filename,
-            distribution=distribution,
-            stepsize=stepsize,
-            initial_model=initial_model,
-            proposals=proposals,
-            diagnostic_mode=diagnostic_mode,
-            online_thinning=online_thinning,
-            ram_buffer_size=ram_buffer_size,
-            overwrite_existing_file=overwrite_existing_file,
-            max_time=max_time,
-            autotuning=autotuning,
-            target_acceptance_rate=target_acceptance_rate,
-            learning_rate=learning_rate,
-        )
-
-        return instance
 
     def _init_sampler_specific(self, **kwargs):
 
@@ -975,7 +946,7 @@ class RWMH(_AbstractSampler):
 
 
 class HMC(_AbstractSampler):
-    time_step: float = 0.1
+    stepsize: float = 0.1
     """A positive float representing the time step to be used in solving Hamiltons
     equations. Has a strong influence on acceptance rate. **An essential tuning
     parameter.**"""
@@ -1040,14 +1011,14 @@ class HMC(_AbstractSampler):
     autotuning is True."""
 
     minimal_stepsize = 1e-18
-    """Minimal timestep which is chosen if timestep becomes zero or negative during
+    """Minimal stepsize which is chosen if stepsize becomes zero or negative during
     autotuning."""
 
-    def _sample(
+    def sample(
         self,
         samples_hdf5_filename: str,
         distribution: _AbstractDistribution,
-        time_step: float = 0.1,
+        stepsize: float = 0.1,
         amount_of_steps: int = 10,
         mass_matrix: _AbstractMassMatrix = None,
         integrator: str = "lf",
@@ -1072,7 +1043,7 @@ class HMC(_AbstractSampler):
         distribution: _AbstractDistribution
             The distribution to sample. Should be an instance of a subclass of
             _AbstractDistribution. **A required parameter.**
-        time_step: float
+        stepsize: float
             A positive float representing the time step to be used in solving Hamiltons
             equations. Has a strong influence on acceptance rate. **An essential tuning
             parameter.**
@@ -1115,11 +1086,14 @@ class HMC(_AbstractSampler):
 
 
         """
+
+        # We put the creation of the sampler entirely in a try/catch block, so we can
+        # actually close the hdf5 file if something goes wrong.
         try:
             self._init_sampler(
                 samples_hdf5_filename=samples_hdf5_filename,
                 distribution=distribution,
-                time_step=time_step,
+                stepsize=stepsize,
                 amount_of_steps=amount_of_steps,
                 mass_matrix=mass_matrix,
                 integrator=integrator,
@@ -1135,61 +1109,16 @@ class HMC(_AbstractSampler):
                 max_time=max_time,
             )
         except Exception as e:
-            self.samples_hdf5_filehandle.close()
+            if self.samples_hdf5_filehandle is not None:
+                self.samples_hdf5_filehandle.close()
             raise e
 
         self._sample_loop()
 
-    @classmethod
-    def sample(
-        cls,
-        samples_hdf5_filename: str,
-        distribution: _AbstractDistribution,
-        time_step: float = 0.1,
-        amount_of_steps: int = 10,
-        mass_matrix: _AbstractMassMatrix = None,
-        integrator: str = "lf",
-        initial_model: _numpy.ndarray = None,
-        proposals: int = 100,
-        diagnostic_mode: bool = False,
-        online_thinning: int = 1,
-        ram_buffer_size: int = None,
-        overwrite_existing_file: bool = False,
-        max_time: float = None,
-        autotuning: bool = False,
-        target_acceptance_rate: float = 0.65,
-        learning_rate: float = 0.75,
-    ):
-        """Simply a forward to the instance method of the sampler; check out
-        _sample()."""
-
-        instance = cls()
-
-        instance._sample(
-            samples_hdf5_filename=samples_hdf5_filename,
-            distribution=distribution,
-            time_step=time_step,
-            amount_of_steps=amount_of_steps,
-            mass_matrix=mass_matrix,
-            autotuning=autotuning,
-            target_acceptance_rate=target_acceptance_rate,
-            learning_rate=learning_rate,
-            integrator=integrator,
-            initial_model=initial_model,
-            proposals=proposals,
-            diagnostic_mode=diagnostic_mode,
-            online_thinning=online_thinning,
-            ram_buffer_size=ram_buffer_size,
-            overwrite_existing_file=overwrite_existing_file,
-            max_time=max_time,
-        )
-
-        return instance
-
     def _init_sampler_specific(self, **kwargs):
         # Parse all possible kwargs
         for key in (
-            "time_step",
+            "stepsize",
             "amount_of_steps",
             "mass_matrix",
             "integrator",
@@ -1218,10 +1147,8 @@ class HMC(_AbstractSampler):
         # Step length ------------------------------------------------------------------
         # Assert that step length for Hamiltons equations is a float and bigger than
         # zero
-        self.time_step = float(self.time_step)
-        assert (
-            self.time_step > 0.0
-        ), "Time step (time_step) should be a float larger than zero."
+        self.stepsize = float(self.stepsize)
+        assert self.stepsize > 0.0, "Stepsize should be a float larger than zero."
 
         # Step amount ------------------------------------------------------------------
         # Assert that number of steps for Hamiltons equations is a positive integer
@@ -1297,7 +1224,7 @@ class HMC(_AbstractSampler):
             self.stepsizes = self.stepsizes[: self.current_proposal]
 
     def _write_tuning_settings(self):
-        self.samples_hdf5_dataset.attrs["time_step"] = self.time_step
+        self.samples_hdf5_dataset.attrs["stepsize"] = self.stepsize
         self.samples_hdf5_dataset.attrs["amount_of_steps"] = self.amount_of_steps
         self.samples_hdf5_dataset.attrs["mass_matrix"] = self.mass_matrix.name
         self.samples_hdf5_dataset.attrs["integrator"] = self.integrators_full_names[
@@ -1335,7 +1262,7 @@ class HMC(_AbstractSampler):
     def autotune(self, acceptance_rate):
         # Write out parameters
         self.acceptance_rates[self.current_proposal] = acceptance_rate
-        self.stepsizes[self.current_proposal] = self.time_step
+        self.stepsizes[self.current_proposal] = self.stepsize
 
         # Compute weight according to diminishing scheme, see also:
         # The No-U-Turn Sampler: Adaptively Setting Path Lengths in Hamiltonian
@@ -1346,20 +1273,20 @@ class HMC(_AbstractSampler):
             acceptance_rate = 0
 
         # Update stepsize
-        self.time_step -= schedule_weight * (
+        self.stepsize -= schedule_weight * (
             self.target_acceptance_rate - min(acceptance_rate, 1)
         )
 
-        if self.time_step <= 0:
+        if self.stepsize <= 0:
             _warnings.warn(
-                "The timestep of the algorithm went below zero. You possibly "
+                "The stepsize of the algorithm went below zero. You possibly "
                 "started the algorithm in a region with extremely strong "
-                "gradients. The sampler will now default to a minimum timestep of "
+                "gradients. The sampler will now default to a minimum stepsize of "
                 f"{self.minimal_stepsize}. If this doesn't work, and if choosing "
                 "a different initial model does not make this warning go away, try"
-                "setting a smaller minimal time step and initial time step value."
+                "setting a smaller minimal stepsize and initial stepsize value."
             )
-            self.time_step = max(self.time_step, self.minimal_stepsize)
+            self.stepsize = max(self.stepsize, self.minimal_stepsize)
 
     def _propagate_leapfrog(self,):
 
@@ -1369,7 +1296,7 @@ class HMC(_AbstractSampler):
 
         # Leapfrog integration ---------------------------------------------------------
         position += (
-            0.5 * self.time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
+            0.5 * self.stepsize * self.mass_matrix.kinetic_energy_gradient(momentum)
         )
 
         self.distribution.corrector(position, momentum)
@@ -1389,9 +1316,9 @@ class HMC(_AbstractSampler):
         # Integration loop
         for i in integration_iterator:
             # Momentum step
-            momentum -= self.time_step * self.distribution.gradient(position)
+            momentum -= self.stepsize * self.distribution.gradient(position)
             # Position step
-            position += self.time_step * self.mass_matrix.kinetic_energy_gradient(
+            position += self.stepsize * self.mass_matrix.kinetic_energy_gradient(
                 momentum
             )
             # Correct bounds
@@ -1399,10 +1326,10 @@ class HMC(_AbstractSampler):
 
         # Full momentum and half step position after loop ------------------------------
         # Momentum step
-        momentum -= self.time_step * self.distribution.gradient(position)
+        momentum -= self.stepsize * self.distribution.gradient(position)
         # Position step
         position += (
-            0.5 * self.time_step * self.mass_matrix.kinetic_energy_gradient(momentum)
+            0.5 * self.stepsize * self.mass_matrix.kinetic_energy_gradient(momentum)
         )
         self.distribution.corrector(position, momentum)
 
@@ -1417,11 +1344,11 @@ class HMC(_AbstractSampler):
         b1 = 0.191667800000000000000
         b2 = 1.0 / 2.0 - b1
 
-        a1 *= self.time_step
-        a2 *= self.time_step
-        a3 *= self.time_step
-        b1 *= self.time_step
-        b2 *= self.time_step
+        a1 *= self.stepsize
+        a2 *= self.stepsize
+        a3 *= self.stepsize
+        b1 *= self.stepsize
+        b2 *= self.stepsize
 
         # Make sure not to alter a view but a copy of the passed arrays.
         position = self.current_model.copy()
@@ -1478,10 +1405,10 @@ class HMC(_AbstractSampler):
         b1 = 0.29619504261126
         b2 = 1.0 - 2.0 * b1
 
-        a1 *= self.time_step
-        a2 *= self.time_step
-        b1 *= self.time_step
-        b2 *= self.time_step
+        a1 *= self.stepsize
+        a2 *= self.stepsize
+        b1 *= self.stepsize
+        b2 *= self.stepsize
 
         # Make sure not to alter a view but a copy of the passed arrays.
         position = self.current_model.copy()
