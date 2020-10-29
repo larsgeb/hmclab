@@ -39,7 +39,7 @@ def test_creation(
     # Create variance
     if variance_type == "scalar":
         variance = _numpy.random.rand() + 5.0
-    elif variance_type == "vector":
+    else:
         variance = _numpy.random.rand(dimension_data, 1) + 5.0
 
     # Create distribution
@@ -78,7 +78,7 @@ def test_misfit(
     # Create variance
     if variance_type == "scalar":
         variance = _numpy.random.rand() + 5.0
-    elif variance_type == "vector":
+    else:
         variance = _numpy.random.rand(dimension_data, 1) + 5.0
 
     # Create distribution
@@ -121,7 +121,7 @@ def test_misfit_bounds(
     # Create variance
     if variance_type == "scalar":
         variance = _numpy.random.rand() + 5.0
-    elif variance_type == "vector":
+    else:
         variance = _numpy.random.rand(dimension_data, 1) + 5.0
 
     # Create distribution
@@ -187,7 +187,7 @@ def test_misfit_bounds_impossible(
     # Create variance
     if variance_type == "scalar":
         variance = _numpy.random.rand() + 5.0
-    elif variance_type == "vector":
+    else:
         variance = _numpy.random.rand(dimension_data, 1) + 5.0
 
     # Create distribution
@@ -243,7 +243,7 @@ def test_gradient(
     # Create variance
     if variance_type == "scalar":
         variance = _numpy.random.rand() + 5.0
-    elif variance_type == "vector":
+    else:
         variance = _numpy.random.rand(dimension_data, 1) + 5.0
 
     # Create distribution

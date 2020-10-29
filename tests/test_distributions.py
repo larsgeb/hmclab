@@ -131,11 +131,9 @@ def test_misfit_bounds_impossible(
     try:
         distribution.update_bounds(lower_bounds=upper_bounds, upper_bounds=lower_bounds)
     except ValueError as e:
-        # Assert that the exception is raised by the bounds
-        assert e.args[0] == "Bounds vectors are incompatible."
-
-        # Expected fail
-        _pytest.xfail("Impossible test case, failure is required")
+        # Assert that the exception is raised by the bounds, else re-raise
+        if e.args[0] != "Bounds vectors are incompatible.":
+            raise e
 
 
 @_pytest.mark.parametrize("pclass", subclasses)

@@ -42,7 +42,7 @@ def test_creation(
     if covariance_type == "vector":
         covariance = _numpy.random.rand(dimension_data,) + 5.0
         covariance = _numpy.diag(covariance)
-    elif covariance_type == "matrix":
+    else:
         covariance = random_correlation_matrix(dimension_data)
 
     # Create distribution
@@ -86,7 +86,7 @@ def test_misfit(
     if covariance_type == "vector":
         covariance = _numpy.random.rand(dimension_data,) + 5.0
         covariance = _numpy.diag(covariance)
-    elif covariance_type == "matrix":
+    else:
         covariance = random_correlation_matrix(dimension_data)
 
     # Create distribution
@@ -134,7 +134,7 @@ def test_misfit_bounds(
     if covariance_type == "vector":
         covariance = _numpy.random.rand(dimension_data,) + 5.0
         covariance = _numpy.diag(covariance)
-    elif covariance_type == "matrix":
+    else:
         covariance = random_correlation_matrix(dimension_data)
 
     # Create distribution
@@ -205,7 +205,7 @@ def test_misfit_bounds_impossible(
     if covariance_type == "vector":
         covariance = _numpy.random.rand(dimension_data,) + 5.0
         covariance = _numpy.diag(covariance)
-    elif covariance_type == "matrix":
+    else:
         covariance = random_correlation_matrix(dimension_data)
 
     # Create distribution
@@ -266,7 +266,7 @@ def test_gradient(
     if covariance_type == "vector":
         covariance = _numpy.random.rand(dimension_data,) + 5.0
         covariance = _numpy.diag(covariance)
-    elif covariance_type == "matrix":
+    else:
         covariance = random_correlation_matrix(dimension_data)
 
     # Create distribution
