@@ -53,6 +53,10 @@ class Samples:
     def numpy(self):
         return self.file_handle[self.datasetname][:, :]
 
+    @property
+    def h5(self):
+        return self.file_handle[self.datasetname]
+
     def print_details(self):
 
         size = _shutil.get_terminal_size((40, 20))
