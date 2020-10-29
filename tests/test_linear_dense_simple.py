@@ -7,9 +7,9 @@ from hmc_tomography.Distributions.LinearMatrix import (
     _LinearMatrix_dense_forward_simple_covariance,
 )
 
-dimension_data = [1, 10, 100, 1000]
-dimension_model = [1, 10, 100, 1000]
-deltas = [1e-10, 1e-4, 1e-2, -1e-10, -1e-4, -1e-2]
+dimension_data = [1, 10, 100]
+dimension_model = [1, 10, 100]
+deltas = [1e-10, 1e-2, -1e-10, -1e-2]
 dtype = [_numpy.dtype("float64"), _numpy.dtype("float32")]
 premultiplication = [True, False, None]
 variance_type = ["scalar", "vector"]

@@ -8,13 +8,13 @@ from hmc_tomography.Distributions.LinearMatrix import (
     _LinearMatrix_sparse_forward_simple_covariance,
 )
 
-dimension_data = [1, 10, 100, 1000]
-dimension_model = [1, 10, 100, 1000]
-deltas = [1e-10, 1e-4, 1e-2, -1e-10, -1e-4, -1e-2]
+dimension_data = [1, 10, 100]
+dimension_model = [1, 10, 100]
+deltas = [1e-10, 1e-2, -1e-10, -1e-2]
 dtype = [_numpy.dtype("float64"), _numpy.dtype("float32")]
 premultiplication = [True, False, None]
 variance_type = ["scalar", "vector"]
-density = [0.001, 0.01, 0.1]
+density = [0.001, 0.1]
 
 try:
     from ctypes import cdll
@@ -44,13 +44,19 @@ def test_creation(
     """This check assesses whether or not we can actually create an instance of the
     _LinearMatrix_sparse_forward_simple_covariance class under varying circumstances."""
 
+    # Adjust for small matrices
+    actual_elements = dimension_data * dimension_model * density
+    if actual_elements < 10:
+        density = 10.0 / (dimension_data * dimension_model)
+    density = min(density, 1.0)
+
     # Create forward model matrix
     G = _scipy.sparse.random(
         dimension_data, dimension_model, density=density, format="csr", dtype=dtype
     )
 
     # Create observed data
-    d = _numpy.ones((dimension_data, 1))
+    data = _numpy.ones((dimension_data, 1))
 
     # Create variance
     if variance_type == "scalar":
@@ -61,7 +67,7 @@ def test_creation(
     # Create distribution
     distribution = _LinearMatrix_sparse_forward_simple_covariance(
         G,
-        d,
+        data,
         data_variance=variance,
         dtype=dtype,
         premultiplication=premultiplication,
@@ -94,13 +100,19 @@ def test_misfit(
     the _LinearMatrix_sparse_forward_simple_covariance class under varying
     circumstances. It also checks if the returned misfit is of the correct type."""
 
+    # Adjust for small matrices
+    actual_elements = dimension_data * dimension_model * density
+    if actual_elements < 10:
+        density = 10.0 / (dimension_data * dimension_model)
+    density = min(density, 1.0)
+
     # Create forward model matrix
     G = _scipy.sparse.random(
         dimension_data, dimension_model, density=density, format="csr", dtype=dtype
     )
 
     # Create observed data
-    d = _numpy.ones((dimension_data, 1))
+    data = _numpy.ones((dimension_data, 1))
 
     # Create variance
     if variance_type == "scalar":
@@ -111,7 +123,7 @@ def test_misfit(
     # Create distribution
     distribution = _LinearMatrix_sparse_forward_simple_covariance(
         G,
-        d,
+        data,
         data_variance=variance,
         dtype=dtype,
         premultiplication=premultiplication,
@@ -148,13 +160,19 @@ def test_misfit_bounds(
     becomes bounded, under varying circumstances.
     """
 
+    # Adjust for small matrices
+    actual_elements = dimension_data * dimension_model * density
+    if actual_elements < 10:
+        density = 10.0 / (dimension_data * dimension_model)
+    density = min(density, 1.0)
+
     # Create forward model matrix
     G = _scipy.sparse.random(
         dimension_data, dimension_model, density=density, format="csr", dtype=dtype
     )
 
     # Create observed data
-    d = _numpy.ones((dimension_data, 1))
+    data = _numpy.ones((dimension_data, 1))
 
     # Create variance
     if variance_type == "scalar":
@@ -165,7 +183,7 @@ def test_misfit_bounds(
     # Create distribution
     distribution = _LinearMatrix_sparse_forward_simple_covariance(
         G,
-        d,
+        data,
         data_variance=variance,
         dtype=dtype,
         premultiplication=premultiplication,
@@ -225,13 +243,19 @@ def test_misfit_bounds_impossible(
     the _LinearMatrix_sparse_forward_simple_covariance class under varying
     circumstances."""
 
+    # Adjust for small matrices
+    actual_elements = dimension_data * dimension_model * density
+    if actual_elements < 10:
+        density = 10.0 / (dimension_data * dimension_model)
+    density = min(density, 1.0)
+
     # Create forward model matrix
     G = _scipy.sparse.random(
         dimension_data, dimension_model, density=density, format="csr", dtype=dtype
     )
 
     # Create observed data
-    d = _numpy.ones((dimension_data, 1))
+    data = _numpy.ones((dimension_data, 1))
 
     # Create variance
     if variance_type == "scalar":
@@ -242,7 +266,7 @@ def test_misfit_bounds_impossible(
     # Create distribution
     distribution = _LinearMatrix_sparse_forward_simple_covariance(
         G,
-        d,
+        data,
         data_variance=variance,
         dtype=dtype,
         premultiplication=premultiplication,
@@ -291,25 +315,30 @@ def test_gradient(
     the _LinearMatrix_sparse_forward_simple_covariance class under varying
     circumstances. Also performs an accuracy check on the gradient."""
 
+    # Adjust for small matrices
+    actual_elements = dimension_data * dimension_model * density
+    if actual_elements < 10:
+        density = 10.0 / (dimension_data * dimension_model)
+    density = min(density, 1.0)
+
     # Create forward model matrix
     G = _scipy.sparse.random(
         dimension_data, dimension_model, density=density, format="csr", dtype=dtype
     )
 
     # Create observed data
-    d = _numpy.ones((dimension_data, 1))
+    data = _numpy.ones((dimension_data, 1))
 
     # Create variance
     if variance_type == "scalar":
         variance = _numpy.random.rand() + 5.0
-        variance = _numpy.array([variance], dtype=dtype).item()
     else:
         variance = _numpy.random.rand(dimension_data, 1).astype(dtype) + 5.0
 
     # Create distribution
     distribution = _LinearMatrix_sparse_forward_simple_covariance(
         G,
-        d,
+        data,
         data_variance=variance,
         dtype=dtype,
         premultiplication=premultiplication,

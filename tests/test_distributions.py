@@ -9,9 +9,9 @@ from hmc_tomography.Helpers.CustomExceptions import (
     InvalidCaseError as _InvalidCaseError,
 )
 
-dimensions = [1, 2, 10, 100]
+dimensions = [1, 2, 50]
 subclasses = _Distributions._AbstractDistribution.__subclasses__()
-deltas = [1e-10, 1e-4, 1e-2, -1e-10, -1e-4, -1e-2]
+deltas = [1e-10, 1e-2, -1e-10, -1e-2]
 
 
 @_pytest.mark.parametrize("pclass", subclasses)

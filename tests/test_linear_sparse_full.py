@@ -12,10 +12,10 @@ from hmc_tomography.Helpers.RandomMatrices import random_correlation_matrix
 
 dimension_data = [1, 10, 100]
 dimension_model = [1, 10, 100]
-deltas = [1e-10, 1e-4, 1e-2, -1e-10, -1e-4, -1e-2]
+deltas = [1e-10, 1e-2, -1e-10, -1e-2]
 dtype = [_numpy.dtype("float64"), _numpy.dtype("float32")]
 covariance_type = ["vector", "matrix"]
-density = [0.001, 0.01, 0.1]
+density = [0.001, 0.1]
 
 
 @_pytest.mark.parametrize("dimension_data", dimension_data)
@@ -33,24 +33,32 @@ def test_creation(
     """This check assesses whether or not we can actually create an instance of the
     _LinearMatrix_sparse_forward_sparse_covariance class under varying circumstances."""
 
+    # Adjust for small matrices
+    actual_elements = dimension_data * dimension_model * density
+    if actual_elements < 10:
+        density = 10.0 / (dimension_data * dimension_model)
+    density = min(density, 1.0)
+
     # Create forward model matrix
     G = _scipy.sparse.random(
         dimension_data, dimension_model, density=density, format="csr", dtype=dtype
     )
 
     # Create observed data
-    d = _numpy.ones((dimension_data, 1))
+    data = _numpy.ones((dimension_data, 1))
 
     # Create covariance
     if covariance_type == "vector":
         covariance = _numpy.random.rand(dimension_data,) + 5.0
-        covariance = _scipy.sparse.diags(covariance)
+        covariance = _numpy.diag(covariance)
     else:
         covariance = random_correlation_matrix(dimension_data)
 
+    covariance = covariance.astype(dtype)
+
     # Create distribution
     distribution = _LinearMatrix_sparse_forward_sparse_covariance(
-        G, d, data_covariance=covariance, dtype=dtype,
+        G, data, data_covariance=covariance, dtype=dtype,
     )
 
     # Check if the distribution has right amount of dimensions
@@ -75,13 +83,19 @@ def test_misfit(
     the _LinearMatrix_sparse_forward_sparse_covariance class under varying
     circumstances. It also checks if the returned misfit is of the correct type."""
 
+    # Adjust for small matrices
+    actual_elements = dimension_data * dimension_model * density
+    if actual_elements < 10:
+        density = 10.0 / (dimension_data * dimension_model)
+    density = min(density, 1.0)
+
     # Create forward model matrix
     G = _scipy.sparse.random(
         dimension_data, dimension_model, density=density, format="csr", dtype=dtype
     )
 
     # Create observed data
-    d = _numpy.ones((dimension_data, 1))
+    data = _numpy.ones((dimension_data, 1))
 
     # Create covariance
     if covariance_type == "vector":
@@ -90,9 +104,11 @@ def test_misfit(
     else:
         covariance = random_correlation_matrix(dimension_data)
 
+    covariance = covariance.astype(dtype)
+
     # Create distribution
     distribution = _LinearMatrix_sparse_forward_sparse_covariance(
-        G, d, data_covariance=covariance, dtype=dtype,
+        G, data, data_covariance=covariance, dtype=dtype,
     )
 
     location = _numpy.ones((dimension_model, 1)) + _numpy.random.rand(1)
@@ -121,13 +137,19 @@ def test_misfit_bounds(
     becomes bounded, under varying circumstances.
     """
 
+    # Adjust for small matrices
+    actual_elements = dimension_data * dimension_model * density
+    if actual_elements < 10:
+        density = 10.0 / (dimension_data * dimension_model)
+    density = min(density, 1.0)
+
     # Create forward model matrix
     G = _scipy.sparse.random(
         dimension_data, dimension_model, density=density, format="csr", dtype=dtype
     )
 
     # Create observed data
-    d = _numpy.ones((dimension_data, 1))
+    data = _numpy.ones((dimension_data, 1))
 
     # Create covariance
     if covariance_type == "vector":
@@ -136,9 +158,11 @@ def test_misfit_bounds(
     else:
         covariance = random_correlation_matrix(dimension_data)
 
+    covariance = covariance.astype(dtype)
+
     # Create distribution
     distribution = _LinearMatrix_sparse_forward_sparse_covariance(
-        G, d, data_covariance=covariance, dtype=dtype,
+        G, data, data_covariance=covariance, dtype=dtype,
     )
 
     lower_bounds = _numpy.ones((dimension_model, 1))
@@ -190,13 +214,19 @@ def test_misfit_bounds_impossible(
     the _LinearMatrix_sparse_forward_sparse_covariance class under varying
     circumstances."""
 
+    # Adjust for small matrices
+    actual_elements = dimension_data * dimension_model * density
+    if actual_elements < 10:
+        density = 10.0 / (dimension_data * dimension_model)
+    density = min(density, 1.0)
+
     # Create forward model matrix
     G = _scipy.sparse.random(
         dimension_data, dimension_model, density=density, format="csr", dtype=dtype
     )
 
     # Create observed data
-    d = _numpy.ones((dimension_data, 1))
+    data = _numpy.ones((dimension_data, 1))
 
     # Create covariance
     if covariance_type == "vector":
@@ -205,9 +235,11 @@ def test_misfit_bounds_impossible(
     else:
         covariance = random_correlation_matrix(dimension_data)
 
+    covariance = covariance.astype(dtype)
+
     # Create distribution
     distribution = _LinearMatrix_sparse_forward_sparse_covariance(
-        G, d, data_covariance=covariance, dtype=dtype,
+        G, data, data_covariance=covariance, dtype=dtype,
     )
 
     lower_bounds = _numpy.ones((dimension_model, 1))
@@ -248,13 +280,19 @@ def test_gradient(
     the _LinearMatrix_sparse_forward_sparse_covariance class under varying
     circumstances. Also performs an accuracy check on the gradient."""
 
+    # Adjust for small matrices
+    actual_elements = dimension_data * dimension_model * density
+    if actual_elements < 10:
+        density = 10.0 / (dimension_data * dimension_model)
+    density = min(density, 1.0)
+
     # Create forward model matrix
     G = _scipy.sparse.random(
         dimension_data, dimension_model, density=density, format="csr", dtype=dtype
     )
 
     # Create observed data
-    d = _numpy.ones((dimension_data, 1))
+    data = _numpy.ones((dimension_data, 1))
 
     # Create covariance
     if covariance_type == "vector":
@@ -263,9 +301,11 @@ def test_gradient(
     else:
         covariance = random_correlation_matrix(dimension_data)
 
+    covariance = covariance.astype(dtype)
+
     # Create distribution
     distribution = _LinearMatrix_sparse_forward_sparse_covariance(
-        G, d, data_covariance=covariance, dtype=dtype,
+        G, data, data_covariance=covariance, dtype=dtype,
     )
 
     location = (_numpy.ones((dimension_model, 1)) + _numpy.random.rand(1)).astype(dtype)
