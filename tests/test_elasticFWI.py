@@ -83,4 +83,3 @@ def test_elasticFWI_sampling():
 
     # Remove the file
     _os.remove(filename)
-

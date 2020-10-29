@@ -6,7 +6,6 @@ from typing import Union as _Union
 import numpy as _numpy
 import scipy as _scipy
 import scipy.sparse as _sparse
-from scipy.sparse import data
 import scipy.sparse.linalg as _sparse_linalg
 
 from hmc_tomography.Distributions import _AbstractDistribution
