@@ -11,7 +11,7 @@ from hmc_tomography.Helpers.RandomMatrices import random_correlation_matrix
 
 dimension_data = [1, 10, 100]
 dimension_model = [1, 10, 100]
-deltas = [1e-10, 1e-4, 1e-2, -1e-10, -1e-4, -1e-2]
+deltas = [1e-10, 1e-2, -1e-10, -1e-2]
 dtype = [_numpy.dtype("float64"), _numpy.dtype("float32")]
 premultiplication = [True, False, None]
 covariance_type = ["vector", "matrix"]
@@ -42,7 +42,7 @@ def test_creation(
     if covariance_type == "vector":
         covariance = _numpy.random.rand(dimension_data,) + 5.0
         covariance = _numpy.diag(covariance)
-    elif covariance_type == "matrix":
+    else:
         covariance = random_correlation_matrix(dimension_data)
 
     # Create distribution
@@ -86,7 +86,7 @@ def test_misfit(
     if covariance_type == "vector":
         covariance = _numpy.random.rand(dimension_data,) + 5.0
         covariance = _numpy.diag(covariance)
-    elif covariance_type == "matrix":
+    else:
         covariance = random_correlation_matrix(dimension_data)
 
     # Create distribution
@@ -134,7 +134,7 @@ def test_misfit_bounds(
     if covariance_type == "vector":
         covariance = _numpy.random.rand(dimension_data,) + 5.0
         covariance = _numpy.diag(covariance)
-    elif covariance_type == "matrix":
+    else:
         covariance = random_correlation_matrix(dimension_data)
 
     # Create distribution
@@ -205,7 +205,7 @@ def test_misfit_bounds_impossible(
     if covariance_type == "vector":
         covariance = _numpy.random.rand(dimension_data,) + 5.0
         covariance = _numpy.diag(covariance)
-    elif covariance_type == "matrix":
+    else:
         covariance = random_correlation_matrix(dimension_data)
 
     # Create distribution
@@ -266,7 +266,7 @@ def test_gradient(
     if covariance_type == "vector":
         covariance = _numpy.random.rand(dimension_data,) + 5.0
         covariance = _numpy.diag(covariance)
-    elif covariance_type == "matrix":
+    else:
         covariance = random_correlation_matrix(dimension_data)
 
     # Create distribution

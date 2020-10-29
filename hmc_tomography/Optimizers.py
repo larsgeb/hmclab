@@ -97,7 +97,6 @@ class gradient_descent(_AbstractOptimizer):
                 nmax, desc="Iterating", leave=True, dynamic_ncols=True,
             )
         except Exception:
-            assert False
             iterations = _tqdm_au.trange(nmax, desc="Iterating", leave=True,)
 
         for iteration in iterations:
@@ -158,7 +157,6 @@ class simple_preconditioned_gradient_descent(_AbstractOptimizer):
                 nmax, desc="Iterating", leave=True, dynamic_ncols=True,
             )
         except Exception:
-            assert False
             iterations = _tqdm_au.trange(nmax, desc="Iterating", leave=True,)
 
         for iteration in iterations:

@@ -22,9 +22,16 @@ class LinearMatrix(_AbstractDistribution):
         G: _Union[_numpy.ndarray, _sparse.spmatrix],
         d: _numpy.ndarray,
         data_covariance: _Union[float, _numpy.ndarray, _sparse.spmatrix],
-        dtype=_numpy.single,
+        dtype=None,
         **kwargs,
     ):
+
+        # Set precision for inconsistently passed objects ------------------------------
+        if dtype is not None:
+            G.dtype = dtype
+        d = d.astype(G.dtype)
+        if type(data_covariance) not in [float, _numpy.float32, _numpy.float64]:
+            data_covariance = data_covariance.astype(G.dtype)
 
         # Four cases:
         # 1 - Dense G, scalar/vector covariance
@@ -367,7 +374,7 @@ class _LinearMatrix_sparse_forward_simple_covariance(_AbstractDistribution):
 
                 except OSError:
                     _warnings.warn(
-                        f"MKL not found, will evaluate matrix-vector products using "
+                        "MKL not found, will evaluate matrix-vector products using "
                         "SciPy.",
                         Warning,
                     )
@@ -449,7 +456,7 @@ class _LinearMatrix_sparse_forward_sparse_covariance(_AbstractDistribution):
         self.data_covariance = data_covariance
 
         self.Gt = self.G.T.tocsr()
-        self.dt = d.T
+        self.dt = d.T.astype(dtype)
         self.factorized_covariance = _sparse_linalg.factorized(
             self.data_covariance.tocsc()
         )
@@ -459,12 +466,16 @@ class _LinearMatrix_sparse_forward_sparse_covariance(_AbstractDistribution):
             0.5
             * (
                 (coordinates.T @ self.Gt - self.dt)
-                @ self.factorized_covariance((self.G @ coordinates - self.d))
+                @ self.factorized_covariance(
+                    (self.G @ coordinates - self.d).astype(self.data_covariance.dtype)
+                )
             ).item()
         )
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
-        return self.Gt @ self.factorized_covariance(self.G @ coordinates - self.d)
+        return self.Gt @ self.factorized_covariance(
+            (self.G @ coordinates - self.d).astype(self.data_covariance.dtype)
+        )
 
     def generate(self) -> _numpy.ndarray:
         raise NotImplementedError()

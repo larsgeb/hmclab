@@ -4,7 +4,7 @@ import h5py as _h5py
 
 
 class Samples:
-    """A class to handle generated samples files more easily.
+    """A class to handle generated samples files.
 
     """
 
@@ -52,6 +52,10 @@ class Samples:
     @property
     def numpy(self):
         return self.file_handle[self.datasetname][:, :]
+
+    @property
+    def h5(self):
+        return self.file_handle[self.datasetname]
 
     def print_details(self):
 

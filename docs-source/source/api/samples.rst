@@ -2,5 +2,5 @@
 Samples class
 #############
 
-.. autoclass:: hmc_tomography.Post.Samples
+.. autoclass:: hmc_tomography.Samples
     :members:

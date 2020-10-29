@@ -84,13 +84,8 @@ class ElasticFullWaveform2D(_AbstractDistribution):
         # Create target model
         # Get the coordinates of every grid point
         IX, IZ = model.get_coordinates(True)
-        extent = model.get_extent(True)
         # Get the associated parameter fields
         vp, vs, rho = model.get_parameter_fields()
-
-        vp_starting = vp
-        vs_starting = vs
-        rho_starting = rho
 
         x_middle = (IX.max() + IX.min()) / 2
         z_middle = (IZ.max() + IZ.min()) / 2

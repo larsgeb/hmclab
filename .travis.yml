@@ -4,17 +4,6 @@ cache: pip
 
 matrix:
   include:
-    - name: "Python 3.6.5 on macOS (xcode9.4)"
-      os: osx
-      env: OS_PY=osx36
-      osx_image: xcode9.4
-      language: shell
-      before_install:
-        - python --version
-        - python3 --version
-        - pip3 install -U pip
-        - pip3 install -U pytest
-        - pip3 install codecov
     - name: "Python 3.7.3 on macOS (xcode10.2)"
       os: osx
       env: OS_PY=osx37
@@ -26,42 +15,25 @@ matrix:
         - pip3 install -U pip
         - pip3 install -U pytest
         - pip3 install codecov
-    - name: "Python 3.6 on Bionic"
-      os: linux
-      dist: bionic
-      env: OS_PY=bionic36
-      language: python
-      python: 3.6
+        - jupyter nbextension enable --py widgetsnbextension
     - name: "Python 3.7 on Bionic"
       os: linux
       dist: bionic
       env: OS_PY=bionic37
       language: python
       python: 3.7
-    - name: "Python 3.6 on Xenial"
-      os: linux
-      dist: xenial
-      env: OS_PY=xenial36
-      language: python
-      python: 3.6
+      before_install:
+        - pip install psvWave
+        - jupyter nbextension enable --py widgetsnbextension
     - name: "Python 3.7 on Xenial"
       os: linux
       dist: xenial
       env: OS_PY=xenial37
       language: python
       python: 3.7
-    - name: "Python 3.6.8 on Windows"
-      os: windows
-      language: shell
       before_install:
-        - choco install python --version 3.6.8
-        - python --version
-        - python -m pip install --upgrade pip
-        - pip3 install --upgrade pytest
-        - pip3 install codecov
-      env:
-        - OS_PY=windows36
-        - PATH=/c/Python36:/c/Python36/Scripts:$PATH
+        - pip install psvWave
+        - jupyter nbextension enable --py widgetsnbextension
     - name: "Python 3.7.4 on Windows"
       os: windows
       language: shell
@@ -71,6 +43,7 @@ matrix:
         - python -m pip install --upgrade pip
         - pip3 install --upgrade pytest
         - pip3 install codecov
+        - jupyter nbextension enable --py widgetsnbextension
       env:
         - OS_PY=windows37
         - PATH=/c/Python37:/c/Python37/Scripts:$PATH
@@ -107,19 +80,6 @@ matrix:
       env: OS_PY=xenial37_deploy
       language: python
       python: 3.7
-  allow_failures:
-    - name: "Python 3.6 on Trusty"
-      os: linux
-      dist: trusty
-      env: OS_PY=trusty36
-      language: python
-      python: 3.6
-    - name: "Python 3.6 on Precise"
-      os: linux
-      dist: precise
-      env: OS_PY=precise36
-      language: python
-      python: 3.6
 
 # Shared install, script, after_succes tasks, only overwritten in deploy task
 

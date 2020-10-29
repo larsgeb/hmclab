@@ -245,7 +245,7 @@ class _AbstractDistribution(metaclass=_ABCMeta):
             self.lower_bounds, self.upper_bounds = old_limits
 
             # Raise error
-            raise ValueError(f"Bounds vectors are of incorrect size.")
+            raise ValueError("Bounds vectors are of incorrect size.")
 
         # Check that all upper bounds are (finitely) above lower bounds ----------------
         if (
@@ -1127,7 +1127,7 @@ class Mixture(_AbstractDistribution):
 
     def misfit(self, m):
         misfits = [d.misfit(m) for d in self.distributions]
-        return -_numpy.log(
+        return self.misfit_bounds(m) - _numpy.log(
             _numpy.sum(_numpy.exp(_numpy.log(self.probabilities) - misfits))
         )
 
@@ -1143,3 +1143,11 @@ class Mixture(_AbstractDistribution):
         )
 
         return -gr / _numpy.sum(probs)
+
+    @staticmethod
+    def create_default(dimensions: int) -> "Mixture":
+
+        Normal1 = Normal.create_default(dimensions)
+        Normal2 = Normal.create_default(dimensions)
+
+        return Mixture([Normal1, Normal2], [0.5, 0.5])

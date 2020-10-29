@@ -15,9 +15,7 @@ Available classes within `MassMatrices`:
    _AbstractMassMatrix
    Unit
    Diagonal
-   LBFGS
    
 .. autosummary:: hmc_tomography.MassMatrices._AbstractMassMatrix
                  hmc_tomography.MassMatrices.Unit
                  hmc_tomography.MassMatrices.Diagonal
-                 hmc_tomography.MassMatrices.LBFGS

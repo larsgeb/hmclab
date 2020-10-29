@@ -1,7 +1,3 @@
-numpy
-scipy
-termcolor
-matplotlib
-tqdm
-h5py
-pyyaml
+# This file may be used to create an environment using:
+# $ conda create --name <env> --file <this file>
+# platform: linux-64

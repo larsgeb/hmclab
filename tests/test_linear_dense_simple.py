@@ -7,9 +7,9 @@ from hmc_tomography.Distributions.LinearMatrix import (
     _LinearMatrix_dense_forward_simple_covariance,
 )
 
-dimension_data = [1, 10, 100, 1000]
-dimension_model = [1, 10, 100, 1000]
-deltas = [1e-10, 1e-4, 1e-2, -1e-10, -1e-4, -1e-2]
+dimension_data = [1, 10, 100]
+dimension_model = [1, 10, 100]
+deltas = [1e-10, 1e-2, -1e-10, -1e-2]
 dtype = [_numpy.dtype("float64"), _numpy.dtype("float32")]
 premultiplication = [True, False, None]
 variance_type = ["scalar", "vector"]
@@ -39,7 +39,7 @@ def test_creation(
     # Create variance
     if variance_type == "scalar":
         variance = _numpy.random.rand() + 5.0
-    elif variance_type == "vector":
+    else:
         variance = _numpy.random.rand(dimension_data, 1) + 5.0
 
     # Create distribution
@@ -78,7 +78,7 @@ def test_misfit(
     # Create variance
     if variance_type == "scalar":
         variance = _numpy.random.rand() + 5.0
-    elif variance_type == "vector":
+    else:
         variance = _numpy.random.rand(dimension_data, 1) + 5.0
 
     # Create distribution
@@ -121,7 +121,7 @@ def test_misfit_bounds(
     # Create variance
     if variance_type == "scalar":
         variance = _numpy.random.rand() + 5.0
-    elif variance_type == "vector":
+    else:
         variance = _numpy.random.rand(dimension_data, 1) + 5.0
 
     # Create distribution
@@ -187,7 +187,7 @@ def test_misfit_bounds_impossible(
     # Create variance
     if variance_type == "scalar":
         variance = _numpy.random.rand() + 5.0
-    elif variance_type == "vector":
+    else:
         variance = _numpy.random.rand(dimension_data, 1) + 5.0
 
     # Create distribution
@@ -243,7 +243,7 @@ def test_gradient(
     # Create variance
     if variance_type == "scalar":
         variance = _numpy.random.rand() + 5.0
-    elif variance_type == "vector":
+    else:
         variance = _numpy.random.rand(dimension_data, 1) + 5.0
 
     # Create distribution
