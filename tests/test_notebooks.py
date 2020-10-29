@@ -1,5 +1,4 @@
 import glob
-import os
 import nbformat
 from black import format_str, FileMode
 import pytest
@@ -13,8 +12,7 @@ fixture = NBRegressionFixture(
 fixture.diff_color_words = False
 
 # Find all notebook files
-os.chdir("examples/notebooks")
-notebooks = glob.glob("*.ipynb")
+notebooks = glob.glob("examples/notebooks/*.ipynb")
 
 
 @pytest.mark.parametrize("notebook_fh", notebooks)

@@ -50,6 +50,7 @@ setuptools.setup(
             "pytest-harvest",
             "pytest-ordering",
             "pytest_notebook",
+            "ipywidgets",
         ],
         "testing": [
             "black",
@@ -60,6 +61,7 @@ setuptools.setup(
             "pytest-harvest",
             "pytest-ordering",
             "pytest_notebook",
+            "ipywidgets",
         ],
     },
     entry_points={"console_scripts": ["hmc_tomography=hmc_tomography.__main__:cli"]},
