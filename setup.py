@@ -51,6 +51,7 @@ setuptools.setup(
             "pytest-ordering",
             "pytest_notebook",
             "ipywidgets",
+            "nbformat",
         ],
     },
     entry_points={"console_scripts": ["hmc_tomography=hmc_tomography.__main__:cli"]},

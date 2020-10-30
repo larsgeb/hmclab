@@ -6,13 +6,16 @@ import numpy as _numpy
 import psvWave as _psvWave
 
 from hmc_tomography.Distributions import _AbstractDistribution
-from hmc_tomography.Helpers import CustomExceptions as _CustomExceptions
+from hmc_tomography.Helpers.CustomExceptions import (
+    InvalidCaseError as _InvalidCaseError,
+)
 
 
 class ElasticFullWaveform2D(_AbstractDistribution):
     forward_up_to_date: bool = False
     temperature: float = 1.0
     omp_threads_override: int = 0
+    fdModel: _psvWave.fdModel
 
     def __init__(
         self,
@@ -28,7 +31,10 @@ class ElasticFullWaveform2D(_AbstractDistribution):
         elif self.__class__ == type(_input):
             make_copy = True
         else:
-            raise ValueError()
+            raise ValueError(
+                f"Incorrect initialization. Passed argument `{_input}` can not create "
+                "an FWI object."
+            )
 
         # Check if we are creating a new object or copying an existing one
         if not make_copy:
@@ -79,7 +85,7 @@ class ElasticFullWaveform2D(_AbstractDistribution):
         model = _psvWave.fdModel(ini_file)
 
         if model.free_parameters != dimensions:
-            raise _CustomExceptions.InvalidCaseError()
+            raise _InvalidCaseError()
 
         # Create target model
         # Get the coordinates of every grid point
@@ -120,7 +126,9 @@ class ElasticFullWaveform2D(_AbstractDistribution):
         )
 
     def generate(self) -> _numpy.ndarray:
-        pass
+        raise _InvalidCaseError(
+            "Can't generate samples from non-analytic distributions."
+        )
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
 
