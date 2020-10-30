@@ -52,7 +52,7 @@ setuptools.setup(
             "pytest-ordering",
             "pytest_notebook",
             "ipywidgets",
-            "nbformat",
+            "nbformat<6.0.0",
             "pybind11",
             "cmake",
             "psvWave",
