@@ -1,5 +1,12 @@
+numpy
+scipy
+termcolor
+matplotlib
+tqdm
+h5py
+pyyaml
 black
-pre-commit
+flake8
 ipython
 sphinx
 nbsphinx
@@ -8,7 +15,11 @@ numpydoc
 pandoc
 sphinx-git
 versioneer
+pandas
+pre-commit
 codecov
 pytest
 pytest-harvest
-pandas
+pytest-ordering
+pytest_notebook
+ipywidgets

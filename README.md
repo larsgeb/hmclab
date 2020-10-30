@@ -30,6 +30,7 @@ pip install -e .
 If you want to develop within this repo, we recommend a few extra packages. They can also be installed using pip.
 
 In Bash:
+
 ```
 pip install -e git+git@github.com:larsgeb/hmc-tomography.git@master#egg=hmc_tomography[dev] # from github repo
 pip install -e .[dev] # from local clone
@@ -46,11 +47,11 @@ pip install -e .\[dev\] # from local clone
 
 We test our code using TravisCI on as many platforms and Python versions as possible. Currently, we are testing the following configurations:
 
-| Testing environments | Python 3.6                      | Python 3.7     |
-|----------------------|---------------------------------|----------------|
-| Windows              | ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=windows36&label=Windows%20-%20Python%203.6)                            | ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=windows37&label=Windows%20-%20Python%203.7)           |
-| Ubuntu               | ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=bionic36&label=Bionic%20-%20Python%203.6) <br> ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=xenial36&label=Xenial%20-%20Python%203.6) <br> | ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=bionic37&label=Bionic%20-%20Python%203.7) <br> ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=xenial37&label=Xenial%20-%20Python%203.7) |
-| macOS                | ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=osx36&label=macOS%20-%20xcode9.4%20-%20Python%203.6)                        | ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=osx37&label=macOS%20-%20xcode10.2%20-%20Python%203.7)      |
+| Testing environments | Python 3.7                                                                                                                                                                                                                                                                     |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Windows              | ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=windows37&label=Windows%20-%20Python%203.7)                                                                                                                                         |
+| Ubuntu               | ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=bionic37&label=Bionic%20-%20Python%203.7) <br> ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=xenial37&label=Xenial%20-%20Python%203.7) |
+| macOS                | ![](https://badges.herokuapp.com/travis.com/larsgeb/hmc-tomography?branch=master&env=OS_PY=osx37&label=macOS%20-%20xcode10.2%20-%20Python%203.7)                                                                                                                               |
 
 ## Code coverage
 
@@ -60,4 +61,4 @@ Codecov graph follows below. An interactive version can be found on the codecov 
 
 ![codecov graph](https://codecov.io/gh/larsgeb/hmc-tomography/graphs/sunburst.svg?token=6svV9YDRhd)
 
-> The inner-most circle is the entire project, moving away from the center are folders then, finally, a single file. The size and color of each slice is representing the number of statements and the coverage, respectively. 
+> The inner-most circle is the entire project, moving away from the center are folders then, finally, a single file. The size and color of each slice is representing the number of statements and the coverage, respectively.

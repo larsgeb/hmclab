@@ -8,7 +8,7 @@ import matplotlib.pyplot as _plt
 import numpy as _numpy
 
 from hmc_tomography.Helpers import Processing as _Processing
-from hmc_tomography import Samples as _Samples
+from hmc_tomography.Samples import Samples as _Samples
 
 
 def marginal_grid(
@@ -36,7 +36,7 @@ def marginal_grid(
         max = samples[dimensions_list[i_dim], :].max()
         dim_range.append((min, max))
 
-        if type(samples) == _Samples:
+        if isinstance(samples, _Samples):
             # Check if all dimensions to be plotted are actual dimensions
             assert samples.numpy.shape[0] - 1 > dimensions_list[i_dim], (
                 "You tried to plot a dimension that is not part of the distribution. "
