@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Tutorial 1 - Gaussian inverse problems - dense forward operator &mdash; HMC Tom 0.2.2-alpha-5-21-gb74f3b8 documentation</title>
+  <title>Tutorial 1 - Gaussian inverse problems - dense forward operator &mdash; HMC Tom 0.2.2 documentation</title>
   
 
   
@@ -34,6 +34,7 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed-amd.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -68,7 +69,7 @@
             
             
               <div class="version">
-                0.2.2-alpha-5-21-gb74f3b8
+                0.2.2
               </div>
             
           
@@ -580,15 +581,15 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">HMC</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
-    <span class="n">likelihood</span><span class="p">,</span>
+<span></span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">HMC</span><span class="p">()</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
     <span class="s2">&quot;bin_samples/tutorial_1_diagonal_covariance.h5&quot;</span><span class="p">,</span>
+    <span class="n">likelihood</span><span class="p">,</span>
     <span class="n">mass_matrix</span><span class="o">=</span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">MassMatrices</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="n">likelihood</span><span class="o">.</span><span class="n">dimensions</span><span class="p">),</span>
     <span class="n">proposals</span><span class="o">=</span><span class="mi">30000</span><span class="p">,</span>
-    <span class="n">integration_steps</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
-    <span class="n">time_step</span><span class="o">=</span><span class="mf">0.07</span><span class="p">,</span>
+    <span class="n">amount_of_steps</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">stepsize</span><span class="o">=</span><span class="mf">0.07</span><span class="p">,</span>
     <span class="n">online_thinning</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">overwrite_samples</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">overwrite_existing_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">initial_model</span><span class="o">=</span><span class="n">m_true</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
@@ -607,7 +608,7 @@ Silently overwriting samples file (bin_samples/tutorial_1_diagonal_covariance.h5
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "ab45fd4b34fb4505bcd1370a3b0fb301", "version_major": 2, "version_minor": 0}</script></div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "496f63b912e8471790727d183a452566", "version_major": 2, "version_minor": 0}</script></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
@@ -623,11 +624,11 @@ Silently overwriting samples file (bin_samples/tutorial_1_diagonal_covariance.h5
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
     <span class="s2">&quot;bin_samples/tutorial_1_diagonal_covariance.h5&quot;</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">1000</span>
 <span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
 
-    <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Visualization</span><span class="o">.</span><span class="n">marginal_grid</span><span class="p">(</span>
+    <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Visualization</span><span class="o">.</span><span class="n">marginal_grid</span><span class="p">(</span>
         <span class="n">samples</span><span class="p">,</span>
         <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>  <span class="c1"># Mind the ZERO INDEXED dimensions.</span>
         <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span>
@@ -725,28 +726,28 @@ Silently overwriting samples file (bin_samples/tutorial_1_diagonal_covariance.h5
 BE AWARE, I print only up to 2 digits. The sampling covariance will appear less accurate when printing more digits.
 
 Analytical covariance matrix:
-[[ 0.32  0.12  0.07 -0.34 -0.02 -0.17]
- [ 0.12  0.15  0.04 -0.2  -0.04 -0.04]
- [ 0.07  0.04  0.05 -0.09 -0.02 -0.04]
- [-0.34 -0.2  -0.09  0.46  0.02  0.14]
- [-0.02 -0.04 -0.02  0.02  0.08 -0.01]
- [-0.17 -0.04 -0.04  0.14 -0.01  0.15]]
+[[ 0.23 -0.12 -0.05 -0.04  0.03 -0.  ]
+ [-0.12  0.15 -0.02  0.01 -0.01 -0.01]
+ [-0.05 -0.02  0.1  -0.01  0.01 -0.04]
+ [-0.04  0.01 -0.01  0.06 -0.03  0.01]
+ [ 0.03 -0.01  0.01 -0.03  0.05 -0.05]
+ [-0.   -0.01 -0.04  0.01 -0.05  0.09]]
 
 Sampling covariance matrix:
-[[ 0.32  0.12  0.07 -0.34 -0.02 -0.17]
- [ 0.12  0.16  0.04 -0.21 -0.04 -0.04]
- [ 0.07  0.04  0.05 -0.1  -0.02 -0.04]
- [-0.34 -0.21 -0.1   0.46  0.02  0.15]
- [-0.02 -0.04 -0.02  0.02  0.08 -0.01]
- [-0.17 -0.04 -0.04  0.15 -0.01  0.15]]
+[[ 0.23 -0.13 -0.05 -0.04  0.03 -0.  ]
+ [-0.13  0.15 -0.02  0.01 -0.01 -0.01]
+ [-0.05 -0.02  0.1  -0.01  0.01 -0.04]
+ [-0.04  0.01 -0.01  0.06 -0.03  0.01]
+ [ 0.03 -0.01  0.01 -0.03  0.05 -0.05]
+ [-0.   -0.01 -0.04  0.01 -0.05  0.09]]
 
 Difference:
-[[ 0.  0.  0. -0. -0. -0.]
- [ 0.  0.  0. -0. -0.  0.]
- [ 0.  0.  0. -0. -0. -0.]
- [-0. -0. -0.  0.  0.  0.]
- [-0. -0. -0.  0.  0. -0.]
- [-0.  0. -0.  0. -0.  0.]]
+[[ 0. -0. -0. -0. -0.  0.]
+ [-0.  0. -0.  0.  0.  0.]
+ [-0. -0.  0. -0.  0. -0.]
+ [-0.  0. -0.  0. -0. -0.]
+ [-0.  0.  0. -0.  0. -0.]
+ [ 0.  0. -0. -0. -0.  0.]]
 </pre></div></div>
 </div>
 <p>Well, everything seems to be in order! Let’s extend the theory a little bit with a dense covariance matrix.</p>
@@ -831,7 +832,7 @@ Matrix is positive definite; proper covariance matrix.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f8ae9c250b8&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7f8742650a50&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -901,15 +902,15 @@ Matrix is positive definite; proper covariance matrix.
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">HMC</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
-    <span class="n">likelihood</span><span class="p">,</span>
+<span></span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">HMC</span><span class="p">()</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
     <span class="s2">&quot;bin_samples/tutorial_1_dense_covariance.h5&quot;</span><span class="p">,</span>
+    <span class="n">likelihood</span><span class="p">,</span>
     <span class="n">mass_matrix</span><span class="o">=</span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">MassMatrices</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="n">likelihood</span><span class="o">.</span><span class="n">dimensions</span><span class="p">),</span>
     <span class="n">proposals</span><span class="o">=</span><span class="mi">20000</span><span class="p">,</span>
-    <span class="n">integration_steps</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
-    <span class="n">time_step</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">amount_of_steps</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
+    <span class="n">stepsize</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
     <span class="n">online_thinning</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">overwrite_samples</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">overwrite_existing_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">initial_model</span><span class="o">=</span><span class="n">m_true</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
@@ -928,7 +929,7 @@ Silently overwriting samples file (bin_samples/tutorial_1_dense_covariance.h5) i
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "57ea5e8753924339b670ccbdbc5200f6", "version_major": 2, "version_minor": 0}</script></div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "c3a01fcbced844e5bab741877b629436", "version_major": 2, "version_minor": 0}</script></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
@@ -944,11 +945,11 @@ Silently overwriting samples file (bin_samples/tutorial_1_dense_covariance.h5) i
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
     <span class="s2">&quot;bin_samples/tutorial_1_dense_covariance.h5&quot;</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">2000</span>
 <span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
 
-    <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Visualization</span><span class="o">.</span><span class="n">marginal_grid</span><span class="p">(</span>
+    <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Visualization</span><span class="o">.</span><span class="n">marginal_grid</span><span class="p">(</span>
         <span class="n">samples</span><span class="p">,</span>
         <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
         <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span>  <span class="c1"># Mind the ZERO INDEXED dimensions.</span>
@@ -1055,28 +1056,28 @@ Silently overwriting samples file (bin_samples/tutorial_1_dense_covariance.h5) i
 BE AWARE, I print only up to 2 digits. The sampling covariance will appear less accurate when printing more digits.
 
 Analytical covariance matrix:
-[[ 0.12  0.05  0.01 -0.13 -0.01 -0.06]
- [ 0.05  0.05  0.01 -0.07 -0.02 -0.01]
- [ 0.01  0.01  0.02 -0.02 -0.01 -0.01]
- [-0.13 -0.07 -0.02  0.18  0.    0.06]
- [-0.01 -0.02 -0.01  0.    0.03 -0.01]
- [-0.06 -0.01 -0.01  0.06 -0.01  0.05]]
+[[ 0.08 -0.05 -0.   -0.02  0.02 -0.01]
+ [-0.05  0.06 -0.02  0.01 -0.01  0.01]
+ [-0.   -0.02  0.04 -0.01  0.01 -0.02]
+ [-0.02  0.01 -0.01  0.02 -0.01  0.01]
+ [ 0.02 -0.01  0.01 -0.01  0.02 -0.02]
+ [-0.01  0.01 -0.02  0.01 -0.02  0.04]]
 
 Sampling covariance matrix:
-[[ 0.12  0.05  0.01 -0.13 -0.01 -0.06]
- [ 0.05  0.05  0.01 -0.07 -0.02 -0.01]
- [ 0.01  0.01  0.02 -0.02 -0.01 -0.01]
- [-0.13 -0.07 -0.02  0.18  0.    0.05]
- [-0.01 -0.02 -0.01  0.    0.03 -0.01]
- [-0.06 -0.01 -0.01  0.05 -0.01  0.05]]
+[[ 0.08 -0.05 -0.   -0.02  0.02 -0.01]
+ [-0.05  0.06 -0.02  0.01 -0.01  0.01]
+ [-0.   -0.02  0.04 -0.01  0.01 -0.02]
+ [-0.02  0.01 -0.01  0.02 -0.01  0.01]
+ [ 0.02 -0.01  0.01 -0.01  0.02 -0.02]
+ [-0.01  0.01 -0.02  0.01 -0.02  0.04]]
 
 Difference:
-[[ 0.  0. -0. -0. -0.  0.]
- [ 0.  0.  0. -0. -0.  0.]
- [-0.  0.  0.  0. -0.  0.]
- [-0. -0.  0. -0.  0. -0.]
- [-0. -0. -0.  0.  0. -0.]
- [ 0.  0.  0. -0. -0.  0.]]
+[[ 0. -0.  0. -0.  0. -0.]
+ [-0.  0. -0.  0. -0.  0.]
+ [ 0. -0.  0. -0.  0. -0.]
+ [-0.  0. -0.  0. -0.  0.]
+ [ 0. -0.  0. -0.  0. -0.]
+ [-0.  0. -0.  0. -0.  0.]]
 </pre></div></div>
 </div>
 <p>There is a few important observations to made from the output here:</p>
@@ -1133,8 +1134,8 @@ Ellipsoid volume dense (correlated noise):              9.06e-15
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Model space measure of dispersion of the posterior:
-Ellipsoid volume uncorrelated noise:    3.23e-08
-Ellipsoid volume correlated noise:      2.48e-10
+Ellipsoid volume uncorrelated noise:    1.55e-08
+Ellipsoid volume correlated noise:      1.30e-10
 </pre></div></div>
 </div>
 </div>
@@ -1160,7 +1161,7 @@ Ellipsoid volume correlated noise:      2.48e-10
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;hmc_tomography.Distributions.LinearMatrix.LinearMatrix at 0x7f8aea925908&gt;
+&lt;hmc_tomography.Distributions.LinearMatrix.LinearMatrix at 0x7f87424ff710&gt;
 </pre></div></div>
 </div>
 <p>Now we can create a prior centered around zero with a given variance.</p>
@@ -1181,7 +1182,7 @@ Ellipsoid volume correlated noise:      2.48e-10
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/larsgebraad/Documents/Hamiltonian Monte Carlo/hmc-tomography/hmc_tomography/Distributions/base.py:366: Warning: Seems that you only passed a vector as the covariance matrix. It will be used as the covariance diagonal.
+/home/larsgebraad/Documents/Hamiltonian Monte Carlo/hmc-tomography/hmc_tomography/Distributions/base.py:403: Warning: Seems that you only passed a vector as the covariance matrix. It will be used as the covariance diagonal.
   Warning,
 </pre></div></div>
 </div>
@@ -1231,13 +1232,13 @@ Ellipsoid volume correlated noise:      2.48e-10
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">HMC</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
-    <span class="n">posterior</span><span class="p">,</span>
+<span></span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">HMC</span><span class="p">()</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
     <span class="s2">&quot;bin_samples/tutorial_1_dense_covariance_with_gaussian_prior.h5&quot;</span><span class="p">,</span>
+    <span class="n">posterior</span><span class="p">,</span>
     <span class="n">mass_matrix</span><span class="o">=</span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">MassMatrices</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="n">likelihood</span><span class="o">.</span><span class="n">dimensions</span><span class="p">),</span>
     <span class="n">proposals</span><span class="o">=</span><span class="mi">80000</span><span class="p">,</span>
-    <span class="n">time_step</span><span class="o">=</span><span class="mf">0.075</span><span class="p">,</span>
-    <span class="n">overwrite_samples</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">stepsize</span><span class="o">=</span><span class="mf">0.075</span><span class="p">,</span>
+    <span class="n">overwrite_existing_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">online_thinning</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">initial_model</span><span class="o">=</span><span class="n">m_true</span><span class="p">,</span>
 <span class="p">)</span>
@@ -1257,7 +1258,7 @@ Silently overwriting samples file (bin_samples/tutorial_1_dense_covariance_with_
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "ac9f11b7672c489791ff375046b6fbb8", "version_major": 2, "version_minor": 0}</script></div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "0395e1e843354898b0df4a47e4cf7412", "version_major": 2, "version_minor": 0}</script></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
@@ -1273,11 +1274,11 @@ Silently overwriting samples file (bin_samples/tutorial_1_dense_covariance_with_
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
     <span class="s2">&quot;bin_samples/tutorial_1_dense_covariance_with_gaussian_prior.h5&quot;</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">1000</span>
 <span class="p">)</span> <span class="k">as</span> <span class="n">samples_posterior</span><span class="p">:</span>
 
-    <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Visualization</span><span class="o">.</span><span class="n">marginal_grid</span><span class="p">(</span>
+    <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Visualization</span><span class="o">.</span><span class="n">marginal_grid</span><span class="p">(</span>
         <span class="n">samples_posterior</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,],</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
     <span class="p">)</span>
 
@@ -1389,28 +1390,28 @@ Silently overwriting samples file (bin_samples/tutorial_1_dense_covariance_with_
 BE AWARE, I print only up to 2 digits. The sampling covariance will appear less accurate when printing more digits.
 
 Analytical covariance matrix:
-[[ 0.01  0.   -0.   -0.01 -0.   -0.  ]
- [ 0.    0.01  0.   -0.   -0.    0.  ]
- [-0.    0.    0.01 -0.   -0.   -0.  ]
- [-0.01 -0.   -0.    0.02 -0.    0.  ]
- [-0.   -0.   -0.   -0.    0.01 -0.  ]
- [-0.    0.   -0.    0.   -0.    0.01]]
+[[ 0.01 -0.01 -0.   -0.    0.   -0.  ]
+ [-0.01  0.01 -0.   -0.    0.   -0.  ]
+ [-0.   -0.    0.01 -0.    0.   -0.  ]
+ [-0.   -0.   -0.    0.01 -0.    0.  ]
+ [ 0.    0.    0.   -0.    0.01 -0.  ]
+ [-0.   -0.   -0.    0.   -0.    0.01]]
 
 Sampling covariance matrix:
-[[ 0.01  0.   -0.   -0.01 -0.   -0.  ]
- [ 0.    0.01  0.   -0.   -0.    0.  ]
- [-0.    0.    0.01 -0.   -0.   -0.  ]
- [-0.01 -0.   -0.    0.02 -0.    0.  ]
- [-0.   -0.   -0.   -0.    0.01 -0.  ]
- [-0.    0.   -0.    0.   -0.    0.01]]
+[[ 0.02 -0.01 -0.   -0.    0.   -0.  ]
+ [-0.01  0.02 -0.   -0.    0.   -0.  ]
+ [-0.   -0.    0.01 -0.    0.   -0.  ]
+ [-0.   -0.   -0.    0.01 -0.    0.  ]
+ [ 0.    0.    0.   -0.    0.01 -0.  ]
+ [-0.   -0.   -0.    0.   -0.    0.01]]
 
 Difference:
-[[-0.  0. -0.  0.  0.  0.]
- [ 0.  0. -0. -0. -0.  0.]
- [-0. -0.  0.  0.  0. -0.]
- [ 0. -0.  0.  0.  0. -0.]
- [ 0. -0.  0.  0.  0. -0.]
- [ 0.  0. -0. -0. -0. -0.]]
+[[ 0. -0. -0. -0.  0. -0.]
+ [-0.  0. -0. -0.  0. -0.]
+ [-0. -0.  0.  0. -0.  0.]
+ [-0. -0.  0. -0. -0.  0.]
+ [ 0.  0. -0. -0. -0. -0.]
+ [-0. -0.  0.  0. -0.  0.]]
 </pre></div></div>
 </div>
 <p>Again, our sampling corresponds to our analytical solution! The prior has two main impacts on the posterior:</p>
@@ -1447,15 +1448,15 @@ Difference:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">HMC</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
-    <span class="n">posterior_laplace</span><span class="p">,</span>
+<span></span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">HMC</span><span class="p">()</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
     <span class="s2">&quot;bin_samples/tutorial_1_dense_covariance_with_laplace_prior.h5&quot;</span><span class="p">,</span>
+    <span class="n">posterior_laplace</span><span class="p">,</span>
     <span class="n">mass_matrix</span><span class="o">=</span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">MassMatrices</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="n">posterior_laplace</span><span class="o">.</span><span class="n">dimensions</span><span class="p">),</span>
     <span class="n">proposals</span><span class="o">=</span><span class="mi">80000</span><span class="p">,</span>
     <span class="n">initial_model</span><span class="o">=</span><span class="n">m_true</span><span class="p">,</span>
-    <span class="n">time_step</span><span class="o">=</span><span class="mf">0.015</span><span class="p">,</span>
+    <span class="n">stepsize</span><span class="o">=</span><span class="mf">0.015</span><span class="p">,</span>
     <span class="n">online_thinning</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-    <span class="n">overwrite_samples</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">overwrite_existing_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -1473,7 +1474,7 @@ Silently overwriting samples file (bin_samples/tutorial_1_dense_covariance_with_
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "e855ff5e9e6e49b98b8479551ddd6d16", "version_major": 2, "version_minor": 0}</script></div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "8193f07aeade43c28cd5c83aebbc78fe", "version_major": 2, "version_minor": 0}</script></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
@@ -1488,11 +1489,11 @@ Silently overwriting samples file (bin_samples/tutorial_1_dense_covariance_with_
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
     <span class="s2">&quot;bin_samples/tutorial_1_dense_covariance_with_laplace_prior.h5&quot;</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">1000</span>
 <span class="p">)</span> <span class="k">as</span> <span class="n">samples_posterior</span><span class="p">:</span>
 
-    <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Visualization</span><span class="o">.</span><span class="n">marginal_grid</span><span class="p">(</span>
+    <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Visualization</span><span class="o">.</span><span class="n">marginal_grid</span><span class="p">(</span>
         <span class="n">samples_posterior</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,],</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
     <span class="p">)</span>
 
@@ -1584,8 +1585,8 @@ Silently overwriting samples file (bin_samples/tutorial_1_dense_covariance_with_
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[0.13 0.17 0.03 0.22 0.06 0.03]
-[0.11 0.11 0.1  0.12 0.11 0.11]
+[0.12 0.17 0.1  0.11 0.03 0.03]
+[0.12 0.12 0.11 0.1  0.09 0.11]
 </pre></div></div>
 </div>
 <p>Looking at the marginals of the two posteriors also well illustrates the non-Gaussianity, as well as the increased accuracy of the posterior.</p>
@@ -1594,11 +1595,11 @@ Silently overwriting samples file (bin_samples/tutorial_1_dense_covariance_with_
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
     <span class="s2">&quot;bin_samples/tutorial_1_dense_covariance_with_laplace_prior.h5&quot;</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">1000</span>
-<span class="p">)</span> <span class="k">as</span> <span class="n">samples_posterior_laplace</span><span class="p">,</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">samples_posterior_laplace</span><span class="p">,</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
     <span class="s2">&quot;bin_samples/tutorial_1_dense_covariance_with_gaussian_prior.h5&quot;</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">1000</span>
-<span class="p">)</span> <span class="k">as</span> <span class="n">samples_posterior_gaussian</span><span class="p">,</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Post</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">samples_posterior_gaussian</span><span class="p">,</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span>
     <span class="s2">&quot;bin_samples/tutorial_1_dense_covariance.h5&quot;</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">1000</span>
 <span class="p">)</span> <span class="k">as</span> <span class="n">samples_posterior</span><span class="p">:</span>
 
@@ -1648,7 +1649,9 @@ Silently overwriting samples file (bin_samples/tutorial_1_dense_covariance_with_
 <img alt="../_images/examples_1_-_Gaussian_inverse_problems_-_dense_forward_operator_70_0.png" src="../_images/examples_1_-_Gaussian_inverse_problems_-_dense_forward_operator_70_0.png" />
 </div>
 </div>
-</div>
+<script type="application/vnd.jupyter.widget-state+json">
+{"state": {"0395e1e843354898b0df4a47e4cf7412": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HBoxModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_d17076cc59ca42408d887020e91e4eae", "IPY_MODEL_d4c9f999c85a457d987dfdf6298e15e9", "IPY_MODEL_ba1dc277cb234fc39697ae5d45b0d661"], "layout": "IPY_MODEL_5f11f2c1d7294de594685e8d7415bbbd"}}, "04d46f79f30f4758b677099ce3c46f59": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "DescriptionStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "DescriptionStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "description_width": ""}}, "0bbcf25dc446483db32bb9bef1e2779e": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HTMLView", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_1dc2f45ff9da42b79266fea861ba330e", "placeholder": "\u200b", "style": "IPY_MODEL_36e0a288f9b341d686b4b3b0381d2984", "value": " 20000/20000 [00:06&lt;00:00, 3010.99it/s]"}}, "1305e40fad33466ca0eb18f94767d8f9": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": "inline-flex", "flex": null, "flex_flow": "row wrap", "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": "100%"}}, "1b0d4a7c81734fd5aa161b8f68ffb4cf": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HTMLView", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_ca857dd609394b79965d9dcca65902c9", "placeholder": "\u200b", "style": "IPY_MODEL_ebc2582adfe841a7b3f2def737f12177", "value": "Tot. acc rate: 0.90. Progress: 100%"}}, "1dc2f45ff9da42b79266fea861ba330e": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "2db3e74d39c24ed4b391bfec3bc49b40": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "ProgressStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "36e0a288f9b341d686b4b3b0381d2984": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "DescriptionStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "DescriptionStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "description_width": ""}}, "37a8d78548be4120a1c73cc9b932a133": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": "2", "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "3c35b0dae06543d293dced53f60b2a18": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HTMLView", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_cfc01b31a3244e3aa5729628a42ca7e3", "placeholder": "\u200b", "style": "IPY_MODEL_04d46f79f30f4758b677099ce3c46f59", "value": " 80000/80000 [00:18&lt;00:00, 4415.61it/s]"}}, "45cb204bc9454c4fa0bd84112e6e6a59": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "DescriptionStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "DescriptionStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "description_width": ""}}, "496f63b912e8471790727d183a452566": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HBoxModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_1b0d4a7c81734fd5aa161b8f68ffb4cf", "IPY_MODEL_8ca1f111b0d74e86bee6965d6f47cbe0", "IPY_MODEL_fe6c819fb3ca460fb468113eda7fa8c3"], "layout": "IPY_MODEL_1305e40fad33466ca0eb18f94767d8f9"}}, "4cea8c722c194a86bcfa6fdb36c48480": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": "2", "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "562e9ebb34d94afc826d1e7964eeb00c": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "5ac5e738078f47fa8f180465d763b63b": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HTMLView", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_d647b1bb71654233afdd051b24e8acc2", "placeholder": "\u200b", "style": "IPY_MODEL_45cb204bc9454c4fa0bd84112e6e6a59", "value": "Tot. acc rate: 0.56. Progress: 100%"}}, "5f11f2c1d7294de594685e8d7415bbbd": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": "inline-flex", "flex": null, "flex_flow": "row wrap", "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": "100%"}}, "61b410600676411ca5cf3ab4c516bd0d": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "FloatProgressModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_4cea8c722c194a86bcfa6fdb36c48480", "max": 20000.0, "min": 0.0, "orientation": "horizontal", "style": "IPY_MODEL_abf07f72e8e94308af8d885558570e99", "value": 20000.0}}, "7178237eb8e440c780431a3ac13a0fdf": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "723a652045134cbabbd1ccaa6aec291b": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": "2", "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "730b173c3aaa4cff8cb6834d6c01a40a": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "ProgressStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "8193f07aeade43c28cd5c83aebbc78fe": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HBoxModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_5ac5e738078f47fa8f180465d763b63b", "IPY_MODEL_cdf7382a79a24228ae525fa431112f5c", "IPY_MODEL_3c35b0dae06543d293dced53f60b2a18"], "layout": "IPY_MODEL_ddd18b7a82b24ff58fdf754429fc43ca"}}, "85b12d16ced344c9915fff389dcaa240": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "DescriptionStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "DescriptionStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "description_width": ""}}, "8ca1f111b0d74e86bee6965d6f47cbe0": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "FloatProgressModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_a1f9553e47fd47e3b526b43dcde9ab7c", "max": 30000.0, "min": 0.0, "orientation": "horizontal", "style": "IPY_MODEL_730b173c3aaa4cff8cb6834d6c01a40a", "value": 30000.0}}, "911894c07318416680570a6ea4437c49": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "DescriptionStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "DescriptionStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "description_width": ""}}, "9d97938d31684767a235f5b4f4e04ad9": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HTMLView", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_decf8483db0d494583e3cb534abbbf6b", "placeholder": "\u200b", "style": "IPY_MODEL_e7d45c33c65744d6b48e5ab89ae6b36a", "value": "Tot. acc rate: 0.96. Progress: 100%"}}, "a1f9553e47fd47e3b526b43dcde9ab7c": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": "2", "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "abf07f72e8e94308af8d885558570e99": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "ProgressStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "ac9d899fe1df400e8a87052050e7c2e8": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "ProgressStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "ba1dc277cb234fc39697ae5d45b0d661": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HTMLView", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_7178237eb8e440c780431a3ac13a0fdf", "placeholder": "\u200b", "style": "IPY_MODEL_ebc3ca26cfdd48398f2de54dd6e54571", "value": " 80000/80000 [00:18&lt;00:00, 4388.98it/s]"}}, "c3a01fcbced844e5bab741877b629436": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HBoxModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_9d97938d31684767a235f5b4f4e04ad9", "IPY_MODEL_61b410600676411ca5cf3ab4c516bd0d", "IPY_MODEL_0bbcf25dc446483db32bb9bef1e2779e"], "layout": "IPY_MODEL_f2b78c7d56854687a045085571bcd641"}}, "c6c15acc8e324d3686888bad44cedd01": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "ca857dd609394b79965d9dcca65902c9": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "cdf7382a79a24228ae525fa431112f5c": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "FloatProgressModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_37a8d78548be4120a1c73cc9b932a133", "max": 80000.0, "min": 0.0, "orientation": "horizontal", "style": "IPY_MODEL_ac9d899fe1df400e8a87052050e7c2e8", "value": 80000.0}}, "cfc01b31a3244e3aa5729628a42ca7e3": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "d17076cc59ca42408d887020e91e4eae": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HTMLView", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_c6c15acc8e324d3686888bad44cedd01", "placeholder": "\u200b", "style": "IPY_MODEL_911894c07318416680570a6ea4437c49", "value": "Tot. acc rate: 0.85. Progress: 100%"}}, "d4c9f999c85a457d987dfdf6298e15e9": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "FloatProgressModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_723a652045134cbabbd1ccaa6aec291b", "max": 80000.0, "min": 0.0, "orientation": "horizontal", "style": "IPY_MODEL_2db3e74d39c24ed4b391bfec3bc49b40", "value": 80000.0}}, "d647b1bb71654233afdd051b24e8acc2": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "ddd18b7a82b24ff58fdf754429fc43ca": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": "inline-flex", "flex": null, "flex_flow": "row wrap", "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": "100%"}}, "decf8483db0d494583e3cb534abbbf6b": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "e7d45c33c65744d6b48e5ab89ae6b36a": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "DescriptionStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "DescriptionStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "description_width": ""}}, "ebc2582adfe841a7b3f2def737f12177": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "DescriptionStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "DescriptionStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "description_width": ""}}, "ebc3ca26cfdd48398f2de54dd6e54571": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "DescriptionStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "DescriptionStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "description_width": ""}}, "f2b78c7d56854687a045085571bcd641": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": "inline-flex", "flex": null, "flex_flow": "row wrap", "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": "100%"}}, "fe6c819fb3ca460fb468113eda7fa8c3": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HTMLView", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_562e9ebb34d94afc826d1e7964eeb00c", "placeholder": "\u200b", "style": "IPY_MODEL_85b12d16ced344c9915fff389dcaa240", "value": " 30000/30000 [00:07&lt;00:00, 3939.23it/s]"}}}, "version_major": 2, "version_minor": 0}
+</script></div>
 </div>
 
 

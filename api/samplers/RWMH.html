@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>RWMH - Random Walk Metropolis Hastings &mdash; HMC Tom 0.2.2-alpha-5-21-gb74f3b8 documentation</title>
+  <title>RWMH - Random Walk Metropolis Hastings &mdash; HMC Tom 0.2.2 documentation</title>
   
 
   
@@ -34,6 +34,7 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed-amd.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -68,7 +69,7 @@
             
             
               <div class="version">
-                0.2.2-alpha-5-21-gb74f3b8
+                0.2.2
               </div>
             
           
@@ -260,23 +261,14 @@ Collected if autotuning is True.</p>
 
 <dl class="py attribute">
 <dt id="hmc_tomography.Samplers.RWMH.minimal_stepsize">
-<code class="sig-name descname">minimal_stepsize</code><em class="property"> = 1e-18</em><a class="headerlink" href="#hmc_tomography.Samplers.RWMH.minimal_stepsize" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">minimal_stepsize</code><em class="property">: float</em><em class="property"> = 1e-18</em><a class="headerlink" href="#hmc_tomography.Samplers.RWMH.minimal_stepsize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Minimal step length which is chosen if timestep becomes zero or negative during
 autotuning.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="hmc_tomography.Samplers.RWMH.sample">
-<em class="property">classmethod </em><code class="sig-name descname">sample</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">samples_hdf5_filename</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">distribution</span><span class="p">:</span> <span class="n">hmc_tomography.Distributions.base._AbstractDistribution</span></em>, <em class="sig-param"><span class="n">stepsize</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">initial_model</span><span class="p">:</span> <span class="n">numpy.ndarray</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">proposals</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">100</span></em>, <em class="sig-param"><span class="n">diagnostic_mode</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">online_thinning</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">1</span></em>, <em class="sig-param"><span class="n">ram_buffer_size</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">overwrite_existing_file</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">max_time</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">autotuning</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">target_acceptance_rate</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.65</span></em>, <em class="sig-param"><span class="n">learning_rate</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.75</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Samplers.html#RWMH.sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Samplers.RWMH.sample" title="Permalink to this definition">¶</a></dt>
-<dd><p>Simply a forward to the instance method of the sampler; check out
-_sample().</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt id="hmc_tomography.Samplers.RWMH._sample">
-<code class="sig-prename descclassname">hmc_tomography.Samplers.RWMH.</code><code class="sig-name descname">_sample</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">self</span></em>, <em class="sig-param"><span class="n">samples_hdf5_filename</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">distribution</span><span class="p">:</span> <span class="n">hmc_tomography.Distributions.base._AbstractDistribution</span></em>, <em class="sig-param"><span class="n">stepsize</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>float<span class="p">, </span>numpy.ndarray<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">initial_model</span><span class="p">:</span> <span class="n">numpy.ndarray</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">proposals</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">100</span></em>, <em class="sig-param"><span class="n">diagnostic_mode</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">online_thinning</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">1</span></em>, <em class="sig-param"><span class="n">ram_buffer_size</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">overwrite_existing_file</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">max_time</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">autotuning</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">target_acceptance_rate</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.65</span></em>, <em class="sig-param"><span class="n">learning_rate</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.75</span></em><span class="sig-paren">)</span><a class="headerlink" href="#hmc_tomography.Samplers.RWMH._sample" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">sample</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">samples_hdf5_filename</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">distribution</span><span class="p">:</span> <span class="n">hmc_tomography.Distributions.base._AbstractDistribution</span></em>, <em class="sig-param"><span class="n">stepsize</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>float<span class="p">, </span>numpy.ndarray<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">initial_model</span><span class="p">:</span> <span class="n">numpy.ndarray</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">proposals</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">100</span></em>, <em class="sig-param"><span class="n">online_thinning</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">1</span></em>, <em class="sig-param"><span class="n">diagnostic_mode</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">ram_buffer_size</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">overwrite_existing_file</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">max_time</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">autotuning</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">target_acceptance_rate</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.65</span></em>, <em class="sig-param"><span class="n">learning_rate</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.75</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Samplers.html#RWMH.sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Samplers.RWMH.sample" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sampling using the Metropolis-Hastings algorithm.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -296,6 +288,8 @@ of the Markov chain. This model will not be written out as a sample.</p></li>
 <li><p><strong>proposals</strong> (<em>int</em>) – An integer representing the amount of proposals the algorithm should make.</p></li>
 <li><p><strong>online_thinning</strong> (<em>int</em>) – An integer representing the degree of online thinning, i.e. the interval
 between storing samples.</p></li>
+<li><p><strong>diagnostic_mode</strong> (<em>bool</em>) – A boolean describing if subroutines of sampling should be timed. Useful for
+finding slow parts of the algorithm. Will add overhead to each function.</p></li>
 <li><p><strong>ram_buffer_size</strong> (<em>int</em>) – An integer representing how many samples should be kept in RAM before
 writing to storage.</p></li>
 <li><p><strong>overwrite_existing_file</strong> (<em>bool</em>) – A boolean describing whether or not to silently overwrite existing files.
@@ -303,7 +297,13 @@ Use with caution.</p></li>
 <li><p><strong>max_time</strong> (<em>float</em>) – A float representing the maximum time in seconds that sampling is allowed to
 take before it is automatically terminated. The value None is used for
 unlimited time.</p></li>
-<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
+<li><p><strong>autotuning</strong> (<em>bool</em>) – A boolean describing whether or not stepsize is automatically adjusted. Uses
+a diminishing adapting scheme to satisfy detailed balance.</p></li>
+<li><p><strong>target_acceptance_rate</strong> (<em>float</em>) – A float between 0.0 and 1.0 that is the target acceptance rate of
+autotuning. The algorithm will try to achieve this acceptance rate.</p></li>
+<li><p><strong>learning_rate</strong> (<em>float</em>) – A float larger than 0.5 but smaller than or equal to 1.0, describing how
+aggressively the stepsize is updated. Lower is more aggresive.
+Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises</dt>
@@ -314,6 +314,8 @@ unlimited time.</p></li>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>

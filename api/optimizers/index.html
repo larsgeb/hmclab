@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Optimizers &mdash; HMC Tom 0.2.2-alpha-5-21-gb74f3b8 documentation</title>
+  <title>Optimizers &mdash; HMC Tom 0.2.2 documentation</title>
   
 
   
@@ -34,6 +34,7 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed-amd.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -68,7 +69,7 @@
             
             
               <div class="version">
-                0.2.2-alpha-5-21-gb74f3b8
+                0.2.2
               </div>
             
           
@@ -105,6 +106,7 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Optimizers</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="_AbstractOptimizer.html">_AbstractOptimizer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gradient_descent.html">gradient_descent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-scipy-s-optimization-routines">Using SciPy’s optimization routines</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../samples.html">Samples class</a></li>
@@ -229,6 +231,46 @@ required methods and their signatures (required in- and outputs).</p>
 </tr>
 </tbody>
 </table>
+<div class="section" id="using-scipy-s-optimization-routines">
+<h2>Using SciPy’s optimization routines<a class="headerlink" href="#using-scipy-s-optimization-routines" title="Permalink to this headline">¶</a></h2>
+<p>It would be a waste to not use the great array of optimization routines available
+through <code class="docutils literal notranslate"><span class="pre">scipy.optimize.minimize</span></code>. To run these, SciPy needs to be supplied with 2
+function handles:
+- a function that computes the objective
+- a function that computes the gradient of the objective</p>
+<p>The input of these functions should be <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">)</span></code> arrays, not the column arrays
+<code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">1)</span></code> used throughout hmc_tomography. Similarly, SciPy requires the return of the
+gradient to be an array of shape <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">)</span></code>, so we’ll have to adapt the inputs to both
+functions and the gradient returned from the gradient function implemented for
+hmc_tomography.</p>
+<p>This is an easy way to extract the methods and convert the arguments needed to run
+SciPy’s routines, given that you constructed a target distribution:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">misfit</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+    <span class="c1"># Converts the input column vector (n, 1) to (n, ) vector</span>
+    <span class="k">return</span> <span class="n">posterior</span><span class="o">.</span><span class="n">misfit</span><span class="p">(</span><span class="n">m</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">])</span>
+
+
+<span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+    <span class="c1"># Converts the input column vector (n, 1) to (n, ) vector and</span>
+    <span class="c1"># creates a column vector (n, 1) from the returned (n, ) vector</span>
+    <span class="k">return</span> <span class="n">posterior</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">m</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">])[:,</span> <span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>These functions can now be used in e.g. SciPy’s L-BFGS algorithm:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">minimize</span>
+
+<span class="n">options</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ftol&quot;</span><span class="p">:</span> <span class="mf">1e-4</span><span class="p">,</span> <span class="s2">&quot;disp&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;maxiter&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;maxcor&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">}</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span>
+    <span class="n">misfit</span><span class="p">,</span>
+    <span class="n">starting_model</span><span class="p">,</span>
+    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;L-BFGS-B&quot;</span><span class="p">,</span>
+    <span class="n">jac</span><span class="o">=</span><span class="n">gradient</span><span class="p">,</span>
+    <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 

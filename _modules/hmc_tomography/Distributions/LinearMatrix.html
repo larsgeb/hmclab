@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>hmc_tomography.Distributions.LinearMatrix &mdash; HMC Tom 0.2.2-alpha-5-21-gb74f3b8 documentation</title>
+  <title>hmc_tomography.Distributions.LinearMatrix &mdash; HMC Tom 0.2.2 documentation</title>
   
 
   
@@ -34,6 +34,7 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed-amd.js"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -66,7 +67,7 @@
             
             
               <div class="version">
-                0.2.2-alpha-5-21-gb74f3b8
+                0.2.2
               </div>
             
           
@@ -187,9 +188,16 @@
         <span class="n">G</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">_sparse</span><span class="o">.</span><span class="n">spmatrix</span><span class="p">],</span>
         <span class="n">d</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">data_covariance</span><span class="p">:</span> <span class="n">_Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">_sparse</span><span class="o">.</span><span class="n">spmatrix</span><span class="p">],</span>
-        <span class="n">dtype</span><span class="o">=</span><span class="n">_numpy</span><span class="o">.</span><span class="n">single</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
+
+        <span class="c1"># Set precision for inconsistently passed objects ------------------------------</span>
+        <span class="k">if</span> <span class="n">dtype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">G</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">dtype</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">G</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">data_covariance</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+            <span class="n">data_covariance</span> <span class="o">=</span> <span class="n">data_covariance</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">G</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 
         <span class="c1"># Four cases:</span>
         <span class="c1"># 1 - Dense G, scalar/vector covariance</span>
@@ -532,7 +540,7 @@
 
                 <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
                     <span class="n">_warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;MKL not found, will evaluate matrix-vector products using &quot;</span>
+                        <span class="s2">&quot;MKL not found, will evaluate matrix-vector products using &quot;</span>
                         <span class="s2">&quot;SciPy.&quot;</span><span class="p">,</span>
                         <span class="ne">Warning</span><span class="p">,</span>
                     <span class="p">)</span>
@@ -614,7 +622,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">data_covariance</span> <span class="o">=</span> <span class="n">data_covariance</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">Gt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">tocsr</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">T</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">factorized_covariance</span> <span class="o">=</span> <span class="n">_sparse_linalg</span><span class="o">.</span><span class="n">factorized</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data_covariance</span><span class="o">.</span><span class="n">tocsc</span><span class="p">()</span>
         <span class="p">)</span>
@@ -624,12 +632,16 @@
             <span class="mf">0.5</span>
             <span class="o">*</span> <span class="p">(</span>
                 <span class="p">(</span><span class="n">coordinates</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">Gt</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">)</span>
-                <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">factorized_covariance</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">@</span> <span class="n">coordinates</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">))</span>
+                <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">factorized_covariance</span><span class="p">(</span>
+                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">@</span> <span class="n">coordinates</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_covariance</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+                <span class="p">)</span>
             <span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Gt</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">factorized_covariance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">@</span> <span class="n">coordinates</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Gt</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">factorized_covariance</span><span class="p">(</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">@</span> <span class="n">coordinates</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_covariance</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
