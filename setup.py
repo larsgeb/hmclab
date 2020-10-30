@@ -21,7 +21,7 @@ setuptools.setup(
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     install_requires=[
         "numpy",
         "scipy",
@@ -30,6 +30,7 @@ setuptools.setup(
         "tqdm",
         "h5py",
         "pyyaml",
+        "jupyter",
     ],
     extras_require={
         "dev": [
@@ -52,6 +53,9 @@ setuptools.setup(
             "pytest_notebook",
             "ipywidgets",
             "nbformat",
+            "pybind11",
+            "cmake",
+            "psvWave",
         ],
     },
     entry_points={"console_scripts": ["hmc_tomography=hmc_tomography.__main__:cli"]},

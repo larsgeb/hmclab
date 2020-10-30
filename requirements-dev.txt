@@ -1,3 +1,4 @@
+python=3.7
 numpy
 scipy
 termcolor
@@ -24,3 +25,7 @@ pytest-ordering
 pytest_notebook
 ipywidgets
 nbformat
+pybind11
+cmake
+psvWave
+IPython

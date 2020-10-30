@@ -1,0 +1,7 @@
+name: hmc-tomo
+dependencies:
+  - python>=3.7
+  - jupyter
+  - pip
+  - pip:
+      - -r file:requirements.txt
