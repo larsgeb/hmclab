@@ -15,8 +15,6 @@ matrix:
         - pip3 install -U pip
         - pip3 install -U pytest
         - pip3 install codecov
-      before_script:
-        - jupyter nbextension enable --py widgetsnbextension
     - name: "Python 3.7 on Bionic"
       os: linux
       dist: bionic
@@ -25,8 +23,6 @@ matrix:
       python: 3.7
       before_install:
         - pip install psvWave
-      before_script:
-        - jupyter nbextension enable --py widgetsnbextension
     - name: "Python 3.7 on Xenial"
       os: linux
       dist: xenial
@@ -35,8 +31,6 @@ matrix:
       python: 3.7
       before_install:
         - pip install psvWave
-      before_script:
-        - jupyter nbextension enable --py widgetsnbextension
     - name: "Python 3.7.4 on Windows"
       os: windows
       language: shell
@@ -46,8 +40,6 @@ matrix:
         - python -m pip install --upgrade pip
         - pip3 install --upgrade pytest
         - pip3 install codecov
-      before_script:
-        - jupyter nbextension enable --py widgetsnbextension
       env:
         - OS_PY=windows37
         - PATH=/c/Python37:/c/Python37/Scripts:$PATH
@@ -88,7 +80,8 @@ matrix:
 # Shared install, script, after_succes tasks, only overwritten in deploy task
 
 install:
-  - pip install -e .[testing]
+  - pip install -e .[dev]
+  - jupyter nbextension enable --py widgetsnbextension
 
 script:
   - echo $OS_PY
