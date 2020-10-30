@@ -41,6 +41,7 @@ from hmc_tomography.Distributions import _AbstractDistribution
 from hmc_tomography.MassMatrices import Unit as _Unit
 from hmc_tomography.MassMatrices import _AbstractMassMatrix
 from hmc_tomography.Helpers.Timers import AccumulatingTimer as _AccumulatingTimer
+from hmc_tomography.Helpers.CustomExceptions import InvalidCaseError
 
 dev_assertion_message = (
     "Something went wrong internally, please report this to the developers."
@@ -667,6 +668,13 @@ class _AbstractSampler(_ABC):
         """An abstract method that does any post-sampling operations for the
         algorithm."""
         pass
+
+    def get_diagnostics(self):
+        if not self.diagnostic_mode:
+            raise InvalidCaseError(
+                "Can't return diagnostics if sampler is not in diagnostic mode"
+            )
+        return self.functions_to_diagnose + self.sampler_specific_functions_to_diagnose
 
 
 class RWMH(_AbstractSampler):
