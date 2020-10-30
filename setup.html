@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; HMC Tom 0.2.2 documentation</title>
+  <title>Installation &mdash; HMC Tom 0.2.2-15-gef7e812 documentation</title>
   
 
   
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                0.2.2
+                0.2.2-15-gef7e812
               </div>
             
           
@@ -99,9 +99,9 @@
 <li class="toctree-l1"><a class="reference internal" href="index.html">HMC Tomography</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#installing-the-package-in-a-new-conda-environment">Installing the package (in a new Conda environment)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#option-one">Option one</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#option-two">Option two</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#option-three">Option three</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#option-1">Option 1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#option-2">Option 2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#option-3">Option 3</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#installing-development-dependencies">Installing development dependencies</a></li>
@@ -215,14 +215,14 @@ appropriate Python version, run the following from your terminal:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt; $ conda activate hmc-tomography
 </pre></div>
 </div>
-<p>There’s at the moment two options to install the package:</p>
+<p>There’s at the moment three ways to install the package:</p>
 <ol class="arabic simple">
 <li><p>Install the code directly from GitHub;</p></li>
 <li><p>Clone the GitHub repo and install from that directory.</p></li>
 <li><p>Download the <code class="code docutils literal notranslate"><span class="pre">.zip</span></code> file of the repo, unzip, and install from that directory.</p></li>
 </ol>
-<div class="section" id="option-one">
-<h3>Option one<a class="headerlink" href="#option-one" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="option-1">
+<h3>Option 1<a class="headerlink" href="#option-1" title="Permalink to this headline">¶</a></h3>
 <p>Option one simply requires you to run the following command from your shell (with the
 appropriate environment activated):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt; $ pip install -e git+git@github.com:larsgeb/hmc-tomography.git@master#egg<span class="o">=</span>hmc_tomography
@@ -235,8 +235,8 @@ instead:</p>
 </pre></div>
 </div>
 </div>
-<div class="section" id="option-two">
-<h3>Option two<a class="headerlink" href="#option-two" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="option-2">
+<h3>Option 2<a class="headerlink" href="#option-2" title="Permalink to this headline">¶</a></h3>
 <p>Option two requires you to run the following commands (with the appropriate environment
 activated):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt; $ git clone git@github.com:larsgeb/hmc-tomography.git
@@ -244,10 +244,11 @@ activated):</p>
 &gt; $ pip install -e .
 </pre></div>
 </div>
+<p>This also won’t work as long as the GitHub repo is private and you don’t have access.</p>
 </div>
-<div class="section" id="option-three">
-<h3>Option three<a class="headerlink" href="#option-three" title="Permalink to this headline">¶</a></h3>
-<p>Option three requires you to decompress the <code class="code docutils literal notranslate"><span class="pre">.zip</span></code> file and go open a terminal in
+<div class="section" id="option-3">
+<h3>Option 3<a class="headerlink" href="#option-3" title="Permalink to this headline">¶</a></h3>
+<p>Option three requires you to decompress the <code class="code docutils literal notranslate"><span class="pre">.zip</span></code> file and open a terminal in
 the resulting folder (such that you see the files <code class="code docutils literal notranslate"><span class="pre">setup.py</span></code>, <code class="code docutils literal notranslate"><span class="pre">README.md</span></code>,
 etc. Once you have activated the proper environment in your shell, run the following:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt; $ pip install -e .

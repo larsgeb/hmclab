@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>hmc_tomography.Visualization &mdash; HMC Tom 0.2.2 documentation</title>
+  <title>hmc_tomography.Visualization &mdash; HMC Tom 0.2.2-15-gef7e812 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.2.2
+                0.2.2-15-gef7e812
               </div>
             
           
@@ -174,7 +174,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">_numpy</span>
 
 <span class="kn">from</span> <span class="nn">hmc_tomography.Helpers</span> <span class="kn">import</span> <span class="n">Processing</span> <span class="k">as</span> <span class="n">_Processing</span>
-<span class="kn">from</span> <span class="nn">hmc_tomography</span> <span class="kn">import</span> <span class="n">Samples</span> <span class="k">as</span> <span class="n">_Samples</span>
+<span class="kn">from</span> <span class="nn">hmc_tomography.Samples</span> <span class="kn">import</span> <span class="n">Samples</span> <span class="k">as</span> <span class="n">_Samples</span>
 
 
 <span class="k">def</span> <span class="nf">marginal_grid</span><span class="p">(</span>
@@ -201,6 +201,17 @@
         <span class="nb">min</span> <span class="o">=</span> <span class="n">samples</span><span class="p">[</span><span class="n">dimensions_list</span><span class="p">[</span><span class="n">i_dim</span><span class="p">],</span> <span class="p">:]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
         <span class="nb">max</span> <span class="o">=</span> <span class="n">samples</span><span class="p">[</span><span class="n">dimensions_list</span><span class="p">[</span><span class="n">i_dim</span><span class="p">],</span> <span class="p">:]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
         <span class="n">dim_range</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">_Samples</span><span class="p">):</span>
+            <span class="c1"># Check if all dimensions to be plotted are actual dimensions</span>
+            <span class="k">assert</span> <span class="n">samples</span><span class="o">.</span><span class="n">numpy</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&gt;</span> <span class="n">dimensions_list</span><span class="p">[</span><span class="n">i_dim</span><span class="p">],</span> <span class="p">(</span>
+                <span class="s2">&quot;You tried to plot a dimension that is not part of the distribution. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;The passed samples file has </span><span class="si">{</span><span class="n">samples</span><span class="o">.</span><span class="n">numpy</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="si">}</span><span class="s2"> dimensions &quot;</span>
+                <span class="s2">&quot;plus 1 for misfit. The misfit can not be plotted in the marginal. You &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;tried to plot (among others) dimension </span><span class="si">{</span><span class="n">dimensions_list</span><span class="p">[</span><span class="n">i_dim</span><span class="p">]</span><span class="si">}</span><span class="s2">, &quot;</span>
+                <span class="s2">&quot;which is out of range for zero-indexed dimensions. Check &quot;</span>
+                <span class="s2">&quot;`dimensions_list`.&quot;</span>
+            <span class="p">)</span>
 
     <span class="k">for</span> <span class="n">i_plot</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_plots</span><span class="p">):</span>
         <span class="c1"># print(i_plot, i_plot) # grid indices for diagonal</span>
@@ -374,6 +385,16 @@
 <span class="sd">        using ``matplotlib.pyplot.show()``. If true, plot is immediately shown.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span> <span class="o">==</span> <span class="n">_Samples</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dim1</span><span class="p">,</span> <span class="n">dim2</span><span class="p">]:</span>
+            <span class="k">assert</span> <span class="n">samples</span><span class="o">.</span><span class="n">numpy</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">dim</span><span class="p">,</span> <span class="p">(</span>
+                <span class="s2">&quot;You tried to plot a dimension that is not part of the distribution. The &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;passed samples file has </span><span class="si">{</span><span class="n">samples</span><span class="o">.</span><span class="n">numpy</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="si">}</span><span class="s2"> dimensions plus 1 for &quot;</span>
+                <span class="s2">&quot;misfit. The misfit can be plotted in the 2d visualization. You tried to &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;plot (among others) dimension </span><span class="si">{</span><span class="n">dim</span><span class="si">}</span><span class="s2">, which is out of range &quot;</span>
+                <span class="s2">&quot;for zero-indexed dimensions. Check `dimensions_list`.&quot;</span>
+            <span class="p">)</span>
+
     <span class="n">figure_analysis</span> <span class="o">=</span> <span class="n">_plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
     <span class="n">axis_2d_histogram</span> <span class="o">=</span> <span class="n">figure_analysis</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="mf">0.07</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.45</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">])</span>
 
@@ -407,7 +428,7 @@
         <span class="n">_Processing</span><span class="o">.</span><span class="n">crosscorrelation</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="n">dim1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">samples</span><span class="p">[</span><span class="n">dim2</span><span class="p">,</span> <span class="p">:]),</span>
         <span class="s2">&quot;k&quot;</span><span class="p">,</span>
         <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
-        <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Cross&quot;</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Cross&quot;</span><span class="p">,</span>
         <span class="n">color</span><span class="o">=</span><span class="n">color_1d</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">axis_autocorrelation</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>

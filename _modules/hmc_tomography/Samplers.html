@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>hmc_tomography.Samplers &mdash; HMC Tom 0.2.2 documentation</title>
+  <title>hmc_tomography.Samplers &mdash; HMC Tom 0.2.2-15-gef7e812 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.2.2
+                0.2.2-15-gef7e812
               </div>
             
           
@@ -207,6 +207,7 @@
 <span class="kn">from</span> <span class="nn">hmc_tomography.MassMatrices</span> <span class="kn">import</span> <span class="n">Unit</span> <span class="k">as</span> <span class="n">_Unit</span>
 <span class="kn">from</span> <span class="nn">hmc_tomography.MassMatrices</span> <span class="kn">import</span> <span class="n">_AbstractMassMatrix</span>
 <span class="kn">from</span> <span class="nn">hmc_tomography.Helpers.Timers</span> <span class="kn">import</span> <span class="n">AccumulatingTimer</span> <span class="k">as</span> <span class="n">_AccumulatingTimer</span>
+<span class="kn">from</span> <span class="nn">hmc_tomography.Helpers.CustomExceptions</span> <span class="kn">import</span> <span class="n">InvalidCaseError</span>
 
 <span class="n">dev_assertion_message</span> <span class="o">=</span> <span class="p">(</span>
     <span class="s2">&quot;Something went wrong internally, please report this to the developers.&quot;</span>
@@ -832,7 +833,14 @@
     <span class="k">def</span> <span class="nf">_close_sampler_specific</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;An abstract method that does any post-sampling operations for the</span>
 <span class="sd">        algorithm.&quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">get_diagnostics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">diagnostic_mode</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidCaseError</span><span class="p">(</span>
+                <span class="s2">&quot;Can&#39;t return diagnostics if sampler is not in diagnostic mode&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions_to_diagnose</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler_specific_functions_to_diagnose</span></div>
 
 
 <div class="viewcode-block" id="RWMH"><a class="viewcode-back" href="../../api/samplers/RWMH.html#hmc_tomography.Samplers.RWMH">[docs]</a><span class="k">class</span> <span class="nc">RWMH</span><span class="p">(</span><span class="n">_AbstractSampler</span><span class="p">):</span>

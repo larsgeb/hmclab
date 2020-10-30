@@ -20,15 +20,15 @@ Now to install the package, we need to first activate this distribution:
     
     > $ conda activate hmc-tomography
 
-There's at the moment two options to install the package:
+There's at the moment three ways to install the package:
     
 1. Install the code directly from GitHub;
 2. Clone the GitHub repo and install from that directory.
 3. Download the :code:`.zip` file of the repo, unzip, and install from that directory.
 
 
-Option one
-^^^^^^^^^^
+Option 1
+^^^^^^^^
 
 Option one simply requires you to run the following command from your shell (with the
 appropriate environment activated):
@@ -45,8 +45,8 @@ instead:
 
     > $ pip install -e git+ssh://git@github.com/larsgeb/hmc-tomography.git#egg=hmc_tomography
 
-Option two
-^^^^^^^^^^
+Option 2
+^^^^^^^^
 
 Option two requires you to run the following commands (with the appropriate environment
 activated):
@@ -57,10 +57,12 @@ activated):
     > $ cd hmc-tomography
     > $ pip install -e .
 
-Option three
-^^^^^^^^^^^^
+This also won't work as long as the GitHub repo is private and you don't have access. 
 
-Option three requires you to decompress the :code:`.zip` file and go open a terminal in 
+Option 3
+^^^^^^^^
+
+Option three requires you to decompress the :code:`.zip` file and open a terminal in 
 the resulting folder (such that you see the files :code:`setup.py`, :code:`README.md`, 
 etc. Once you have activated the proper environment in your shell, run the following:
 
