@@ -4,6 +4,7 @@ termcolor
 matplotlib
 tqdm
 h5py
+jax
 pyyaml
 black
 flake8

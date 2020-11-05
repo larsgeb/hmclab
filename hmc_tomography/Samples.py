@@ -33,8 +33,7 @@ class Samples:
         """This operator overloads the [] brackets to correct for burn in.
 
         The operator overload takes care of the burn-in phase sample discard."""
-
-        return self.file_handle[self.datasetname][key]
+        return self.file_handle[self.datasetname][:, self.burn_in : -1][key]
 
     def __enter__(self):
         return self
@@ -47,11 +46,11 @@ class Samples:
 
     @property
     def misfits(self):
-        return self.file_handle[self.datasetname][-1, :][:, None]
+        return self.file_handle[self.datasetname][-1, self.burn_in : -1][:, None]
 
     @property
     def numpy(self):
-        return self.file_handle[self.datasetname][:, :]
+        return self.file_handle[self.datasetname][:, self.burn_in : -1]
 
     @property
     def h5(self):

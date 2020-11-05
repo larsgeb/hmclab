@@ -31,6 +31,7 @@ setuptools.setup(
         "h5py",
         "pyyaml",
         "jupyter",
+        "jax",
     ],
     extras_require={
         "dev": [

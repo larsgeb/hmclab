@@ -6,3 +6,4 @@ matplotlib
 tqdm
 h5py
 pyyaml
+jax
