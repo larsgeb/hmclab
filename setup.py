@@ -30,14 +30,12 @@ setuptools.setup(
         "tqdm",
         "h5py",
         "pyyaml",
-        "jupyter",
         "jax",
     ],
     extras_require={
         "dev": [
             "black",
             "flake8",
-            "ipython",
             "sphinx",
             "nbsphinx",
             "sphinx_rtd_theme",

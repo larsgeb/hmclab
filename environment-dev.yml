@@ -1,7 +1,0 @@
-name: hmc-tomo-dev
-dependencies:
-  - python>=3.7
-  - jupyter
-  - pip
-  - pip:
-      - -r file:requirements-dev.txt
