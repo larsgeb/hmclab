@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; HMC Tom 0.2.2-15-gef7e812 documentation</title>
+  <title>Installation &mdash; HMC Tom 0.2.2-17-g82b23b2-dirty documentation</title>
   
 
   
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                0.2.2-15-gef7e812
+                0.2.2-17-g82b23b2-dirty
               </div>
             
           
@@ -98,10 +98,15 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">HMC Tomography</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#installing-the-package-in-a-new-conda-environment">Installing the package (in a new Conda environment)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#option-1">Option 1</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#option-2">Option 2</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#option-3">Option 3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#quick-installation">Quick installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installing-the-package">Installing the package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#environment-setup">Environment setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Installing the package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#installation-option-1">Installation option 1</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#installation-option-2">Installation option 2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#installation-option-3">Installation option 3</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#installing-development-dependencies">Installing development dependencies</a></li>
@@ -203,26 +208,50 @@
 <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
 <p>Installing the <code class="code docutils literal notranslate"><span class="pre">hmc_tomography</span></code> package is dead-simple. It requires you to have
-Python 3.7 on your system. Virtual environments and <code class="code docutils literal notranslate"><span class="pre">Conda</span></code> are also fine.</p>
-<div class="section" id="installing-the-package-in-a-new-conda-environment">
-<h2>Installing the package (in a new Conda environment)<a class="headerlink" href="#installing-the-package-in-a-new-conda-environment" title="Permalink to this headline">¶</a></h2>
-<p>Activate your environment of choice. To create e.g. a new <code class="code docutils literal notranslate"><span class="pre">Conda</span></code> environment with the
-appropriate Python version, run the following from your terminal:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt; $ conda create -n hmc-tomography <span class="nv">python</span><span class="o">=</span><span class="m">3</span>.7
+Python 3.7 on your system. Using either virtual environments or <code class="code docutils literal notranslate"><span class="pre">Conda</span></code> is
+recommended.</p>
+<div class="section" id="quick-installation">
+<h2>Quick installation<a class="headerlink" href="#quick-installation" title="Permalink to this headline">¶</a></h2>
+<p>Run the following inside your local copy of the source code:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt; $ conda env create -f environment.yml
+&gt; $ conda activate hmctomo
+&gt; $ pip install -e .
 </pre></div>
 </div>
-<p>Now to install the package, we need to first activate this distribution:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt; $ conda activate hmc-tomography
+<p>After this you can use the code anywhere on your system, or start a Jupyter Notebook
+server and have a look at our examples.</p>
+</div>
+<div class="section" id="installing-the-package">
+<h2>Installing the package<a class="headerlink" href="#installing-the-package" title="Permalink to this headline">¶</a></h2>
+<p>Activate your environment of choice. This can be your system Python, a virtualenv, Conda
+environment, etc.</p>
+<div class="section" id="environment-setup">
+<h3>Environment setup<a class="headerlink" href="#environment-setup" title="Permalink to this headline">¶</a></h3>
+<p>To create e.g. a new <code class="code docutils literal notranslate"><span class="pre">Conda</span></code> environment with the appropriate
+Python version and dependencies, run the following from your terminal:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt; $ conda create -n hmctomo <span class="nv">python</span><span class="o">=</span><span class="m">3</span>.7
+&gt; $ conda activate hmctomo
+&gt; $ conda install notebook pip
 </pre></div>
 </div>
+<p>You can also create this environment byu first downloading this repo, and running the
+following command inside of it:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt; $ conda env create -f environment.yml
+&gt; $ conda activate hmctomo
+</pre></div>
+</div>
+<p>This does exactly the same as the previous commands.</p>
+</div>
+<div class="section" id="id1">
+<h3>Installing the package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <p>There’s at the moment three ways to install the package:</p>
 <ol class="arabic simple">
 <li><p>Install the code directly from GitHub;</p></li>
 <li><p>Clone the GitHub repo and install from that directory.</p></li>
 <li><p>Download the <code class="code docutils literal notranslate"><span class="pre">.zip</span></code> file of the repo, unzip, and install from that directory.</p></li>
 </ol>
-<div class="section" id="option-1">
-<h3>Option 1<a class="headerlink" href="#option-1" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="installation-option-1">
+<h4>Installation option 1<a class="headerlink" href="#installation-option-1" title="Permalink to this headline">¶</a></h4>
 <p>Option one simply requires you to run the following command from your shell (with the
 appropriate environment activated):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt; $ pip install -e git+git@github.com:larsgeb/hmc-tomography.git@master#egg<span class="o">=</span>hmc_tomography
@@ -235,8 +264,8 @@ instead:</p>
 </pre></div>
 </div>
 </div>
-<div class="section" id="option-2">
-<h3>Option 2<a class="headerlink" href="#option-2" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="installation-option-2">
+<h4>Installation option 2<a class="headerlink" href="#installation-option-2" title="Permalink to this headline">¶</a></h4>
 <p>Option two requires you to run the following commands (with the appropriate environment
 activated):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt; $ git clone git@github.com:larsgeb/hmc-tomography.git
@@ -246,8 +275,8 @@ activated):</p>
 </div>
 <p>This also won’t work as long as the GitHub repo is private and you don’t have access.</p>
 </div>
-<div class="section" id="option-3">
-<h3>Option 3<a class="headerlink" href="#option-3" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="installation-option-3">
+<h4>Installation option 3<a class="headerlink" href="#installation-option-3" title="Permalink to this headline">¶</a></h4>
 <p>Option three requires you to decompress the <code class="code docutils literal notranslate"><span class="pre">.zip</span></code> file and open a terminal in
 the resulting folder (such that you see the files <code class="code docutils literal notranslate"><span class="pre">setup.py</span></code>, <code class="code docutils literal notranslate"><span class="pre">README.md</span></code>,
 etc. Once you have activated the proper environment in your shell, run the following:</p>
@@ -258,6 +287,7 @@ etc. Once you have activated the proper environment in your shell, run the follo
 distribution by importing <code class="code docutils literal notranslate"><span class="pre">hmc_tomography</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">hmc_tomography</span>
 </pre></div>
+</div>
 </div>
 </div>
 </div>

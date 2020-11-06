@@ -2,23 +2,53 @@ Installation
 ============
 
 Installing the :code:`hmc_tomography` package is dead-simple. It requires you to have 
-Python 3.7 on your system. Virtual environments and :code:`Conda` are also fine. 
+Python 3.7 on your system. Using either virtual environments or :code:`Conda` is
+recommended.
 
-Installing the package (in a new Conda environment)
-***************************************************
+Quick installation
+******************
 
-Activate your environment of choice. To create e.g. a new :code:`Conda` environment with the
-appropriate Python version, run the following from your terminal:
-
-.. code-block:: bash    
-    
-    > $ conda create -n hmc-tomography python=3.7
-
-Now to install the package, we need to first activate this distribution:
+Run the following inside your local copy of the source code:
 
 .. code-block:: bash    
     
-    > $ conda activate hmc-tomography
+    > $ conda env create -f environment.yml
+    > $ conda activate hmctomo
+    > $ pip install -e .
+
+After this you can use the code anywhere on your system, or start a Jupyter Notebook
+server and have a look at our examples.
+
+Installing the package
+**********************
+
+Activate your environment of choice. This can be your system Python, a virtualenv, Conda
+environment, etc. 
+
+Environment setup
+^^^^^^^^^^^^^^^^^
+
+To create e.g. a new :code:`Conda` environment with the appropriate
+Python version and dependencies, run the following from your terminal:
+
+.. code-block:: bash    
+    
+    > $ conda create -n hmctomo python=3.7
+    > $ conda activate hmctomo
+    > $ conda install notebook pip
+
+You can also create this environment byu first downloading this repo, and running the
+following command inside of it:
+
+.. code-block:: bash    
+
+    > $ conda env create -f environment.yml
+    > $ conda activate hmctomo
+
+This does exactly the same as the previous commands.
+
+Installing the package
+^^^^^^^^^^^^^^^^^^^^^^
 
 There's at the moment three ways to install the package:
     
@@ -27,8 +57,8 @@ There's at the moment three ways to install the package:
 3. Download the :code:`.zip` file of the repo, unzip, and install from that directory.
 
 
-Option 1
-^^^^^^^^
+Installation option 1
+---------------------
 
 Option one simply requires you to run the following command from your shell (with the
 appropriate environment activated):
@@ -45,8 +75,8 @@ instead:
 
     > $ pip install -e git+ssh://git@github.com/larsgeb/hmc-tomography.git#egg=hmc_tomography
 
-Option 2
-^^^^^^^^
+Installation option 2
+---------------------
 
 Option two requires you to run the following commands (with the appropriate environment
 activated):
@@ -59,8 +89,8 @@ activated):
 
 This also won't work as long as the GitHub repo is private and you don't have access. 
 
-Option 3
-^^^^^^^^
+Installation option 3
+---------------------
 
 Option three requires you to decompress the :code:`.zip` file and open a terminal in 
 the resulting folder (such that you see the files :code:`setup.py`, :code:`README.md`, 
