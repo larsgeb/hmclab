@@ -41,6 +41,7 @@ from hmc_tomography.Distributions import _AbstractDistribution
 from hmc_tomography.MassMatrices import Unit as _Unit
 from hmc_tomography.MassMatrices import _AbstractMassMatrix
 from hmc_tomography.Helpers.Timers import AccumulatingTimer as _AccumulatingTimer
+from hmc_tomography.Helpers.CustomExceptions import InvalidCaseError
 
 dev_assertion_message = (
     "Something went wrong internally, please report this to the developers."
@@ -668,6 +669,13 @@ class _AbstractSampler(_ABC):
         algorithm."""
         pass
 
+    def get_diagnostics(self):
+        if not self.diagnostic_mode:
+            raise InvalidCaseError(
+                "Can't return diagnostics if sampler is not in diagnostic mode"
+            )
+        return self.functions_to_diagnose + self.sampler_specific_functions_to_diagnose
+
 
 class RWMH(_AbstractSampler):
     stepsize: _Union[float, _numpy.ndarray] = 1.0
@@ -698,7 +706,7 @@ class RWMH(_AbstractSampler):
     """A NumPy ndarray containing all past step lengths for the RWMH algorithm.
     Collected if autotuning is True."""
 
-    minimal_stepsize = 1e-18
+    minimal_stepsize: float = 1e-18
     """Minimal step length which is chosen if timestep becomes zero or negative during
     autotuning."""
 
@@ -711,8 +719,8 @@ class RWMH(_AbstractSampler):
         stepsize: _Union[float, _numpy.ndarray] = 1.0,
         initial_model: _numpy.ndarray = None,
         proposals: int = 100,
-        diagnostic_mode: bool = False,
         online_thinning: int = 1,
+        diagnostic_mode: bool = False,
         ram_buffer_size: int = None,
         overwrite_existing_file: bool = False,
         max_time: float = None,
@@ -745,6 +753,9 @@ class RWMH(_AbstractSampler):
         online_thinning: int
             An integer representing the degree of online thinning, i.e. the interval
             between storing samples.
+        diagnostic_mode: bool
+            A boolean describing if subroutines of sampling should be timed. Useful for
+            finding slow parts of the algorithm. Will add overhead to each function.
         ram_buffer_size: int
             An integer representing how many samples should be kept in RAM before
             writing to storage.
@@ -755,7 +766,15 @@ class RWMH(_AbstractSampler):
             A float representing the maximum time in seconds that sampling is allowed to
             take before it is automatically terminated. The value None is used for
             unlimited time.
-        **kwargs
+        autotuning: bool
+            A boolean describing whether or not stepsize is automatically adjusted. Uses
+            a diminishing adapting scheme to satisfy detailed balance.
+        target_acceptance_rate: float
+            A float between 0.0 and 1.0 that is the target acceptance rate of
+            autotuning. The algorithm will try to achieve this acceptance rate.
+        learning_rate: float
+            A float larger than 0.5 but smaller than or equal to 1.0, describing how
+            aggressively the stepsize is updated. Lower is more aggresive.
             Arbitrary keyword arguments.
 
         Raises
@@ -1010,7 +1029,7 @@ class HMC(_AbstractSampler):
     """A NumPy ndarray containing all past stepsizes for the HMC algorithm. Collected if
     autotuning is True."""
 
-    minimal_stepsize = 1e-18
+    minimal_stepsize: float = 1e-18
     """Minimal stepsize which is chosen if stepsize becomes zero or negative during
     autotuning."""
 
@@ -1024,8 +1043,8 @@ class HMC(_AbstractSampler):
         integrator: str = "lf",
         initial_model: _numpy.ndarray = None,
         proposals: int = 100,
-        diagnostic_mode: bool = False,
         online_thinning: int = 1,
+        diagnostic_mode: bool = False,
         ram_buffer_size: int = None,
         overwrite_existing_file: bool = False,
         max_time: float = None,
@@ -1033,7 +1052,7 @@ class HMC(_AbstractSampler):
         target_acceptance_rate: float = 0.65,
         learning_rate: float = 0.75,
     ):
-        """Sampling using the Metropolis-Hastings algorithm.
+        """Sampling using the Hamiltonian Monte Carlo algorithm.
 
         Parameters
         ----------
@@ -1056,6 +1075,10 @@ class HMC(_AbstractSampler):
             Needs to be a subtype of _AbstractMassMatrix. Has a strong influence on
             convergence rate. One passing None, defaults to the Unit mass matrix. **An
             essential tuning parameter.**
+        integrator: str
+            String containing "lf", "3s" or "4s" for a leapfrog, 3-stage or 4-stage
+            symplectic integrator respectively, to be used during the trajectory
+            calculation.
         initial_model: _numpy
             A NumPy column vector (shape dimensions × 1) containing the starting model
             of the Markov chain. This model will not be written out as a sample.
@@ -1064,6 +1087,9 @@ class HMC(_AbstractSampler):
         online_thinning: int
             An integer representing the degree of online thinning, i.e. the interval
             between storing samples.
+        diagnostic_mode: bool
+            A boolean describing if subroutines of sampling should be timed. Useful for
+            finding slow parts of the algorithm. Will add overhead to each function.
         ram_buffer_size: int
             An integer representing how many samples should be kept in RAM before
             writing to storage.
@@ -1074,6 +1100,15 @@ class HMC(_AbstractSampler):
             A float representing the maximum time in seconds that sampling is allowed to
             take before it is automatically terminated. The value None is used for
             unlimited time.
+        autotuning: bool
+            A boolean describing whether or not stepsize is automatically adjusted. Uses
+            a diminishing adapting scheme to satisfy detailed balance.
+        target_acceptance_rate: float
+            A float between 0.0 and 1.0 that is the target acceptance rate of
+            autotuning. The algorithm will try to achieve this acceptance rate.
+        learning_rate: float
+            A float larger than 0.5 but smaller than or equal to 1.0, describing how
+            aggressively the stepsize is updated. Lower is more aggresive.
 
         Raises
         ------
@@ -1273,11 +1308,11 @@ class HMC(_AbstractSampler):
             acceptance_rate = 0
 
         # Update stepsize
-        self.stepsize -= schedule_weight * (
+        proposed_stepsize = self.stepsize - schedule_weight * (
             self.target_acceptance_rate - min(acceptance_rate, 1)
         )
 
-        if self.stepsize <= 0:
+        if proposed_stepsize <= 0:
             _warnings.warn(
                 "The stepsize of the algorithm went below zero. You possibly "
                 "started the algorithm in a region with extremely strong "
@@ -1286,7 +1321,18 @@ class HMC(_AbstractSampler):
                 "a different initial model does not make this warning go away, try"
                 "setting a smaller minimal stepsize and initial stepsize value."
             )
-            self.stepsize = max(self.stepsize, self.minimal_stepsize)
+            proposed_stepsize = max(proposed_stepsize, self.minimal_stepsize)
+
+        if (
+            _numpy.abs(_numpy.log10(proposed_stepsize) - _numpy.log10(self.stepsize))
+            > 1
+        ):
+            if proposed_stepsize > self.stepsize:
+                self.stepsize *= 10
+            else:
+                self.stepsize *= 0.1
+        else:
+            self.stepsize = proposed_stepsize
 
     def _propagate_leapfrog(self,):
 
@@ -1473,5 +1519,5 @@ class HMC(_AbstractSampler):
 
         _plt.semilogy(self.acceptance_rates)
         _plt.xlabel("iteration")
-        _plt.ylabel("stepsize")
+        _plt.ylabel("acceptance rate")
         return _plt.gca()

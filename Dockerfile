@@ -11,3 +11,8 @@ RUN apt-get update \
 COPY . /hmc-tomography
 WORKDIR /hmc-tomography
 RUN pip install -v -e .[testing]
+RUN pip install -v psvWave
+RUN pip install jupyter
+
+WORKDIR /hmc-tomography/examples/notebooks
+CMD ["jupyter", "notebook", "--port=8888", "--no-browser", "--ip=0.0.0.0", "--allow-root"] 

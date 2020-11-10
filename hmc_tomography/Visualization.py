@@ -8,7 +8,7 @@ import matplotlib.pyplot as _plt
 import numpy as _numpy
 
 from hmc_tomography.Helpers import Processing as _Processing
-from hmc_tomography import Samples as _Samples
+from hmc_tomography.Samples import Samples as _Samples
 
 
 def marginal_grid(
@@ -35,6 +35,17 @@ def marginal_grid(
         min = samples[dimensions_list[i_dim], :].min()
         max = samples[dimensions_list[i_dim], :].max()
         dim_range.append((min, max))
+
+        if isinstance(samples, _Samples):
+            # Check if all dimensions to be plotted are actual dimensions
+            assert samples.numpy.shape[0] - 1 > dimensions_list[i_dim], (
+                "You tried to plot a dimension that is not part of the distribution. "
+                f"The passed samples file has {samples.numpy.shape[0]-1} dimensions "
+                "plus 1 for misfit. The misfit can not be plotted in the marginal. You "
+                f"tried to plot (among others) dimension {dimensions_list[i_dim]}, "
+                "which is out of range for zero-indexed dimensions. Check "
+                "`dimensions_list`."
+            )
 
     for i_plot in range(number_of_plots):
         # print(i_plot, i_plot) # grid indices for diagonal
@@ -208,6 +219,16 @@ def visualize_2_dimensions(
         using ``matplotlib.pyplot.show()``. If true, plot is immediately shown.
 
     """
+    if type(samples) == _Samples:
+        for dim in [dim1, dim2]:
+            assert samples.numpy.shape[0] > dim, (
+                "You tried to plot a dimension that is not part of the distribution. The "
+                f"passed samples file has {samples.numpy.shape[0]-1} dimensions plus 1 for "
+                "misfit. The misfit can be plotted in the 2d visualization. You tried to "
+                f"plot (among others) dimension {dim}, which is out of range "
+                "for zero-indexed dimensions. Check `dimensions_list`."
+            )
+
     figure_analysis = _plt.figure(figsize=(14, 8))
     axis_2d_histogram = figure_analysis.add_axes([0.07, 0.1, 0.45 / 2, 0.4])
 
@@ -241,7 +262,7 @@ def visualize_2_dimensions(
         _Processing.crosscorrelation(samples[dim1, :], samples[dim2, :]),
         "k",
         alpha=0.25,
-        label=f"Cross",
+        label="Cross",
         color=color_1d,
     )
     axis_autocorrelation.legend()

@@ -6,7 +6,7 @@ from pytest_notebook.nb_regression import NBRegressionFixture
 
 # Setup the fixture for testing notebooks using pytest_notebook
 fixture = NBRegressionFixture(
-    exec_timeout=60,
+    exec_timeout=600,
     diff_ignore=("/cells/*/outputs/", "/cells/*/execution_count", "/metadata"),
 )
 fixture.diff_color_words = False
