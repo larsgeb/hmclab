@@ -1308,11 +1308,11 @@ class HMC(_AbstractSampler):
             acceptance_rate = 0
 
         # Update stepsize
-        self.stepsize -= schedule_weight * (
+        proposed_stepsize = self.stepsize - schedule_weight * (
             self.target_acceptance_rate - min(acceptance_rate, 1)
         )
 
-        if self.stepsize <= 0:
+        if proposed_stepsize <= 0:
             _warnings.warn(
                 "The stepsize of the algorithm went below zero. You possibly "
                 "started the algorithm in a region with extremely strong "
@@ -1321,7 +1321,18 @@ class HMC(_AbstractSampler):
                 "a different initial model does not make this warning go away, try"
                 "setting a smaller minimal stepsize and initial stepsize value."
             )
-            self.stepsize = max(self.stepsize, self.minimal_stepsize)
+            proposed_stepsize = max(proposed_stepsize, self.minimal_stepsize)
+
+        if (
+            _numpy.abs(_numpy.log10(proposed_stepsize) - _numpy.log10(self.stepsize))
+            > 1
+        ):
+            if proposed_stepsize > self.stepsize:
+                self.stepsize *= 10
+            else:
+                self.stepsize *= 0.1
+        else:
+            self.stepsize = proposed_stepsize
 
     def _propagate_leapfrog(self,):
 
@@ -1508,5 +1519,5 @@ class HMC(_AbstractSampler):
 
         _plt.semilogy(self.acceptance_rates)
         _plt.xlabel("iteration")
-        _plt.ylabel("stepsize")
+        _plt.ylabel("acceptance rate")
         return _plt.gca()

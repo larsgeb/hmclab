@@ -4,9 +4,7 @@ import h5py as _h5py
 
 
 class Samples:
-    """A class to handle generated samples files.
-
-    """
+    """A class to handle generated samples files."""
 
     filename: str = None
 
@@ -33,8 +31,7 @@ class Samples:
         """This operator overloads the [] brackets to correct for burn in.
 
         The operator overload takes care of the burn-in phase sample discard."""
-
-        return self.file_handle[self.datasetname][key]
+        return self.file_handle[self.datasetname][:, self.burn_in :][key]
 
     def __enter__(self):
         return self
@@ -47,11 +44,11 @@ class Samples:
 
     @property
     def misfits(self):
-        return self.file_handle[self.datasetname][-1, :][:, None]
+        return self.file_handle[self.datasetname][-1, self.burn_in :][:, None]
 
     @property
     def numpy(self):
-        return self.file_handle[self.datasetname][:, :]
+        return self.file_handle[self.datasetname][:, self.burn_in :]
 
     @property
     def h5(self):

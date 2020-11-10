@@ -4,10 +4,10 @@ termcolor
 matplotlib
 tqdm
 h5py
+jax
 pyyaml
 black
 flake8
-ipython
 sphinx
 nbsphinx
 sphinx_rtd_theme
