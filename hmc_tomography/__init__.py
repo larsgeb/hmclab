@@ -8,7 +8,7 @@ from hmc_tomography import (
     Optimizers,
     Visualization,
 )
-from hmc_tomography.Samples import Samples
+from hmc_tomography.Samples import Samples, combine_samples
 
 from ._version import get_versions
 
@@ -21,7 +21,7 @@ __all__ = [
     "Distributions",
     "Samplers",
     "Optimizers",
-    "Post",
     "Visualization",
     "Samples",
+    "combine_samples",
 ]

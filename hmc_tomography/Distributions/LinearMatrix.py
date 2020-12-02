@@ -112,13 +112,11 @@ class LinearMatrix(_AbstractDistribution):
             )
 
     def misfit(self, coordinates: _numpy.ndarray) -> float:
-        """
-        """
+        """"""
         return self.Distribution.misfit(coordinates) + self.misfit_bounds(coordinates)
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
-        """
-        """
+        """"""
         return self.Distribution.gradient(coordinates)
 
     def generate(self):
@@ -141,7 +139,8 @@ class _LinearMatrix_dense_forward_simple_covariance(_AbstractDistribution):
         G: _numpy.ndarray,
         d: _numpy.ndarray,
         data_variance: _Union[
-            float, _numpy.ndarray,
+            float,
+            _numpy.ndarray,
         ],  # The name variance is justified, as only used on diagonal
         dtype=_numpy.single,
         premultiplication: bool = None,
@@ -170,7 +169,7 @@ class _LinearMatrix_dense_forward_simple_covariance(_AbstractDistribution):
             else:
                 invcov = _numpy.diag(1.0 / self.data_variance[:, 0])
 
-            self.GtG: _numpy.ndarray = (self.G.T @ invcov @ self.G)
+            self.GtG: _numpy.ndarray = self.G.T @ invcov @ self.G
             self.Gtd0: _numpy.ndarray = G.T @ invcov @ self.d
             self.dtd: float = (self.d.T @ invcov @ self.d).item()
 
@@ -249,7 +248,7 @@ class _LinearMatrix_dense_forward_dense_covariance(_AbstractDistribution):
 
         if self.premultiplication:
             # Precompute factors
-            self.GtG: _numpy.ndarray = (self.G.T @ self.invcov @ self.G)
+            self.GtG: _numpy.ndarray = self.G.T @ self.invcov @ self.G
             self.Gtd0: _numpy.ndarray = G.T @ self.invcov @ self.d
             self.dtd: float = (self.d.T @ self.invcov @ self.d).item()
 
@@ -310,7 +309,8 @@ class _LinearMatrix_sparse_forward_simple_covariance(_AbstractDistribution):
         G: _scipy.sparse.spmatrix,
         d: _numpy.ndarray,
         data_variance: _Union[
-            float, _numpy.ndarray,
+            float,
+            _numpy.ndarray,
         ],  # The name variance is justified, as only used on diagonal
         dtype=_numpy.single,
         premultiplication: bool = None,
@@ -346,7 +346,7 @@ class _LinearMatrix_sparse_forward_simple_covariance(_AbstractDistribution):
                 ).tocsr()
 
             # Precompute relevate factors
-            self.GtG: _scipy.sparse.spmatrix = (self.G.T @ invcov @ self.G)
+            self.GtG: _scipy.sparse.spmatrix = self.G.T @ invcov @ self.G
             self.Gtd0: _scipy.sparse.spmatrix = G.T @ invcov @ self.d
             self.dtd: float = (self.d.T @ invcov @ self.d).item()
 

@@ -1,6 +1,6 @@
 """Elastic 2D FWI class
 """
-from typing import Union as _Union
+from typing import Union as _Union, List as _List
 
 import numpy as _numpy
 import psvWave as _psvWave
@@ -20,11 +20,12 @@ class ElasticFullWaveform2D(_AbstractDistribution):
 
     def __init__(
         self,
-        _input: _Union[str, "ElasticFullWaveform2D"],
+        _input: _Union[str, "ElasticFullWaveform2D", dict],
         ux_obs: _numpy.ndarray = None,
         uz_obs: _numpy.ndarray = None,
         temperature: float = None,
         omp_threads_override: int = None,
+        free_parameter_grid: _List = None,
     ):
 
         if type(_input) == str:
@@ -74,6 +75,9 @@ class ElasticFullWaveform2D(_AbstractDistribution):
         else:
             # Default omp_threads_override
             self.omp_threads_override = 0
+
+        if free_parameter_grid is not None:
+            self.make_blob(*free_parameter_grid)
 
     @staticmethod
     def create_default(
@@ -201,20 +205,34 @@ class ElasticFullWaveform2D(_AbstractDistribution):
 
     def plot_model_vector(self, m, *args, **kwargs):
         if self.use_blob_par:
-            self.fdModel.plot_model_vector(
+            return self.fdModel.plot_model_vector(
                 self.blob.forward_transform_background(m), *args, **kwargs
             )
         else:
-            self.fdModel.plot_model_vector(m, *args, **kwargs)
+            return self.fdModel.plot_model_vector(m, *args, **kwargs)
 
     def make_blob(self, nx, nz):
-        self.use_blob_par = True
-        self.blob = BlobParametrization(self.fdModel, nx, nz)
-        self.dimensions = self.blob.free_parameters
+        if not self.use_blob_par:
+            self.use_blob_par = True
+            self.blob = BlobParametrization(self.fdModel, nx, nz)
+            self.dimensions = self.blob.free_parameters
+        elif self.blob.nx != nx or self.blob.nz != nz:
+            print(
+                f"Parametrization changed from {self.blob.nx} by "
+                "{self.blob.nz} to {nx} by {nz}."
+            )
+            self.use_blob_par = True
+            self.blob = BlobParametrization(self.fdModel, nx, nz)
+            self.dimensions = self.blob.free_parameters
+        else:
+            print("Parametrization unchanged.")
 
 
 class BlobParametrization:
     def __init__(self, model: _psvWave.fdModel, nx, nz):
+
+        self.nx = nx
+        self.nz = nz
 
         self.fdModel = model
 
@@ -252,13 +270,13 @@ class BlobParametrization:
         # Define Gaussian center points as indicate in graph
         #       0                     max_x
         # max_z -----------------------  |  |
-        #       |                     |  |  |
+        #       |                     |  |  |  Par3
         #       |   *3     *4     *5  |  | /
         #       |                     |  |/
-        #       |                     |  |
+        #       |                     |  |  Par2
         #       |   *0     *1     *2  | /
         #       |                     |/
-        #     0 -----------------------
+        #     0 ----------------------- Par1
         length_x = self.coordinates_x.max() - self.coordinates_x.min()
         length_z = self.coordinates_z.max() - self.coordinates_z.min()
         dx = length_x / nx
@@ -323,4 +341,3 @@ class BlobParametrization:
         #     self.fdModel.set_model_vector(
         #         self.forward_transform_background(vector[:, None])
         #     )
-

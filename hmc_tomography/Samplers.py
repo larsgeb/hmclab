@@ -48,10 +48,12 @@ dev_assertion_message = (
 )
 
 
-class _AbstractSampler(_ABC):
-    """Abstract base class for Markov chain Monte Carlo samplers.
+class H5FileOpenedError(FileExistsError):
+    pass
 
-    """
+
+class _AbstractSampler(_ABC):
+    """Abstract base class for Markov chain Monte Carlo samplers."""
 
     name: str = "Monte Carlo sampler abstract base class"
     """The name of the sampler"""
@@ -373,7 +375,9 @@ class _AbstractSampler(_ABC):
             )
         except Exception:
             self.proposals_iterator = _tqdm_au.trange(
-                self.proposals, desc="Sampling. Acceptance rate:", leave=True,
+                self.proposals,
+                desc="Sampling. Acceptance rate:",
+                leave=True,
             )
 
         # Start time for updating progressbar
@@ -433,9 +437,14 @@ class _AbstractSampler(_ABC):
                 # Check elapsed time
                 if self.max_time is not None and scheduled_termination_time < _time():
                     # Raise KeyboardInterrupt if we're over time
-                    raise KeyboardInterrupt
+                    raise TimeoutError
 
         except KeyboardInterrupt:  # Catch SIGINT --------------------------------------
+            # Assume current proposal couldn't be finished, so ignore it.
+            self.current_proposal -= 1
+            # Close progressbar
+            self.proposals_iterator.close()
+        except TimeoutError:  # Catch SIGINT --------------------------------------
             # Close progressbar
             self.proposals_iterator.close()
         finally:  # Write out the last samples not on a full buffer --------------------
@@ -452,6 +461,8 @@ class _AbstractSampler(_ABC):
         nested=False,
         overwrite: bool = False,
     ) -> int:
+
+        choice_made = False
 
         # Add file extension
         if not name.endswith(".h5"):
@@ -479,7 +490,10 @@ class _AbstractSampler(_ABC):
                 == f"Unable to create file (unable to open file: name = '{name}', "
                 f"errno = 17, error message = 'File exists', flags = 15, o_flags = c2)"
             ):
-                raise e
+                raise H5FileOpenedError(
+                    "This file is already opened as HDF5 file. If you "
+                    "want to write to it, close the filehandle."
+                )
 
             # If it exists, prompt the user with a warning
             _warnings.warn(
@@ -500,11 +514,14 @@ class _AbstractSampler(_ABC):
                     # If this is not the first time that this is called, also print the
                     # warning again
                     input_choice = input(
-                        f"{name} also exists. (n)ew file name, (o)verwrite or (a)bort? "
-                        ">> "
+                        f"{name} also exists. (n)ew file name, (o)verwrite, (s)kip "
+                        "sampling or (a)bort code? >> "
                     )
                 else:
-                    input_choice = input("(n)ew file name, (o)verwrite or (a)bort? >> ")
+                    input_choice = input(
+                        "(n)ew file name, (o)verwrite, (s)kip sampling or (a)bort "
+                        "code? >> "
+                    )
 
                 # Act on choice
                 if input_choice == "n":
@@ -532,11 +549,18 @@ class _AbstractSampler(_ABC):
                     )
 
                 elif input_choice == "a":
-                    # User wants to abort sampling
+                    # User wants to abort code
                     choice_made = True
-                    raise AttributeError(
-                        "Wasn't able to create the samples file. This exception should "
-                        "come paired with an OSError thrown by h5py."
+                    raise FileExistsError(
+                        "Aborting code execution due to samples file existing."
+                    )
+
+                elif input_choice == "s":
+                    # User wants to abort sampling, but continue code
+                    choice_made = True
+                    raise FileExistsError(
+                        "Skipping sampling due to samples file existing. Code "
+                        "execution continues."
                     )
 
         # Update the filename in the sampler object for later retrieval
@@ -568,7 +592,8 @@ class _AbstractSampler(_ABC):
             acceptance_rate = self.accepted_proposals / (self.current_proposal + 1)
 
             self.proposals_iterator.set_description(
-                f"Tot. acc rate: {acceptance_rate:.2f}. Progress", refresh=False,
+                f"Tot. acc rate: {acceptance_rate:.2f}. Progress",
+                refresh=False,
             )
 
     def _sample_to_ram(self):
@@ -634,6 +659,7 @@ class _AbstractSampler(_ABC):
             self.samples_hdf5_dataset[:, robust_start:end] = self.ram_buffer[
                 :, : end - robust_start
             ]
+            self.ram_buffer.fill(_numpy.nan)
 
             # Reset the markers in the HDF5 file
             self.samples_hdf5_dataset.attrs["write_index"] = end
@@ -1146,6 +1172,13 @@ class HMC(_AbstractSampler):
         except Exception as e:
             if self.samples_hdf5_filehandle is not None:
                 self.samples_hdf5_filehandle.close()
+
+            if type(e) is FileExistsError:
+                if (
+                    str(e) == "Skipping sampling due to samples file existing. Code "
+                    "execution continues."
+                ):
+                    return
             raise e
 
         self._sample_loop()
@@ -1334,7 +1367,9 @@ class HMC(_AbstractSampler):
         else:
             self.stepsize = proposed_stepsize
 
-    def _propagate_leapfrog(self,):
+    def _propagate_leapfrog(
+        self,
+    ):
 
         # Make sure not to alter a view but a copy of arrays ---------------------------
         position = self.current_model.copy()
