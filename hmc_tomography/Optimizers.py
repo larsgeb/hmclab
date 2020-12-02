@@ -25,7 +25,9 @@ class _AbstractOptimizer(_ABC):
     target: _AbstractDistribution
 
     @_abstractmethod
-    def iterate_once(self,) -> _numpy.ndarray:
+    def iterate_once(
+        self,
+    ) -> _numpy.ndarray:
         """
         Parameters
         ----------
@@ -38,7 +40,9 @@ class _AbstractOptimizer(_ABC):
         pass
 
     @_abstractmethod
-    def iterate(self,) -> _numpy.ndarray:
+    def iterate(
+        self,
+    ) -> _numpy.ndarray:
         """
         Parameters
         ----------
@@ -55,7 +59,9 @@ class gradient_descent(_AbstractOptimizer):
     """An unscaled gradient descent optimization routine."""
 
     def __init__(
-        self, target: _AbstractDistribution, epsilon: float = 0.1,
+        self,
+        target: _AbstractDistribution,
+        epsilon: float = 0.1,
     ):
         # Setting the passed objects -------------------------------------------
         self.dimensions = target.dimensions
@@ -94,10 +100,17 @@ class gradient_descent(_AbstractOptimizer):
         # Create progress bar
         try:
             iterations = _tqdm_au.trange(
-                nmax, desc="Iterating", leave=True, dynamic_ncols=True,
+                nmax,
+                desc="Iterating",
+                leave=True,
+                dynamic_ncols=True,
             )
         except Exception:
-            iterations = _tqdm_au.trange(nmax, desc="Iterating", leave=True,)
+            iterations = _tqdm_au.trange(
+                nmax,
+                desc="Iterating",
+                leave=True,
+            )
 
         for iteration in iterations:
             xs.append(self.target.misfit(m))
@@ -154,10 +167,17 @@ class simple_preconditioned_gradient_descent(_AbstractOptimizer):
         # Create progress bar
         try:
             iterations = _tqdm_au.trange(
-                nmax, desc="Iterating", leave=True, dynamic_ncols=True,
+                nmax,
+                desc="Iterating",
+                leave=True,
+                dynamic_ncols=True,
             )
         except Exception:
-            iterations = _tqdm_au.trange(nmax, desc="Iterating", leave=True,)
+            iterations = _tqdm_au.trange(
+                nmax,
+                desc="Iterating",
+                leave=True,
+            )
 
         for iteration in iterations:
             xs.append(self.target.misfit(m))

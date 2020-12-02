@@ -51,3 +51,10 @@ class AccumulatingTimer:
         print(f"Function: {self.function}")
         print(f"Calls: {self.calls}")
         print(f"Total time spent: {self.time_spent} seconds")
+
+    def __str__(self) -> str:
+        return (
+            f"Function: {self.function}, "
+            f"Calls: {self.calls}, "
+            f"Total time spent: {self.time_spent} seconds, "
+        )

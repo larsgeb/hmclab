@@ -2,11 +2,12 @@ import shutil as _shutil
 
 import h5py as _h5py
 
+from typing import List as _List, Union as _Union
+import numpy as _numpy
+
 
 class Samples:
-    """A class to handle generated samples files.
-
-    """
+    """A class to handle generated samples files."""
 
     filename: str = None
 
@@ -33,8 +34,7 @@ class Samples:
         """This operator overloads the [] brackets to correct for burn in.
 
         The operator overload takes care of the burn-in phase sample discard."""
-
-        return self.file_handle[self.datasetname][key]
+        return self.file_handle[self.datasetname][:, self.burn_in :][key]
 
     def __enter__(self):
         return self
@@ -47,11 +47,11 @@ class Samples:
 
     @property
     def misfits(self):
-        return self.file_handle[self.datasetname][-1, :][:, None]
+        return self.file_handle[self.datasetname][-1, self.burn_in :][:, None]
 
     @property
     def numpy(self):
-        return self.file_handle[self.datasetname][:, :]
+        return self.file_handle[self.datasetname][:, self.burn_in :]
 
     @property
     def h5(self):
@@ -111,6 +111,50 @@ class Samples:
         print("━" * width)
         for key in details:
             print("{0:30} {1}".format(key, details[key]))
+
+
+def combine_samples(
+    samples_list: _Union[_List[Samples], _List[str]],
+    output_filename=None,
+    check_tuning_parameters=True,
+    burn_ins=None,
+    cull_nan=True,
+):
+    assert (
+        type(samples_list) == list
+    ), "Passed sample files/objects are not in list format."
+
+    close_files = False
+    ret_obj = None
+
+    if all(isinstance(n, Samples) for n in samples_list):
+        pass
+
+    elif all(isinstance(n, str) for n in samples_list):
+        close_files = True
+        samples_list = [Samples(samples_item) for samples_item in samples_list]
+
+    else:
+        raise ValueError(
+            "Passed neither only strings to a sample files nor only sample collections."
+            " Can't combine samples. "
+        )
+
+    # Concatenation is in memory
+    if output_filename is None:
+        ret_obj = _numpy.hstack([samples_item.numpy for samples_item in samples_list])
+
+        if cull_nan:
+            ret_obj = ret_obj[
+                :,
+                _numpy.logical_not(_numpy.isnan(_numpy.sum(ret_obj, axis=0))),
+            ]
+
+    if close_files:
+        for samples_item in samples_list:
+            samples_item.close()
+
+    return ret_obj
 
 
 def _in_notebook():

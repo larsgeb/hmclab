@@ -41,16 +41,19 @@ from hmc_tomography.Distributions import _AbstractDistribution
 from hmc_tomography.MassMatrices import Unit as _Unit
 from hmc_tomography.MassMatrices import _AbstractMassMatrix
 from hmc_tomography.Helpers.Timers import AccumulatingTimer as _AccumulatingTimer
+from hmc_tomography.Helpers.CustomExceptions import InvalidCaseError
 
 dev_assertion_message = (
     "Something went wrong internally, please report this to the developers."
 )
 
 
-class _AbstractSampler(_ABC):
-    """Abstract base class for Markov chain Monte Carlo samplers.
+class H5FileOpenedError(FileExistsError):
+    pass
 
-    """
+
+class _AbstractSampler(_ABC):
+    """Abstract base class for Markov chain Monte Carlo samplers."""
 
     name: str = "Monte Carlo sampler abstract base class"
     """The name of the sampler"""
@@ -372,7 +375,9 @@ class _AbstractSampler(_ABC):
             )
         except Exception:
             self.proposals_iterator = _tqdm_au.trange(
-                self.proposals, desc="Sampling. Acceptance rate:", leave=True,
+                self.proposals,
+                desc="Sampling. Acceptance rate:",
+                leave=True,
             )
 
         # Start time for updating progressbar
@@ -432,9 +437,14 @@ class _AbstractSampler(_ABC):
                 # Check elapsed time
                 if self.max_time is not None and scheduled_termination_time < _time():
                     # Raise KeyboardInterrupt if we're over time
-                    raise KeyboardInterrupt
+                    raise TimeoutError
 
         except KeyboardInterrupt:  # Catch SIGINT --------------------------------------
+            # Assume current proposal couldn't be finished, so ignore it.
+            self.current_proposal -= 1
+            # Close progressbar
+            self.proposals_iterator.close()
+        except TimeoutError:  # Catch SIGINT --------------------------------------
             # Close progressbar
             self.proposals_iterator.close()
         finally:  # Write out the last samples not on a full buffer --------------------
@@ -451,6 +461,8 @@ class _AbstractSampler(_ABC):
         nested=False,
         overwrite: bool = False,
     ) -> int:
+
+        choice_made = False
 
         # Add file extension
         if not name.endswith(".h5"):
@@ -478,7 +490,10 @@ class _AbstractSampler(_ABC):
                 == f"Unable to create file (unable to open file: name = '{name}', "
                 f"errno = 17, error message = 'File exists', flags = 15, o_flags = c2)"
             ):
-                raise e
+                raise H5FileOpenedError(
+                    "This file is already opened as HDF5 file. If you "
+                    "want to write to it, close the filehandle."
+                )
 
             # If it exists, prompt the user with a warning
             _warnings.warn(
@@ -499,11 +514,14 @@ class _AbstractSampler(_ABC):
                     # If this is not the first time that this is called, also print the
                     # warning again
                     input_choice = input(
-                        f"{name} also exists. (n)ew file name, (o)verwrite or (a)bort? "
-                        ">> "
+                        f"{name} also exists. (n)ew file name, (o)verwrite, (s)kip "
+                        "sampling or (a)bort code? >> "
                     )
                 else:
-                    input_choice = input("(n)ew file name, (o)verwrite or (a)bort? >> ")
+                    input_choice = input(
+                        "(n)ew file name, (o)verwrite, (s)kip sampling or (a)bort "
+                        "code? >> "
+                    )
 
                 # Act on choice
                 if input_choice == "n":
@@ -531,11 +549,18 @@ class _AbstractSampler(_ABC):
                     )
 
                 elif input_choice == "a":
-                    # User wants to abort sampling
+                    # User wants to abort code
                     choice_made = True
-                    raise AttributeError(
-                        "Wasn't able to create the samples file. This exception should "
-                        "come paired with an OSError thrown by h5py."
+                    raise FileExistsError(
+                        "Aborting code execution due to samples file existing."
+                    )
+
+                elif input_choice == "s":
+                    # User wants to abort sampling, but continue code
+                    choice_made = True
+                    raise FileExistsError(
+                        "Skipping sampling due to samples file existing. Code "
+                        "execution continues."
                     )
 
         # Update the filename in the sampler object for later retrieval
@@ -567,7 +592,8 @@ class _AbstractSampler(_ABC):
             acceptance_rate = self.accepted_proposals / (self.current_proposal + 1)
 
             self.proposals_iterator.set_description(
-                f"Tot. acc rate: {acceptance_rate:.2f}. Progress", refresh=False,
+                f"Tot. acc rate: {acceptance_rate:.2f}. Progress",
+                refresh=False,
             )
 
     def _sample_to_ram(self):
@@ -633,6 +659,7 @@ class _AbstractSampler(_ABC):
             self.samples_hdf5_dataset[:, robust_start:end] = self.ram_buffer[
                 :, : end - robust_start
             ]
+            self.ram_buffer.fill(_numpy.nan)
 
             # Reset the markers in the HDF5 file
             self.samples_hdf5_dataset.attrs["write_index"] = end
@@ -668,6 +695,13 @@ class _AbstractSampler(_ABC):
         algorithm."""
         pass
 
+    def get_diagnostics(self):
+        if not self.diagnostic_mode:
+            raise InvalidCaseError(
+                "Can't return diagnostics if sampler is not in diagnostic mode"
+            )
+        return self.functions_to_diagnose + self.sampler_specific_functions_to_diagnose
+
 
 class RWMH(_AbstractSampler):
     stepsize: _Union[float, _numpy.ndarray] = 1.0
@@ -698,7 +732,7 @@ class RWMH(_AbstractSampler):
     """A NumPy ndarray containing all past step lengths for the RWMH algorithm.
     Collected if autotuning is True."""
 
-    minimal_stepsize = 1e-18
+    minimal_stepsize: float = 1e-18
     """Minimal step length which is chosen if timestep becomes zero or negative during
     autotuning."""
 
@@ -711,8 +745,8 @@ class RWMH(_AbstractSampler):
         stepsize: _Union[float, _numpy.ndarray] = 1.0,
         initial_model: _numpy.ndarray = None,
         proposals: int = 100,
-        diagnostic_mode: bool = False,
         online_thinning: int = 1,
+        diagnostic_mode: bool = False,
         ram_buffer_size: int = None,
         overwrite_existing_file: bool = False,
         max_time: float = None,
@@ -745,6 +779,9 @@ class RWMH(_AbstractSampler):
         online_thinning: int
             An integer representing the degree of online thinning, i.e. the interval
             between storing samples.
+        diagnostic_mode: bool
+            A boolean describing if subroutines of sampling should be timed. Useful for
+            finding slow parts of the algorithm. Will add overhead to each function.
         ram_buffer_size: int
             An integer representing how many samples should be kept in RAM before
             writing to storage.
@@ -755,7 +792,15 @@ class RWMH(_AbstractSampler):
             A float representing the maximum time in seconds that sampling is allowed to
             take before it is automatically terminated. The value None is used for
             unlimited time.
-        **kwargs
+        autotuning: bool
+            A boolean describing whether or not stepsize is automatically adjusted. Uses
+            a diminishing adapting scheme to satisfy detailed balance.
+        target_acceptance_rate: float
+            A float between 0.0 and 1.0 that is the target acceptance rate of
+            autotuning. The algorithm will try to achieve this acceptance rate.
+        learning_rate: float
+            A float larger than 0.5 but smaller than or equal to 1.0, describing how
+            aggressively the stepsize is updated. Lower is more aggresive.
             Arbitrary keyword arguments.
 
         Raises
@@ -1010,7 +1055,7 @@ class HMC(_AbstractSampler):
     """A NumPy ndarray containing all past stepsizes for the HMC algorithm. Collected if
     autotuning is True."""
 
-    minimal_stepsize = 1e-18
+    minimal_stepsize: float = 1e-18
     """Minimal stepsize which is chosen if stepsize becomes zero or negative during
     autotuning."""
 
@@ -1024,8 +1069,8 @@ class HMC(_AbstractSampler):
         integrator: str = "lf",
         initial_model: _numpy.ndarray = None,
         proposals: int = 100,
-        diagnostic_mode: bool = False,
         online_thinning: int = 1,
+        diagnostic_mode: bool = False,
         ram_buffer_size: int = None,
         overwrite_existing_file: bool = False,
         max_time: float = None,
@@ -1033,7 +1078,7 @@ class HMC(_AbstractSampler):
         target_acceptance_rate: float = 0.65,
         learning_rate: float = 0.75,
     ):
-        """Sampling using the Metropolis-Hastings algorithm.
+        """Sampling using the Hamiltonian Monte Carlo algorithm.
 
         Parameters
         ----------
@@ -1056,6 +1101,10 @@ class HMC(_AbstractSampler):
             Needs to be a subtype of _AbstractMassMatrix. Has a strong influence on
             convergence rate. One passing None, defaults to the Unit mass matrix. **An
             essential tuning parameter.**
+        integrator: str
+            String containing "lf", "3s" or "4s" for a leapfrog, 3-stage or 4-stage
+            symplectic integrator respectively, to be used during the trajectory
+            calculation.
         initial_model: _numpy
             A NumPy column vector (shape dimensions × 1) containing the starting model
             of the Markov chain. This model will not be written out as a sample.
@@ -1064,6 +1113,9 @@ class HMC(_AbstractSampler):
         online_thinning: int
             An integer representing the degree of online thinning, i.e. the interval
             between storing samples.
+        diagnostic_mode: bool
+            A boolean describing if subroutines of sampling should be timed. Useful for
+            finding slow parts of the algorithm. Will add overhead to each function.
         ram_buffer_size: int
             An integer representing how many samples should be kept in RAM before
             writing to storage.
@@ -1074,6 +1126,15 @@ class HMC(_AbstractSampler):
             A float representing the maximum time in seconds that sampling is allowed to
             take before it is automatically terminated. The value None is used for
             unlimited time.
+        autotuning: bool
+            A boolean describing whether or not stepsize is automatically adjusted. Uses
+            a diminishing adapting scheme to satisfy detailed balance.
+        target_acceptance_rate: float
+            A float between 0.0 and 1.0 that is the target acceptance rate of
+            autotuning. The algorithm will try to achieve this acceptance rate.
+        learning_rate: float
+            A float larger than 0.5 but smaller than or equal to 1.0, describing how
+            aggressively the stepsize is updated. Lower is more aggresive.
 
         Raises
         ------
@@ -1111,6 +1172,13 @@ class HMC(_AbstractSampler):
         except Exception as e:
             if self.samples_hdf5_filehandle is not None:
                 self.samples_hdf5_filehandle.close()
+
+            if type(e) is FileExistsError:
+                if (
+                    str(e) == "Skipping sampling due to samples file existing. Code "
+                    "execution continues."
+                ):
+                    return
             raise e
 
         self._sample_loop()
@@ -1273,11 +1341,11 @@ class HMC(_AbstractSampler):
             acceptance_rate = 0
 
         # Update stepsize
-        self.stepsize -= schedule_weight * (
+        proposed_stepsize = self.stepsize - schedule_weight * (
             self.target_acceptance_rate - min(acceptance_rate, 1)
         )
 
-        if self.stepsize <= 0:
+        if proposed_stepsize <= 0:
             _warnings.warn(
                 "The stepsize of the algorithm went below zero. You possibly "
                 "started the algorithm in a region with extremely strong "
@@ -1286,9 +1354,22 @@ class HMC(_AbstractSampler):
                 "a different initial model does not make this warning go away, try"
                 "setting a smaller minimal stepsize and initial stepsize value."
             )
-            self.stepsize = max(self.stepsize, self.minimal_stepsize)
+            proposed_stepsize = max(proposed_stepsize, self.minimal_stepsize)
 
-    def _propagate_leapfrog(self,):
+        if (
+            _numpy.abs(_numpy.log10(proposed_stepsize) - _numpy.log10(self.stepsize))
+            > 1
+        ):
+            if proposed_stepsize > self.stepsize:
+                self.stepsize *= 10
+            else:
+                self.stepsize *= 0.1
+        else:
+            self.stepsize = proposed_stepsize
+
+    def _propagate_leapfrog(
+        self,
+    ):
 
         # Make sure not to alter a view but a copy of arrays ---------------------------
         position = self.current_model.copy()
@@ -1473,5 +1554,5 @@ class HMC(_AbstractSampler):
 
         _plt.semilogy(self.acceptance_rates)
         _plt.xlabel("iteration")
-        _plt.ylabel("stepsize")
+        _plt.ylabel("acceptance rate")
         return _plt.gca()
