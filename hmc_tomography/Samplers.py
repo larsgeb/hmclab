@@ -32,6 +32,11 @@ from abc import abstractmethod as _abstractmethod
 from time import time as _time
 from datetime import datetime as _datetime
 from typing import Union as _Union
+from multiprocessing import (
+    Process as _Process,
+    Pipe as _Pipe,
+    Value as _Value,
+)
 
 import h5py as _h5py
 import numpy as _numpy
@@ -114,6 +119,14 @@ class _AbstractSampler(_ABC):
     diagnostic_mode: bool = True
     functions_to_diagnose = []
     sampler_specific_functions_to_diagnose = []
+    main_thread_keyboard_interrupt = None
+
+    # Below are fields that are only relevant to parallel sampling
+    parallel = False
+    sampler_index = 0
+    exchange_schedule = None
+    pipe_matrix = None
+    exchange_interval = None
 
     def __init__(self):
         pass
@@ -372,12 +385,14 @@ class _AbstractSampler(_ABC):
                 desc="Sampling. Acceptance rate:",
                 leave=True,
                 dynamic_ncols=True,
+                position=self.sampler_index,  # only relevant for parallel sampling
             )
         except Exception:
             self.proposals_iterator = _tqdm_au.trange(
                 self.proposals,
                 desc="Sampling. Acceptance rate:",
                 leave=True,
+                position=self.sampler_index,  # only relevant for parallel sampling
             )
 
         # Start time for updating progressbar
@@ -413,6 +428,88 @@ class _AbstractSampler(_ABC):
                 # The underlying method changes when different algorithms are selected.
                 self._evaluate_acceptance()
 
+                # Parallel communication section -------------
+                if self.parallel:
+                    # Check if chain is in the schedule for current iteration
+                    if self.current_proposal % self.exchange_interval == 0 and (
+                        self.sampler_index
+                        in self.exchange_schedule[
+                            int(self.current_proposal / self.exchange_interval), :
+                        ]
+                    ):
+
+                        # Find where in schedule
+                        position_in_schedule = _numpy.where(
+                            self.sampler_index
+                            == self.exchange_schedule[
+                                int(self.current_proposal / self.exchange_interval), :
+                            ]
+                        )[0][0]
+
+                        # Determine if master (master evaluates swap)
+                        if position_in_schedule % 2 == 0:
+                            master = False
+                        else:
+                            master = True
+
+                        # Find counterpart
+                        exchange_chain = self.exchange_schedule[
+                            int(self.current_proposal / self.exchange_interval),
+                            position_in_schedule + (-1 if master else +1),
+                        ]
+
+                        # Find correct pipes
+                        left_pipe, right_pipe = self.pipe_matrix.retrieve_pipes(
+                            self.sampler_index, exchange_chain
+                        )
+
+                        if self.sampler_index > exchange_chain:
+                            pipe = left_pipe
+                        else:
+                            pipe = right_pipe
+
+                        # Master sends model, then waits for misfit and other chains'
+                        # model + misfit
+                        if master:
+                            (exchange_model,) = pipe.recv()
+                            pipe.send([self.current_model])
+
+                            # Compute misfit of received model
+                            exchange_x = self.distribution.misfit(exchange_model)
+
+                            # Compute misfit improvement
+                            misfit_improvement = self.current_x - exchange_x
+
+                            # Receive improvement of misfit of the counterpart
+                            (counterpart_improvement,) = pipe.recv()
+
+                            # Evaluate acceptance rate of exchange, based on both
+                            # improvements.
+                            if _numpy.exp(
+                                misfit_improvement + counterpart_improvement
+                            ) > _numpy.random.uniform(0, 1):
+                                # If accepted, switch models
+                                pipe.send([self.current_model])
+                                self.current_model = exchange_model.copy()
+                            else:
+                                # If not accepted, send the exchanged model back to
+                                # other chain, effectively not switching.
+                                pipe.send([exchange_model])
+
+                        else:
+                            pipe.send([self.current_model])
+                            (exchange_model,) = pipe.recv()
+
+                            exchange_x = self.distribution.misfit(exchange_model)
+
+                            misfit_improvement = self.current_x - exchange_x
+
+                            pipe.send([misfit_improvement])
+
+                            (self.current_model,) = pipe.recv()
+
+                # --------------------------------------------
+
                 # If we are on a thinning number ... (i.e. one of the non-discarded
                 # samples)
                 if self.current_proposal % self.online_thinning == 0:
@@ -436,7 +533,7 @@ class _AbstractSampler(_ABC):
 
                 # Check elapsed time
                 if self.max_time is not None and scheduled_termination_time < _time():
-                    # Raise KeyboardInterrupt if we're over time
+                    # Raise TimeoutError if we're over time
                     raise TimeoutError
 
         except KeyboardInterrupt:  # Catch SIGINT --------------------------------------
@@ -444,7 +541,7 @@ class _AbstractSampler(_ABC):
             self.current_proposal -= 1
             # Close progressbar
             self.proposals_iterator.close()
-        except TimeoutError:  # Catch SIGINT --------------------------------------
+        except TimeoutError:  # Catch SIGINT -------------------------------------------
             # Close progressbar
             self.proposals_iterator.close()
         finally:  # Write out the last samples not on a full buffer --------------------
@@ -591,10 +688,17 @@ class _AbstractSampler(_ABC):
             # Calculate acceptance rate
             acceptance_rate = self.accepted_proposals / (self.current_proposal + 1)
 
-            self.proposals_iterator.set_description(
-                f"Tot. acc rate: {acceptance_rate:.2f}. Progress",
-                refresh=False,
-            )
+            if self.parallel:
+                self.proposals_iterator.set_description(
+                    f"Sampler {self.sampler_index}, tot. acc rate: "
+                    f"{acceptance_rate:.2f}. Progress",
+                    refresh=False,
+                )
+            else:
+                self.proposals_iterator.set_description(
+                    f"Tot. acc rate: {acceptance_rate:.2f}. Progress",
+                    refresh=False,
+                )
 
     def _sample_to_ram(self):
         # Calculate proposal number after thinning
@@ -1556,3 +1660,135 @@ class HMC(_AbstractSampler):
         _plt.xlabel("iteration")
         _plt.ylabel("acceptance rate")
         return _plt.gca()
+
+
+class PipeMatrix:
+    def __init__(self, n_endpoints):
+
+        self.n_endpoints = n_endpoints
+
+        self.left_pipes = [
+            [None for i in range(n_endpoints)] for i in range(n_endpoints)
+        ]
+        self.right_pipes = [
+            [None for i in range(n_endpoints)] for i in range(n_endpoints)
+        ]
+
+        for point1 in range(self.n_endpoints):
+            for point2 in range(point1):
+                left, right = _Pipe(True)
+                self.left_pipes[point1][point2] = left
+                self.right_pipes[point1][point2] = right
+
+            # The following pipe is to communicate with the main process. Left is used
+            # to send from main, right to receive at fork. Is used to send interrupts.
+            left, right = _Pipe(True)
+            self.left_pipes[point1][point1] = left
+            self.right_pipes[point1][point1] = right
+
+    def pipes_to_subprocess(self):
+        return [self.left_pipes[point][point] for point in range(self.n_endpoints)]
+
+    def pipes_from_main(self):
+        return [self.right_pipes[point][point] for point in range(self.n_endpoints)]
+
+    def retrieve_pipes(self, point1, point2):
+        assert point1 != point2
+        left_point = max(point1, point2)
+        right_point = min(point1, point2)
+
+        return (
+            self.left_pipes[left_point][right_point],
+            self.right_pipes[left_point][right_point],
+        )
+
+    def close(self):
+        for point1 in range(self.n_endpoints):
+            for point2 in range(point1):
+                self.left_pipes[point1][point2].close()
+                self.right_pipes[point1][point2].close()
+
+
+class ParallelSampleSMP:
+    # SMP stands for Shared Memory Parallelism, i.e. single machine parallel sampling
+    def __init__(
+        self,
+        samplers,
+        filenames,
+        posteriors,
+        proposals,
+        exchange=True,
+        exchange_interval=1,
+        initial_model=None,
+    ):
+
+        self.samplers = samplers
+
+        ps = []
+
+        number_of_chains = len(filenames)
+
+        if exchange:
+            exchanges_per_proposal = int(_numpy.floor(number_of_chains / 2))
+
+            exchange_schedule = _numpy.vstack(
+                [
+                    _numpy.random.choice(
+                        number_of_chains, exchanges_per_proposal * 2, replace=False
+                    )
+                    for i in range(int(proposals / exchange_interval))
+                ]
+            )
+
+            pipe_matrix = PipeMatrix(number_of_chains)
+
+        else:
+            exchange_schedule = None
+            pipe_matrix = None
+
+        main_thread_keyboard_interrupt = _Value("f", 0)
+
+        try:
+            # Do modifications to the sampelrs that we don't want to do in the
+            # constructor or sampling function. The reasoning here is that it is better
+            # to obfuscate the non-parallel code less.
+            for i, sampler in enumerate(samplers):
+                sampler.parallel = True
+                sampler.sampler_index = i
+                sampler.exchange_schedule = exchange_schedule
+                sampler.pipe_matrix = pipe_matrix
+                sampler.exchange_interval = exchange_interval
+                sampler.main_thread_keyboard_interrupt = main_thread_keyboard_interrupt
+
+            for sampler, filename, posterior in zip(samplers, filenames, posteriors):
+                ps.append(
+                    _Process(
+                        target=sampler.sample,
+                        args=(filename, posterior),
+                        kwargs={
+                            "overwrite_existing_file": True,
+                            "proposals": proposals,
+                            "autotuning": True,
+                            "initial_model": initial_model,
+                        },
+                    )
+                )
+
+            print(f"Starting {number_of_chains} markov chains...")
+            for p in ps:
+                p.start()
+
+            for p in ps:
+                p.join()
+        except KeyboardInterrupt:
+            # Keyboard interrupt is also send automatically to subprocesses, so the only
+            # thing left to do is wait on them.
+            for p in ps:
+                p.join()
+
+        except Exception as e:
+            pipe_matrix.close()
+            raise e
+
+        pipe_matrix.close()
+        return
