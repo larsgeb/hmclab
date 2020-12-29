@@ -1,8 +1,0 @@
-numpy
-scipy
-termcolor
-matplotlib
-tqdm
-h5py
-pyyaml
-jax

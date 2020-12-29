@@ -1,0 +1,1155 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Tutorial 0.1 - Getting started &mdash; HMC Tom 0.2.2-27-g07553ae documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Tutorial 0.2 - Tuning Hamiltonian Monte Carlo" href="0.2%20-%20Tuning%20Hamiltonian%20Monte%20Carlo.html" />
+    <link rel="prev" title="Examples and tutorials" href="../examples.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> HMC Tom
+          
+
+          
+            
+            <img src="../_static/hmctom.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.2-27-g07553ae
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">HMC Tomography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../examples.html">Examples and tutorials</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Tutorial 0.1 - Getting started</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Sampling-for-the-first-time">Sampling for the first time</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Investigating-your-samples">Investigating your samples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Accessing-the-raw-samples-and-misfits">Accessing the raw samples and misfits</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Interrupting-sampling:-no-big-deal">Interrupting sampling: no big deal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Interpreting-multidimensional-results">Interpreting multidimensional results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Using-Bayes'-rule">Using Bayes’ rule</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="0.2%20-%20Tuning%20Hamiltonian%20Monte%20Carlo.html">Tutorial 0.2 - Tuning Hamiltonian Monte Carlo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1%20-%20Gaussian%20inverse%20problems%20-%20dense%20forward%20operator.html">Tutorial 1 - Gaussian inverse problems - dense forward operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2%20-%20Gaussian%20inverse%20problems%20-%20sparse%20forward%20operator.html">Tutorial 2 - Gaussian inverse problems - sparse forward operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3%20-%20Separate%20priors%20per%20dimension.html">Tutorial 3 - Separate priors per dimension</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4%20-%20Creating%20your%20own%20inverse%20problem.html">Tutorial 4 - Creating your own inverse problem</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../py-modindex.html">Module index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Alphabetic index</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">HMC Tom</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../examples.html">Examples and tutorials</a> &raquo;</li>
+        
+      <li>Tutorial 0.1 - Getting started</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/examples/0.1 - Getting started.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">hmc_tomography</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="Tutorial-0.1---Getting-started">
+<h1>Tutorial 0.1 - Getting started<a class="headerlink" href="#Tutorial-0.1---Getting-started" title="Permalink to this headline">¶</a></h1>
+<p>In this tutorial, you will see all the essentials of using <code class="docutils literal notranslate"><span class="pre">hmc_tomography</span></code>. We will cover the following topics:</p>
+<ol class="arabic simple">
+<li><p>Creating and sampling from a distribution;</p></li>
+<li><p>Investigating your samples;</p></li>
+<li><p>Accessing the raw samples and misfits;</p></li>
+<li><p>Interrupting sampling;</p></li>
+<li><p>Using Bayes’ rule.</p></li>
+</ol>
+<p>To start, we will sample one of the most common distributions in statistics, the standard normal distribution. To sample anything in this framework, we need an instance of the distribution class we wish to sample. Here is how we create a standard normal distribution in 1 dimension:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">distribution</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Distributions</span><span class="o">.</span><span class="n">StandardNormal1D</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>Every distribution object should have a few essential methods and attributes, which will be covered in the tutorial on implementing your own inverse problem. However, maybe the most important attribute of any distribution is its dimensionality, indicating the dimensions of the model space:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">distribution</span><span class="o">.</span><span class="n">dimensions</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+1
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">issubclass</span><span class="p">(</span>
+    <span class="nb">type</span><span class="p">(</span><span class="n">distribution</span><span class="p">),</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Distributions</span><span class="o">.</span><span class="n">_AbstractDistribution</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+True
+</pre></div></div>
+</div>
+<p>As expected, the 1 dimensional standard normal distribution has 1 dimension. Great!</p>
+<div class="section" id="Sampling-for-the-first-time">
+<h2>Sampling for the first time<a class="headerlink" href="#Sampling-for-the-first-time" title="Permalink to this headline">¶</a></h2>
+<p>To generate samples of the distribution, one can use the methods contained in the submodule <code class="docutils literal notranslate"><span class="pre">hmc_tomography.Samplers</span></code>. As of yet, it only has the vanilla HMC algorithm.</p>
+<p>Running the associated <code class="docutils literal notranslate"><span class="pre">sample()</span></code> method requires you to <strong>minimally</strong> pass the <strong>distribution</strong> and the <strong>filename</strong> of the h5 file you wish to write to. This h5 file will be created if it does not exist. If it does exist, the program will prompt you with options on how to continue.</p>
+<div class="admonition warning">
+<p class="admonition-title fa fa-exclamation-circle"><strong>Note:</strong> .h5 files</p>
+<p>The sample files with extension .h5 are a special kind of files that are designed to hold a lot of data. They were specifically chosen for hmc_tomography because MCMC generates large amounts of data.</p>
+<p>The samplers in this package buffer samples to RAM, and flush them intermittently to the hard drive. This is to allow for sample sizes bigger than RAM (by writing to disk) as well as avoiding continuous writes to disk which might slow down sampling (by buffering).</p>
+<p>However, these files are not the easiest to work with. They require either an API to access them (in Python <code class="docutils literal notranslate"><span class="pre">h5py</span></code>) or a specialized program (e.g. <code class="docutils literal notranslate"><span class="pre">HDFCompass</span></code>). There are no easy ways to ‘have a peek’ in the file if you’re not a little experienced with the file format.</p>
+<p>In this package, we provide a class (<code class="docutils literal notranslate"><span class="pre">hmc_tomography.Post.Samples</span></code>) that allows us to work in an easy way with the samples. However, they should <strong>ALWAYS</strong> be used in a Python context manager, as shown in the section <code class="docutils literal notranslate"><span class="pre">Investigating</span> <span class="pre">your</span> <span class="pre">samples</span></code>.</p>
+</div>
+<p>Any other setting has defaults for all samplers, such that <em>you</em> can get started quickly.</p>
+<p>For the Hamiltonian Monte Carlo algorithm, important settings you could change include: 1. Mass matrix; 2. Amount of integration steps; 3. Integration time step. 4. …</p>
+<p>You can find detailed descriptions of all the parameters in the API reference.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;bin_samples/tutorial_01_standard_normal.h5&quot;</span>
+
+<span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">HMC</span><span class="p">()</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+    <span class="n">filename</span><span class="p">,</span> <span class="n">distribution</span><span class="p">,</span> <span class="n">overwrite_existing_file</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+sys:1: Warning:
+Silently overwriting samples file (bin_samples/tutorial_01_standard_normal.h5) if it exists.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "0ba6cfedd41848b19d10c25502ff659f", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+</pre></div></div>
+</div>
+<p>Great! We just generated 100 samples from the distribution. The total acceptance rate was 1.00, and the acceptance rate of the last 100 samples (coincidentally the total amount of samples) is also 1.00. These numbers are rounded, so at a high amount of samples there might still be some rejected samples if you see 1.00.</p>
+<p>In the next cell, we try to write to the same samples file again, so the sampler also asks us for permission to overwrite the previous file.</p>
+<p>This package allows you to run the <code class="docutils literal notranslate"><span class="pre">sample()</span></code> method on either the instance, or directly on the class. What this means is that the previous and the following code snippets do the same thing:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">hmc_instance</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">HMC</span><span class="p">()</span>
+
+<span class="n">hmc_instance</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+    <span class="s2">&quot;bin_samples/tutorial_01_standard_normal.h5&quot;</span><span class="p">,</span>
+    <span class="n">distribution</span><span class="p">,</span>
+    <span class="n">proposals</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+    <span class="n">overwrite_existing_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+sys:1: Warning:
+Silently overwriting samples file (bin_samples/tutorial_01_standard_normal.h5) if it exists.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "fe587fa75972454b99ed1aa92eddbd2f", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+</pre></div></div>
+</div>
+<p>Sneakily, I’ve now also passed an extra argument: proposals. This controls how many proposals the algorithm makes. How many of those are accepted still depends on other settings!</p>
+</div>
+<div class="section" id="Investigating-your-samples">
+<h2>Investigating your samples<a class="headerlink" href="#Investigating-your-samples" title="Permalink to this headline">¶</a></h2>
+<p>Now that we have some samples generated on disk, we should do something useful with them!</p>
+<p>As a first step, we should verify some attributes of the generated samples. We can do this by using a Python context manager. The reason for this is that this construct closes the file properly when we are done with it.</p>
+<p>One of the helpful functions that <code class="docutils literal notranslate"><span class="pre">Samples</span></code> provides is <code class="docutils literal notranslate"><span class="pre">print_details()</span></code>, showing the final statistics of the Markov Chain:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span><span class="s2">&quot;bin_samples/tutorial_01_standard_normal.h5&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
+    <span class="n">samples</span><span class="o">.</span><span class="n">print_details</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+                                H5 file details
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Filename                       bin_samples/tutorial_01_standard_normal.h5
+Dataset                        samples_0
+
+                              Sampling attributes
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Sampler                        Hamiltonian Monte Carlo
+Requested proposals            10000
+Online thinning                1
+Proposals per second           9699.12
+Proposals saved to disk        10000
+Acceptance rate                1.00
+Sampler initiate time          30-Oct-2020 (16:08:11.605485)
+Sampler terminate time         30-Oct-2020 (16:08:12.654523)
+
+                          Sampler specific attributes
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+amount_of_steps                10
+integrator                     leapfrog integrator
+mass_matrix                    unit mass matrix
+stepsize                       0.1
+</pre></div></div>
+</div>
+<p>We might wish to visualize the resulting distribution. Luckily, there is a visualization module, <code class="docutils literal notranslate"><span class="pre">hmc_tomography.Post.Visualization</span></code>.</p>
+<p>This module contains multiple helpful functions to start with. One of them is <code class="docutils literal notranslate"><span class="pre">marginal</span></code>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span><span class="s2">&quot;bin_samples/tutorial_01_standard_normal.h5&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
+    <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Visualization</span><span class="o">.</span><span class="n">marginal</span><span class="p">(</span>
+        <span class="n">samples</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">25</span>  <span class="c1"># Note that dimensions are zero indexed</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_0.1_-_Getting_started_18_0.png" src="../_images/examples_0.1_-_Getting_started_18_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Accessing-the-raw-samples-and-misfits">
+<h2>Accessing the raw samples and misfits<a class="headerlink" href="#Accessing-the-raw-samples-and-misfits" title="Permalink to this headline">¶</a></h2>
+<p>Sometimes you want more control over your samples. Luckily, we got your back. You can access the samples both as a NumPy array as well as the actual HDF5 dataset object.</p>
+<p>If you know how to work with it, accessing via HDF is faster, as it doesn’t necessarily load all samples into RAM before slicing.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span><span class="s2">&quot;bin_samples/tutorial_01_standard_normal.h5&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
+
+    <span class="c1"># Access samples as a numpy array</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Type:  </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">samples</span><span class="o">.</span><span class="n">numpy</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Shape: </span><span class="si">{</span><span class="n">samples</span><span class="o">.</span><span class="n">numpy</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+
+    <span class="c1"># Access samples as a HDF dataset</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Type:  </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">samples</span><span class="o">.</span><span class="n">h5</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Shape: </span><span class="si">{</span><span class="n">samples</span><span class="o">.</span><span class="n">h5</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Type:  &lt;class &#39;numpy.ndarray&#39;&gt;
+Shape: (2, 10000)
+
+Type:  &lt;class &#39;h5py._hl.dataset.Dataset&#39;&gt;
+Shape: (2, 10000)
+</pre></div></div>
+</div>
+<p>You might notice the the <code class="docutils literal notranslate"><span class="pre">raw_samples_hdf</span></code> attribute has one extra dimension. That is because the samples file also records the misfits of each sample. We can easily access these as a NumPy array in the following way:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span><span class="s2">&quot;bin_samples/tutorial_01_standard_normal.h5&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
+
+    <span class="c1"># Access misfits as a numpy array</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Type:  </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">samples</span><span class="o">.</span><span class="n">misfits</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Shape: </span><span class="si">{</span><span class="n">samples</span><span class="o">.</span><span class="n">misfits</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Type:  &lt;class &#39;numpy.ndarray&#39;&gt;
+Shape: (10000, 1)
+
+</pre></div></div>
+</div>
+<p>Accessing the data directly might be handy when you need to compute some properties of a parameter, or wish to visualize some behaviour of the Monte Carlo sampler.</p>
+<p>Here is an example where we plot the evolution of parameter 1 and the misfit during the Markov chain, as well as printing statistics on parameter 1:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span><span class="s2">&quot;bin_samples/tutorial_01_standard_normal.h5&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;sample index&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;parameter 1 value&quot;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">samples</span><span class="o">.</span><span class="n">misfits</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;sample index&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;misfit&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;emperical mean: </span><span class="si">{</span><span class="n">samples</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;emperical standard deviation: </span><span class="si">{</span><span class="n">samples</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+emperical mean: -0.25
+emperical standard deviation: 0.79
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_0.1_-_Getting_started_25_1.png" src="../_images/examples_0.1_-_Getting_started_25_1.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Interrupting-sampling:-no-big-deal">
+<h2>Interrupting sampling: no big deal<a class="headerlink" href="#Interrupting-sampling:-no-big-deal" title="Permalink to this headline">¶</a></h2>
+<p>Sometimes you think you have the perfect settings for your ‘run’, and then after half an hour realize sampling is going to take longer than expected. At least, we experienced this a lot during our work with HMC.</p>
+<p>Luckily, we’ve added some nice functionality in this specific case. When a sampler is busy doing his thing, and you want it to wrap up, simply interrupt the process. What this means is you either <strong>once</strong> press <code class="docutils literal notranslate"><span class="pre">CTRL</span> <span class="pre">+</span> <span class="pre">C</span></code> when you’re running from a terminal, or press the stop button (■) at the top if you’re in a Jupyter Notebook. This ensures that the algorithm gracefully wraps up, leaving your dear samples intact.</p>
+<p>Try this out with the next cell. Let it progress to some percentage, and interrupt the kernel.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">HMC</span><span class="p">()</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+    <span class="s2">&quot;bin_samples/tutorial_01_standard_normal.h5&quot;</span><span class="p">,</span>
+    <span class="n">distribution</span><span class="p">,</span>
+    <span class="n">proposals</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span>
+    <span class="n">online_thinning</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">overwrite_existing_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">max_time</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+sys:1: Warning:
+Silently overwriting samples file (bin_samples/tutorial_01_standard_normal.h5) if it exists.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "632457f048324ea3b27162f63dac2917", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+</pre></div></div>
+</div>
+<p>When we now inspect the resulting samples file, we see that because we interrupted the kernel, the <code class="docutils literal notranslate"><span class="pre">proposals</span> <span class="pre">saved</span> <span class="pre">to</span> <span class="pre">disk</span></code> is less than we would expect after dividing <code class="docutils literal notranslate"><span class="pre">requested</span> <span class="pre">proposals</span></code> by <code class="docutils literal notranslate"><span class="pre">online</span> <span class="pre">thinning</span></code> (i.e. the number we would expect if the sampler finished).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span><span class="s2">&quot;bin_samples/tutorial_01_standard_normal.h5&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
+    <span class="n">samples</span><span class="o">.</span><span class="n">print_details</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+                                H5 file details
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Filename                       bin_samples/tutorial_01_standard_normal.h5
+Dataset                        samples_0
+
+                              Sampling attributes
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Sampler                        Hamiltonian Monte Carlo
+Requested proposals            100000
+Online thinning                100
+Proposals per second           11514.04
+Proposals saved to disk        346
+Acceptance rate                1.00
+Sampler initiate time          30-Oct-2020 (16:08:13.779909)
+Sampler terminate time         30-Oct-2020 (16:08:16.804850)
+
+                          Sampler specific attributes
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+amount_of_steps                10
+integrator                     leapfrog integrator
+mass_matrix                    unit mass matrix
+stepsize                       0.1
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Interpreting-multidimensional-results">
+<h2>Interpreting multidimensional results<a class="headerlink" href="#Interpreting-multidimensional-results" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># These guys have to be column vectors</span>
+<span class="n">mean</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.2</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">]])</span>
+<span class="n">std</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">4.5</span><span class="p">]])</span>
+<span class="n">variance</span> <span class="o">=</span> <span class="n">std</span> <span class="o">**</span> <span class="mi">2</span>
+
+
+<span class="n">normal_2d</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Distributions</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">variance</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/larsgebraad/Documents/Hamiltonian Monte Carlo/hmc-tomography/hmc_tomography/Distributions/base.py:403: Warning: Seems that you only passed a vector as the covariance matrix. It will be used as the covariance diagonal.
+  Warning,
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">HMC</span><span class="p">()</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+    <span class="s2">&quot;bin_samples/tutorial_01_mvn.h5&quot;</span><span class="p">,</span>
+    <span class="n">normal_2d</span><span class="p">,</span>
+    <span class="n">stepsize</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>
+    <span class="n">proposals</span><span class="o">=</span><span class="mi">25000</span><span class="p">,</span>
+    <span class="n">overwrite_existing_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+sys:1: Warning:
+Silently overwriting samples file (bin_samples/tutorial_01_mvn.h5) if it exists.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "fa2a543f5dc14d5db4dd067a45a91d2f", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+</pre></div></div>
+</div>
+<p>One of the most interesting things to investigate when sampling from multidimensional distributions is the trade-off between different parameters. We can visualize these (second order) trade-offs by inspecting the 2D marginals. We supply a function that can create a set of 2D marginals from a samples object, by specifying which dimensions should be investigated:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span><span class="s2">&quot;bin_samples/tutorial_01_mvn.h5&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
+    <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Visualization</span><span class="o">.</span><span class="n">marginal_grid</span><span class="p">(</span>
+        <span class="n">samples</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="mi">25</span>  <span class="c1"># Note that dimensions are zero indexed</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_0.1_-_Getting_started_34_0.png" src="../_images/examples_0.1_-_Getting_started_34_0.png" />
+</div>
+</div>
+<p>If you want to investigate sampler behaviour, it is often beneficial to look at a trace plot of the Markov chain. In the next cell, we visualize the evolution of parameter 2 (dimension 1, due to zero based index). We give this function only the first 250 samples.</p>
+<p>Additionally, the used function creates the 2D marginal with another dimension and plots the autocorrelation function of these two parameters during the supplied samples.</p>
+<p>These types of plots can help us identify problems with sampling and assess convergence.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span><span class="s2">&quot;bin_samples/tutorial_01_mvn.h5&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
+    <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Visualization</span><span class="o">.</span><span class="n">visualize_2_dimensions</span><span class="p">(</span>
+        <span class="n">samples</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">250</span><span class="p">],</span>
+    <span class="p">)</span>  <span class="c1"># Note that we only pass the first 250 samples</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_0.1_-_Getting_started_36_0.png" src="../_images/examples_0.1_-_Getting_started_36_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Using-Bayes'-rule">
+<h2>Using Bayes’ rule<a class="headerlink" href="#Using-Bayes'-rule" title="Permalink to this headline">¶</a></h2>
+<p>One of the main operations users of Bayesian inference do is applying Bayes’ rule to two distributions. Bayes’ rule combines two distributions (typically a likelihood and a prior) to a combined state of information, the posterior. We provide a simple interface to combine two or more distributions using Bayes’ rule in the following way.</p>
+<p>First we create two distributions we wish to combine. The first distribution is a 2D uniform distribution bounded between <span class="math notranslate nohighlight">\([0, 1]\)</span> for both parameters:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">lower_bounds</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="n">upper_bounds</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+<span class="n">distribution_1</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Distributions</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span>
+    <span class="n">lower_bounds</span><span class="o">=</span><span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="o">=</span><span class="n">upper_bounds</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The next distribution is a mutlivariate (uncorrelated) normal distribution with varying means and standard deviations:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">mean</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.75</span><span class="p">]])</span>
+<span class="n">std</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.1</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.25</span><span class="p">]])</span>
+<span class="n">variance</span> <span class="o">=</span> <span class="n">std</span> <span class="o">**</span> <span class="mi">2</span>
+
+<span class="n">distribution_2</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Distributions</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">variance</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/larsgebraad/Documents/Hamiltonian Monte Carlo/hmc-tomography/hmc_tomography/Distributions/base.py:403: Warning: Seems that you only passed a vector as the covariance matrix. It will be used as the covariance diagonal.
+  Warning,
+</pre></div></div>
+</div>
+<p>The hmc_tomography package additionally warns us that it assumed the passed variance object was the diagonal of a covariance matrix. This is fine, as we don’t want to define any correlations in this distribution.</p>
+<p>We can use Bayes’ rule by passing a list of distributions to the method <code class="docutils literal notranslate"><span class="pre">hmc_tomography.Distributions.BayesRule</span></code>. The returned distribution will contain the originally passed distributions completely.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">posterior</span> <span class="o">=</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Distributions</span><span class="o">.</span><span class="n">BayesRule</span><span class="p">([</span><span class="n">distribution_1</span><span class="p">,</span> <span class="n">distribution_2</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<p>The generated distribution can then be investigated using the samplers:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">HMC</span><span class="p">()</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+    <span class="s2">&quot;bin_samples/tutorial_01_posterior.h5&quot;</span><span class="p">,</span>
+    <span class="n">posterior</span><span class="p">,</span>
+    <span class="n">proposals</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+    <span class="n">overwrite_existing_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+sys:1: Warning:
+Silently overwriting samples file (bin_samples/tutorial_01_posterior.h5) if it exists.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "f711e077f78441a6abeccbdc77984519", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+</pre></div></div>
+</div>
+<p>Upon visualization we see the influence of both the uniform distributions (truncating the posterior at their limits) as well as the multivariate normal distribution:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span><span class="s2">&quot;bin_samples/tutorial_01_posterior.h5&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
+
+    <span class="n">hmc_tomography</span><span class="o">.</span><span class="n">Visualization</span><span class="o">.</span><span class="n">marginal_grid</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_0.1_-_Getting_started_47_0.png" src="../_images/examples_0.1_-_Getting_started_47_0.png" />
+</div>
+</div>
+<script type="application/vnd.jupyter.widget-state+json">
+{"state": {"010dce9b574a49ef9e92ce30b3f5fea2": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": "inline-flex", "flex": null, "flex_flow": "row wrap", "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": "100%"}}, "05a99451a42b4d849f84ba3b8e69a410": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "ProgressStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "0b940ce9ef5e459782609db05f3c59a4": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "DescriptionStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "DescriptionStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "description_width": ""}}, "0ba6cfedd41848b19d10c25502ff659f": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HBoxModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_47b35268b6224420b5f70f522e3d4a8e", "IPY_MODEL_d5952777e7814493866e262471a0eac1", "IPY_MODEL_c4cbfacb40de45a9aef69dc25f944ebb"], "layout": "IPY_MODEL_010dce9b574a49ef9e92ce30b3f5fea2"}}, "0e161d2c91084c468de6d6ee9d072e3f": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": "2", "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "0e35907559e945d5a82d89f9a1371e20": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "DescriptionStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "DescriptionStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "description_width": ""}}, "0fd5b3d4913047d0bbebd717cd485d53": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "10f5b99b78e64e0694e78c526f847544": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "163325974bcc486a850043778ebfe5d9": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "DescriptionStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "DescriptionStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "description_width": ""}}, "1ccf463877ef48fe9aca30b5e42f470a": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "DescriptionStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "DescriptionStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "description_width": ""}}, "376dfb9dcd754d06a750dbbabe2ce713": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "3e7339b3c95048a2ad796b7391feb7fa": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": "2", "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "3fa8fe7b2eaa4af3ab13df729a0224a7": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "ProgressStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "445c3dc4b5e34668903f1b263174cbec": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "DescriptionStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "DescriptionStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "description_width": ""}}, "4530d469afe04b62b44ab3637f8477bc": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "47b35268b6224420b5f70f522e3d4a8e": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HTMLView", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_376dfb9dcd754d06a750dbbabe2ce713", "placeholder": "\u200b", "style": "IPY_MODEL_445c3dc4b5e34668903f1b263174cbec", "value": "Tot. acc rate: 1.00. Progress: 100%"}}, "47cedda393e745c4bf72cf5aa8bab6a4": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HTMLView", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_a2b3e3c01871468aa9baee4bade01964", "placeholder": "\u200b", "style": "IPY_MODEL_1ccf463877ef48fe9aca30b5e42f470a", "value": "Tot. acc rate: 1.00. Progress:  35%"}}, "4b62f59aecee41d69a60383044d03467": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": "2", "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "5183810db5734929aa29498e44a07601": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": "2", "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "5487d9fd900746c8898d7cde2f6c7f3d": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HTMLView", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_d250bd08f0b24d8d94dd1b0835087e6e", "placeholder": "\u200b", "style": "IPY_MODEL_5a0a1d0a775c4501bc5fda8348cd060e", "value": " 10000/10000 [00:05&lt;00:00, 1780.90it/s]"}}, "59bda83da97c43d1afd2fb78f387840d": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "DescriptionStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "DescriptionStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "description_width": ""}}, "59e61e3d281a4fa9913977afbe21216f": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "FloatProgressModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_0e161d2c91084c468de6d6ee9d072e3f", "max": 25000.0, "min": 0.0, "orientation": "horizontal", "style": "IPY_MODEL_a3df47afbea243ae808127117df2d626", "value": 25000.0}}, "5a0a1d0a775c4501bc5fda8348cd060e": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "DescriptionStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "DescriptionStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "description_width": ""}}, "5cfaa86c628e4608a9d1c519c82a2a69": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "DescriptionStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "DescriptionStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "description_width": ""}}, "5efb153091a6410e97abf08aa058e3c3": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "632457f048324ea3b27162f63dac2917": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HBoxModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_47cedda393e745c4bf72cf5aa8bab6a4", "IPY_MODEL_78664f4e38214daca0a829ba8a79b317", "IPY_MODEL_e777c7da89c34e39905b9c63e598d91c"], "layout": "IPY_MODEL_83892e5848a94a19b35980a1fd67f6b6"}}, "68432d91a62d4257a6e0033fcf1ba416": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HTMLView", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_d517636318c14a9f95599364909643ce", "placeholder": "\u200b", "style": "IPY_MODEL_163325974bcc486a850043778ebfe5d9", "value": "Tot. acc rate: 0.62. Progress: 100%"}}, "7797619b58b74aaaae75d844b3722f00": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "DescriptionStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "DescriptionStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "description_width": ""}}, "78664f4e38214daca0a829ba8a79b317": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "FloatProgressModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "ProgressView", "bar_style": "danger", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_5183810db5734929aa29498e44a07601", "max": 100000.0, "min": 0.0, "orientation": "horizontal", "style": "IPY_MODEL_b728ad2d8b634590ac629d76279cbccb", "value": 34586.0}}, "83892e5848a94a19b35980a1fd67f6b6": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": "inline-flex", "flex": null, "flex_flow": "row wrap", "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": "100%"}}, "83a68aa457a34ab3ac5bd709ed953a44": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "953e11e581424bc7b20b9432176da036": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HTMLView", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_b057a210ee154d6a937b5d43cc9b42df", "placeholder": "\u200b", "style": "IPY_MODEL_0b940ce9ef5e459782609db05f3c59a4", "value": "Tot. acc rate: 1.00. Progress: 100%"}}, "98067a8df3ec4a6e83c95c4b96c73810": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HTMLView", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_10f5b99b78e64e0694e78c526f847544", "placeholder": "\u200b", "style": "IPY_MODEL_59bda83da97c43d1afd2fb78f387840d", "value": " 25000/25000 [00:04&lt;00:00, 6230.96it/s]"}}, "a2b3e3c01871468aa9baee4bade01964": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "a3df47afbea243ae808127117df2d626": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "ProgressStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "aa922975d1b3414992e8d28d9eff49ba": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": "inline-flex", "flex": null, "flex_flow": "row wrap", "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": "100%"}}, "afe698dba816482a8352e9301bfef66e": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HTMLView", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_5efb153091a6410e97abf08aa058e3c3", "placeholder": "\u200b", "style": "IPY_MODEL_5cfaa86c628e4608a9d1c519c82a2a69", "value": " 10000/10000 [00:01&lt;00:00, 9550.49it/s]"}}, "b057a210ee154d6a937b5d43cc9b42df": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "b728ad2d8b634590ac629d76279cbccb": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "ProgressStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "c0fe4490edef4e5b84819a507e4df308": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": "2", "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "c4cbfacb40de45a9aef69dc25f944ebb": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HTMLView", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_83a68aa457a34ab3ac5bd709ed953a44", "placeholder": "\u200b", "style": "IPY_MODEL_7797619b58b74aaaae75d844b3722f00", "value": " 100/100 [00:11&lt;00:00,  8.52it/s]"}}, "c7f51216e10942f8ba0d1b29c2199c89": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": "inline-flex", "flex": null, "flex_flow": "row wrap", "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": "100%"}}, "d250bd08f0b24d8d94dd1b0835087e6e": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "d517636318c14a9f95599364909643ce": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "d5952777e7814493866e262471a0eac1": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "FloatProgressModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_4b62f59aecee41d69a60383044d03467", "max": 100.0, "min": 0.0, "orientation": "horizontal", "style": "IPY_MODEL_05a99451a42b4d849f84ba3b8e69a410", "value": 100.0}}, "d5b2094b765043d7b58df02d141bbab0": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "ProgressStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "e21dc98bfb214042975a271d9f92b47f": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "FloatProgressModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_c0fe4490edef4e5b84819a507e4df308", "max": 10000.0, "min": 0.0, "orientation": "horizontal", "style": "IPY_MODEL_3fa8fe7b2eaa4af3ab13df729a0224a7", "value": 10000.0}}, "e777c7da89c34e39905b9c63e598d91c": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HTMLView", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_0fd5b3d4913047d0bbebd717cd485d53", "placeholder": "\u200b", "style": "IPY_MODEL_e9c8279ca39d4de282047a5050ffac85", "value": " 34586/100000 [00:03&lt;00:05, 11216.69it/s]"}}, "e9c8279ca39d4de282047a5050ffac85": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "DescriptionStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "DescriptionStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "description_width": ""}}, "ea0a5ae2a48b4bddb6d512d55e62381a": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "FloatProgressModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_3e7339b3c95048a2ad796b7391feb7fa", "max": 10000.0, "min": 0.0, "orientation": "horizontal", "style": "IPY_MODEL_d5b2094b765043d7b58df02d141bbab0", "value": 10000.0}}, "ee74c96bc90c4896a2ff16c4c95ec64d": {"model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": "inline-flex", "flex": null, "flex_flow": "row wrap", "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": "100%"}}, "f60752b4d619494996cc35ed2c09d116": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HTMLView", "description": "", "description_tooltip": null, "layout": "IPY_MODEL_4530d469afe04b62b44ab3637f8477bc", "placeholder": "\u200b", "style": "IPY_MODEL_0e35907559e945d5a82d89f9a1371e20", "value": "Tot. acc rate: 0.75. Progress: 100%"}}, "f711e077f78441a6abeccbdc77984519": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HBoxModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_68432d91a62d4257a6e0033fcf1ba416", "IPY_MODEL_e21dc98bfb214042975a271d9f92b47f", "IPY_MODEL_5487d9fd900746c8898d7cde2f6c7f3d"], "layout": "IPY_MODEL_aa922975d1b3414992e8d28d9eff49ba"}}, "fa2a543f5dc14d5db4dd067a45a91d2f": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HBoxModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_f60752b4d619494996cc35ed2c09d116", "IPY_MODEL_59e61e3d281a4fa9913977afbe21216f", "IPY_MODEL_98067a8df3ec4a6e83c95c4b96c73810"], "layout": "IPY_MODEL_c7f51216e10942f8ba0d1b29c2199c89"}}, "fe587fa75972454b99ed1aa92eddbd2f": {"model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "model_name": "HBoxModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_953e11e581424bc7b20b9432176da036", "IPY_MODEL_ea0a5ae2a48b4bddb6d512d55e62381a", "IPY_MODEL_afe698dba816482a8352e9301bfef66e"], "layout": "IPY_MODEL_ee74c96bc90c4896a2ff16c4c95ec64d"}}}, "version_major": 2, "version_minor": 0}
+</script></div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="0.2%20-%20Tuning%20Hamiltonian%20Monte%20Carlo.html" class="btn btn-neutral float-right" title="Tutorial 0.2 - Tuning Hamiltonian Monte Carlo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../examples.html" class="btn btn-neutral float-left" title="Examples and tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2019-2020, Andrea Zunino, Andreas Fichtner, Lars Gebraad
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
