@@ -3,11 +3,11 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>CompositeDistribution &mdash; HMC Tom 0.2.2-27-g07553ae documentation</title>
+  <title>CompositeDistribution &mdash; HMC Tom 0.2.2-30-gf7ff20a documentation</title>
   
 
   
@@ -17,7 +17,10 @@
 
   
   
+
   
+  
+
   
 
   
@@ -31,9 +34,9 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
-        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -55,7 +58,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> HMC Tom
+            <a href="../../index.html" class="icon icon-home"> HMC Tom
           
 
           
@@ -68,7 +71,7 @@
             
             
               <div class="version">
-                0.2.2-27-g07553ae
+                0.2.2-30-gf7ff20a
               </div>
             
           
@@ -96,6 +99,7 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../index.html">HMC Tomography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../hmc.html">The Hamiltonian Monte Carlo algorithm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../setup.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples and tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">API reference</a><ul class="current">
@@ -161,6 +165,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -176,7 +182,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="../../_sources/api/distributions/CompositeDistribution.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -218,7 +224,7 @@
 <h1>CompositeDistribution<a class="headerlink" href="#compositedistribution" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt id="hmc_tomography.Distributions.CompositeDistribution">
-<em class="property">class </em><code class="sig-prename descclassname">hmc_tomography.Distributions.</code><code class="sig-name descname">CompositeDistribution</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#CompositeDistribution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Distributions.CompositeDistribution" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">hmc_tomography.Distributions.</span></code><code class="sig-name descname"><span class="pre">CompositeDistribution</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#CompositeDistribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hmc_tomography.Distributions.CompositeDistribution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Distribution distribution combined from multiple unconditional distributions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -237,7 +243,7 @@ different distributions, e.g. when one set requires a Normal distribution and
 another a uniform distribution.</p>
 <dl class="py attribute">
 <dt id="hmc_tomography.Distributions.CompositeDistribution.enumerated_dimensions">
-<code class="sig-name descname">enumerated_dimensions</code><em class="property">: numpy.ndarray</em><a class="headerlink" href="#hmc_tomography.Distributions.CompositeDistribution.enumerated_dimensions" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">enumerated_dimensions</span></code><em class="property"><span class="pre">:</span> <span class="pre">numpy.ndarray</span></em><a class="headerlink" href="#hmc_tomography.Distributions.CompositeDistribution.enumerated_dimensions" title="Permalink to this definition">¶</a></dt>
 <dd><p>This object describes how many dimensions each distribution has, ordered
 according to <code class="docutils literal notranslate"><span class="pre">CompositeDistribution.separate_distributions</span></code>. Sums to
 <code class="docutils literal notranslate"><span class="pre">CompositeDistribution.dimesions</span></code>.</p>
@@ -245,7 +251,7 @@ according to <code class="docutils literal notranslate"><span class="pre">Compos
 
 <dl class="py attribute">
 <dt id="hmc_tomography.Distributions.CompositeDistribution.enumerated_dimensions_cumulative">
-<code class="sig-name descname">enumerated_dimensions_cumulative</code><em class="property">: numpy.ndarray</em><a class="headerlink" href="#hmc_tomography.Distributions.CompositeDistribution.enumerated_dimensions_cumulative" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">enumerated_dimensions_cumulative</span></code><em class="property"><span class="pre">:</span> <span class="pre">numpy.ndarray</span></em><a class="headerlink" href="#hmc_tomography.Distributions.CompositeDistribution.enumerated_dimensions_cumulative" title="Permalink to this definition">¶</a></dt>
 <dd><p>This object describes each separate distribution index in combined model
 space. Invoking
 <code class="docutils literal notranslate"><span class="pre">numpy.split(m,</span> <span class="pre">CompositeDistribution.enumerated_dimensions_cumulative)[:-1])</span></code>
@@ -254,13 +260,13 @@ splits a vector appropriately for all separate distributions.</p>
 
 <dl class="py method">
 <dt id="hmc_tomography.Distributions.CompositeDistribution.collapse_bounds">
-<code class="sig-name descname">collapse_bounds</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#CompositeDistribution.collapse_bounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Distributions.CompositeDistribution.collapse_bounds" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">collapse_bounds</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#CompositeDistribution.collapse_bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hmc_tomography.Distributions.CompositeDistribution.collapse_bounds" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method to restructure all composite bounds into top level object.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="hmc_tomography.Distributions.CompositeDistribution.corrector">
-<code class="sig-name descname">corrector</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coordinates</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">momentum</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#CompositeDistribution.corrector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Distributions.CompositeDistribution.corrector" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">corrector</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coordinates</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">momentum</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#CompositeDistribution.corrector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hmc_tomography.Distributions.CompositeDistribution.corrector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Override method to correct an HMC particle for composite distribution, which
 is called after every time integration step. Calls all sub-correctors only if
 the object does not have bounds itself.</p>
@@ -287,37 +293,29 @@ reference.</p></li>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="AdditiveDistribution.html" class="btn btn-neutral float-right" title="AdditiveDistribution" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="LinearMatrix.html" class="btn btn-neutral float-left" title="LinearMatrix" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="AdditiveDistribution.html" class="btn btn-neutral float-right" title="AdditiveDistribution" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="LinearMatrix.html" class="btn btn-neutral float-left" title="LinearMatrix" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2019-2020, Andrea Zunino, Andreas Fichtner, Lars Gebraad
+        &#169; Copyright 2019-2021, Andrea Zunino, Andreas Fichtner, Lars Gebraad.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

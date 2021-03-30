@@ -1,0 +1,342 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>The Hamiltonian Monte Carlo algorithm &mdash; HMC Tom 0.2.2-30-gf7ff20a documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="setup.html" />
+    <link rel="prev" title="HMC Tomography" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> HMC Tom
+          
+
+          
+            
+            <img src="_static/hmctom.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.2-30-gf7ff20a
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">HMC Tomography</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">The Hamiltonian Monte Carlo algorithm</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#theory">Theory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#from-theory-to-code">From theory to code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hmc-compared">HMC compared</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tuning-parameters">Tuning parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#further-reading">Further reading</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples and tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="py-modindex.html">Module index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Alphabetic index</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">HMC Tom</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>The Hamiltonian Monte Carlo algorithm</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/hmc.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="the-hamiltonian-monte-carlo-algorithm">
+<h1>The Hamiltonian Monte Carlo algorithm<a class="headerlink" href="#the-hamiltonian-monte-carlo-algorithm" title="Permalink to this headline">¶</a></h1>
+<p>Originally developed for molecular dynamics under the name hybrid Monte Carlo <span id="id1">[<a class="reference internal" href="#id299">1</a>]</span>, Hamiltonian Monte Carlo (HMC) is now commonly used for the subset of sampling problems where gradients of the posterior <span class="math notranslate nohighlight">\(p(\mathbf{m}|\mathbf{d}_\text{obs})\)</span> with respect to the model parameters <span class="math notranslate nohighlight">\(\mathbf{m}\)</span> are easy to compute. The cost of generating independent samples with HMC under increasing dimension <span class="math notranslate nohighlight">\(n\)</span> grows as <span class="math notranslate nohighlight">\(\mathcal{O}(n^{5/4})\)</span> <span id="id2">[<a class="reference internal" href="#id803">2</a>]</span>, whereas it grows as <span class="math notranslate nohighlight">\(\mathcal{O}(n^2)\)</span> for  standard Metropolis-Hastings <span id="id3">[<a class="reference internal" href="#id238">3</a>]</span>.</p>
+<div class="section" id="theory">
+<h2>Theory<a class="headerlink" href="#theory" title="Permalink to this headline">¶</a></h2>
+<p>HMC constructs a Markov chain over an <span class="math notranslate nohighlight">\(n\)</span>-dimensional probability density function <span class="math notranslate nohighlight">\(p(\mathbf{m})\)</span> using classical Hamiltonian mechanics <span id="id4">[<a class="reference internal" href="#id636">4</a>]</span>. The algorithm regards the current state <span class="math notranslate nohighlight">\(\mathbf{m}\)</span> of the Markov chain as the location of a physical particle in <span class="math notranslate nohighlight">\(n\)</span>-dimensional space <span class="math notranslate nohighlight">\(\mathbb{M}\)</span>. It moves under the influence of a potential energy, <span class="math notranslate nohighlight">\(U\)</span>, which is defined as</p>
+<div class="math notranslate nohighlight">
+\begin{eqnarray}
+    U (\mathbf{m}) = - \ln p(\mathbf{m})\,.
+\end{eqnarray}</div><p>In the case of a Gaussian probability density <span class="math notranslate nohighlight">\(p\)</span>, the potential energy <span class="math notranslate nohighlight">\(U\)</span> is equal to the least-squares misfit <span class="math notranslate nohighlight">\(\chi(\mathbf{m})\)</span>. To complete the physical system, the state of the Markov chain needs to be artificially augmented with momentum variables <span class="math notranslate nohighlight">\(\mathbf{p}\)</span> for every dimension and a generalized mass for every dimension pair.
+The collection of resulting masses are contained in a positive definite mass matrix <span class="math notranslate nohighlight">\(\mathbf{m}\)</span> of dimension <span class="math notranslate nohighlight">\(n\times n\)</span>. The momenta and the mass matrix define the kinetic energy of a model as</p>
+<div class="math notranslate nohighlight">
+\begin{eqnarray}
+    K(\mathbf{p}) = \frac{1}{2}\mathbf{p}^T \mathbf{M}^{-1} \mathbf{p}\,.
+\end{eqnarray}</div><p>In the HMC algorithm, the momenta <span class="math notranslate nohighlight">\(\mathbf{p}\)</span> are drawn randomly from a multivariate Gaussian with covariance matrix <span class="math notranslate nohighlight">\(\mathbf{m}\)</span>. The location-dependent potential and kinetic energies constitute the total energy or Hamiltonian of the system,</p>
+<div class="math notranslate nohighlight">
+\begin{eqnarray}
+     H(\mathbf{m}, \mathbf{p}) = U(\mathbf{m}) + K(\mathbf{p}).
+\end{eqnarray}</div><p>Hamilton’s equations</p>
+<div class="math notranslate nohighlight">
+\begin{eqnarray}
+    \frac{d \mathbf{m}}{d \tau}  =  \frac{\partial H}{\partial \mathbf{p}}\,, \qquad
+    \frac{d \mathbf{p}}{d \tau}  =  - \frac{\partial H}{\partial \mathbf{m}}\,,
+\end{eqnarray}</div><p>determine the position of the particle as a function of the artificial time variable <span class="math notranslate nohighlight">\(\tau\)</span>. We can simplify Hamilton’s equations using the fact that kinetic and potential energy depend only on momentum and location, respectively,</p>
+<div class="math notranslate nohighlight">
+\begin{eqnarray}
+    \frac{d \mathbf{m}}{d \tau}  =  \mathbf{M}^{-1} \mathbf{p}\,,\qquad
+    \frac{d \mathbf{p}}{d \tau}  =  - \frac{\partial U}{\partial \mathbf{m}}\,.
+\end{eqnarray}</div><p>Evolving <span class="math notranslate nohighlight">\(\mathbf{m}\)</span> over time <span class="math notranslate nohighlight">\(\tau\)</span> generates another possible state of the system with new position <span class="math notranslate nohighlight">\(\mathbf{\tilde{m}}\)</span>, momentum <span class="math notranslate nohighlight">\(\mathbf{\tilde{p}}\)</span>, potential energy <span class="math notranslate nohighlight">\(\tilde{U}\)</span>, and kinetic energy <span class="math notranslate nohighlight">\(\tilde{K}\)</span>. Due to the conservation of energy, the Hamiltonian is equal in both states. Successively drawing random momenta and evolving the system generates a distribution of the possible states of the system. Thereby, HMC samples the joint momentum and model space, referred to as phase space. As we are not interested in the momentum component of phase space, we marginalize over the momenta by simply dropping them. This results in samples drawn from <span class="math notranslate nohighlight">\(p(\mathbf{m})\)</span>.</p>
+</div>
+<div class="section" id="from-theory-to-code">
+<h2>From theory to code<a class="headerlink" href="#from-theory-to-code" title="Permalink to this headline">¶</a></h2>
+<p>If one could solve Hamilton’s equations exactly, every proposed state would be a valid sample of <span class="math notranslate nohighlight">\(p(\mathbf{m})\)</span>. Since Hamilton’s equations for non-linear forward models cannot be solved analytically, the system must be integrated numerically. Suitable integrators are symplectic, meaning that time reversibility, phase space partitioning and volume preservation are satisfied <span id="id5">[<a class="reference internal" href="#id803">2</a>, <a class="reference internal" href="#id367">5</a>]</span>. However, the Hamiltonian is generally not preserved exactly when explicit time-stepping schemes are used. In this work, we employ the leapfrog method as described in <span id="id6">Neal [<a class="reference internal" href="#id803">2</a>]</span>. As the Hamiltonian is not preserved, the time evolution generates samples not exactly proportional to the original distribution. A Metropolis-Hastings correction step is therefore applied at the end of numerical integration.</p>
+<p>In summary, samples are generated starting from a random model <span class="math notranslate nohighlight">\(\mathbf{m}\)</span> in the following way:</p>
+<div class="admonition-the-hamiltonian-monte-carlo-algorithm admonition">
+<p class="admonition-title">The Hamiltonian Monte Carlo algorithm</p>
+<ol class="arabic simple">
+<li><p>Propose momenta <span class="math notranslate nohighlight">\(\mathbf{p}\)</span> according to the Gaussian with mean <span class="math notranslate nohighlight">\(\mathbf{0}\)</span> and covariance <span class="math notranslate nohighlight">\(\mathbf{m}\)</span>;</p></li>
+<li><p>Compute the Hamiltonian <span class="math notranslate nohighlight">\(H\)</span> of model <span class="math notranslate nohighlight">\(\mathbf{m}\)</span> with momenta <span class="math notranslate nohighlight">\(\mathbf{p}\)</span>;</p></li>
+<li><p>Propagate <span class="math notranslate nohighlight">\(\mathbf{m}\)</span> and <span class="math notranslate nohighlight">\(\mathbf{p}\)</span> for some time <span class="math notranslate nohighlight">\(\tau\)</span> to <span class="math notranslate nohighlight">\(\tilde{\mathbf{m}}\)</span> and <span class="math notranslate nohighlight">\(\tilde{\mathbf   {p}}\)</span>, using the discretized version of Hamilton’s equations and a suitable numerical integrator;</p></li>
+<li><p>Compute the Hamiltonian <span class="math notranslate nohighlight">\(\tilde{H}\)</span> of model <span class="math notranslate nohighlight">\(\tilde{\mathbf{m}}\)</span> with momenta <span class="math notranslate nohighlight">\(\mathbf{\tilde{p}}\)</span>;</p></li>
+<li><p>Accept the proposed move <span class="math notranslate nohighlight">\(\mathbf{m} \rightarrow \tilde{\mathbf{m}}\)</span> with probability</p></li>
+</ol>
+<div class="math notranslate nohighlight">
+\begin{eqnarray}
+    p_\text{accept} = \min \left( 1, \exp ( H-\tilde{H} ) \right)\,.
+\end{eqnarray}</div><ol class="arabic simple" start="6">
+<li><p>If accepted, use (and count) <span class="math notranslate nohighlight">\(\tilde{\mathbf{m}}\)</span> as the new state. Otherwise, keep (and count) the previous state. Then return    to 1.</p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="hmc-compared">
+<h2>HMC compared<a class="headerlink" href="#hmc-compared" title="Permalink to this headline">¶</a></h2>
+<p>The main factor influencing the acceptance rate of the algorithm is the conservation of energy, <span class="math notranslate nohighlight">\(H\)</span>, along the trajectory.
+If the leapfrog integration has too large time steps, or the gradients of the misfit function are computed incorrectly (e.g., by badly discretizing the forward model), <span class="math notranslate nohighlight">\(H\)</span> is less well conserved, and the algorithm’s acceptance rate decreases.</p>
+<p>The main cost of HMC, compared to other MCMC samplers, is the computation of the gradient <span class="math notranslate nohighlight">\(\partial U/\partial \mathbf{m}\)</span> at every step in the leapfrog propagation. When gradients can be computed easily, HMC can provide improved performance for two reasons: (1) the reduced cost of generating independent samples, that is, the avoidance of random-walk behaviour <span id="id7">[<a class="reference internal" href="#id803">2</a>]</span>, and (2) the better scaling of HMC with increasing dimension <span id="id8">[<a class="reference internal" href="#id803">2</a>, <a class="reference internal" href="#id238">3</a>]</span>.</p>
+</div>
+<div class="section" id="tuning-parameters">
+<h2>Tuning parameters<a class="headerlink" href="#tuning-parameters" title="Permalink to this headline">¶</a></h2>
+<p>The tuning parameters in HMC are simulation time <span class="math notranslate nohighlight">\(\tau\)</span> and the mass matrix <span class="math notranslate nohighlight">\(\mathbf{m}\)</span>. HMC has the potential to inject additional knowledge about the distribution <span class="math notranslate nohighlight">\(p\)</span> via the mass matrix in order to enhance convergence significantly. At the same time, the abundance of tuning parameters also creates potential for choosing inefficient settings, leading to sub-optimal convergence. <span id="id9">Fichtner <em>et al.</em> [<a class="reference internal" href="#id366">6</a>]</span> and <span id="id10">Fichtner and Zunino [<a class="reference internal" href="#id367">5</a>]</span> both illustrate how to create relevant mass matrices for tomographic inverse problems.</p>
+<p>We adapt the specific tuning strategy for the mass matrix in this study depending on the target, as illustrated in the following  sections. However, for all targets we choose the size of the discrete time steps empirically such that the acceptance rate is close to the optimum of 65 % <span id="id11">[<a class="reference internal" href="#id803">2</a>]</span>. This typically results in needing approximately 10 leap-frog steps per proposal, i.e. requiring this many forward and adjoint solves per proposal.</p>
+</div>
+<div class="section" id="further-reading">
+<h2>Further reading<a class="headerlink" href="#further-reading" title="Permalink to this headline">¶</a></h2>
+<p id="id12"><dl class="citation">
+<dt class="label" id="id299"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>S. Duane, A. D. Kennedy, B. J. Pendleton, and D. Roweth. Hybrid Monte Carlo. <em>Phys. Lett. B</em>, 195:216–222, 1987.</p>
+</dd>
+<dt class="label" id="id803"><span class="brackets">2</span><span class="fn-backref">(<a href="#id2">1</a>,<a href="#id5">2</a>,<a href="#id6">3</a>,<a href="#id7">4</a>,<a href="#id8">5</a>,<a href="#id11">6</a>)</span></dt>
+<dd><p>R. M. Neal. MCMC using Hamiltonian dynamics. In <em>Handbook of Markov Chain Monte Carlo</em>, Chapter 5. 2011.</p>
+</dd>
+<dt class="label" id="id238"><span class="brackets">3</span><span class="fn-backref">(<a href="#id3">1</a>,<a href="#id8">2</a>)</span></dt>
+<dd><p>Michael Creutz. Global monte carlo algorithms for many-fermion systems. <em>Physical Review D</em>, 38(4):1228, 1988.</p>
+</dd>
+<dt class="label" id="id636"><span class="brackets"><a class="fn-backref" href="#id4">4</a></span></dt>
+<dd><p>L. D. Landau and E. M. Lifshitz. <em>Course of Theoretical Physics, Volume 1, Mechanics, 3rd edition</em>. Elsevier Butterworth Heinemann, Amsterdam, 1976.</p>
+</dd>
+<dt class="label" id="id367"><span class="brackets">5</span><span class="fn-backref">(<a href="#id5">1</a>,<a href="#id10">2</a>)</span></dt>
+<dd><p>A. Fichtner and A. Zunino. Hamiltonian nullspace shuttles. <em>Geophys. Res. Lett.</em>, 46:doi:10.1029/2018GL080931, 2019.</p>
+</dd>
+<dt class="label" id="id366"><span class="brackets"><a class="fn-backref" href="#id9">6</a></span></dt>
+<dd><p>A. Fichtner, A. Zunino, and L. Gebraad. Hamiltonian Monte Carlo solution of tomographic inverse problems. <em>Geophys. J. Int.</em>, 216:doi:10.1093/gji/ggy496, 2018.</p>
+</dd>
+</dl>
+</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="setup.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="index.html" class="btn btn-neutral float-left" title="HMC Tomography" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2019-2021, Andrea Zunino, Andreas Fichtner, Lars Gebraad.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

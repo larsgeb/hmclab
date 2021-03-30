@@ -3,11 +3,11 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Laplace &mdash; HMC Tom 0.2.2-27-g07553ae documentation</title>
+  <title>Laplace &mdash; HMC Tom 0.2.2-30-gf7ff20a documentation</title>
   
 
   
@@ -17,7 +17,10 @@
 
   
   
+
   
+  
+
   
 
   
@@ -31,8 +34,6 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
         <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
@@ -55,7 +56,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> HMC Tom
+            <a href="../../index.html" class="icon icon-home"> HMC Tom
           
 
           
@@ -68,7 +69,7 @@
             
             
               <div class="version">
-                0.2.2-27-g07553ae
+                0.2.2-30-gf7ff20a
               </div>
             
           
@@ -96,6 +97,7 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../index.html">HMC Tomography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../hmc.html">The Hamiltonian Monte Carlo algorithm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../setup.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples and tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">API reference</a><ul class="current">
@@ -161,6 +163,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -176,7 +180,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="../../_sources/api/distributions/Laplace.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -218,19 +222,19 @@
 <h1>Laplace<a class="headerlink" href="#laplace" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt id="hmc_tomography.Distributions.Laplace">
-<em class="property">class </em><code class="sig-prename descclassname">hmc_tomography.Distributions.</code><code class="sig-name descname">Laplace</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#Laplace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Distributions.Laplace" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">hmc_tomography.Distributions.</span></code><code class="sig-name descname"><span class="pre">Laplace</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#Laplace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hmc_tomography.Distributions.Laplace" title="Permalink to this definition">¶</a></dt>
 <dd><p>Laplace distribution in model space.</p>
 <p>Least absolute deviations, Laplace distribution, LASSO, L1</p>
 <dl class="py attribute">
 <dt id="hmc_tomography.Distributions.Laplace.means">
-<code class="sig-name descname">means</code><a class="headerlink" href="#hmc_tomography.Distributions.Laplace.means" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">means</span></code><a class="headerlink" href="#hmc_tomography.Distributions.Laplace.means" title="Permalink to this definition">¶</a></dt>
 <dd><p>A float or numpy.ndarray of shape (dimensions, 1) of floats describing the
 mean of the uncorrelated multivariate Laplace distribution.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="hmc_tomography.Distributions.Laplace.dispersions">
-<code class="sig-name descname">dispersions</code><a class="headerlink" href="#hmc_tomography.Distributions.Laplace.dispersions" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">dispersions</span></code><a class="headerlink" href="#hmc_tomography.Distributions.Laplace.dispersions" title="Permalink to this definition">¶</a></dt>
 <dd><p>A positive float or numpy.ndarray of shape (dimensions, 1) of positive floats
 describing the dispersion of the uncorrelated multivariate Laplace
 distribution.</p>
@@ -238,7 +242,7 @@ distribution.</p>
 
 <dl class="py attribute">
 <dt id="hmc_tomography.Distributions.Laplace.inverse_dispersions">
-<code class="sig-name descname">inverse_dispersions</code><a class="headerlink" href="#hmc_tomography.Distributions.Laplace.inverse_dispersions" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">inverse_dispersions</span></code><a class="headerlink" href="#hmc_tomography.Distributions.Laplace.inverse_dispersions" title="Permalink to this definition">¶</a></dt>
 <dd><p>A positive float or numpy.ndarray of shape (dimensions, 1) of positive floats
 describing the inverse dispersion of the uncorrelated multivariate Laplace
 distribution. Used to accelerate computations at the cost of memory usage.</p>
@@ -246,13 +250,13 @@ distribution. Used to accelerate computations at the cost of memory usage.</p>
 
 <dl class="py method">
 <dt id="hmc_tomography.Distributions.Laplace.misfit">
-<code class="sig-name descname">misfit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coordinates</span></em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#Laplace.misfit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Distributions.Laplace.misfit" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">misfit</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coordinates</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#Laplace.misfit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hmc_tomography.Distributions.Laplace.misfit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method to compute the misfit of a L1 distribution distribution.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="hmc_tomography.Distributions.Laplace.gradient">
-<code class="sig-name descname">gradient</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coordinates</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#Laplace.gradient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hmc_tomography.Distributions.Laplace.gradient" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">gradient</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coordinates</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Distributions/base.html#Laplace.gradient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hmc_tomography.Distributions.Laplace.gradient" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method to compute the gradient of a L1 distribution distribution.</p>
 </dd></dl>
 
@@ -265,37 +269,29 @@ distribution. Used to accelerate computations at the cost of memory usage.</p>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="Uniform.html" class="btn btn-neutral float-right" title="Uniform" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="Normal.html" class="btn btn-neutral float-left" title="Normal" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="Uniform.html" class="btn btn-neutral float-right" title="Uniform" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Normal.html" class="btn btn-neutral float-left" title="Normal" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2019-2020, Andrea Zunino, Andreas Fichtner, Lars Gebraad
+        &#169; Copyright 2019-2021, Andrea Zunino, Andreas Fichtner, Lars Gebraad.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
