@@ -25,6 +25,7 @@ class Samples:
         self.last_sample = self.file_handle[self.datasetname].attrs["write_index"]
 
         if self.last_sample <= self.burn_in:
+            self.close()
             raise ValueError("The burn-in phase is longer than the chain itself.")
 
     def __del__(self):
