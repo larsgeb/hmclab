@@ -42,6 +42,7 @@ setuptools.setup(
             "numpydoc",
             "pandoc",
             "sphinx-git",
+            "sphinxcontrib-bibtex",
             "versioneer",
             "pandas",
             "pre-commit",

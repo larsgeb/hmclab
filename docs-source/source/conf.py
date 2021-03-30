@@ -37,7 +37,7 @@ nbsphinx_execute = "never"
 # -- Project information -----------------------------------------------------
 
 project = "HMC Tom"
-copyright = "2019-2020, Andrea Zunino, Andreas Fichtner, Lars Gebraad"
+copyright = "2019-2021, Andrea Zunino, Andreas Fichtner, Lars Gebraad"
 author = "Andrea Zunino, Andreas Fichtner, Lars Gebraad"
 
 # The short X.Y version
@@ -66,8 +66,12 @@ extensions = [
     "IPython.sphinxext.ipython_console_highlighting",
     "IPython.sphinxext.ipython_directive",
     "nbsphinx",
-    'sphinx_git',
+    "sphinx_git",
+    "sphinxcontrib.bibtex",
 ]
+
+bibtex_bibfiles = ["biblio.bib"]
+bibtex_default_style = "unsrt"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
