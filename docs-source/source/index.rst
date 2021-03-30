@@ -7,6 +7,7 @@ HMC Tomography
     :caption: Contents:
 
     self
+    hmc
     setup
     examples
     api/index
@@ -25,3 +26,14 @@ HMC Tomography
 .. centered:: Andrea Zunino, Andreas Fichtner, Lars Gebraad
 
 This documentation is built on top of commit `COMMIT_HASH <https://github.com/larsgeb/hmc-tomography/commit/COMMIT_HASH>`_.
+
+
+.. math:: 
+   :label: euler
+   
+   -\frac{1}{c(\mathbf{x})^2}\frac{\partial}{\partial t^2}p(\mathbf{x},t)+\nabla^2 p(\mathbf{x},t)=f(\mathbf{x},t).
+
+   
+Refer to :eq:`euler`
+
+
