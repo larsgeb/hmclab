@@ -32,12 +32,15 @@ from abc import abstractmethod as _abstractmethod
 from time import time as _time
 from datetime import datetime as _datetime
 from typing import Union as _Union
+from typing import List as _List
+from typing import Dict as _Dict
 from multiprocessing import (
     Process as _Process,
     Pipe as _Pipe,
     Value as _Value,
+    Queue as _Queue,
 )
-
+import copy as _copy
 import h5py as _h5py
 import numpy as _numpy
 import tqdm.auto as _tqdm_au
@@ -47,6 +50,9 @@ from hmc_tomography.MassMatrices import Unit as _Unit
 from hmc_tomography.MassMatrices import _AbstractMassMatrix
 from hmc_tomography.Helpers.Timers import AccumulatingTimer as _AccumulatingTimer
 from hmc_tomography.Helpers.CustomExceptions import InvalidCaseError
+
+import ipywidgets as _widgets
+from IPython.core.display import display as _display
 
 dev_assertion_message = (
     "Something went wrong internally, please report this to the developers."
@@ -116,6 +122,17 @@ class _AbstractSampler(_ABC):
     """A float representing the maximum time in seconds that sampling is allowed to take
     before it is automatically terminated. The value None is used for unlimited time."""
 
+    times_started = 0
+    proposals = None
+    online_thinning = None
+    current_proposal = 0
+    current_proposal_after_thinning = 0
+    accepted_proposals = 0
+    distribution = type("NoDistribution", (object,), {"name": None})
+
+    end_time = None
+    start_time = None
+
     diagnostic_mode: bool = True
     functions_to_diagnose = []
     sampler_specific_functions_to_diagnose = []
@@ -128,8 +145,101 @@ class _AbstractSampler(_ABC):
     pipe_matrix = None
     exchange_interval = None
 
-    def __init__(self):
-        pass
+    rng = None
+
+    def __str__(self):
+        return f"An instance of the {self.name} sampler object."
+
+    def _widget_data(self):
+        # Run details (panel 1) --------------------------------------------------------
+        run_details = {}
+        proposed_samples = self.current_proposal if self.current_proposal > 0 else None
+        acceptance_rate = self.accepted_proposals / (self.current_proposal + 1)
+        if not (self.start_time is None or self.end_time is None):
+            runtime = (self.end_time - self.start_time).total_seconds()
+            run_details["local start time (not timezone aware)"] = self.start_time
+            run_details["runtime (seconds)"] = runtime
+            run_details["proposals per seconds"] = proposed_samples / runtime
+
+        written_samples = (
+            self.current_proposal_after_thinning + 1
+            if self.current_proposal_after_thinning > 0
+            else None
+        )
+
+        run_details["acceptance rate"] = acceptance_rate
+        run_details["output file"] = self.samples_hdf5_filename
+        run_details["proposals made (excluding first position)"] = proposed_samples
+        run_details["samples written (after online thinning)"] = written_samples
+        run_details["amount of writes"] = self.amount_of_writes
+        run_details["dimensions"] = self.dimensions
+        run_details["distribution"] = (
+            self.distribution.name
+            if (self.distribution.name is not None)
+            else self.distribution
+        )
+
+        # Tuning settings (panel 2) ----------------------------------------------------
+        settings = {}
+        settings["proposals"] = self.proposals
+        settings["online thinning (store every ...-th sample)"] = self.online_thinning
+
+        # Combine with algorithm specific settings
+        settings = {**settings, **self._tuning_settings()}
+
+        # Algorithm (panel 3) ----------------------------------------------------------
+        algorithm = {}
+        algorithm["algorithm used"] = self.name
+        algorithm["diagnostic mode"] = self.diagnostic_mode
+        algorithm["ram buffer size"] = self.ram_buffer_size
+        algorithm["this object has started sampling ... times"] = self.times_started
+
+        return {
+            "Details of last run": run_details,
+            "Tuning settings": settings,
+            "Algorithm": algorithm,
+        }
+
+    def print_results(self):
+        print(self._repr_html_())
+
+    def _repr_html_(self, nested=False, widget_data=None):
+
+        default_layout = _widgets.Layout(padding="10px")
+
+        def dictionary_to_widget(dictionary):
+            left_column = _widgets.VBox(
+                [_widgets.Label(str(key)) for key in dictionary.keys()],
+                layout=default_layout,
+            )
+            right_column = _widgets.VBox(
+                [_widgets.Label(str(key)) for key in dictionary.values()],
+                layout=default_layout,
+            )
+            return _widgets.HBox([left_column, right_column], layout=default_layout)
+
+        if widget_data is None:
+            widget_data = self._widget_data()
+        tab = _widgets.Tab()
+        tab.children = [
+            dictionary_to_widget(panel_data) for panel_data in widget_data.values()
+        ]
+
+        panel_headings = [key for key in widget_data.keys()]
+        for i in range(len(tab.children)):
+            tab.set_title(i, panel_headings[i])
+
+        if nested:
+            return tab
+        else:
+            _display(tab)
+            return ""
+
+    def __init__(self, seed=None):
+        if seed is None:
+            self.rng = _numpy.random.default_rng()
+        else:
+            self.rng = _numpy.random.default_rng(seed)
 
     def _init_sampler(
         self,
@@ -342,6 +452,8 @@ class _AbstractSampler(_ABC):
         ).total_seconds()
 
         self.samples_hdf5_filehandle.close()
+        self.samples_hdf5_filehandle = None
+        self.samples_hdf5_dataset = None
 
         self._close_sampler_specific()
 
@@ -382,7 +494,7 @@ class _AbstractSampler(_ABC):
         try:
             self.proposals_iterator = _tqdm_au.trange(
                 self.proposals,
-                desc="Sampling. Acceptance rate:",
+                desc=f"Tot. acc rate: {0:.2f}. Progress",
                 leave=True,
                 dynamic_ncols=True,
                 position=self.sampler_index,  # only relevant for parallel sampling
@@ -390,7 +502,7 @@ class _AbstractSampler(_ABC):
         except Exception:
             self.proposals_iterator = _tqdm_au.trange(
                 self.proposals,
-                desc="Sampling. Acceptance rate:",
+                desc=f"Tot. acc rate: {0:.2f}. Progress",
                 leave=True,
                 position=self.sampler_index,  # only relevant for parallel sampling
             )
@@ -411,6 +523,7 @@ class _AbstractSampler(_ABC):
 
         # Run the Markov process -------------------------------------------------------
         self.start_time = _datetime.now()
+        self.times_started += 1
         try:
             # If the sampler is given a maximum time, start timer now
             scheduled_termination_time = 0
@@ -429,7 +542,7 @@ class _AbstractSampler(_ABC):
                 self._evaluate_acceptance()
 
                 # Parallel communication section -------------
-                if self.parallel:
+                if self.parallel and (self.exchange_interval is not None):
                     # Check if chain is in the schedule for current iteration
                     if self.current_proposal % self.exchange_interval == 0 and (
                         self.sampler_index
@@ -487,7 +600,7 @@ class _AbstractSampler(_ABC):
                             # improvements.
                             if _numpy.exp(
                                 misfit_improvement + counterpart_improvement
-                            ) > _numpy.random.uniform(0, 1):
+                            ) > self.rng.uniform(0, 1):
                                 # If accepted, switch models
                                 pipe.send([self.current_model])
                                 self.current_model = exchange_model.copy()
@@ -539,16 +652,22 @@ class _AbstractSampler(_ABC):
         except KeyboardInterrupt:  # Catch SIGINT --------------------------------------
             # Assume current proposal couldn't be finished, so ignore it.
             self.current_proposal -= 1
-            # Close progressbar
-            self.proposals_iterator.close()
         except TimeoutError:  # Catch SIGINT -------------------------------------------
-            # Close progressbar
+            pass
+        except Exception as e:
+            # Any other exception, we don't know how to handle
             self.proposals_iterator.close()
-        finally:  # Write out the last samples not on a full buffer --------------------
+            self.proposals_iterator = None
             self._samples_to_disk()
             self.end_time = _datetime.now()
-
-        self._close_sampler()
+            self._close_sampler()
+            raise e
+        finally:  # Write out the last samples not on a full buffer --------------------
+            self.proposals_iterator.close()
+            self.proposals_iterator = None
+            self._samples_to_disk()
+            self.end_time = _datetime.now()
+            self._close_sampler()
 
     def _open_samples_hdf5(
         self,
@@ -702,14 +821,14 @@ class _AbstractSampler(_ABC):
 
     def _sample_to_ram(self):
         # Calculate proposal number after thinning
-        current_proposal_after_thinning = int(
+        self.current_proposal_after_thinning = int(
             self.current_proposal / self.online_thinning
         )
         # Assert that it's an integer (if we only write on end of buffer)
         assert self.current_proposal % self.online_thinning == 0, dev_assertion_message
 
         # Calculate index for the RAM array
-        index_in_ram = current_proposal_after_thinning % self.ram_buffer_size
+        index_in_ram = self.current_proposal_after_thinning % self.ram_buffer_size
 
         # Place samples in RAM
         self.ram_buffer[:-1, index_in_ram] = self.current_model[:, 0]
@@ -720,7 +839,7 @@ class _AbstractSampler(_ABC):
     def _samples_to_disk(self):
 
         # Calculate proposal number after thinning
-        current_proposal_after_thinning = int(
+        self.current_proposal_after_thinning = int(
             _numpy.floor(self.current_proposal / self.online_thinning)
         )
 
@@ -731,10 +850,10 @@ class _AbstractSampler(_ABC):
 
         # Calculate start/end indices
         robust_start = (
-            current_proposal_after_thinning
-            - current_proposal_after_thinning % self.ram_buffer_size
+            self.current_proposal_after_thinning
+            - self.current_proposal_after_thinning % self.ram_buffer_size
         )
-        end = current_proposal_after_thinning + 1
+        end = self.current_proposal_after_thinning + 1
 
         # If there is something to write
         if (
@@ -756,7 +875,7 @@ class _AbstractSampler(_ABC):
 
             # Update the size in the h5 file
             self.samples_hdf5_dataset.resize(
-                (self.dimensions + 1, current_proposal_after_thinning + 1)
+                (self.dimensions + 1, self.current_proposal_after_thinning + 1)
             )
 
             # Write samples to disk
@@ -857,6 +976,7 @@ class RWMH(_AbstractSampler):
         autotuning: bool = False,
         target_acceptance_rate: float = 0.65,
         learning_rate: float = 0.75,
+        queue=None,
     ):
         """Sampling using the Metropolis-Hastings algorithm.
 
@@ -939,9 +1059,16 @@ class RWMH(_AbstractSampler):
         except Exception as e:
             if self.samples_hdf5_filehandle is not None:
                 self.samples_hdf5_filehandle.close()
+                self.samples_hdf5_filehandle = None
+                self.samples_hdf5_dataset = None
             raise e
 
         self._sample_loop()
+
+        if self.parallel:
+            queue.put({f"{self.sampler_index}": self._widget_data()})
+
+        return self
 
     def _init_sampler_specific(self, **kwargs):
 
@@ -1023,6 +1150,27 @@ class RWMH(_AbstractSampler):
                 "stepsize"
             ] = self.stepsize.__class__.__name__
 
+    def _tuning_settings(self):
+
+        settings = {
+            "step size"
+            if not self.autotuning
+            else "final step size after tuning": str(self.stepsize)
+        }
+
+        if self.autotuning:
+            settings = {
+                **settings,
+                **{
+                    "autotuning": self.autotuning,
+                    "learning_rate": self.learning_rate,
+                    "target_acceptance_rate": self.target_acceptance_rate,
+                    "minimal_stepsize": self.minimal_stepsize,
+                },
+            }
+
+        return settings
+
     def autotune(self, acceptance_rate):
         # Write out parameters
         self.acceptance_rates[self.current_proposal] = acceptance_rate
@@ -1056,8 +1204,8 @@ class RWMH(_AbstractSampler):
 
         # Propose a new model according to the MH Random Walk algorithm with a Gaussian
         # proposal distribution
-        self.proposed_model = self.current_model + self.stepsize * _numpy.random.randn(
-            self.dimensions, 1
+        self.proposed_model = self.current_model + self.stepsize * self.rng.normal(
+            size=(self.dimensions, 1)
         )
         assert self.proposed_model.shape == (self.dimensions, 1), dev_assertion_message
 
@@ -1072,7 +1220,7 @@ class RWMH(_AbstractSampler):
             self.autotune(acceptance_rate)
 
         # Evaluate MH acceptance rate
-        if acceptance_rate > _numpy.random.uniform(0, 1):
+        if acceptance_rate > self.rng.uniform(0, 1):
             self.current_model = _numpy.copy(self.proposed_model)
             self.current_x = self.proposed_x
             self.accepted_proposals += 1
@@ -1163,6 +1311,8 @@ class HMC(_AbstractSampler):
     """Minimal stepsize which is chosen if stepsize becomes zero or negative during
     autotuning."""
 
+    integrator = None
+
     def sample(
         self,
         samples_hdf5_filename: str,
@@ -1181,6 +1331,7 @@ class HMC(_AbstractSampler):
         autotuning: bool = False,
         target_acceptance_rate: float = 0.65,
         learning_rate: float = 0.75,
+        queue=None,
     ):
         """Sampling using the Hamiltonian Monte Carlo algorithm.
 
@@ -1276,6 +1427,8 @@ class HMC(_AbstractSampler):
         except Exception as e:
             if self.samples_hdf5_filehandle is not None:
                 self.samples_hdf5_filehandle.close()
+                self.samples_hdf5_filehandle = None
+                self.samples_hdf5_dataset = None
 
             if type(e) is FileExistsError:
                 if (
@@ -1286,6 +1439,11 @@ class HMC(_AbstractSampler):
             raise e
 
         self._sample_loop()
+
+        if self.parallel:
+            queue.put({f"{self.sampler_index}": self._widget_data()})
+
+        return self
 
     def _init_sampler_specific(self, **kwargs):
         # Parse all possible kwargs
@@ -1403,6 +1561,33 @@ class HMC(_AbstractSampler):
             self.integrator
         ]
 
+    def _tuning_settings(self):
+        settings = {
+            "step size"
+            if not self.autotuning
+            else "final step size after tuning": str(self.stepsize),
+            "amount of steps": self.amount_of_steps,
+            "mass matrix type": self.mass_matrix.name
+            if self.mass_matrix is not None
+            else None,
+            "integrator": self.integrators_full_names[self.integrator]
+            if self.integrator is not None
+            else None,
+        }
+
+        if self.autotuning:
+            settings = {
+                **settings,
+                **{
+                    "autotuning": self.autotuning,
+                    "learning_rate": self.learning_rate,
+                    "target_acceptance_rate": self.target_acceptance_rate,
+                    "minimal_stepsize": self.minimal_stepsize,
+                },
+            }
+
+        return settings
+
     def _propose(self):
 
         # Generate a momentum sample
@@ -1426,7 +1611,7 @@ class HMC(_AbstractSampler):
         if self.autotuning:
             self.autotune(acceptance_rate)
 
-        if acceptance_rate > _numpy.random.uniform(0, 1):
+        if acceptance_rate > self.rng.uniform(0, 1):
             self.current_model = _numpy.copy(self.proposed_model)
             self.current_x = self.proposed_x
             self.accepted_proposals += 1
@@ -1664,7 +1849,6 @@ class HMC(_AbstractSampler):
 
 class PipeMatrix:
     def __init__(self, n_endpoints):
-
         self.n_endpoints = n_endpoints
 
         self.left_pipes = [
@@ -1711,66 +1895,142 @@ class PipeMatrix:
 
 class ParallelSampleSMP:
     # SMP stands for Shared Memory Parallelism, i.e. single machine parallel sampling
-    def __init__(
+    # Initlization makes a deepcopy of the samplers, but NOT of the posteriors.
+    def __init__(self, seed=None):
+        if seed is None:
+            self.rng = _numpy.random.default_rng()
+        else:
+            self.rng = _numpy.random.default_rng(seed)
+
+    def sample(
         self,
-        samplers,
-        filenames,
-        posteriors,
-        proposals,
-        exchange=True,
-        exchange_interval=1,
-        initial_model=None,
+        samplers: _AbstractSampler,
+        filenames: str,
+        posteriors: _AbstractDistribution,
+        overwrite_existing_files=False,
+        proposals: int = 100,
+        exchange: bool = True,
+        exchange_interval: int = 1,
+        initial_model: _Union[_numpy.array, _List[_numpy.array]] = None,
+        kwargs: _Union[_Dict, _List[_Dict]] = None,
     ):
 
-        self.samplers = samplers
+        assert overwrite_existing_files, (
+            "You have to manually enable overwriting samples. This is for safety. The "
+            "existing file dialog doesn't work in the parallel case. "
+            "Set `overwrite_existing_files=True`."
+        )
 
+        number_of_chains = len(samplers)
+
+        # Save passed parameters and check their shapes. -------------------------------
+        self.samplers = _copy.deepcopy(samplers)
+
+        assert len(filenames) == number_of_chains, (
+            f"The number of supplied initial models ({len(filenames)}) "
+            f"is not equal to the amount of chains ({number_of_chains}). "
+            f"Supply {number_of_chains} models."
+        )
+
+        assert len(posteriors) == number_of_chains, (
+            f"The number of supplied initial models ({len(posteriors)}) "
+            f"is not equal to the amount of chains ({number_of_chains}). "
+            f"Supply {number_of_chains} posteriors."
+        )
+
+        if type(initial_model) == list:
+            assert len(initial_model) == number_of_chains, (
+                f"The number of supplied initial models ({len(initial_model)}) "
+                f"is not equal to the amount of chains ({number_of_chains}). "
+                f"Supply either 1 or {number_of_chains} models."
+            )
+
+        if type(kwargs) == list:
+            assert len(kwargs) == number_of_chains, (
+                f"The number of supplied kwargs dictionaries ({len(kwargs)}) "
+                f"is not equal to the amount of chains ({number_of_chains}). "
+                f"Supply either 1 or {number_of_chains} kwargs. Note that even if you "
+                f"don't want to pass arguments to one of the chains, and empty "
+                f"dictionary still has to be included."
+            )
+
+        # Exchange and parallel communication details ----------------------------------
+        # All markov chain processes in an array
         ps = []
-
-        number_of_chains = len(filenames)
-
+        # If we need to exchange samples, create a schedule and a communication matrix.
         if exchange:
+            # Every separate chain can at most switch 1 time per proposal. The total is
+            # rounded down, because every chain needs a partner chain.
             exchanges_per_proposal = int(_numpy.floor(number_of_chains / 2))
-
             exchange_schedule = _numpy.vstack(
                 [
-                    _numpy.random.choice(
+                    self.rng.choice(
                         number_of_chains, exchanges_per_proposal * 2, replace=False
                     )
                     for i in range(int(proposals / exchange_interval))
                 ]
             )
-
+            # Communication object
             pipe_matrix = PipeMatrix(number_of_chains)
-
         else:
             exchange_schedule = None
             pipe_matrix = None
+            exchange_interval = None
+        self.exchange_schedule = exchange_schedule
 
+        # A queue to which the final sampling details are passed at the end of sampling
+        self.queue = _Queue()
         main_thread_keyboard_interrupt = _Value("f", 0)
 
-        try:
-            # Do modifications to the sampelrs that we don't want to do in the
-            # constructor or sampling function. The reasoning here is that it is better
-            # to obfuscate the non-parallel code less.
-            for i, sampler in enumerate(samplers):
-                sampler.parallel = True
-                sampler.sampler_index = i
-                sampler.exchange_schedule = exchange_schedule
-                sampler.pipe_matrix = pipe_matrix
-                sampler.exchange_interval = exchange_interval
-                sampler.main_thread_keyboard_interrupt = main_thread_keyboard_interrupt
+        # Settings within the samplers -------------------------------------------------
+        # Do modifications to the samplers that we don't want to do in the
+        # constructor or sampling function. The reasoning here is that it is better
+        # to avoid obfuscating the non-parallel code.
+        for i, sampler in enumerate(self.samplers):
+            sampler.parallel = True
+            sampler.exchange_interval = exchange_interval
+            sampler.sampler_index = i
+            sampler.exchange_schedule = exchange_schedule
+            sampler.pipe_matrix = pipe_matrix
+            sampler.main_thread_keyboard_interrupt = main_thread_keyboard_interrupt
 
-            for sampler, filename, posterior in zip(samplers, filenames, posteriors):
+        # Start parallel sampling
+        try:
+
+            # These arguments need to be passed to all chains
+            fixed_kwargs = {
+                "overwrite_existing_file": True,
+                "proposals": proposals,
+                "queue": self.queue,
+            }
+
+            for i_chain, (sampler, filename, posterior) in enumerate(
+                zip(self.samplers, filenames, posteriors)
+            ):
+
+                if type(initial_model) == list:
+                    chain_initial_model = initial_model[i_chain]
+                else:
+                    chain_initial_model = initial_model
+
+                if type(kwargs) == list:
+                    chain_kwargs = kwargs[i_chain]
+                elif kwargs is None:
+                    chain_kwargs = {}
+                else:
+                    chain_kwargs = kwargs
+
+                total_kwargs = {
+                    **{"initial_model": chain_initial_model},
+                    **chain_kwargs,
+                    **fixed_kwargs,
+                }
+
                 ps.append(
                     _Process(
                         target=sampler.sample,
                         args=(filename, posterior),
-                        kwargs={
-                            "overwrite_existing_file": True,
-                            "proposals": proposals,
-                            "autotuning": True,
-                            "initial_model": initial_model,
-                        },
+                        kwargs=total_kwargs,
                     )
                 )
 
@@ -1780,15 +2040,47 @@ class ParallelSampleSMP:
 
             for p in ps:
                 p.join()
+
         except KeyboardInterrupt:
             # Keyboard interrupt is also send automatically to subprocesses, so the only
             # thing left to do is wait on them.
             for p in ps:
                 p.join()
-
         except Exception as e:
-            pipe_matrix.close()
+            if exchange:
+                pipe_matrix.close()
             raise e
+        finally:
+            self.sampler_widget_data = []
+            while not self.queue.empty():
+                self.sampler_widget_data.append(self.queue.get())
+            # Beat it into the correct format
+            data = {}
+            for idata in self.sampler_widget_data:
+                data = {**data, **idata}
+            self.sampler_widget_data = data
 
-        pipe_matrix.close()
-        return
+        if exchange:
+            pipe_matrix.close()
+
+        return self
+
+    def _repr_html_(self):
+
+        tab = _widgets.Tab()
+        tab.children = [
+            sampler._repr_html_(
+                nested=True, widget_data=self.sampler_widget_data[f"{i}"]
+            )
+            for i, sampler in enumerate(self.samplers)
+        ]
+
+        for i in range(len(tab.children)):
+            tab.set_title(i, f"Sampler {i}")
+
+        _display(tab)
+
+        return ""
+
+    def print_results(self):
+        print(self._repr_html_())
