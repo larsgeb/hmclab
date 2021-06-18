@@ -16,7 +16,7 @@ from hmc_tomography.Helpers import CustomExceptions as _CustomExceptions
 class _AbstractDistribution(metaclass=_ABCMeta):
     """Abstract base class for distributions."""
 
-    name: str = "abstract distribution"
+    name: str = None
     """Name of the distribution."""
 
     @_abstractattribute
@@ -208,6 +208,12 @@ class _AbstractDistribution(metaclass=_ABCMeta):
 
         old_limits = (self.lower_bounds, self.upper_bounds)
 
+        if type(upper_bounds) == list:
+            upper_bounds = _numpy.array(upper_bounds)[:, None]
+
+        if type(lower_bounds) == list:
+            lower_bounds = _numpy.array(lower_bounds)[:, None]
+
         # Set the bounds ---------------------------------------------------------------
         self.upper_bounds = upper_bounds
         self.lower_bounds = lower_bounds
@@ -339,8 +345,13 @@ class Normal(_AbstractDistribution):
 
         self.name = "Gaussian (normal) distribution"
 
+        if type(means) == list:
+            means = _numpy.array(means)[:, None]
+        if type(covariance) == list:
+            covariance = _numpy.array(covariance)[:, None]
+
         # Automatically get dimensionality from means
-        if type(means) == float:
+        if type(means) == float or type(means) == int:
             self.dimensions: int = 1
         else:
             self.dimensions: int = means.size

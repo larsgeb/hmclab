@@ -3,6 +3,7 @@
 from typing import Union as _Union, Tuple as _Tuple
 
 import numpy as _numpy
+import matplotlib.pyplot as _plt
 
 from hmc_tomography.Distributions import _AbstractDistribution, Normal
 from hmc_tomography.Helpers.CustomExceptions import (
@@ -12,8 +13,7 @@ import math as _math
 
 
 class SourceLocation(_AbstractDistribution):
-    """Earthquake source location in 2D using a single velocity for the subsurface.
-    """
+    """Earthquake source location in 2D using a single velocity for the subsurface."""
 
     name: str = "Earthquake source location in 2D"
 
@@ -167,6 +167,16 @@ class SourceLocation(_AbstractDistribution):
 
         return traveltimes
 
+    def forward_vector(self, m):
+        x, z, T, v = self.split_vector(m, velocity=self.fixed_medium_velocity)
+        traveltimes: _numpy.ndarray = (
+            T
+            + ((x - self.receiver_array_x) ** 2.0 + (z - self.receiver_array_z) ** 2.0)
+            ** 0.5
+            / v
+        )
+        return traveltimes
+
     @staticmethod
     def forward_gradient(
         x, z, T, v, receiver_array_x, receiver_array_z
@@ -206,8 +216,28 @@ class SourceLocation(_AbstractDistribution):
 
         return gradient_x, gradient_z, gradient_T, gradient_v
 
+    def describe(self):
+        if self.infer_velocity:
+            print("We are inferring the location of events AS WELL AS medium velocity.")
+            print(
+                "The parameters are ordered like: x1, z1, t1, x2, z2, t2, ... xn, "
+                "zn, tn, v."
+            )
+        else:
+            print("We are inferring the location of events GIVEN a medium velocity.")
+            print(
+                "The parameters are ordered like: x1, z1, t1, x2, z2, t2, ... xn, "
+                "zn, tn."
+            )
+
+        print(
+            f"We are placing {self.number_of_events} events using "
+            f"{self.number_of_stations} stations, and a total of "
+            f"{self.number_of_datums} observations"
+        )
+
     @staticmethod
-    def create_default(dimensions):
+    def create_default(dimensions, seed=127):
         # Possible parameter numbers:
         # 3, 4, 6, 7, 9, 10, etcc
 
@@ -224,14 +254,18 @@ class SourceLocation(_AbstractDistribution):
         else:
             raise _InvalidCaseError()
 
+        _numpy.random.seed(seed)
+
         # Create surface stations ------------------------------------------------------
 
-        stations_x = _numpy.array([0.0, 5.0, 10.0, 15.0, 20.0])[None, :]
-        stations_z = _numpy.array([0.0, 0.0, 0.0, 0.0, 0.0])[None, :]
+        stations_x = _numpy.random.rand(1, 3) * 40 - 10
+        stations_z = _numpy.zeros_like(stations_x)
+
+        stations_z[0, -1] = 4.0
 
         # Create the true model and observations ---------------------------------------
 
-        x = _numpy.random.rand(events, 1) * 10
+        x = _numpy.random.rand(events, 1) * 20
         z = _numpy.random.rand(events, 1) * 10
         T = _numpy.random.rand(events, 1) * 10
         v = _numpy.random.rand(1, 1) * 3 + 1
@@ -243,7 +277,9 @@ class SourceLocation(_AbstractDistribution):
 
         # Create the likelihood --------------------------------------------------------
 
-        data_std = 0.25 * _numpy.ones_like(fake_observed_data)
+        data_std = 1.0 * _numpy.random.randn(*fake_observed_data.shape)
+
+        fake_observed_data += data_std * _numpy.random.randn(*data_std.shape)
 
         return SourceLocation(
             stations_x,
@@ -253,6 +289,27 @@ class SourceLocation(_AbstractDistribution):
             infer_velocity=infer_velocity,
             fixed_medium_velocity=fixed_medium_velocity,
         )
+
+    def plot_data(self, figure=None):
+
+        if figure is None:
+            figure = _plt.figure(figsize=(6, 6))
+
+        _plt.grid()
+
+        for event in range(self.number_of_events):
+            _plt.errorbar(
+                self.receiver_array_x.T,
+                self.observed_data[event, :],
+                yerr=self.data_std[event, :],
+                fmt="x",
+                label=f"Event {event+1}",
+            )
+
+        _plt.ylim([0, _plt.gca().get_ylim()[1]])
+
+        _plt.xlabel("Horizontal distance [km]")
+        _plt.ylabel("Time [s]")
 
     @staticmethod
     def split_vector(model_vector, velocity=None) -> _Tuple:
