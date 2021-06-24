@@ -28,7 +28,8 @@ from hmc_tomography.Distributions.base import (
 )
 from hmc_tomography.Distributions.LinearMatrix import LinearMatrix
 
-from hmc_tomography.Distributions.SourceLocation import SourceLocation
+from hmc_tomography.Distributions.SourceLocation import SourceLocation2D
+from hmc_tomography.Distributions.SourceLocation import SourceLocation3D
 
 try:
     from hmc_tomography.Distributions.ElasticFullWaveform2D import ElasticFullWaveform2D
@@ -49,7 +50,8 @@ __all__ = [
     "Himmelblau",
     "BayesRule",
     "LinearMatrix",
-    "SourceLocation",
+    "SourceLocation2D",
+    "SourceLocation3D",
     "ElasticFullWaveform2D",
     "Mixture",
 ]
