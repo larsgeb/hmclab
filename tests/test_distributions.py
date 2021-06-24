@@ -9,7 +9,7 @@ from hmc_tomography.Helpers.CustomExceptions import (
     InvalidCaseError as _InvalidCaseError,
 )
 
-dimensions = [1, 2, 50]
+dimensions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 50]
 subclasses = _Distributions._AbstractDistribution.__subclasses__()
 deltas = [1e-10, 1e-2, -1e-10, -1e-2]
 

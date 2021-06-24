@@ -279,7 +279,9 @@ class SourceLocation2D(_AbstractDistribution):
         if not infer_velocity:
             medium_velocity = v
 
-        fake_observed_data = SourceLocation.forward(x, z, T, v, stations_x, stations_z)
+        fake_observed_data = SourceLocation2D.forward(
+            x, z, T, v, stations_x, stations_z
+        )
 
         # Create the likelihood --------------------------------------------------------
 
@@ -287,7 +289,7 @@ class SourceLocation2D(_AbstractDistribution):
 
         fake_observed_data += data_std * _numpy.random.randn(*data_std.shape)
 
-        return SourceLocation(
+        return SourceLocation2D(
             stations_x,
             stations_z,
             fake_observed_data,
@@ -464,10 +466,10 @@ class SourceLocation3D(_AbstractDistribution):
             total_grad[-1, 0] = gv
             return total_grad
         else:
-            total_grad[0::3, 0] = gx
-            total_grad[1::3, 0] = gy
-            total_grad[2::3, 0] = gz
-            total_grad[3::3, 0] = gT
+            total_grad[0::4, 0] = gx
+            total_grad[1::4, 0] = gy
+            total_grad[2::4, 0] = gz
+            total_grad[3::4, 0] = gT
             return total_grad
 
     def generate(self) -> _numpy.ndarray:
@@ -527,18 +529,18 @@ class SourceLocation3D(_AbstractDistribution):
         return gradient_x, gradient_y, gradient_z, gradient_T, gradient_v
 
     def describe(self):
-        #     if self.infer_velocity:
-        #         print("We are inferring the location of events AS WELL AS medium velocity.")
-        #         print(
-        #             "The parameters are ordered like: x1, z1, t1, x2, z2, t2, ... xn, "
-        #             "zn, tn, v."
-        #         )
-        #     else:
-        #         print("We are inferring the location of events GIVEN a medium velocity.")
-        #         print(
-        #             "The parameters are ordered like: x1, z1, t1, x2, z2, t2, ... xn, "
-        #             "zn, tn."
-        #         )
+        if self.infer_velocity:
+            print("We are inferring the location of events AS WELL AS medium velocity.")
+            print(
+                "The parameters are ordered like: x1, y1, z1, t1, x2, y2, z2, t2, ..."
+                " xn, yn, zn, tn, v."
+            )
+        else:
+            print("We are inferring the location of events GIVEN a medium velocity.")
+            print(
+                "The parameters are ordered like: x1, y1, z1, t1, x2, y2, z2, t2, ..."
+                " xn, yn, zn, tn."
+            )
 
         print(
             f"We are placing {self.number_of_events} events using "
@@ -548,7 +550,61 @@ class SourceLocation3D(_AbstractDistribution):
 
     @staticmethod
     def create_default(dimensions, seed=127):
-        pass
+
+        # Possible parameter numbers 4 * n_events + (opt velocity) 1:
+        # 4, 5, 8, 9, 12, 13, etc
+
+        events = _math.floor(dimensions / 4)
+
+        medium_velocity = None
+
+        if dimensions < 4:
+            raise _InvalidCaseError()
+        elif dimensions % 4 == 1:
+            infer_velocity = True
+        elif dimensions % 4 == 0:
+            infer_velocity = False
+        else:
+            raise _InvalidCaseError()
+
+        _numpy.random.seed(seed)
+
+        # Create surface stations ------------------------------------------------------
+        n_stations = 3
+        stations_x = _numpy.random.rand(1, n_stations) * 40 - 10
+        stations_y = _numpy.random.rand(1, n_stations) * 40 - 10
+        stations_z = _numpy.zeros_like(stations_x)
+
+        # Create the true model and observations ---------------------------------------
+
+        x = _numpy.random.rand(events, 1) * 20
+        y = _numpy.random.rand(events, 1) * 20
+        z = _numpy.random.rand(events, 1) * 10
+        T = _numpy.random.rand(events, 1) * 10
+        v = _numpy.random.rand(1, 1) * 3 + 1
+
+        if not infer_velocity:
+            medium_velocity = v
+
+        fake_observed_data = SourceLocation3D.forward(
+            x, y, z, T, v, stations_x, stations_y, stations_z
+        )
+
+        # Create the likelihood --------------------------------------------------------
+
+        data_std = 1.0 * _numpy.random.randn(*fake_observed_data.shape)
+
+        fake_observed_data += data_std * _numpy.random.randn(*data_std.shape)
+
+        return SourceLocation3D(
+            stations_x,
+            stations_y,
+            stations_z,
+            fake_observed_data,
+            data_std,
+            infer_velocity=infer_velocity,
+            medium_velocity=medium_velocity,
+        )
 
     def plot_data(self, figure=None):
 
