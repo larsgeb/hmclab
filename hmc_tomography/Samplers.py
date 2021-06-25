@@ -441,6 +441,13 @@ class _AbstractSampler(_ABC):
         self.samples_hdf5_dataset.attrs["acceptance_rate"] = self.accepted_proposals / (
             self.current_proposal + 1
         )
+
+        # Manually check for ram_buffer_size = 1 + failed written sample
+        if self.ram_buffer_size == 1 and _numpy.all(
+            self.samples_hdf5_dataset[:, -1] == 0.0
+        ):
+            self.samples_hdf5_dataset[:, -1] = self.ram_buffer[:, 0]
+
         self.samples_hdf5_dataset.attrs["end_time"] = _datetime.now().strftime(
             "%d-%b-%Y (%H:%M:%S.%f)"
         )
@@ -790,6 +797,7 @@ class _AbstractSampler(_ABC):
             dtype=dtype,
             chunks=True,
         )
+        self.samples_hdf5_dataset.set_fill_value = _numpy.nan
 
         # Set the current index of samples to the start of the file
         self.samples_hdf5_dataset.attrs["write_index"] = -1
@@ -874,14 +882,20 @@ class _AbstractSampler(_ABC):
             self.amount_of_writes += 1
 
             # Update the size in the h5 file
+            size_before = _numpy.copy(self.samples_hdf5_dataset.shape)
             self.samples_hdf5_dataset.resize(
                 (self.dimensions + 1, self.current_proposal_after_thinning + 1)
             )
+            size_after = _numpy.copy(self.samples_hdf5_dataset.shape)
+            # Write nan's to resized array to be sure if actual writing fails, we can
+            # recover
+            self.samples_hdf5_dataset[:, size_before[1] - size_after[1]] = _numpy.nan
 
             # Write samples to disk
             self.samples_hdf5_dataset[:, robust_start:end] = self.ram_buffer[
                 :, : end - robust_start
             ]
+
             self.ram_buffer.fill(_numpy.nan)
 
             # Reset the markers in the HDF5 file

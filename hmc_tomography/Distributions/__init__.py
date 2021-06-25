@@ -33,11 +33,12 @@ from hmc_tomography.Distributions.SourceLocation import SourceLocation3D
 
 try:
     from hmc_tomography.Distributions.ElasticFullWaveform2D import ElasticFullWaveform2D
-except ModuleNotFoundError as e:
-    _warnings.warn(
-        f"Couldn't find the required package for ElasticFullWaveform2D. Detailed error"
-        f"message: {e}"
-    )
+except ModuleNotFoundError:  # as e:
+    pass
+    # _warnings.warn(
+    #     f"Couldn't find the required package for ElasticFullWaveform2D. Detailed"
+    #     f" error message: {e}"
+    # )
 
 __all__ = [
     "_AbstractDistribution",

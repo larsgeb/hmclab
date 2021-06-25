@@ -1,7 +1,7 @@
 """A collection of integrated tests.
 """
 import h5py as _h5py
-from hmc_tomography import Distributions
+from hmc_tomography import Distributions as _Distributions
 import os as _os
 
 import numpy as _numpy
@@ -15,8 +15,9 @@ from hmc_tomography.Helpers.CustomExceptions import (
 _ad = _hmc_tomography.Distributions._AbstractDistribution
 _as = _hmc_tomography.Samplers._AbstractSampler
 
-dimensions = [1, 2, 100]
-distribution_classes = [Distributions.Normal]
+dimensions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 100]
+# distribution_classes = [_Distributions.Normal]
+distribution_classes = _Distributions._AbstractDistribution.__subclasses__()
 sampler_classes = _as.__subclasses__()
 proposals = [10, 1000]
 autotuning = [True, False]
