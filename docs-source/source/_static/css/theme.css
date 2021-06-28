@@ -6087,3 +6087,7 @@ span[id*="MathJax-Span"] {
     url("../fonts/RobotoSlab/roboto-slab-v7-bold.woff") format("woff"),
     url("../fonts/RobotoSlab/roboto-slab-v7-bold.ttf") format("truetype");
 }
+div.nboutput.container div.output_area div[class*="highlight"] > pre{
+  white-space: pre-wrap;
+}
+  

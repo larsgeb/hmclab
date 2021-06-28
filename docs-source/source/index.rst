@@ -9,11 +9,13 @@ HMC Tomography
     self
     hmc
     setup
-    examples
+    notebooks
     api/index
     py-modindex
     genindex
 
+As one may see, we have made significant strides in |ProjectVersion| 
+and hope that you enjoy the product!
 
 .. note::
 
