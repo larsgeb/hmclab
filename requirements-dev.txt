@@ -10,7 +10,6 @@ black
 flake8
 sphinx
 nbsphinx
-sphinx_rtd_theme
 numpydoc
 pandoc
 sphinx-git
@@ -28,3 +27,4 @@ pybind11
 cmake
 psvWave
 IPython
+sphinxcontrib-bibtex

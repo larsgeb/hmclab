@@ -16,6 +16,12 @@ import os
 import sys
 import hmc_tomography
 
+rst_epilog = """
+.. |ProjectVersion| replace:: Foo Project, version {versionnum}
+""".format(
+    versionnum=hmc_tomography.__version__,
+)
+
 sys.path.insert(0, os.path.abspath("../../"))
 sys.path.insert(0, os.path.abspath("../../hmc_tomography/Tests"))
 sys.path.insert(0, os.path.abspath("../../examples"))
@@ -36,7 +42,7 @@ nbsphinx_execute = "never"
 
 # -- Project information -----------------------------------------------------
 
-project = "HMC Tom"
+project = "HMCLab"
 copyright = "2019-2021, Andrea Zunino, Andreas Fichtner, Lars Gebraad"
 author = "Andrea Zunino, Andreas Fichtner, Lars Gebraad"
 
@@ -107,7 +113,8 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "insegel"
+# html_theme = "sphinx_rtd_theme"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -134,7 +141,7 @@ html_static_path = ["_static"]
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "HMCTomdoc"
+htmlhelp_basename = "HMCLab"
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -160,8 +167,8 @@ latex_elements = {
 latex_documents = [
     (
         master_doc,
-        "HMCTom.tex",
-        "HMC Tomography Documentation",
+        "HMCLab.tex",
+        "HMCLab Documentation",
         "Andrea Zunino, Andreas Fichtner, Lars Gebraad",
         "manual",
     )

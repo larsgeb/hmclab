@@ -18,9 +18,12 @@ help:
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
-	rm source/examples -rf
+	rm source/notebooks -rf
 	rm ../docs/* -rf
-	mkdir source/examples
-	cp ../examples/notebooks/*.ipynb source/examples/
+	mkdir source/notebooks
+	mkdir source/notebooks/tutorials
+	# mkdir source/notebooks/inverse_problems
+	cp -r ../notebooks/tutorials/*.ipynb source/notebooks/tutorials
+	# cp -r ../notebooks/inverse_problems/*.ipynb source/notebooks/inverse_problems
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 	git rev-parse --short HEAD | xargs -I {} sed -i 's/COMMIT_HASH/{}/g' ../docs/build/html/index.html 
