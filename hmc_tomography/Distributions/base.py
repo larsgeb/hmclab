@@ -14,11 +14,9 @@ from hmc_tomography.Helpers import CustomExceptions as _CustomExceptions
 
 
 class _AbstractDistribution(metaclass=_ABCMeta):
-    """Abstract base class for distributions.
+    """Abstract base class for distributions."""
 
-    """
-
-    name: str = "abstract distribution"
+    name: str = None
     """Name of the distribution."""
 
     @_abstractattribute
@@ -210,6 +208,12 @@ class _AbstractDistribution(metaclass=_ABCMeta):
 
         old_limits = (self.lower_bounds, self.upper_bounds)
 
+        if type(upper_bounds) == list:
+            upper_bounds = _numpy.array(upper_bounds)[:, None]
+
+        if type(lower_bounds) == list:
+            lower_bounds = _numpy.array(lower_bounds)[:, None]
+
         # Set the bounds ---------------------------------------------------------------
         self.upper_bounds = upper_bounds
         self.lower_bounds = lower_bounds
@@ -260,8 +264,7 @@ class _AbstractDistribution(metaclass=_ABCMeta):
             raise ValueError("Bounds vectors are incompatible.")
 
     def misfit_bounds(self, coordinates: _numpy.ndarray) -> float:
-        """Method to compute the misfit associated with the truncated part of the distribution.
-        """
+        """Method to compute the misfit associated with the truncated part of the distribution."""
         if (
             self.lower_bounds is not None
             and _numpy.any(coordinates < self.lower_bounds)
@@ -281,15 +284,18 @@ class StandardNormal1D(_AbstractDistribution):
     dimensions = 1
     name = "Standard normal distribution in 1 dimension."
 
+    def __init__(self, temperature=1.0):
+        self.temperature = temperature
+
     def misfit(self, m: _numpy.ndarray) -> float:
         _CustomExceptions.Assertions.assert_shape(m, (1, 1))
 
-        return self.misfit_bounds(m) + float(0.5 * m[0, 0] ** 2)
+        return self.misfit_bounds(m) + float(0.5 * m[0, 0] ** 2) / self.temperature
 
     def gradient(self, m: _numpy.ndarray) -> _numpy.ndarray:
         _CustomExceptions.Assertions.assert_shape(m, (1, 1))
 
-        return m
+        return m / self.temperature
 
     def generate(self) -> _numpy.ndarray:
         raise NotImplementedError(
@@ -339,8 +345,13 @@ class Normal(_AbstractDistribution):
 
         self.name = "Gaussian (normal) distribution"
 
+        if type(means) == list:
+            means = _numpy.array(means)[:, None]
+        if type(covariance) == list:
+            covariance = _numpy.array(covariance)[:, None]
+
         # Automatically get dimensionality from means
-        if type(means) == float:
+        if type(means) == float or type(means) == int:
             self.dimensions: int = 1
         else:
             self.dimensions: int = means.size
@@ -423,8 +434,7 @@ class Normal(_AbstractDistribution):
         self.update_bounds(lower_bounds, upper_bounds)
 
     def misfit(self, coordinates: _numpy.ndarray) -> float:
-        """Method to compute the misfit of a Normal distribution distribution.
-        """
+        """Method to compute the misfit of a Normal distribution distribution."""
 
         if self.diagonal:
             return (
@@ -449,8 +459,7 @@ class Normal(_AbstractDistribution):
             )
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
-        """Method to compute the gradient of a Normal distribution distribution.
-        """
+        """Method to compute the gradient of a Normal distribution distribution."""
 
         if self.diagonal:
             return -self.inverse_covariance * (
@@ -496,7 +505,12 @@ class Normal(_AbstractDistribution):
         correlation = _RandomMatrices.random_correlation_matrix(dimensions)
 
         # Standard deviations between 1 and 2
-        standard_deviations = _numpy.diag(_numpy.random.rand(dimensions,) + 1)
+        standard_deviations = _numpy.diag(
+            _numpy.random.rand(
+                dimensions,
+            )
+            + 1
+        )
 
         covariance = standard_deviations @ correlation @ standard_deviations
 
@@ -539,8 +553,7 @@ class Laplace(_AbstractDistribution):
         self.update_bounds(lower_bounds, upper_bounds)
 
     def misfit(self, coordinates) -> float:
-        """Method to compute the misfit of a L1 distribution distribution.
-        """
+        """Method to compute the misfit of a L1 distribution distribution."""
 
         return (
             self.normalization_constant
@@ -551,8 +564,7 @@ class Laplace(_AbstractDistribution):
         )
 
     def gradient(self, coordinates):
-        """Method to compute the gradient of a L1 distribution distribution.
-        """
+        """Method to compute the gradient of a L1 distribution distribution."""
 
         # The derivative of the function |x| is simply 1 or -1, depending on the sign
         # of x, subsequently scaled by the dispersion.
@@ -609,7 +621,9 @@ class Uniform(_AbstractDistribution):
     """
 
     def __init__(
-        self, lower_bounds: _numpy.ndarray, upper_bounds: _numpy.ndarray,
+        self,
+        lower_bounds: _numpy.ndarray,
+        upper_bounds: _numpy.ndarray,
     ):
         self.name = "uniform distribution"
 
@@ -626,13 +640,11 @@ class Uniform(_AbstractDistribution):
         self.update_bounds(lower_bounds, upper_bounds)
 
     def misfit(self, coordinates: _numpy.ndarray) -> float:
-        """Method to compute the misfit of a uniform distribution.
-        """
+        """Method to compute the misfit of a uniform distribution."""
         return self.misfit_bounds(coordinates)
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
-        """Method to compute the gradient of a uniform distribution.
-        """
+        """Method to compute the gradient of a uniform distribution."""
         return _numpy.zeros((self.dimensions, 1)) + self.misfit_bounds(coordinates)
 
     def generate(self) -> _numpy.ndarray:
@@ -752,8 +764,7 @@ class CompositeDistribution(_AbstractDistribution):
         )
 
     def collapse_bounds(self):
-        """Method to restructure all composite bounds into top level object.
-        """
+        """Method to restructure all composite bounds into top level object."""
         raise NotImplementedError()
 
     def corrector(self, coordinates: _numpy.ndarray, momentum: _numpy.ndarray):
@@ -902,8 +913,7 @@ class AdditiveDistribution(_AbstractDistribution):
         )
 
     def collapse_bounds(self):
-        """Method to restructure all composite bounds into top level object.
-        """
+        """Method to restructure all composite bounds into top level object."""
         # Iterate over all subdistributions
         for i_distribution, distribution in enumerate(self.separate_distributions):
 

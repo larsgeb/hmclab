@@ -1,8 +1,9 @@
 """A collection of integrated tests.
 """
-import h5py as _h5py
-from hmc_tomography import Distributions as _Distributions
+from hmc_tomography import Distributions
 import os as _os
+import copy as _copy
+import h5py as _h5py
 
 import numpy as _numpy
 import pytest as _pytest
@@ -15,58 +16,29 @@ from hmc_tomography.Helpers.CustomExceptions import (
 _ad = _hmc_tomography.Distributions._AbstractDistribution
 _as = _hmc_tomography.Samplers._AbstractSampler
 
-dimensions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 100]
-# distribution_classes = [_Distributions.Normal]
-distribution_classes = _Distributions._AbstractDistribution.__subclasses__()
+dimensions = [1, 2, 100]
+distribution_classes = [Distributions.Normal]
 sampler_classes = _as.__subclasses__()
 proposals = [10, 1000]
 autotuning = [True, False]
 
 
 @_pytest.mark.parametrize("sampler_class", sampler_classes)
-@_pytest.mark.parametrize("distribution_class", distribution_classes)
-@_pytest.mark.parametrize("dimensions", dimensions)
-@_pytest.mark.parametrize("proposals", proposals)
-@_pytest.mark.parametrize("autotuning", autotuning)
-def test_basic_sampling(
+def test_basic_copying(
     sampler_class: _as,
-    distribution_class: _ad,
-    dimensions: int,
-    proposals: int,
-    autotuning: bool,
 ):
-
-    try:
-        distribution: _ad = distribution_class.create_default(dimensions)
-    except _InvalidCaseError:
-        return 0
 
     sampler_instance = sampler_class()
 
     assert isinstance(sampler_instance, _as)
 
-    filename = "temporary_file.h5"
+    sampler_instance_copy = _copy.deepcopy(sampler_instance)
 
-    # Remove file before attempting to sample
-    if _os.path.exists(filename):
-        _os.remove(filename)
+    assert isinstance(sampler_instance_copy, _as)
 
-    sampler_instance.sample(
-        filename,
-        distribution,
-        proposals=proposals,
-        online_thinning=10,
-        ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
-        max_time=1.0,
-        autotuning=autotuning,
-    )
+    assert sampler_instance is not sampler_instance_copy
 
-    # Check if the file was created. If it wasn't, fail
-    if not _os.path.exists(filename):
-        _pytest.fail("Samples file wasn't created")
-
-    # Remove the file
-    _os.remove(filename)
+    assert type(sampler_instance) == type(sampler_instance_copy)
 
 
 @_pytest.mark.parametrize("sampler_class", sampler_classes)
@@ -129,3 +101,11 @@ def test_samples_file(
 
     # Remove the file
     _os.remove(filename)
+
+    sampler_instance_copy = _copy.deepcopy(sampler_instance)
+
+    assert isinstance(sampler_instance_copy, _as)
+
+    assert sampler_instance is not sampler_instance_copy
+
+    assert type(sampler_instance) == type(sampler_instance_copy)

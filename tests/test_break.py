@@ -4,7 +4,6 @@ import os as _os
 import pytest as _pytest
 import time as _time
 import threading
-import time
 import _thread
 
 
@@ -17,15 +16,16 @@ def interruptor():
 # Build a slow version just so that we don't generate crazy amounts of samples
 class SlowStandardNormal(_hmc_tomography.Distributions.StandardNormal1D):
     def misfit(self, m):
-        _time.sleep(0.0005)
+        _time.sleep(0.0001)
         return super().misfit(m)
 
     def gradient(self, m):
-        _time.sleep(0.0005)
+        _time.sleep(0.0001)
         return super().gradient(m)
 
 
-def test_break():
+@_pytest.mark.parametrize("execution_number", range(100))
+def test_break(execution_number):
 
     # Create some arbitrary posterior
     prior = _hmc_tomography.Distributions.Uniform([-1], [1])

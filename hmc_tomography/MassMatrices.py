@@ -36,6 +36,7 @@ class _AbstractMassMatrix(_ABC):
 
     name: str = "mass matrix abstract base class"
     dimensions: int = -1
+    rng: _numpy.random.Generator = _numpy.random.default_rng()
 
     def full_name(self) -> str:
         return self.name
@@ -80,12 +81,13 @@ class Unit(_AbstractMassMatrix):
 
     """
 
-    def __init__(self, dimensions: int = -1):
-        """Constructor for unit mass matrices
-
-        """
+    def __init__(self, dimensions: int = -1, rng: _numpy.random.Generator = None):
+        """Constructor for unit mass matrices"""
         self.name = "unit mass matrix"
         self.dimensions = dimensions
+
+        if rng is not None:
+            self.rng = rng
 
     def kinetic_energy(self, momentum: _numpy.ndarray) -> float:
         """
@@ -125,7 +127,7 @@ class Unit(_AbstractMassMatrix):
         -------
 
         """
-        return _numpy.random.randn(self.dimensions, 1)
+        return self.rng.normal(size=(self.dimensions, 1))
 
     @property
     def matrix(self) -> _numpy.ndarray:
@@ -151,10 +153,8 @@ class Diagonal(_AbstractMassMatrix):
 
     """
 
-    def __init__(self, diagonal: _numpy.ndarray):
-        """Constructor for diagonal mass matrices.
-
-        """
+    def __init__(self, diagonal: _numpy.ndarray, rng: _numpy.random.Generator = None):
+        """Constructor for diagonal mass matrices."""
         self.name = "diagonal mass matrix"
 
         diagonal = _numpy.asarray(diagonal)
@@ -169,6 +169,9 @@ class Diagonal(_AbstractMassMatrix):
         self.dimensions = diagonal.size
         self.diagonal = diagonal
         self.inverse_diagonal = 1.0 / self.diagonal
+
+        if rng is not None:
+            self.rng = rng
 
     def kinetic_energy(self, momentum: _numpy.ndarray) -> float:
         """
@@ -203,7 +206,7 @@ class Diagonal(_AbstractMassMatrix):
         -------
 
         """
-        return _numpy.sqrt(self.diagonal) * _numpy.random.randn(self.dimensions, 1)
+        return _numpy.sqrt(self.diagonal) * self.rng.normal(size=(self.dimensions, 1))
 
     @property
     def matrix(self) -> _numpy.ndarray:
@@ -232,10 +235,9 @@ class LBFGS(_AbstractMassMatrix):
         starting_gradient: _numpy.ndarray = None,
         max_determinant_change: float = 0.1,
         update_interval: int = 1,
+        rng: _numpy.random.Generator = None,
     ):
-        """Constructor for LBFGS-style mass matrices.
-
-        """
+        """Constructor for LBFGS-style mass matrices."""
 
         if starting_position is None or starting_gradient is None:
             _warnings.warn(
@@ -266,6 +268,9 @@ class LBFGS(_AbstractMassMatrix):
 
         self.max_determinant_change = max_determinant_change
 
+        if rng is not None:
+            self.rng = rng
+
     def kinetic_energy(self, momentum: _numpy.ndarray) -> float:
         return 0.5 * _numpy.vdot(momentum, self.Hinv(momentum))
 
@@ -273,7 +278,7 @@ class LBFGS(_AbstractMassMatrix):
         return self.Hinv(momentum)
 
     def generate_momentum(self) -> _numpy.ndarray:
-        return self.S(_numpy.random.randn(self.dimensions, 1))
+        return self.S(self.rng.normal(size=(self.dimensions, 1)))
 
     def update(self, m, g):
 
