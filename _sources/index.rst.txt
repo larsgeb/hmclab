@@ -7,12 +7,15 @@ HMC Tomography
     :caption: Contents:
 
     self
+    hmc
     setup
-    examples
+    notebooks
     api/index
     py-modindex
     genindex
 
+As one may see, we have made significant strides in |ProjectVersion| 
+and hope that you enjoy the product!
 
 .. note::
 
@@ -25,3 +28,4 @@ HMC Tomography
 .. centered:: Andrea Zunino, Andreas Fichtner, Lars Gebraad
 
 This documentation is built on top of commit `COMMIT_HASH <https://github.com/larsgeb/hmc-tomography/commit/COMMIT_HASH>`_.
+

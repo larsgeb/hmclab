@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2D2D2D" />
+  
+  <title>HMCLab :: The Hamiltonian Monte Carlo algorithm</title>
+  
+
+  <link rel="icon" type="image/png" sizes="32x32" href="_static/img/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="_static/img/favicon-16x16.png">
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+
+  <link rel="stylesheet" href="_static/css/insegel.css"/>
+
+  <script type="text/javascript">
+    var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:'',
+        VERSION:'archive/parallel-tempering-9-gf4060a9',
+        LANGUAGE:'None',
+        COLLAPSE_INDEX:false,
+        FILE_SUFFIX:'.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+    };
+  </script>
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script type="text/javascript" src="None"></script>
+
+  <script src="https://email.tl.fortawesome.com/c/eJxNjUEOgyAQAF8jR7Kw6wIHDh7sP1Cw2mgxgmn6-3JsMqc5zEQfE8dkxOY1KKMUOI3ACFKRJpSW2AAp7ontYIaxI6i7XPJVwyeVfCQ550Os3jLrGSNOLgbdAy6s0PBk2TFNjEbsfq31LB0OnX407pJa5v2faRadwSW63mn5KuLyR9j2tgx3zecanl-55R_-jjPs"></script>
+
+</head>
+
+<body>
+  <div id="insegel-container">
+    <header>
+      <div id="logo-container">
+          
+          <a href="index.html"><img src="_static/hmctom.png"></a>
+          
+
+      </div>
+      <div id="project-container">
+        <h1>HMCLab Documentation</h1>
+      </div>
+    </header>
+
+    <div id="content-container">
+
+      <div id="main-content-container">
+        <div id="main-content-header">
+          <h1>The Hamiltonian Monte Carlo algorithm</h1>
+        </div>
+        <div id="main-content">
+          
+  <div class="section" id="the-hamiltonian-monte-carlo-algorithm">
+<h1>The Hamiltonian Monte Carlo algorithm<a class="headerlink" href="#the-hamiltonian-monte-carlo-algorithm" title="Permalink to this headline">¶</a></h1>
+<p>Originally developed for molecular dynamics under the name hybrid Monte Carlo <span id="id1">[<a class="reference internal" href="#id299" title="S. Duane, A. D. Kennedy, B. J. Pendleton, and D. Roweth. Hybrid Monte Carlo. Phys. Lett. B, 195:216-222, 1987.">1</a>]</span>, Hamiltonian Monte Carlo (HMC) is now commonly used for the subset of sampling problems where gradients of the posterior <span class="math notranslate nohighlight">\(p(\mathbf{m}|\mathbf{d}_\text{obs})\)</span> with respect to the model parameters <span class="math notranslate nohighlight">\(\mathbf{m}\)</span> are easy to compute. The cost of generating independent samples with HMC under increasing dimension <span class="math notranslate nohighlight">\(n\)</span> grows as <span class="math notranslate nohighlight">\(\mathcal{O}(n^{5/4})\)</span> <span id="id2">[<a class="reference internal" href="#id803" title="R. M. Neal. MCMC using Hamiltonian dynamics. In Handbook of Markov Chain Monte Carlo, Chapter 5. 2011.">2</a>]</span>, whereas it grows as <span class="math notranslate nohighlight">\(\mathcal{O}(n^2)\)</span> for  standard Metropolis-Hastings <span id="id3">[<a class="reference internal" href="#id238" title="Michael Creutz. Global monte carlo algorithms for many-fermion systems. Physical Review D, 38(4):1228, 1988.">3</a>]</span>.</p>
+<div class="section" id="theory">
+<h2>Theory<a class="headerlink" href="#theory" title="Permalink to this headline">¶</a></h2>
+<p>HMC constructs a Markov chain over an <span class="math notranslate nohighlight">\(n\)</span>-dimensional probability density function <span class="math notranslate nohighlight">\(p(\mathbf{m})\)</span> using classical Hamiltonian mechanics <span id="id4">[<a class="reference internal" href="#id636" title="L. D. Landau and E. M. Lifshitz. Course of Theoretical Physics, Volume 1, Mechanics, 3rd edition. Elsevier Butterworth Heinemann, Amsterdam, 1976.">4</a>]</span>. The algorithm regards the current state <span class="math notranslate nohighlight">\(\mathbf{m}\)</span> of the Markov chain as the location of a physical particle in <span class="math notranslate nohighlight">\(n\)</span>-dimensional space <span class="math notranslate nohighlight">\(\mathbb{M}\)</span>. It moves under the influence of a potential energy, <span class="math notranslate nohighlight">\(U\)</span>, which is defined as</p>
+<div class="math notranslate nohighlight">
+\begin{eqnarray}
+    U (\mathbf{m}) = - \ln p(\mathbf{m})\,.
+\end{eqnarray}</div><p>In the case of a Gaussian probability density <span class="math notranslate nohighlight">\(p\)</span>, the potential energy <span class="math notranslate nohighlight">\(U\)</span> is equal to the least-squares misfit <span class="math notranslate nohighlight">\(\chi(\mathbf{m})\)</span>. To complete the physical system, the state of the Markov chain needs to be artificially augmented with momentum variables <span class="math notranslate nohighlight">\(\mathbf{p}\)</span> for every dimension and a generalized mass for every dimension pair.
+The collection of resulting masses are contained in a positive definite mass matrix <span class="math notranslate nohighlight">\(\mathbf{m}\)</span> of dimension <span class="math notranslate nohighlight">\(n\times n\)</span>. The momenta and the mass matrix define the kinetic energy of a model as</p>
+<div class="math notranslate nohighlight">
+\begin{eqnarray}
+    K(\mathbf{p}) = \frac{1}{2}\mathbf{p}^T \mathbf{M}^{-1} \mathbf{p}\,.
+\end{eqnarray}</div><p>In the HMC algorithm, the momenta <span class="math notranslate nohighlight">\(\mathbf{p}\)</span> are drawn randomly from a multivariate Gaussian with covariance matrix <span class="math notranslate nohighlight">\(\mathbf{m}\)</span>. The location-dependent potential and kinetic energies constitute the total energy or Hamiltonian of the system,</p>
+<div class="math notranslate nohighlight">
+\begin{eqnarray}
+     H(\mathbf{m}, \mathbf{p}) = U(\mathbf{m}) + K(\mathbf{p}).
+\end{eqnarray}</div><p>Hamilton’s equations</p>
+<div class="math notranslate nohighlight">
+\begin{eqnarray}
+    \frac{d \mathbf{m}}{d \tau}  =  \frac{\partial H}{\partial \mathbf{p}}\,, \qquad
+    \frac{d \mathbf{p}}{d \tau}  =  - \frac{\partial H}{\partial \mathbf{m}}\,,
+\end{eqnarray}</div><p>determine the position of the particle as a function of the artificial time variable <span class="math notranslate nohighlight">\(\tau\)</span>. We can simplify Hamilton’s equations using the fact that kinetic and potential energy depend only on momentum and location, respectively,</p>
+<div class="math notranslate nohighlight">
+\begin{eqnarray}
+    \frac{d \mathbf{m}}{d \tau}  =  \mathbf{M}^{-1} \mathbf{p}\,,\qquad
+    \frac{d \mathbf{p}}{d \tau}  =  - \frac{\partial U}{\partial \mathbf{m}}\,.
+\end{eqnarray}</div><p>Evolving <span class="math notranslate nohighlight">\(\mathbf{m}\)</span> over time <span class="math notranslate nohighlight">\(\tau\)</span> generates another possible state of the system with new position <span class="math notranslate nohighlight">\(\mathbf{\tilde{m}}\)</span>, momentum <span class="math notranslate nohighlight">\(\mathbf{\tilde{p}}\)</span>, potential energy <span class="math notranslate nohighlight">\(\tilde{U}\)</span>, and kinetic energy <span class="math notranslate nohighlight">\(\tilde{K}\)</span>. Due to the conservation of energy, the Hamiltonian is equal in both states. Successively drawing random momenta and evolving the system generates a distribution of the possible states of the system. Thereby, HMC samples the joint momentum and model space, referred to as phase space. As we are not interested in the momentum component of phase space, we marginalize over the momenta by simply dropping them. This results in samples drawn from <span class="math notranslate nohighlight">\(p(\mathbf{m})\)</span>.</p>
+</div>
+<div class="section" id="from-theory-to-code">
+<h2>From theory to code<a class="headerlink" href="#from-theory-to-code" title="Permalink to this headline">¶</a></h2>
+<p>If one could solve Hamilton’s equations exactly, every proposed state would be a valid sample of <span class="math notranslate nohighlight">\(p(\mathbf{m})\)</span>. Since Hamilton’s equations for non-linear forward models cannot be solved analytically, the system must be integrated numerically. Suitable integrators are symplectic, meaning that time reversibility, phase space partitioning and volume preservation are satisfied <span id="id5">[<a class="reference internal" href="#id803" title="R. M. Neal. MCMC using Hamiltonian dynamics. In Handbook of Markov Chain Monte Carlo, Chapter 5. 2011.">2</a>, <a class="reference internal" href="#id367" title="A. Fichtner and A. Zunino. Hamiltonian nullspace shuttles. Geophys. Res. Lett., 46:doi:10.1029/2018GL080931, 2019.">5</a>]</span>. However, the Hamiltonian is generally not preserved exactly when explicit time-stepping schemes are used. In this work, we employ the leapfrog method as described in <span id="id6">Neal [<a class="reference internal" href="#id803" title="R. M. Neal. MCMC using Hamiltonian dynamics. In Handbook of Markov Chain Monte Carlo, Chapter 5. 2011.">2</a>]</span>. As the Hamiltonian is not preserved, the time evolution generates samples not exactly proportional to the original distribution. A Metropolis-Hastings correction step is therefore applied at the end of numerical integration.</p>
+<p>In summary, samples are generated starting from a random model <span class="math notranslate nohighlight">\(\mathbf{m}\)</span> in the following way:</p>
+<div class="admonition-the-hamiltonian-monte-carlo-algorithm admonition">
+<p class="admonition-title">The Hamiltonian Monte Carlo algorithm</p>
+<ol class="arabic simple">
+<li><p>Propose momenta <span class="math notranslate nohighlight">\(\mathbf{p}\)</span> according to the Gaussian with mean <span class="math notranslate nohighlight">\(\mathbf{0}\)</span> and covariance <span class="math notranslate nohighlight">\(\mathbf{m}\)</span>;</p></li>
+<li><p>Compute the Hamiltonian <span class="math notranslate nohighlight">\(H\)</span> of model <span class="math notranslate nohighlight">\(\mathbf{m}\)</span> with momenta <span class="math notranslate nohighlight">\(\mathbf{p}\)</span>;</p></li>
+<li><p>Propagate <span class="math notranslate nohighlight">\(\mathbf{m}\)</span> and <span class="math notranslate nohighlight">\(\mathbf{p}\)</span> for some time <span class="math notranslate nohighlight">\(\tau\)</span> to <span class="math notranslate nohighlight">\(\tilde{\mathbf{m}}\)</span> and <span class="math notranslate nohighlight">\(\tilde{\mathbf   {p}}\)</span>, using the discretized version of Hamilton’s equations and a suitable numerical integrator;</p></li>
+<li><p>Compute the Hamiltonian <span class="math notranslate nohighlight">\(\tilde{H}\)</span> of model <span class="math notranslate nohighlight">\(\tilde{\mathbf{m}}\)</span> with momenta <span class="math notranslate nohighlight">\(\mathbf{\tilde{p}}\)</span>;</p></li>
+<li><p>Accept the proposed move <span class="math notranslate nohighlight">\(\mathbf{m} \rightarrow \tilde{\mathbf{m}}\)</span> with probability</p></li>
+</ol>
+<div class="math notranslate nohighlight">
+\begin{eqnarray}
+    p_\text{accept} = \min \left( 1, \exp ( H-\tilde{H} ) \right)\,.
+\end{eqnarray}</div><ol class="arabic simple" start="6">
+<li><p>If accepted, use (and count) <span class="math notranslate nohighlight">\(\tilde{\mathbf{m}}\)</span> as the new state. Otherwise, keep (and count) the previous state. Then return    to 1.</p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="hmc-compared">
+<h2>HMC compared<a class="headerlink" href="#hmc-compared" title="Permalink to this headline">¶</a></h2>
+<p>The main factor influencing the acceptance rate of the algorithm is the conservation of energy, <span class="math notranslate nohighlight">\(H\)</span>, along the trajectory.
+If the leapfrog integration has too large time steps, or the gradients of the misfit function are computed incorrectly (e.g., by badly discretizing the forward model), <span class="math notranslate nohighlight">\(H\)</span> is less well conserved, and the algorithm’s acceptance rate decreases.</p>
+<p>The main cost of HMC, compared to other MCMC samplers, is the computation of the gradient <span class="math notranslate nohighlight">\(\partial U/\partial \mathbf{m}\)</span> at every step in the leapfrog propagation. When gradients can be computed easily, HMC can provide improved performance for two reasons: (1) the reduced cost of generating independent samples, that is, the avoidance of random-walk behaviour <span id="id7">[<a class="reference internal" href="#id803" title="R. M. Neal. MCMC using Hamiltonian dynamics. In Handbook of Markov Chain Monte Carlo, Chapter 5. 2011.">2</a>]</span>, and (2) the better scaling of HMC with increasing dimension <span id="id8">[<a class="reference internal" href="#id803" title="R. M. Neal. MCMC using Hamiltonian dynamics. In Handbook of Markov Chain Monte Carlo, Chapter 5. 2011.">2</a>, <a class="reference internal" href="#id238" title="Michael Creutz. Global monte carlo algorithms for many-fermion systems. Physical Review D, 38(4):1228, 1988.">3</a>]</span>.</p>
+</div>
+<div class="section" id="tuning-parameters">
+<h2>Tuning parameters<a class="headerlink" href="#tuning-parameters" title="Permalink to this headline">¶</a></h2>
+<p>The tuning parameters in HMC are simulation time <span class="math notranslate nohighlight">\(\tau\)</span> and the mass matrix <span class="math notranslate nohighlight">\(\mathbf{m}\)</span>. HMC has the potential to inject additional knowledge about the distribution <span class="math notranslate nohighlight">\(p\)</span> via the mass matrix in order to enhance convergence significantly. At the same time, the abundance of tuning parameters also creates potential for choosing inefficient settings, leading to sub-optimal convergence. <span id="id9">Fichtner <em>et al.</em> [<a class="reference internal" href="#id366" title="A. Fichtner, A. Zunino, and L. Gebraad. Hamiltonian Monte Carlo solution of tomographic inverse problems. Geophys. J. Int., 216:doi:10.1093/gji/ggy496, 2018.">6</a>]</span> and <span id="id10">Fichtner and Zunino [<a class="reference internal" href="#id367" title="A. Fichtner and A. Zunino. Hamiltonian nullspace shuttles. Geophys. Res. Lett., 46:doi:10.1029/2018GL080931, 2019.">5</a>]</span> both illustrate how to create relevant mass matrices for tomographic inverse problems.</p>
+<p>We adapt the specific tuning strategy for the mass matrix in this study depending on the target, as illustrated in the following  sections. However, for all targets we choose the size of the discrete time steps empirically such that the acceptance rate is close to the optimum of 65 % <span id="id11">[<a class="reference internal" href="#id803" title="R. M. Neal. MCMC using Hamiltonian dynamics. In Handbook of Markov Chain Monte Carlo, Chapter 5. 2011.">2</a>]</span>. This typically results in needing approximately 10 leap-frog steps per proposal, i.e. requiring this many forward and adjoint solves per proposal.</p>
+</div>
+<div class="section" id="further-reading">
+<h2>Further reading<a class="headerlink" href="#further-reading" title="Permalink to this headline">¶</a></h2>
+<p id="id12"><dl class="citation">
+<dt class="label" id="id299"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>S. Duane, A. D. Kennedy, B. J. Pendleton, and D. Roweth. Hybrid Monte Carlo. <em>Phys. Lett. B</em>, 195:216–222, 1987.</p>
+</dd>
+<dt class="label" id="id803"><span class="brackets">2</span><span class="fn-backref">(<a href="#id2">1</a>,<a href="#id5">2</a>,<a href="#id6">3</a>,<a href="#id7">4</a>,<a href="#id8">5</a>,<a href="#id11">6</a>)</span></dt>
+<dd><p>R. M. Neal. MCMC using Hamiltonian dynamics. In <em>Handbook of Markov Chain Monte Carlo</em>, Chapter 5. 2011.</p>
+</dd>
+<dt class="label" id="id238"><span class="brackets">3</span><span class="fn-backref">(<a href="#id3">1</a>,<a href="#id8">2</a>)</span></dt>
+<dd><p>Michael Creutz. Global monte carlo algorithms for many-fermion systems. <em>Physical Review D</em>, 38(4):1228, 1988.</p>
+</dd>
+<dt class="label" id="id636"><span class="brackets"><a class="fn-backref" href="#id4">4</a></span></dt>
+<dd><p>L. D. Landau and E. M. Lifshitz. <em>Course of Theoretical Physics, Volume 1, Mechanics, 3rd edition</em>. Elsevier Butterworth Heinemann, Amsterdam, 1976.</p>
+</dd>
+<dt class="label" id="id367"><span class="brackets">5</span><span class="fn-backref">(<a href="#id5">1</a>,<a href="#id10">2</a>)</span></dt>
+<dd><p>A. Fichtner and A. Zunino. Hamiltonian nullspace shuttles. <em>Geophys. Res. Lett.</em>, 46:doi:10.1029/2018GL080931, 2019.</p>
+</dd>
+<dt class="label" id="id366"><span class="brackets"><a class="fn-backref" href="#id9">6</a></span></dt>
+<dd><p>A. Fichtner, A. Zunino, and L. Gebraad. Hamiltonian Monte Carlo solution of tomographic inverse problems. <em>Geophys. J. Int.</em>, 216:doi:10.1093/gji/ggy496, 2018.</p>
+</dd>
+</dl>
+</p>
+</div>
+</div>
+
+
+        </div>
+      </div>
+
+      <div id="side-menu-container">
+
+        <div id="search" role="search">
+        <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+            <input type="text" name="q" placeholder="Search..." />
+            <input type="hidden" name="check_keywords" value="yes" />
+            <input type="hidden" name="area" value="default" />
+        </form>
+</div>
+
+        <div id="side-menu" role="navigation">
+
+          
+  
+    
+  
+  
+    <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">HMC Tomography</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">The Hamiltonian Monte Carlo algorithm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks.html">Notebooks: Examples and tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="py-modindex.html">Module index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Alphabetic index</a></li>
+</ul>
+
+  
+
+
+        </div>
+
+        
+
+      </div>
+
+    </div>
+
+<footer>
+    <div id="footer-info">
+        <ul id="build-details">
+            
+                <li class="footer-element">
+                    
+                        <a href="_sources/hmc.rst.txt" rel="nofollow"> source</a>
+                    
+                </li>
+            
+
+            
+
+            
+        </ul>
+        <div id="credit">
+            created with <a href="http://sphinx-doc.org/">Sphinx</a> and <a href="https://github.com/Autophagy/insegel">Insegel</a>
+
+        </div>
+    </div>
+
+    <a id="menu-toggle" class="fa fa-bars" aria-hidden="true"></a>
+
+    <script type="text/javascript">
+      $("#menu-toggle").click(function() {
+        $("#menu-toggle").toggleClass("toggled");
+        $("#side-menu-container").slideToggle(300);
+      });
+    </script>
+
+</footer> 
+
+</div>
+
+</body>
+</html>
