@@ -14,9 +14,6 @@ HMC Tomography
     py-modindex
     genindex
 
-As one may see, we have made significant strides in |ProjectVersion| 
-and hope that you enjoy the product!
-
 .. note::
 
    This documentation is far from complete. Please let us know if you miss something.

@@ -11,7 +11,7 @@ required methods and their signatures (required in- and outputs).
 
     The mass matrix is vitally important for the performance of HMC algorithms A
     tutorial on the tuning parameters of HMC can be found at
-    :ref:`/examples/0.2 - Tuning Hamiltonian Monte Carlo.ipynb`.
+    :ref:`/notebooks/tutorials/0.2 - Tuning Hamiltonian Monte Carlo.ipynb`.
 
 """
 import warnings as _warnings

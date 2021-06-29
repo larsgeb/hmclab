@@ -9,7 +9,7 @@ required methods and their signatures (required in- and outputs).
 .. note::
 
     A tutorial on implementing your own distributions can be found at
-    :ref:`/examples/4 - Creating your own inverse problem.ipynb`.
+    :ref:`/notebooks/tutorials/3 - Creating your own inverse problem.ipynb`.
 
 """
 import warnings as _warnings

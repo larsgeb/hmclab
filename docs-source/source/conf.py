@@ -16,11 +16,6 @@ import os
 import sys
 import hmc_tomography
 
-rst_epilog = """
-.. |ProjectVersion| replace:: Foo Project, version {versionnum}
-""".format(
-    versionnum=hmc_tomography.__version__,
-)
 
 sys.path.insert(0, os.path.abspath("../../"))
 sys.path.insert(0, os.path.abspath("../../hmc_tomography/Tests"))
@@ -29,9 +24,6 @@ sys.path.insert(0, os.path.abspath("../../examples"))
 # - Custom configuration -----------------------------------------------------
 
 autodoc_member_order = "bysource"
-
-# override wide tables in RTD theme
-html_context = {"css_files": ["_static/theme_overrides.css"]}
 
 autodoc_inherit_docstrings = False
 autodoc_default_flags = ["members", "undoc-members", "show-inheritance"]
@@ -114,7 +106,6 @@ pygments_style = None
 # a list of builtin themes.
 #
 html_theme = "insegel"
-# html_theme = "sphinx_rtd_theme"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
