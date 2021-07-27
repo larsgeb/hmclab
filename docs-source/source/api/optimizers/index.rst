@@ -7,16 +7,17 @@ Optimizers
 
 Available classes within `Optimizers`:
 
-.. toctree::
-   :hidden:
-   :maxdepth: 1
-   :caption: Overview of samplers
+.. autosummary:: 
+   :toctree: _autosummary
+   :template: custom-class-template.rst
+   :nosignatures:
+   :recursive:
 
    _AbstractOptimizer
-   gradient_descent
-
-.. autosummary:: hmc_tomography.Optimizers._AbstractOptimizer
-                 hmc_tomography.Optimizers.gradient_descent
+    gradient_descent
+   
+   
+   
 
 Using SciPy's optimization routines
 ***********************************

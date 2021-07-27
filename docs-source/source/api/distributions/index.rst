@@ -4,15 +4,19 @@ Distributions
 
 .. automodule:: hmc_tomography.Distributions
    :no-members:
+   :show-inheritance:
 
 Available classes within `Distributions`:
 
-.. toctree::
-   :hidden:
-   :maxdepth: 1
-   :caption: Overview of distributions
+
+.. autosummary:: 
+   :toctree: _autosummary
+   :template: custom-class-template.rst
+   :nosignatures:
+   :recursive:
 
    _AbstractDistribution
+   StandardNormal1D
    Normal
    Laplace
    Uniform
@@ -21,16 +25,5 @@ Available classes within `Distributions`:
    AdditiveDistribution
    BayesRule
    Himmelblau
-   SourceLocation
-
-
-.. autosummary:: hmc_tomography.Distributions._AbstractDistribution
-                 hmc_tomography.Distributions.Normal
-                 hmc_tomography.Distributions.Laplace
-                 hmc_tomography.Distributions.Uniform
-                 hmc_tomography.Distributions.LinearMatrix
-                 hmc_tomography.Distributions.CompositeDistribution
-                 hmc_tomography.Distributions.AdditiveDistribution
-                 hmc_tomography.Distributions.BayesRule
-                 hmc_tomography.Distributions.Himmelblau
-                 hmc_tomography.Distributions.SourceLocation
+   SourceLocation2D
+   SourceLocation3D

@@ -23,6 +23,7 @@ pytest-ordering
 pytest_notebook
 ipywidgets
 nbformat<6.0.0
+autoclasstoc
 pybind11
 cmake
 psvWave

@@ -51,6 +51,7 @@ setuptools.setup(
             "pytest-harvest",
             "pytest-ordering",
             "pytest_notebook",
+            "autoclasstoc",
             "ipywidgets",
             "nbformat",
             "nbconvert < 6.0.0",

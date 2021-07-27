@@ -12,7 +12,7 @@ required methods and their signatures (required in- and outputs).
     :ref:`/notebooks/tutorials/3 - Creating your own inverse problem.ipynb`.
 
 """
-import warnings as _warnings
+# import warnings as _warnings # TODO check why this was here
 
 from hmc_tomography.Distributions.base import (
     AdditiveDistribution,
@@ -31,15 +31,6 @@ from hmc_tomography.Distributions.LinearMatrix import LinearMatrix
 from hmc_tomography.Distributions.SourceLocation import SourceLocation2D
 from hmc_tomography.Distributions.SourceLocation import SourceLocation3D
 
-try:
-    from hmc_tomography.Distributions.ElasticFullWaveform2D import ElasticFullWaveform2D
-except ModuleNotFoundError:  # as e:
-    pass
-    # _warnings.warn(
-    #     f"Couldn't find the required package for ElasticFullWaveform2D. Detailed"
-    #     f" error message: {e}"
-    # )
-
 __all__ = [
     "_AbstractDistribution",
     "StandardNormal1D",
@@ -53,6 +44,14 @@ __all__ = [
     "LinearMatrix",
     "SourceLocation2D",
     "SourceLocation3D",
-    "ElasticFullWaveform2D",
     "Mixture",
 ]
+
+# Try to import 2D FWI examples if psvWave is installed, otherwise, don't fail
+try:
+    from hmc_tomography.Distributions.ElasticFullWaveform2D import ElasticFullWaveform2D
+
+    __all__ += ["ElasticFullWaveform2D"]
+
+except ModuleNotFoundError:  # as e:
+    pass
