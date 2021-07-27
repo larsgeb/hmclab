@@ -1,0 +1,47 @@
+﻿AdditiveDistribution
+====================
+
+.. currentmodule:: hmc_tomography.Distributions
+
+.. autoclass:: AdditiveDistribution
+   :members:                                 
+   :show-inheritance:                        
+   :inherited-members:                       
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+   
+      ~AdditiveDistribution.__init__
+      ~AdditiveDistribution.add_distribution
+      ~AdditiveDistribution.collapse_bounds
+      ~AdditiveDistribution.corrector
+      ~AdditiveDistribution.create_default
+      ~AdditiveDistribution.dimensions
+      ~AdditiveDistribution.generate
+      ~AdditiveDistribution.gradient
+      ~AdditiveDistribution.misfit
+      ~AdditiveDistribution.misfit_bounds
+      ~AdditiveDistribution.normalize
+      ~AdditiveDistribution.update_bounds
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~AdditiveDistribution.lower_bounds
+      ~AdditiveDistribution.name
+      ~AdditiveDistribution.normalized
+      ~AdditiveDistribution.upper_bounds
+   
+   

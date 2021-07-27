@@ -1,0 +1,19 @@
+﻿SourceLocation
+==============
+
+.. currentmodule:: hmc_tomography.Distributions
+
+.. autoclass:: SourceLocation
+   :members:                                 
+   :show-inheritance:                        
+   :inherited-members:                       
+
+   
+   .. automethod:: __init__
+
+   
+   
+
+   
+   
+   

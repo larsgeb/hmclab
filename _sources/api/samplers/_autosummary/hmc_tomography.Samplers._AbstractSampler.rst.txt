@@ -1,0 +1,67 @@
+﻿\_AbstractSampler
+=================
+
+.. currentmodule:: hmc_tomography.Samplers
+
+.. autoclass:: _AbstractSampler
+   :members:                                 
+   :show-inheritance:                        
+   :inherited-members:                       
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+   
+      ~_AbstractSampler.__init__
+      ~_AbstractSampler.get_diagnostics
+      ~_AbstractSampler.print_results
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~_AbstractSampler.accepted_proposals
+      ~_AbstractSampler.amount_of_writes
+      ~_AbstractSampler.current_model
+      ~_AbstractSampler.current_proposal
+      ~_AbstractSampler.current_proposal_after_thinning
+      ~_AbstractSampler.current_x
+      ~_AbstractSampler.diagnostic_mode
+      ~_AbstractSampler.dimensions
+      ~_AbstractSampler.distribution
+      ~_AbstractSampler.end_time
+      ~_AbstractSampler.exchange_interval
+      ~_AbstractSampler.exchange_schedule
+      ~_AbstractSampler.functions_to_diagnose
+      ~_AbstractSampler.main_thread_keyboard_interrupt
+      ~_AbstractSampler.max_time
+      ~_AbstractSampler.name
+      ~_AbstractSampler.online_thinning
+      ~_AbstractSampler.parallel
+      ~_AbstractSampler.pipe_matrix
+      ~_AbstractSampler.progressbar_refresh_rate
+      ~_AbstractSampler.proposals
+      ~_AbstractSampler.proposed_model
+      ~_AbstractSampler.proposed_x
+      ~_AbstractSampler.ram_buffer
+      ~_AbstractSampler.ram_buffer_size
+      ~_AbstractSampler.rng
+      ~_AbstractSampler.sampler_index
+      ~_AbstractSampler.sampler_specific_functions_to_diagnose
+      ~_AbstractSampler.samples_hdf5_dataset
+      ~_AbstractSampler.samples_hdf5_filehandle
+      ~_AbstractSampler.samples_hdf5_filename
+      ~_AbstractSampler.start_time
+      ~_AbstractSampler.times_started
+   
+   

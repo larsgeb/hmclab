@@ -1,0 +1,41 @@
+﻿Diagonal
+========
+
+.. currentmodule:: hmc_tomography.MassMatrices
+
+.. autoclass:: Diagonal
+   :members:                                 
+   :show-inheritance:                        
+   :inherited-members:                       
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+   
+      ~Diagonal.__init__
+      ~Diagonal.create_default
+      ~Diagonal.full_name
+      ~Diagonal.generate_momentum
+      ~Diagonal.kinetic_energy
+      ~Diagonal.kinetic_energy_gradient
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Diagonal.dimensions
+      ~Diagonal.matrix
+      ~Diagonal.name
+      ~Diagonal.rng
+   
+   

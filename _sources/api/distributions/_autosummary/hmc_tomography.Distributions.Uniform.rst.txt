@@ -1,0 +1,45 @@
+﻿Uniform
+=======
+
+.. currentmodule:: hmc_tomography.Distributions
+
+.. autoclass:: Uniform
+   :members:                                 
+   :show-inheritance:                        
+   :inherited-members:                       
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+   
+      ~Uniform.__init__
+      ~Uniform.corrector
+      ~Uniform.create_default
+      ~Uniform.dimensions
+      ~Uniform.generate
+      ~Uniform.gradient
+      ~Uniform.misfit
+      ~Uniform.misfit_bounds
+      ~Uniform.normalize
+      ~Uniform.update_bounds
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Uniform.lower_bounds
+      ~Uniform.name
+      ~Uniform.normalized
+      ~Uniform.upper_bounds
+   
+   

@@ -1,0 +1,39 @@
+﻿Samples
+=======
+
+.. currentmodule:: hmc_tomography
+
+.. autoclass:: Samples
+   :members:                                 
+   :show-inheritance:                        
+   :inherited-members:                       
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+   
+      ~Samples.__init__
+      ~Samples.close
+      ~Samples.print_details
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Samples.datasetname
+      ~Samples.filename
+      ~Samples.h5
+      ~Samples.misfits
+      ~Samples.numpy
+   
+   

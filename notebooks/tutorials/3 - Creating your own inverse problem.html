@@ -1,66 +1,193 @@
+
+
 <!DOCTYPE html>
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#2D2D2D" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>HMCLab :: Tutorial 3 - Creating your own inverse problem</title>
+  <title>Tutorial 3 - Creating your own inverse problem &mdash; HMCLab archive/parallel-tempering-11-g497b41c documentation</title>
   
 
-  <link rel="icon" type="image/png" sizes="32x32" href="../../_static/img/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="../../_static/img/favicon-16x16.png">
-        <link rel="index" title="Index"
-              href="../../genindex.html"/>
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/autoclasstoc.css" type="text/css" />
 
-  <link rel="stylesheet" href="../../_static/css/insegel.css"/>
+  
+  
 
-  <script type="text/javascript">
-    var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:'',
-        VERSION:'archive/parallel-tempering-9-gf4060a9',
-        LANGUAGE:'None',
-        COLLAPSE_INDEX:false,
-        FILE_SUFFIX:'.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-    };
-  </script>
-    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script type="text/javascript" src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script type="text/javascript" src="../../None"></script>
+  
+  
 
-  <script src="https://email.tl.fortawesome.com/c/eJxNjUEOgyAQAF8jR7Kw6wIHDh7sP1Cw2mgxgmn6-3JsMqc5zEQfE8dkxOY1KKMUOI3ACFKRJpSW2AAp7ontYIaxI6i7XPJVwyeVfCQ550Os3jLrGSNOLgbdAy6s0PBk2TFNjEbsfq31LB0OnX407pJa5v2faRadwSW63mn5KuLyR9j2tgx3zecanl-55R_-jjPs"></script>
+  
 
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Tutorial 4 - Running parallel Markov chains" href="4%20-%20Running%20parallel%20Markov%20chains.html" />
+    <link rel="prev" title="Tutorial 2 - Separate priors per dimension" href="2%20-%20Separate%20priors%20per%20dimension.html" /> 
 </head>
 
-<body>
-  <div id="insegel-container">
-    <header>
-      <div id="logo-container">
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
           
-          <a href="../../index.html"><img src="../../_static/hmctom.png"></a>
+
+          
+            <a href="../../index.html" class="icon icon-home"> HMCLab
           
 
-      </div>
-      <div id="project-container">
-        <h1>HMCLab Documentation</h1>
-      </div>
-    </header>
+          
+            
+            <img src="../../_static/hmctom.png" class="logo" alt="Logo"/>
+          
+          </a>
 
-    <div id="content-container">
+          
+            
+            
+              <div class="version">
+                archive/parallel-tempering-11-g497b41c
+              </div>
+            
+          
 
-      <div id="main-content-container">
-        <div id="main-content-header">
-          <h1>Tutorial 3 - Creating your own inverse problem</h1>
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
         </div>
-        <div id="main-content">
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">HMC Tomography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../hmc.html">The Hamiltonian Monte Carlo algorithm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../setup.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../notebooks.html">Notebooks: Examples and tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="0.1%20-%20Getting%20started.html">Tutorial 0.1 - Getting started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0.2%20-%20Tuning%20Hamiltonian%20Monte%20Carlo.html">Tutorial 0.2 - Tuning Hamiltonian Monte Carlo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1%20-%20Gaussian%20inverse%20problems%20-%20dense%20forward%20operator.html">Tutorial 1 - Gaussian inverse problems - dense forward operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1b%20-%20Gaussian%20inverse%20problems%20-%20sparse%20forward%20operator.html">Tutorial 1b - Gaussian inverse problems - sparse forward operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2%20-%20Separate%20priors%20per%20dimension.html">Tutorial 2 - Separate priors per dimension</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Tutorial 3 - Creating your own inverse problem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Gathering-all-the-ingredients">Gathering all the ingredients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#An-empty-target-model:-Brownian-Motion">An empty target model: Brownian Motion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#The-Styblinsky-Tang-Function">The Styblinsky-Tang Function</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="4%20-%20Running%20parallel%20Markov%20chains.html">Tutorial 4 - Running parallel Markov chains</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../py-modindex.html">Module index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Alphabetic index</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">HMCLab</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../notebooks.html">Notebooks: Examples and tutorials</a> &raquo;</li>
+        
+      <li>Tutorial 3 - Creating your own inverse problem</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../_sources/notebooks/tutorials/3 - Creating your own inverse problem.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
   
 <style>
 /* CSS for nbsphinx extension */
@@ -308,6 +435,28 @@ div.rendered_html tbody tr:nth-child(odd) {
 div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
 </style>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -335,7 +484,7 @@ div.rendered_html tbody tr:hover {
 <p>To illustrate the process we will implement the Styblisnky-Tang function in arbitrary dimensions. The class will be built piece by piece, to indicate all required objects.</p>
 <p>To implement any distribution / likelihood / target, we need to inherit from <code class="docutils literal notranslate"><span class="pre">hmc_tomography.Distributions._AbstractDistribution</span></code>. By doing this, we can make the sampler understand that we passed a distribution, as well as providing checks on all required methods and attributes.</p>
 <div class="admonition note">
-<p><strong>Note:</strong> We will now go through the process of illustrating what happens when you implement a distribution yourself, in steps. I’ll do this in a trial-and-error fashion, to show what happens if you omit required parts. For the shorter technical version, I refer to the documentation of the abstract class <a class="reference internal" href="../../api/distributions/_AbstractDistribution.html"><span class="doc">hmc_tomography.Distributions._AbstractDistribution</span></a>, which illustrates the required abstract methods and attributes.</p>
+<p><strong>Note:</strong> We will now go through the process of illustrating what happens when you implement a distribution yourself, in steps. I’ll do this in a trial-and-error fashion, to show what happens if you omit required parts. For the shorter technical version, I refer to the documentation of the abstract class <a class="reference external" href="../../api/distributions/_AbstractDistribution.rst">hmc_tomography.Distributions._AbstractDistribution</a>, which illustrates the required abstract methods and attributes.</p>
 </div>
 <div class="section" id="Gathering-all-the-ingredients">
 <h2>Gathering all the ingredients<a class="headerlink" href="#Gathering-all-the-ingredients" title="Permalink to this headline">¶</a></h2>
@@ -810,81 +959,51 @@ Silently overwriting samples file (bin/3/styblinski-tang_cool.h5) if it exists.
 </div>
 
 
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="4%20-%20Running%20parallel%20Markov%20chains.html" class="btn btn-neutral float-right" title="Tutorial 4 - Running parallel Markov chains" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="2%20-%20Separate%20priors%20per%20dimension.html" class="btn btn-neutral float-left" title="Tutorial 2 - Separate priors per dimension" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2019-2021, Andrea Zunino, Andreas Fichtner, Lars Gebraad.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
         </div>
       </div>
 
-      <div id="side-menu-container">
+    </section>
 
-        <div id="search" role="search">
-        <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-            <input type="text" name="q" placeholder="Search..." />
-            <input type="hidden" name="check_keywords" value="yes" />
-            <input type="hidden" name="area" value="default" />
-        </form>
-</div>
+  </div>
+  
 
-        <div id="side-menu" role="navigation">
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
 
-          
+  
   
     
-  
-  
-    <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../../index.html">HMC Tomography</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../hmc.html">The Hamiltonian Monte Carlo algorithm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../setup.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../../notebooks.html">Notebooks: Examples and tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">API reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../py-modindex.html">Module index</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Alphabetic index</a></li>
-</ul>
-
-  
-
-
-        </div>
-
-        
-
-      </div>
-
-    </div>
-
-<footer>
-    <div id="footer-info">
-        <ul id="build-details">
-            
-                <li class="footer-element">
-                    
-                        <a href="../../_sources/notebooks/tutorials/3 - Creating your own inverse problem.ipynb.txt" rel="nofollow"> source</a>
-                    
-                </li>
-            
-
-            
-
-            
-        </ul>
-        <div id="credit">
-            created with <a href="http://sphinx-doc.org/">Sphinx</a> and <a href="https://github.com/Autophagy/insegel">Insegel</a>
-
-        </div>
-    </div>
-
-    <a id="menu-toggle" class="fa fa-bars" aria-hidden="true"></a>
-
-    <script type="text/javascript">
-      $("#menu-toggle").click(function() {
-        $("#menu-toggle").toggleClass("toggled");
-        $("#side-menu-container").slideToggle(300);
-      });
-    </script>
-
-</footer> 
-
-</div>
+   
 
 </body>
 </html>

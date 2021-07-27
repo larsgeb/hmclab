@@ -1,0 +1,78 @@
+﻿RWMH
+====
+
+.. currentmodule:: hmc_tomography.Samplers
+
+.. autoclass:: RWMH
+   :members:                                 
+   :show-inheritance:                        
+   :inherited-members:                       
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+   
+      ~RWMH.__init__
+      ~RWMH.autotune
+      ~RWMH.get_diagnostics
+      ~RWMH.plot_acceptance_rate
+      ~RWMH.plot_stepsizes
+      ~RWMH.print_results
+      ~RWMH.sample
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~RWMH.acceptance_rates
+      ~RWMH.accepted_proposals
+      ~RWMH.amount_of_writes
+      ~RWMH.autotuning
+      ~RWMH.current_model
+      ~RWMH.current_proposal
+      ~RWMH.current_proposal_after_thinning
+      ~RWMH.current_x
+      ~RWMH.diagnostic_mode
+      ~RWMH.dimensions
+      ~RWMH.distribution
+      ~RWMH.end_time
+      ~RWMH.exchange_interval
+      ~RWMH.exchange_schedule
+      ~RWMH.functions_to_diagnose
+      ~RWMH.learning_rate
+      ~RWMH.main_thread_keyboard_interrupt
+      ~RWMH.max_time
+      ~RWMH.minimal_stepsize
+      ~RWMH.name
+      ~RWMH.online_thinning
+      ~RWMH.parallel
+      ~RWMH.pipe_matrix
+      ~RWMH.progressbar_refresh_rate
+      ~RWMH.proposals
+      ~RWMH.proposed_model
+      ~RWMH.proposed_x
+      ~RWMH.ram_buffer
+      ~RWMH.ram_buffer_size
+      ~RWMH.rng
+      ~RWMH.sampler_index
+      ~RWMH.sampler_specific_functions_to_diagnose
+      ~RWMH.samples_hdf5_dataset
+      ~RWMH.samples_hdf5_filehandle
+      ~RWMH.samples_hdf5_filename
+      ~RWMH.start_time
+      ~RWMH.stepsize
+      ~RWMH.stepsizes
+      ~RWMH.target_acceptance_rate
+      ~RWMH.times_started
+   
+   

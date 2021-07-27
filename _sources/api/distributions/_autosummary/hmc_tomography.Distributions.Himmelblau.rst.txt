@@ -1,0 +1,46 @@
+﻿Himmelblau
+==========
+
+.. currentmodule:: hmc_tomography.Distributions
+
+.. autoclass:: Himmelblau
+   :members:                                 
+   :show-inheritance:                        
+   :inherited-members:                       
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+   
+      ~Himmelblau.__init__
+      ~Himmelblau.corrector
+      ~Himmelblau.create_default
+      ~Himmelblau.generate
+      ~Himmelblau.gradient
+      ~Himmelblau.misfit
+      ~Himmelblau.misfit_bounds
+      ~Himmelblau.normalize
+      ~Himmelblau.update_bounds
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Himmelblau.dimensions
+      ~Himmelblau.lower_bounds
+      ~Himmelblau.name
+      ~Himmelblau.normalized
+      ~Himmelblau.temperature
+      ~Himmelblau.upper_bounds
+   
+   

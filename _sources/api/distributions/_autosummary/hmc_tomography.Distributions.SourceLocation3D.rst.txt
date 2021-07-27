@@ -1,0 +1,57 @@
+﻿SourceLocation3D
+================
+
+.. currentmodule:: hmc_tomography.Distributions
+
+.. autoclass:: SourceLocation3D
+   :members:                                 
+   :show-inheritance:                        
+   :inherited-members:                       
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+   
+      ~SourceLocation3D.__init__
+      ~SourceLocation3D.corrector
+      ~SourceLocation3D.create_default
+      ~SourceLocation3D.describe
+      ~SourceLocation3D.dimensions
+      ~SourceLocation3D.forward
+      ~SourceLocation3D.forward_gradient
+      ~SourceLocation3D.forward_vector
+      ~SourceLocation3D.generate
+      ~SourceLocation3D.gradient
+      ~SourceLocation3D.misfit
+      ~SourceLocation3D.misfit_bounds
+      ~SourceLocation3D.normalize
+      ~SourceLocation3D.plot_data
+      ~SourceLocation3D.split_vector
+      ~SourceLocation3D.update_bounds
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SourceLocation3D.infer_velocity
+      ~SourceLocation3D.lower_bounds
+      ~SourceLocation3D.medium_velocity
+      ~SourceLocation3D.name
+      ~SourceLocation3D.normalized
+      ~SourceLocation3D.number_of_events
+      ~SourceLocation3D.receiver_array_x
+      ~SourceLocation3D.receiver_array_y
+      ~SourceLocation3D.receiver_array_z
+      ~SourceLocation3D.upper_bounds
+   
+   

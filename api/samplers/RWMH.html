@@ -1,72 +1,205 @@
+
+
 <!DOCTYPE html>
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#2D2D2D" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>HMCLab :: RWMH - Random Walk Metropolis Hastings</title>
+  <title>RWMH - Random Walk Metropolis Hastings &mdash; HMCLab archive/parallel-tempering-11-g497b41c documentation</title>
   
 
-  <link rel="icon" type="image/png" sizes="32x32" href="../../_static/img/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="../../_static/img/favicon-16x16.png">
-        <link rel="index" title="Index"
-              href="../../genindex.html"/>
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/autoclasstoc.css" type="text/css" />
 
-  <link rel="stylesheet" href="../../_static/css/insegel.css"/>
+  
+  
 
-  <script type="text/javascript">
-    var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:'',
-        VERSION:'archive/parallel-tempering-9-gf4060a9',
-        LANGUAGE:'None',
-        COLLAPSE_INDEX:false,
-        FILE_SUFFIX:'.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-    };
-  </script>
-    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script type="text/javascript" src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+  
+  
 
-  <script src="https://email.tl.fortawesome.com/c/eJxNjUEOgyAQAF8jR7Kw6wIHDh7sP1Cw2mgxgmn6-3JsMqc5zEQfE8dkxOY1KKMUOI3ACFKRJpSW2AAp7ontYIaxI6i7XPJVwyeVfCQ550Os3jLrGSNOLgbdAy6s0PBk2TFNjEbsfq31LB0OnX407pJa5v2faRadwSW63mn5KuLyR9j2tgx3zecanl-55R_-jjPs"></script>
+  
 
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body>
-  <div id="insegel-container">
-    <header>
-      <div id="logo-container">
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
           
-          <a href="../../index.html"><img src="../../_static/hmctom.png"></a>
+
+          
+            <a href="../../index.html" class="icon icon-home"> HMCLab
           
 
-      </div>
-      <div id="project-container">
-        <h1>HMCLab Documentation</h1>
-      </div>
-    </header>
+          
+            
+            <img src="../../_static/hmctom.png" class="logo" alt="Logo"/>
+          
+          </a>
 
-    <div id="content-container">
+          
+            
+            
+              <div class="version">
+                archive/parallel-tempering-11-g497b41c
+              </div>
+            
+          
 
-      <div id="main-content-container">
-        <div id="main-content-header">
-          <h1>RWMH - Random Walk Metropolis Hastings</h1>
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
         </div>
-        <div id="main-content">
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
-  <div class="section" id="rwmh-random-walk-metropolis-hastings">
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">HMC Tomography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../hmc.html">The Hamiltonian Monte Carlo algorithm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../setup.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks.html">Notebooks: Examples and tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../py-modindex.html">Module index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Alphabetic index</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">HMCLab</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>RWMH - Random Walk Metropolis Hastings</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../_sources/api/samplers/RWMH.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="rwmh-random-walk-metropolis-hastings">
 <h1>RWMH - Random Walk Metropolis Hastings<a class="headerlink" href="#rwmh-random-walk-metropolis-hastings" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="hmc_tomography.Samplers.RWMH">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">hmc_tomography.Samplers.</span></span><span class="sig-name descname"><span class="pre">RWMH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Samplers.html#RWMH"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hmc_tomography.Samplers.RWMH" title="Permalink to this definition">¶</a></dt>
+<dt id="hmc_tomography.Samplers.RWMH">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">hmc_tomography.Samplers.</span></code><code class="sig-name descname"><span class="pre">RWMH</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Samplers.html#RWMH"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hmc_tomography.Samplers.RWMH" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py attribute">
-<dt class="sig sig-object py" id="hmc_tomography.Samplers.RWMH.stepsize">
-<span class="sig-name descname"><span class="pre">stepsize</span></span><em class="property"><span class="pre">:</span> <span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">1.0</span></em><a class="headerlink" href="#hmc_tomography.Samplers.RWMH.stepsize" title="Permalink to this definition">¶</a></dt>
+<dt id="hmc_tomography.Samplers.RWMH.stepsize">
+<code class="sig-name descname"><span class="pre">stepsize</span></code><em class="property"><span class="pre">:</span> <span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">1.0</span></em><a class="headerlink" href="#hmc_tomography.Samplers.RWMH.stepsize" title="Permalink to this definition">¶</a></dt>
 <dd><p>A parameter describing the standard deviation of a multivariate normal (MVN) used
 as the proposal distribution for Random Walk Metropolis-Hastings. Using a
 _numpy.ndarray column vector (shape dimensions × 1) will give every dimensions a
@@ -75,58 +208,58 @@ influence on acceptance rate. <strong>An essential tuning parameter.</strong></p
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="hmc_tomography.Samplers.RWMH.autotuning">
-<span class="sig-name descname"><span class="pre">autotuning</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><em class="property"> <span class="pre">=</span> <span class="pre">False</span></em><a class="headerlink" href="#hmc_tomography.Samplers.RWMH.autotuning" title="Permalink to this definition">¶</a></dt>
+<dt id="hmc_tomography.Samplers.RWMH.autotuning">
+<code class="sig-name descname"><span class="pre">autotuning</span></code><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><em class="property"> <span class="pre">=</span> <span class="pre">False</span></em><a class="headerlink" href="#hmc_tomography.Samplers.RWMH.autotuning" title="Permalink to this definition">¶</a></dt>
 <dd><p>A boolean indicating if the stepsize is tuned towards a specific acceptance rate
 using diminishing adaptive parameters.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="hmc_tomography.Samplers.RWMH.learning_rate">
-<span class="sig-name descname"><span class="pre">learning_rate</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><em class="property"> <span class="pre">=</span> <span class="pre">0.75</span></em><a class="headerlink" href="#hmc_tomography.Samplers.RWMH.learning_rate" title="Permalink to this definition">¶</a></dt>
+<dt id="hmc_tomography.Samplers.RWMH.learning_rate">
+<code class="sig-name descname"><span class="pre">learning_rate</span></code><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><em class="property"> <span class="pre">=</span> <span class="pre">0.75</span></em><a class="headerlink" href="#hmc_tomography.Samplers.RWMH.learning_rate" title="Permalink to this definition">¶</a></dt>
 <dd><p>A float tuning the rate of decrease at which a new step size is adapted,
 according to rate = (iteration_number) ** (-learning_rate). Needs to be larger than
 0.5 and equal to or smaller than 1.0.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="hmc_tomography.Samplers.RWMH.target_acceptance_rate">
-<span class="sig-name descname"><span class="pre">target_acceptance_rate</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><em class="property"> <span class="pre">=</span> <span class="pre">0.65</span></em><a class="headerlink" href="#hmc_tomography.Samplers.RWMH.target_acceptance_rate" title="Permalink to this definition">¶</a></dt>
+<dt id="hmc_tomography.Samplers.RWMH.target_acceptance_rate">
+<code class="sig-name descname"><span class="pre">target_acceptance_rate</span></code><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><em class="property"> <span class="pre">=</span> <span class="pre">0.65</span></em><a class="headerlink" href="#hmc_tomography.Samplers.RWMH.target_acceptance_rate" title="Permalink to this definition">¶</a></dt>
 <dd><p>A float representing the optimal acceptance rate used for autotuning, if
 autotuning is True.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="hmc_tomography.Samplers.RWMH.acceptance_rates">
-<span class="sig-name descname"><span class="pre">acceptance_rates</span></span><em class="property"><span class="pre">:</span> <span class="pre">numpy.ndarray</span></em><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#hmc_tomography.Samplers.RWMH.acceptance_rates" title="Permalink to this definition">¶</a></dt>
+<dt id="hmc_tomography.Samplers.RWMH.acceptance_rates">
+<code class="sig-name descname"><span class="pre">acceptance_rates</span></code><em class="property"><span class="pre">:</span> <span class="pre">numpy.ndarray</span></em><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#hmc_tomography.Samplers.RWMH.acceptance_rates" title="Permalink to this definition">¶</a></dt>
 <dd><p>A NumPy ndarray containing all past acceptance rates. Collected if autotuning is
 True.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="hmc_tomography.Samplers.RWMH.stepsizes">
-<span class="sig-name descname"><span class="pre">stepsizes</span></span><em class="property"><span class="pre">:</span> <span class="pre">numpy.ndarray</span></em><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#hmc_tomography.Samplers.RWMH.stepsizes" title="Permalink to this definition">¶</a></dt>
+<dt id="hmc_tomography.Samplers.RWMH.stepsizes">
+<code class="sig-name descname"><span class="pre">stepsizes</span></code><em class="property"><span class="pre">:</span> <span class="pre">numpy.ndarray</span></em><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#hmc_tomography.Samplers.RWMH.stepsizes" title="Permalink to this definition">¶</a></dt>
 <dd><p>A NumPy ndarray containing all past step lengths for the RWMH algorithm.
 Collected if autotuning is True.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="hmc_tomography.Samplers.RWMH.minimal_stepsize">
-<span class="sig-name descname"><span class="pre">minimal_stepsize</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><em class="property"> <span class="pre">=</span> <span class="pre">1e-18</span></em><a class="headerlink" href="#hmc_tomography.Samplers.RWMH.minimal_stepsize" title="Permalink to this definition">¶</a></dt>
+<dt id="hmc_tomography.Samplers.RWMH.minimal_stepsize">
+<code class="sig-name descname"><span class="pre">minimal_stepsize</span></code><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><em class="property"> <span class="pre">=</span> <span class="pre">1e-18</span></em><a class="headerlink" href="#hmc_tomography.Samplers.RWMH.minimal_stepsize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Minimal step length which is chosen if timestep becomes zero or negative during
 autotuning.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="hmc_tomography.Samplers.RWMH.sample">
-<span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples_hdf5_filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distribution</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="../distributions/_AbstractDistribution.html#hmc_tomography.Distributions._AbstractDistribution" title="hmc_tomography.Distributions.base._AbstractDistribution"><span class="pre">hmc_tomography.Distributions.base._AbstractDistribution</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proposals</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">online_thinning</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diagnostic_mode</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ram_buffer_size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite_existing_file</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_time</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autotuning</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_acceptance_rate</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.65</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">queue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Samplers.html#RWMH.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hmc_tomography.Samplers.RWMH.sample" title="Permalink to this definition">¶</a></dt>
+<dt id="hmc_tomography.Samplers.RWMH.sample">
+<code class="sig-name descname"><span class="pre">sample</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples_hdf5_filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distribution</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">hmc_tomography.Distributions.base._AbstractDistribution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proposals</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">online_thinning</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diagnostic_mode</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ram_buffer_size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite_existing_file</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_time</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autotuning</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_acceptance_rate</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.65</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">queue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/hmc_tomography/Samplers.html#RWMH.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hmc_tomography.Samplers.RWMH.sample" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sampling using the Metropolis-Hastings algorithm.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>samples_hdf5_filename</strong> (<em>str</em>) – String containing the (path+)filename of the HDF5 file to contain the
 samples. <strong>A required parameter.</strong></p></li>
-<li><p><strong>distribution</strong> (<a class="reference internal" href="../distributions/_AbstractDistribution.html#hmc_tomography.Distributions._AbstractDistribution" title="hmc_tomography.Distributions._AbstractDistribution"><em>_AbstractDistribution</em></a>) – The distribution to sample. Should be an instance of a subclass of
+<li><p><strong>distribution</strong> (<a class="reference internal" href="../distributions/_autosummary/hmc_tomography.Distributions._AbstractDistribution.html#hmc_tomography.Distributions._AbstractDistribution" title="hmc_tomography.Distributions._AbstractDistribution"><em>_AbstractDistribution</em></a>) – The distribution to sample. Should be an instance of a subclass of
 _AbstractDistribution. <strong>A required parameter.</strong></p></li>
 <li><p><strong>stepsize</strong> (<em>_Union</em><em>[</em><em>float</em><em>, </em><em>_numpy.ndarray</em><em>]</em>) – A parameter describing the standard deviation of a multivariate normal (MVN)
 used as the proposal distribution for Random Walk Metropolis-Hastings. Using
@@ -172,81 +305,47 @@ Arbitrary keyword arguments.</p></li>
 </div>
 
 
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2019-2021, Andrea Zunino, Andreas Fichtner, Lars Gebraad.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
         </div>
       </div>
 
-      <div id="side-menu-container">
+    </section>
 
-        <div id="search" role="search">
-        <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-            <input type="text" name="q" placeholder="Search..." />
-            <input type="hidden" name="check_keywords" value="yes" />
-            <input type="hidden" name="area" value="default" />
-        </form>
-</div>
+  </div>
+  
 
-        <div id="side-menu" role="navigation">
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
 
-          
+  
   
     
-  
-  
-    <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../../index.html">HMC Tomography</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../hmc.html">The Hamiltonian Monte Carlo algorithm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../setup.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../notebooks.html">Notebooks: Examples and tutorials</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../py-modindex.html">Module index</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Alphabetic index</a></li>
-</ul>
-
-  
-
-
-        </div>
-
-        
-
-      </div>
-
-    </div>
-
-<footer>
-    <div id="footer-info">
-        <ul id="build-details">
-            
-                <li class="footer-element">
-                    
-                        <a href="../../_sources/api/samplers/RWMH.rst.txt" rel="nofollow"> source</a>
-                    
-                </li>
-            
-
-            
-
-            
-        </ul>
-        <div id="credit">
-            created with <a href="http://sphinx-doc.org/">Sphinx</a> and <a href="https://github.com/Autophagy/insegel">Insegel</a>
-
-        </div>
-    </div>
-
-    <a id="menu-toggle" class="fa fa-bars" aria-hidden="true"></a>
-
-    <script type="text/javascript">
-      $("#menu-toggle").click(function() {
-        $("#menu-toggle").toggleClass("toggled");
-        $("#side-menu-container").slideToggle(300);
-      });
-    </script>
-
-</footer> 
-
-</div>
+   
 
 </body>
 </html>
