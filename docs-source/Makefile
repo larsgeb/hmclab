@@ -22,8 +22,9 @@ help:
 	rm ../docs/* -rf
 	mkdir source/notebooks
 	mkdir source/notebooks/tutorials
+	mkdir source/notebooks/examples
 	# mkdir source/notebooks/inverse_problems
 	cp -r ../notebooks/tutorials/*.ipynb source/notebooks/tutorials
-	# cp -r ../notebooks/inverse_problems/*.ipynb source/notebooks/inverse_problems
+	cp -r ../notebooks/examples/*.ipynb source/notebooks/examples
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 	git rev-parse --short HEAD | xargs -I {} sed -i 's/COMMIT_HASH/{}/g' ../docs/build/html/index.html 

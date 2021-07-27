@@ -26,8 +26,8 @@ class _AbstractDistribution(metaclass=_ABCMeta):
 
     The abstract methods (e.g. functions that *need* to be created by the user) of this
     class are:
-        1. :meth:`hmc_tomography.Distributions._AbstractDistribution.misfit`
-        2. :meth:`hmc_tomography.Distributions._AbstractDistribution.gradient`
+    1. :meth:`hmc_tomography.Distributions._AbstractDistribution.misfit`
+    2. :meth:`hmc_tomography.Distributions._AbstractDistribution.gradient`
     Make sure the signature of these functions is correct when implementing. Special
     care needs to be given to input and output shapes of NumPy arrays, all of which
     should be column vectors (n×1). Reshaping can be done within the function at will.
