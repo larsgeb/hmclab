@@ -44,7 +44,11 @@ def test_creation(
 
     # Create distribution
     distribution = _LinearMatrix_dense_forward_simple_covariance(
-        G, d, data_variance=variance, dtype=dtype, premultiplication=premultiplication,
+        G,
+        d,
+        data_variance=variance,
+        dtype=dtype,
+        premultiplication=premultiplication,
     )
 
     # Check if the distribution has right amount of dimensions
@@ -83,7 +87,11 @@ def test_misfit(
 
     # Create distribution
     distribution = _LinearMatrix_dense_forward_simple_covariance(
-        G, d, data_variance=variance, dtype=dtype, premultiplication=premultiplication,
+        G,
+        d,
+        data_variance=variance,
+        dtype=dtype,
+        premultiplication=premultiplication,
     )
 
     location = _numpy.ones((dimension_model, 1)) + _numpy.random.rand(1)
@@ -126,11 +134,15 @@ def test_misfit_bounds(
 
     # Create distribution
     distribution = _LinearMatrix_dense_forward_simple_covariance(
-        G, d, data_variance=variance, dtype=dtype, premultiplication=premultiplication,
+        G,
+        d,
+        data_variance=variance,
+        dtype=dtype,
+        premultiplication=premultiplication,
     )
 
     lower_bounds = _numpy.ones((dimension_model, 1))
-    distribution.update_bounds(lower_bounds=lower_bounds)
+    distribution.update_bounds(lower=lower_bounds)
 
     # Compute misfit above lower bounds
     location = _numpy.ones((dimension_model, 1)) + _numpy.random.rand(1) + 0.1
@@ -146,7 +158,7 @@ def test_misfit_bounds(
 
     # Create upper bounds
     upper_bounds = 3 * _numpy.ones((dimension_model, 1))
-    distribution.update_bounds(upper_bounds=upper_bounds)
+    distribution.update_bounds(upper=upper_bounds)
 
     # Compute misfit between the two limits
     location = _numpy.ones((dimension_model, 1)) + _numpy.random.rand(1) + 0.1
@@ -192,7 +204,11 @@ def test_misfit_bounds_impossible(
 
     # Create distribution
     distribution = _LinearMatrix_dense_forward_simple_covariance(
-        G, d, data_variance=variance, dtype=dtype, premultiplication=premultiplication,
+        G,
+        d,
+        data_variance=variance,
+        dtype=dtype,
+        premultiplication=premultiplication,
     )
 
     lower_bounds = _numpy.ones((dimension_model, 1))
@@ -200,7 +216,7 @@ def test_misfit_bounds_impossible(
 
     # Try to switch the bounds s.t. lower > upper
     try:
-        distribution.update_bounds(lower_bounds=upper_bounds, upper_bounds=lower_bounds)
+        distribution.update_bounds(lower=upper_bounds, upper=lower_bounds)
     except ValueError as e:
         # Assert that the exception is raised by the bounds
         assert (
@@ -248,7 +264,11 @@ def test_gradient(
 
     # Create distribution
     distribution = _LinearMatrix_dense_forward_simple_covariance(
-        G, d, data_variance=variance, dtype=dtype, premultiplication=premultiplication,
+        G,
+        d,
+        data_variance=variance,
+        dtype=dtype,
+        premultiplication=premultiplication,
     )
 
     location = (_numpy.ones((dimension_model, 1)) + _numpy.random.rand(1)).astype(dtype)

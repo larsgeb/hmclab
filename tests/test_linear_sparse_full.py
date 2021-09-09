@@ -49,7 +49,12 @@ def test_creation(
 
     # Create covariance
     if covariance_type == "vector":
-        covariance = _numpy.random.rand(dimension_data,) + 5.0
+        covariance = (
+            _numpy.random.rand(
+                dimension_data,
+            )
+            + 5.0
+        )
         covariance = _numpy.diag(covariance)
     else:
         covariance = random_correlation_matrix(dimension_data)
@@ -58,7 +63,10 @@ def test_creation(
 
     # Create distribution
     distribution = _LinearMatrix_sparse_forward_sparse_covariance(
-        G, data, data_covariance=covariance, dtype=dtype,
+        G,
+        data,
+        data_covariance=covariance,
+        dtype=dtype,
     )
 
     # Check if the distribution has right amount of dimensions
@@ -99,7 +107,12 @@ def test_misfit(
 
     # Create covariance
     if covariance_type == "vector":
-        covariance = _numpy.random.rand(dimension_data,) + 5.0
+        covariance = (
+            _numpy.random.rand(
+                dimension_data,
+            )
+            + 5.0
+        )
         covariance = _numpy.diag(covariance)
     else:
         covariance = random_correlation_matrix(dimension_data)
@@ -108,7 +121,10 @@ def test_misfit(
 
     # Create distribution
     distribution = _LinearMatrix_sparse_forward_sparse_covariance(
-        G, data, data_covariance=covariance, dtype=dtype,
+        G,
+        data,
+        data_covariance=covariance,
+        dtype=dtype,
     )
 
     location = _numpy.ones((dimension_model, 1)) + _numpy.random.rand(1)
@@ -153,7 +169,12 @@ def test_misfit_bounds(
 
     # Create covariance
     if covariance_type == "vector":
-        covariance = _numpy.random.rand(dimension_data,) + 5.0
+        covariance = (
+            _numpy.random.rand(
+                dimension_data,
+            )
+            + 5.0
+        )
         covariance = _numpy.diag(covariance)
     else:
         covariance = random_correlation_matrix(dimension_data)
@@ -162,11 +183,14 @@ def test_misfit_bounds(
 
     # Create distribution
     distribution = _LinearMatrix_sparse_forward_sparse_covariance(
-        G, data, data_covariance=covariance, dtype=dtype,
+        G,
+        data,
+        data_covariance=covariance,
+        dtype=dtype,
     )
 
     lower_bounds = _numpy.ones((dimension_model, 1))
-    distribution.update_bounds(lower_bounds=lower_bounds)
+    distribution.update_bounds(lower=lower_bounds)
 
     # Compute misfit above lower bounds
     location = _numpy.ones((dimension_model, 1)) + _numpy.random.rand(1) + 0.1
@@ -182,7 +206,7 @@ def test_misfit_bounds(
 
     # Create upper bounds
     upper_bounds = 3 * _numpy.ones((dimension_model, 1))
-    distribution.update_bounds(upper_bounds=upper_bounds)
+    distribution.update_bounds(upper=upper_bounds)
 
     # Compute misfit between the two limits
     location = _numpy.ones((dimension_model, 1)) + _numpy.random.rand(1) + 0.1
@@ -230,7 +254,12 @@ def test_misfit_bounds_impossible(
 
     # Create covariance
     if covariance_type == "vector":
-        covariance = _numpy.random.rand(dimension_data,) + 5.0
+        covariance = (
+            _numpy.random.rand(
+                dimension_data,
+            )
+            + 5.0
+        )
         covariance = _numpy.diag(covariance)
     else:
         covariance = random_correlation_matrix(dimension_data)
@@ -239,7 +268,10 @@ def test_misfit_bounds_impossible(
 
     # Create distribution
     distribution = _LinearMatrix_sparse_forward_sparse_covariance(
-        G, data, data_covariance=covariance, dtype=dtype,
+        G,
+        data,
+        data_covariance=covariance,
+        dtype=dtype,
     )
 
     lower_bounds = _numpy.ones((dimension_model, 1))
@@ -247,7 +279,7 @@ def test_misfit_bounds_impossible(
 
     # Try to switch the bounds s.t. lower > upper
     try:
-        distribution.update_bounds(lower_bounds=upper_bounds, upper_bounds=lower_bounds)
+        distribution.update_bounds(lower=upper_bounds, upper=lower_bounds)
     except ValueError as e:
         # Assert that the exception is raised by the bounds
         assert (
@@ -296,7 +328,12 @@ def test_gradient(
 
     # Create covariance
     if covariance_type == "vector":
-        covariance = _numpy.random.rand(dimension_data,) + 5.0
+        covariance = (
+            _numpy.random.rand(
+                dimension_data,
+            )
+            + 5.0
+        )
         covariance = _numpy.diag(covariance)
     else:
         covariance = random_correlation_matrix(dimension_data)
@@ -305,7 +342,10 @@ def test_gradient(
 
     # Create distribution
     distribution = _LinearMatrix_sparse_forward_sparse_covariance(
-        G, data, data_covariance=covariance, dtype=dtype,
+        G,
+        data,
+        data_covariance=covariance,
+        dtype=dtype,
     )
 
     location = (_numpy.ones((dimension_model, 1)) + _numpy.random.rand(1)).astype(dtype)
