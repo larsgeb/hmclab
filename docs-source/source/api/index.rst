@@ -23,15 +23,20 @@ components work together.
    massmatrices/index
    samplers/index
    optimizers/index
-   samples
    visualization/index
 
 .. autosummary::
 
-    hmc_tomography.Distributions
-    hmc_tomography.MassMatrices
-    hmc_tomography.Samplers
-    hmc_tomography.Optimizers
-    hmc_tomography.Samples
-    hmc_tomography.Visualization
+    Distributions
+    MassMatrices
+    Samplers
+    Optimizers
+    Visualization
 
+.. autosummary:: 
+   :toctree: _autosummary
+   :template: custom-class-template.rst
+   :nosignatures:
+   :recursive:
+
+   Samples

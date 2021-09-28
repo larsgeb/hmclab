@@ -1,5 +1,3 @@
-"""Earthquake source location inverse problems in 2 and 3 dimensions.
-"""
 from typing import Union as _Union, Tuple as _Tuple
 
 import numpy as _numpy

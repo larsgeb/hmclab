@@ -15,9 +15,12 @@ Available visualization methods:
    marginal_grid
    visualize_2_dimensions
 
-.. autosummary:: hmc_tomography.Visualization.marginal
-                 hmc_tomography.Visualization.marginal_grid
-                 hmc_tomography.Visualization.visualize_2_dimensions
+.. autosummary:: 
+   :nosignatures:
+
+   marginal
+   marginal_grid
+   visualize_2_dimensions
 
 
 

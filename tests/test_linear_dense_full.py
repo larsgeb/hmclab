@@ -40,7 +40,12 @@ def test_creation(
 
     # Create covariance
     if covariance_type == "vector":
-        covariance = _numpy.random.rand(dimension_data,) + 5.0
+        covariance = (
+            _numpy.random.rand(
+                dimension_data,
+            )
+            + 5.0
+        )
         covariance = _numpy.diag(covariance)
     else:
         covariance = random_correlation_matrix(dimension_data)
@@ -84,7 +89,12 @@ def test_misfit(
 
     # Create covariance
     if covariance_type == "vector":
-        covariance = _numpy.random.rand(dimension_data,) + 5.0
+        covariance = (
+            _numpy.random.rand(
+                dimension_data,
+            )
+            + 5.0
+        )
         covariance = _numpy.diag(covariance)
     else:
         covariance = random_correlation_matrix(dimension_data)
@@ -132,7 +142,12 @@ def test_misfit_bounds(
 
     # Create covariance
     if covariance_type == "vector":
-        covariance = _numpy.random.rand(dimension_data,) + 5.0
+        covariance = (
+            _numpy.random.rand(
+                dimension_data,
+            )
+            + 5.0
+        )
         covariance = _numpy.diag(covariance)
     else:
         covariance = random_correlation_matrix(dimension_data)
@@ -147,7 +162,7 @@ def test_misfit_bounds(
     )
 
     lower_bounds = _numpy.ones((dimension_model, 1))
-    distribution.update_bounds(lower_bounds=lower_bounds)
+    distribution.update_bounds(lower=lower_bounds)
 
     # Compute misfit above lower bounds
     location = _numpy.ones((dimension_model, 1)) + _numpy.random.rand(1) + 0.1
@@ -163,7 +178,7 @@ def test_misfit_bounds(
 
     # Create upper bounds
     upper_bounds = 3 * _numpy.ones((dimension_model, 1))
-    distribution.update_bounds(upper_bounds=upper_bounds)
+    distribution.update_bounds(upper=upper_bounds)
 
     # Compute misfit between the two limits
     location = _numpy.ones((dimension_model, 1)) + _numpy.random.rand(1) + 0.1
@@ -203,7 +218,12 @@ def test_misfit_bounds_impossible(
 
     # Create covariance
     if covariance_type == "vector":
-        covariance = _numpy.random.rand(dimension_data,) + 5.0
+        covariance = (
+            _numpy.random.rand(
+                dimension_data,
+            )
+            + 5.0
+        )
         covariance = _numpy.diag(covariance)
     else:
         covariance = random_correlation_matrix(dimension_data)
@@ -222,7 +242,7 @@ def test_misfit_bounds_impossible(
 
     # Try to switch the bounds s.t. lower > upper
     try:
-        distribution.update_bounds(lower_bounds=upper_bounds, upper_bounds=lower_bounds)
+        distribution.update_bounds(lower=upper_bounds, upper=lower_bounds)
     except ValueError as e:
         # Assert that the exception is raised by the bounds
         assert (
@@ -264,7 +284,12 @@ def test_gradient(
 
     # Create covariance
     if covariance_type == "vector":
-        covariance = _numpy.random.rand(dimension_data,) + 5.0
+        covariance = (
+            _numpy.random.rand(
+                dimension_data,
+            )
+            + 5.0
+        )
         covariance = _numpy.diag(covariance)
     else:
         covariance = random_correlation_matrix(dimension_data)

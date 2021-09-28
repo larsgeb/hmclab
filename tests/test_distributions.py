@@ -67,7 +67,7 @@ def test_misfit_bounds(pclass: _Distributions._AbstractDistribution, dimensions:
         return 0
 
     lower_bounds = _numpy.ones((dimensions, 1))
-    distribution.update_bounds(lower_bounds=lower_bounds)
+    distribution.update_bounds(lower=lower_bounds)
 
     # Compute misfit above lower bounds
 
@@ -90,7 +90,7 @@ def test_misfit_bounds(pclass: _Distributions._AbstractDistribution, dimensions:
     # Create upper bounds
 
     upper_bounds = 3 * _numpy.ones((dimensions, 1))
-    distribution.update_bounds(upper_bounds=upper_bounds)
+    distribution.update_bounds(upper=upper_bounds)
 
     # Compute misfit between the two limits
 
@@ -129,7 +129,7 @@ def test_misfit_bounds_impossible(
 
     # Try to switch the bounds s.t. lower > upper
     try:
-        distribution.update_bounds(lower_bounds=upper_bounds, upper_bounds=lower_bounds)
+        distribution.update_bounds(lower=upper_bounds, upper=lower_bounds)
     except ValueError as e:
         # Assert that the exception is raised by the bounds, else re-raise
         if e.args[0] != "Bounds vectors are incompatible.":

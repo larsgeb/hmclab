@@ -6,17 +6,13 @@ sampling method with only a target distribution and filename to write your sampl
 However, the true power of any algorithm only shows when the user injects his expertise
 through tuning parameters.
 
-Sampling can be initialised from both an instance of a sampler or directly as a static
-method:
+Sampling can be initialised from an instance of a sampler:
 
 .. code-block:: python
 
     from hmc_tomography import HMC
 
     HMC_instance = HMC()
-
-    # Sampling using the static method
-    HMC.sample(distribution, "samples.h5")
 
     # Sampling using the instance method
     HMC_instance.sample(distribution, "samples.h5")
@@ -60,20 +56,26 @@ dev_assertion_message = (
 
 
 class H5FileOpenedError(FileExistsError):
+    """An internal exception that helps us keep track of H5 files."""
+
     pass
 
 
 class _AbstractSampler(_ABC):
     """Abstract base class for Markov chain Monte Carlo samplers."""
 
+    # Essential attributes -------------------------------------------------------------
+
     name: str = "Monte Carlo sampler abstract base class"
     """The name of the sampler"""
+
+    rng = None
 
     dimensions: int = None
     """An integer representing the dimensionality in which the MCMC sampler works."""
 
     distribution: _AbstractDistribution = None
-    """The _AbstractDistribution object on which the sampler works."""
+    """The _AbstractDistribution-derived object on which the sampler works."""
 
     samples_hdf5_filename: str = None
     """A string containing the path+filename of the hdf5 file to which samples will be
@@ -99,58 +101,110 @@ class _AbstractSampler(_ABC):
     """A NumPy array containing the model at the proposed state of the Markov chain. """
 
     current_x: float = None
-    """A NumPy array containing :math:`\chi = -\log\left( p\\right)` (i.e. the misfit,
+    """A float containing :math:`\chi = -\log\left( p\\right)` (i.e. the misfit,
     negative log probability) of the distribution at the current state of the
     Markov chain."""
 
     proposed_x: float = None
-    """A NumPy array containing :math:`\chi = -\log\left( p\\right)` (i.e. the misfit,
+    """A float containing :math:`\chi = -\log\left( p\\right)` (i.e. the misfit,
     negative log probability) of the distribution at the proposed state of the
     Markov chain. """
 
+    # Statistics attributes ------------------------------------------------------------
+
     accepted_proposals: int = None
-    """An integer representing the amount of accepted proposals."""
+    """A positive integer representing the amount of accepted proposals."""
 
     amount_of_writes: int = None
-    """An integer representing the amount of times the sampler has written to disk."""
+    """A positive integer representing the amount of times the sampler has written to
+    disk."""
 
     progressbar_refresh_rate: float = 0.25
-    """A float representing how long lies between an update of the progress bar
+    """A float representing how many seconds lies between an update of the progress bar
     statistics (acceptance rate etc.)."""
 
     max_time: float = None
     """A float representing the maximum time in seconds that sampling is allowed to take
     before it is automatically terminated. The value None is used for unlimited time."""
 
-    times_started = 0
-    proposals = None
-    online_thinning = None
-    current_proposal = 0
-    current_proposal_after_thinning = 0
-    accepted_proposals = 0
-    distribution = type("NoDistribution", (object,), {"name": None})
+    times_started: int = 0
+    """An integer representing how often this sampler object has started sampling."""
 
-    end_time = None
-    start_time = None
+    proposals: int = None
+    """An integer representing the amount of requested proposals for a run."""
+
+    online_thinning: int = None
+    """An integer representing the interval between stored samples. Defaults to 1, i.e. 
+    all samples are stored."""
+
+    current_proposal: int = 0
+    """An integer representing the current proposal index (before thinning) of the 
+    Markov chain."""
+
+    current_proposal_after_thinning: int = 0
+    """An integer representing the current proposal index after thinning of the 
+    Markov chain."""
+
+    accepted_proposals = 0
+    """An integer representing the amount of accepted proposals."""
+
+    # distribution = type("NoDistribution", (object,), {"name": None})
+    # """The distribution """
+    # TODO: assert why this was in the class
+
+    # Diagnostics attributes -----------------------------------------------------------
+
+    end_time: _datetime = None
+    """Time (and date) at which sampling was terminated / finished."""
+
+    start_time: _datetime = None
+    """Time (and date) at which sampling was started."""
 
     diagnostic_mode: bool = True
-    functions_to_diagnose = []
-    sampler_specific_functions_to_diagnose = []
+    """Boolean describing whether functions need to be profiled for performance."""
+
+    # TODO: figure out how to do _List[fn]
+    functions_to_diagnose: _List = []
+    """Array of functions to be profiled, typically contains functions only from the
+    abstract base class."""
+
+    sampler_specific_functions_to_diagnose: _List = []
+    """Array of sampler specific functions to be profiled."""
+
     main_thread_keyboard_interrupt = None
+    # TODO: figure out what this does
 
-    # Below are fields that are only relevant to parallel sampling
-    parallel = False
-    sampler_index = 0
+    # Parallel sampling attributes -----------------------------------------------------
+    parallel: bool = False
+    """A boolean describing if this sampler works in an array of multiple samplers."""
+
+    sampler_index: int = 0
+    """An integer describing the index of the parallel sampler in the array of samplers.
+    Essential for two-way communication."""
+
+    # TODO: add type hint
     exchange_schedule = None
+    """A pre-communicated exchange schedule determining when and which samplers try to
+    exchange states."""
+
+    # TODO: add type hint
     pipe_matrix = None
-    exchange_interval = None
+    """A matrix of two-way communicators between samplers. Indexed using
+    `sampler_index.`"""
 
-    rng = None
+    exchange_interval: int = None
+    """Integer describing how many samples lie between the attempted swap of states
+    between samplers."""
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Method for converting a sampler object to string, handy in outputs. Works for
+        derived classes."""
         return f"An instance of the {self.name} sampler object."
 
-    def _widget_data(self):
+    def _widget_data(self) -> _Dict:
+        """Method for returning post-sampling summary data to be displayed in e.g.
+        Jupyter widgets."""
+
         # Run details (panel 1) --------------------------------------------------------
         run_details = {}
         proposed_samples = self.current_proposal if self.current_proposal > 0 else None
@@ -160,7 +214,6 @@ class _AbstractSampler(_ABC):
             run_details["local start time (not timezone aware)"] = self.start_time
             run_details["runtime (seconds)"] = runtime
             run_details["proposals per seconds"] = proposed_samples / runtime
-
         written_samples = (
             self.current_proposal_after_thinning + 1
             if self.current_proposal_after_thinning > 0
@@ -200,13 +253,18 @@ class _AbstractSampler(_ABC):
             "Algorithm": algorithm,
         }
 
-    def print_results(self):
+    def print_results(self) -> None:
+        """Print Jupyter widget from `_repr_html_()` to stdout."""
         print(self._repr_html_())
 
-    def _repr_html_(self, nested=False, widget_data=None):
+    def _repr_html_(
+        self, nested: bool = False, widget_data: _Dict = None
+    ) -> _Union[None, _widgets.Tab]:
+        """Create a Jupyter widget with the sampling results and statistics."""
 
         default_layout = _widgets.Layout(padding="10px")
 
+        # Helper function to make a Tab from a Python Dictionary
         def dictionary_to_widget(dictionary):
             left_column = _widgets.VBox(
                 [_widgets.Label(str(key)) for key in dictionary.keys()],
@@ -218,24 +276,44 @@ class _AbstractSampler(_ABC):
             )
             return _widgets.HBox([left_column, right_column], layout=default_layout)
 
+        # Obtain sampling data
         if widget_data is None:
             widget_data = self._widget_data()
+
+        # Create tab object
         tab = _widgets.Tab()
+
+        # Populate children with sampling data
         tab.children = [
             dictionary_to_widget(panel_data) for panel_data in widget_data.values()
         ]
-
         panel_headings = [key for key in widget_data.keys()]
         for i in range(len(tab.children)):
             tab.set_title(i, panel_headings[i])
 
+        # Return results, or print and return nothing.
         if nested:
+            # This is used when multiple samplers ran in parallel, and the tabs of each
+            # individual sampler still need to be combined.
             return tab
         else:
             _display(tab)
             return ""
 
-    def __init__(self, seed=None):
+    def __init__(
+        self,
+        seed: int = None,
+    ) -> None:
+        """Constructor that sets the random number generator for the sampler. Pass a
+        seed to make a Markov chain reproducible (given that all settings are re-used.)
+
+        Parameters
+        ----------
+        seed : int
+            Description of parameter `seed`.
+
+
+        """
         if seed is None:
             self.rng = _numpy.random.default_rng()
         else:
@@ -248,9 +326,9 @@ class _AbstractSampler(_ABC):
         initial_model: _numpy.ndarray,
         proposals: int,
         online_thinning: int,
-        ram_buffer_size,
-        overwrite_existing_file,
-        max_time,
+        ram_buffer_size: int,
+        overwrite_existing_file: bool,
+        max_time: int,
         diagnostic_mode: bool = False,
         **kwargs,
     ):

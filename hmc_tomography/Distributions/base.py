@@ -1,6 +1,10 @@
+"""Collection of essential distributions don't are simple enough not to warrant their
+own file.
+
+"""
+
 import warnings as _warnings
 
-# from abc import ABCMeta as _ABCMeta
 from abc import abstractmethod as _abstractmethod
 from typing import List as _List
 from typing import Union as _Union
@@ -14,18 +18,39 @@ from hmc_tomography.Helpers import CustomExceptions as _CustomExceptions
 
 
 class _AbstractDistribution(metaclass=_ABCMeta):
-    """Abstract base class for distributions."""
+    """Abstract base class for distributions.
+
+    This class is used as the template for any distribution supplied in the package or
+    made by the user. It ensures key componenets are present (such as abstract methods)
+    and takes care of bounded distributions.
+
+    The abstract methods (e.g. functions that *need* to be created by the user) of this
+    class are:
+    1. :meth:`hmc_tomography.Distributions._AbstractDistribution.misfit`
+    2. :meth:`hmc_tomography.Distributions._AbstractDistribution.gradient`
+    Make sure the signature of these functions is correct when implementing. Special
+    care needs to be given to input and output shapes of NumPy arrays, all of which
+    should be column vectors (n×1). Reshaping can be done within the function at will.
+
+    One abstract attribute is also required:
+    :meth:`hmc_tomography.Distributions._AbstractDistribution.dimensions`
+
+
+    """
 
     name: str = None
     """Name of the distribution."""
 
     @_abstractattribute
-    def dimensions(self):
-        """Number of dimensions of the model space.
+    def dimensions(self) -> int:
+        """Dimensionality of misfit space.
 
         This is an abstract parameter. If it is not defined either in your class
         directly or in its constructor (the __init__ function) then attempting to use
-        the class will raise a NotImplementedError."""
+        the class will raise a NotImplementedError.
+
+        Access it like a parameter, not a function: :code:`distribution.dimensions`.
+        """
         pass
 
     lower_bounds: _Union[_numpy.ndarray, None] = None
@@ -35,12 +60,19 @@ class _AbstractDistribution(metaclass=_ABCMeta):
     """Upper bounds for every parameter. If initialized to None, no bounds are used."""
 
     normalized: bool = False
-    """Boolean describing if the distribution is normalized, i.e. if we can use it in
-    mixtures of distributions."""
+    """Boolean describing if the distribution is normalized.
+    
+    Boolean describing if the distribution is normalized, i.e. if we can use it in
+    mixtures of distributions. Is computed typically only after running
+    :meth:`hmc_tomography.Distributions._AbstractDistribution.normalize`"""
 
     @_abstractmethod
     def misfit(self, coordinates: _numpy.ndarray) -> float:
-        """Computes the misfit of the distribution at the given coordinates.
+        """Compute misfit of distribution.
+
+        Misfit computation (e.g. log likelihood) of the distribution. This method is
+        present in all implemented derived classes, and should be present, with this
+        exact signature, in all user-implemented derived classes.
 
         Parameters
         ----------
@@ -58,11 +90,16 @@ class _AbstractDistribution(metaclass=_ABCMeta):
 
         .. math::
 
-            \\chi_\\text{distribution} (\\mathbf{m}) = -\\log p(\\mathbf{m}).
+            \\chi_\\text{distribution} (\\mathbf{m}) \propto -\\log p(\\mathbf{m}).
 
 
         This method is called many times in an HMC appraisal. It is therefore
         beneficial to optimize the implementation.
+
+        Note that the distribution need not be normalized, except when using mixtures of
+        distributions. Therefore, distributions for which the normalization constant is
+        intractable should not be used in mixtures. These distributions can be combined
+        using Bayes' rule with other mixtures.
         """
         raise _CustomExceptions.AbstractMethodError(
             "You tried accessing an abstract method directly through a class. This is "
@@ -72,7 +109,7 @@ class _AbstractDistribution(metaclass=_ABCMeta):
 
     @_abstractmethod
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
-        """Computes the misfit gradient of the distribution at the given coordinates.
+        """Compute gradient of distribution.
 
         Parameters
         ----------
@@ -105,10 +142,23 @@ class _AbstractDistribution(metaclass=_ABCMeta):
         )
 
     def normalize(self):
+        """Normalize distribution.
+
+        Method to compute the normalization constant of a distribution. As this might
+        take significant time, it is not done in initialization.
+
+        Raises
+        ------
+        AttributeError
+            An AttributeError is raised if the distribution provides no way to be
+            normalized, e.g. when the normalization constant is intractable.
+
+
+        """
         raise AttributeError("This distribution is not normalizable.")
 
     def generate(self) -> _numpy.ndarray:
-        """Method to draw samples from the distribution.
+        """Draw samples from distribution.
 
         Returns
         -------
@@ -123,10 +173,7 @@ class _AbstractDistribution(metaclass=_ABCMeta):
 
 
         This method is mostly a convenience class. The algorithm itself does not
-        require the implementation. Therefore an implementation as such will suffice::
-
-            def generate(self) -> _numpy.ndarray:
-                raise NotImplementedError("This function is not implemented.")
+        require the implementation.
 
         """
         raise _CustomExceptions.AbstractMethodError(
@@ -137,6 +184,33 @@ class _AbstractDistribution(metaclass=_ABCMeta):
 
     @staticmethod
     def create_default(dimensions: int) -> "_AbstractDistribution":
+        """Create default instance.
+
+        Method to create a default version of the distribution, given a specific
+        dimensionality. Used in automated testing. Can be used on the class instead of
+        an instance, e.g.::
+
+           class.create_default(10)
+
+        Parameters
+        ----------
+        dimensions : int
+            Integer corresponding to the amount of free parameters the distribution
+            should have.
+
+        Returns
+        -------
+        distribution : derivative of _AbstractDistribution
+            An instance of the derived class with the requested amount of free
+            parameters.
+
+        Raises
+        ------
+        NotImplementedError
+            A NotImplementedError is raised if the distribution provides no way create
+            a model for the requested dimensionality.
+
+        """
         raise NotImplementedError(
             "You tried creating a default distribution. Although you have used this "
             "method correctly, it wasn't implemented in the derived class. Create the "
@@ -145,8 +219,10 @@ class _AbstractDistribution(metaclass=_ABCMeta):
         )
 
     def corrector(self, coordinates: _numpy.ndarray, momentum: _numpy.ndarray):
-        """Method to correct an HMC particle, which is called after every time
-        integration step.
+        """Correct HMC trajectory.
+
+        Method to correct an HMC particle for bounded distributions, which is called
+        after every time integration step.
 
         Parameters
         ----------
@@ -177,49 +253,50 @@ class _AbstractDistribution(metaclass=_ABCMeta):
 
     def update_bounds(
         self,
-        lower_bounds: _Union[_numpy.ndarray, None] = None,
-        upper_bounds: _Union[_numpy.ndarray, None] = None,
+        lower: _Union[_numpy.ndarray, None] = None,
+        upper: _Union[_numpy.ndarray, None] = None,
     ):
-        """Method to update bounds of a distribution distribution.
+        """Update bounded distribution.
+
+        This method updates the bounds of a distribution. Note that invocating it,
+        does not require both bounds to be passed.
+
+        If both vectors are passed, ensure that all upper bounds are above the
+        corresponding lower bounds.
 
         Parameters
-        ==========
-        lower_bounds : numpy.ndarray or `None`
+        ----------
+        lower : numpy.ndarray or `None`
             Either an array shaped as (dimensions, 1) with floats for the lower bounds,
             or `None` for no bounds. If some dimensions should be bounded, while others
             should not, use ``-numpy.inf`` within the vector as needed.
-        upper_bounds : numpy.ndarray or `None`
+        upper : numpy.ndarray or `None`
             Either an array shaped as (dimensions, 1) with floats for the upper bounds,
             or `None` for no bounds. If some dimensions should be bounded, while others
             should not, use ``numpy.inf`` within the vector as needed.
 
-
-        This method updates the bounds of a distribution. Note that invocating it,
-        requires both bounds to be passed. If only one is to be updated, simply pass
-        the current object of the other bound::
-
-            distribution.update_bounds(numpy.zeros((4, 1)), distribution.upper_bounds)
-
-
-        If both vectors are passed, ensure that all upper bounds are above the
-        corresponding lower bounds.
+        Raises
+        ------
+        ValueError
+           A ValueError is raised if the supplied upper and lower bounds are
+           incompatible.
 
         """
 
         old_limits = (self.lower_bounds, self.upper_bounds)
 
-        if type(upper_bounds) == list:
-            upper_bounds = _numpy.array(upper_bounds)[:, None]
+        if type(upper) == list:
+            upper = _numpy.array(upper)[:, None]
 
-        if type(lower_bounds) == list:
-            lower_bounds = _numpy.array(lower_bounds)[:, None]
+        if type(lower) == list:
+            lower = _numpy.array(lower)[:, None]
 
         # Set the bounds ---------------------------------------------------------------
-        self.upper_bounds = upper_bounds
-        self.lower_bounds = lower_bounds
+        self.upper_bounds = upper
+        self.lower_bounds = lower
 
         # Check the types --------------------------------------------------------------
-        if lower_bounds is not None and type(lower_bounds) is not _numpy.ndarray:
+        if lower is not None and type(lower) is not _numpy.ndarray:
             # Lower bound is wrong
 
             # Reset bounds
@@ -228,7 +305,7 @@ class _AbstractDistribution(metaclass=_ABCMeta):
             # Raise error
             raise ValueError("Lower bounds object not understood.")
 
-        if upper_bounds is not None and type(upper_bounds) is not _numpy.ndarray:
+        if upper is not None and type(upper) is not _numpy.ndarray:
             # Upper bound is wrong
 
             # Reset bounds
@@ -249,7 +326,7 @@ class _AbstractDistribution(metaclass=_ABCMeta):
             self.lower_bounds, self.upper_bounds = old_limits
 
             # Raise error
-            raise ValueError(f"Bounds vectors are of incorrect size.")
+            raise ValueError("Bounds vectors are of incorrect size.")
 
         # Check that all upper bounds are (finitely) above lower bounds ----------------
         if (
@@ -264,7 +341,10 @@ class _AbstractDistribution(metaclass=_ABCMeta):
             raise ValueError("Bounds vectors are incompatible.")
 
     def misfit_bounds(self, coordinates: _numpy.ndarray) -> float:
-        """Method to compute the misfit associated with the truncated part of the distribution."""
+        """Compute misfit of bounded distribution.
+
+        Method to compute the misfit associated with the truncated part of the
+        distribution. Used internally."""
         if (
             self.lower_bounds is not None
             and _numpy.any(coordinates < self.lower_bounds)
@@ -280,27 +360,40 @@ class StandardNormal1D(_AbstractDistribution):
     """Standard normal distribution in 1 dimension."""
 
     mean = 0.0
+    """Mean of the standard Normal distribution"""
+
     std = 1.0
+    """Standard deviation of the standard Normal distribution"""
+
     dimensions = 1
+    """Amount of dimensions on which the distribution is defined"""
+
     name = "Standard normal distribution in 1 dimension."
+    """Name of the distribution."""
 
     def __init__(self, temperature=1.0):
+        """ """
         self.temperature = temperature
 
     def misfit(self, m: _numpy.ndarray) -> float:
+        """Compute misfit of distribution.
+
+        Method to compute the misfit of a distribution for a given model m. See,
+        :meth:`hmc_tomography.Distributions._AbstractDistribution.misfit` for details.
+        """
         _CustomExceptions.Assertions.assert_shape(m, (1, 1))
 
         return self.misfit_bounds(m) + float(0.5 * m[0, 0] ** 2) / self.temperature
 
     def gradient(self, m: _numpy.ndarray) -> _numpy.ndarray:
+        """Compute gradient of distribution.
+
+        Method to compute the gradient of a distribution for a given model m. See,
+        :meth:`hmc_tomography.Distributions._AbstractDistribution.gradient` for details.
+        """
         _CustomExceptions.Assertions.assert_shape(m, (1, 1))
 
         return m / self.temperature
-
-    def generate(self) -> _numpy.ndarray:
-        raise NotImplementedError(
-            "Generating samples from this distribution is not implemented or supported."
-        )
 
     @staticmethod
     def create_default(dimensions: int) -> "StandardNormal1D":
@@ -313,12 +406,14 @@ class StandardNormal1D(_AbstractDistribution):
 class Normal(_AbstractDistribution):
     """Normal distribution in model space.
 
+
     Parameters
     ----------
     dimensions : int
         Dimension of the distribution.
     means : numpy.ndarray
-        Numpy array shaped as (dimensions, 1) containing the means of the distribution.
+        Numpy array shaped as (dimensions, 1) containing the means of the
+        distribution.
     covariance : numpy.ndarray
         Numpy array shaped as either as (dimensions, dimensions) or (dimensions, 1).
         This array represents either the full covariance matrix for a multivariate
@@ -330,7 +425,6 @@ class Normal(_AbstractDistribution):
     upper_bounds: numpy.ndarray
         Numpy array of shape (dimensions, 1) that contains the upper limits of each
         parameter.
-
     """
 
     def __init__(
@@ -340,7 +434,6 @@ class Normal(_AbstractDistribution):
         inverse_covariance: _Union[_numpy.ndarray, float, None] = None,
         lower_bounds: _numpy.ndarray = None,
         upper_bounds: _numpy.ndarray = None,
-        normalize=False,
     ):
 
         self.name = "Gaussian (normal) distribution"
@@ -459,7 +552,7 @@ class Normal(_AbstractDistribution):
             )
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
-        """Method to compute the gradient of a Normal distribution distribution."""
+        """Method to compute the gradient of the distribution."""
 
         if self.diagonal:
             return -self.inverse_covariance * (
@@ -553,7 +646,7 @@ class Laplace(_AbstractDistribution):
         self.update_bounds(lower_bounds, upper_bounds)
 
     def misfit(self, coordinates) -> float:
-        """Method to compute the misfit of a L1 distribution distribution."""
+        """Method to compute the misfit the distribution."""
 
         return (
             self.normalization_constant
@@ -564,7 +657,7 @@ class Laplace(_AbstractDistribution):
         )
 
     def gradient(self, coordinates):
-        """Method to compute the gradient of a L1 distribution distribution."""
+        """Method to compute the gradient the distribution."""
 
         # The derivative of the function |x| is simply 1 or -1, depending on the sign
         # of x, subsequently scaled by the dispersion.
@@ -574,7 +667,6 @@ class Laplace(_AbstractDistribution):
         )
 
     def normalize(self):
-
         if (
             type(self.dispersions) == float
             or type(self.dispersions) == _numpy.float64

@@ -16,6 +16,7 @@ import os
 import sys
 import hmc_tomography
 
+
 sys.path.insert(0, os.path.abspath("../../"))
 sys.path.insert(0, os.path.abspath("../../hmc_tomography/Tests"))
 sys.path.insert(0, os.path.abspath("../../examples"))
@@ -23,9 +24,6 @@ sys.path.insert(0, os.path.abspath("../../examples"))
 # - Custom configuration -----------------------------------------------------
 
 autodoc_member_order = "bysource"
-
-# override wide tables in RTD theme
-html_context = {"css_files": ["_static/theme_overrides.css"]}
 
 autodoc_inherit_docstrings = False
 autodoc_default_flags = ["members", "undoc-members", "show-inheritance"]
@@ -36,7 +34,7 @@ nbsphinx_execute = "never"
 
 # -- Project information -----------------------------------------------------
 
-project = "HMC Tom"
+project = "HMCLab"
 copyright = "2019-2021, Andrea Zunino, Andreas Fichtner, Lars Gebraad"
 author = "Andrea Zunino, Andreas Fichtner, Lars Gebraad"
 
@@ -56,6 +54,7 @@ release = hmc_tomography.__version__
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "autoclasstoc",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.todo",
@@ -69,6 +68,12 @@ extensions = [
     "sphinx_git",
     "sphinxcontrib.bibtex",
 ]
+
+html_theme_options = {
+    "collapse_navigation": True,
+    "sticky_navigation": True,
+    "navigation_depth": -1,
+}
 
 bibtex_bibfiles = ["biblio.bib"]
 bibtex_default_style = "unsrt"
@@ -134,7 +139,7 @@ html_static_path = ["_static"]
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "HMCTomdoc"
+htmlhelp_basename = "HMCLab"
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -160,8 +165,8 @@ latex_elements = {
 latex_documents = [
     (
         master_doc,
-        "HMCTom.tex",
-        "HMC Tomography Documentation",
+        "HMCLab.tex",
+        "HMCLab Documentation",
         "Andrea Zunino, Andreas Fichtner, Lars Gebraad",
         "manual",
     )
@@ -217,3 +222,5 @@ epub_exclude_files = ["search.html"]
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
+autodoc_default_flags = ["members"]
+autosummary_generate = True

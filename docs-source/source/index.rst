@@ -9,11 +9,10 @@ HMC Tomography
     self
     hmc
     setup
-    examples
+    notebooks
     api/index
     py-modindex
     genindex
-
 
 .. note::
 
