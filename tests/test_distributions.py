@@ -4,8 +4,8 @@ import matplotlib.pyplot as _plt
 import numpy as _numpy
 import pytest as _pytest
 
-from hmc_tomography import Distributions as _Distributions
-from hmc_tomography.Helpers.CustomExceptions import (
+from hmclab import Distributions as _Distributions
+from hmclab.Helpers.CustomExceptions import (
     InvalidCaseError as _InvalidCaseError,
 )
 

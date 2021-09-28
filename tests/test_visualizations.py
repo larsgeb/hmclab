@@ -1,13 +1,13 @@
 """A collection of integrated tests.
 """
-from hmc_tomography.Distributions import Normal
+from hmclab.Distributions import Normal
 import os as _os
 import pytest as _pytest
-import hmc_tomography as _hmc_tomography
+import hmclab as _hmclab
 import matplotlib.pyplot as _plt
 
-_ad = _hmc_tomography.Distributions._AbstractDistribution
-_as = _hmc_tomography.Samplers._AbstractSampler
+_ad = _hmclab.Distributions._AbstractDistribution
+_as = _hmclab.Samplers._AbstractSampler
 
 dimensions = [1, 2, 10]
 proposals = [10000]
@@ -21,7 +21,7 @@ def test_basic_sampling(
 
     distribution = Normal.create_default(dimensions=dimensions)
 
-    sampler_instance = _hmc_tomography.Samplers.HMC()
+    sampler_instance = _hmclab.Samplers.HMC()
 
     filename = "temporary_file.h5"
 
@@ -42,12 +42,12 @@ def test_basic_sampling(
     if not _os.path.exists(filename):
         _pytest.fail("Samples file wasn't created")
 
-    with _hmc_tomography.Samples(filename) as samples:
-        _hmc_tomography.Visualization.marginal(samples, 0, 10, False, "r")
+    with _hmclab.Samples(filename) as samples:
+        _hmclab.Visualization.marginal(samples, 0, 10, False, "r")
         _plt.close()
 
         try:
-            _hmc_tomography.Visualization.marginal_grid(
+            _hmclab.Visualization.marginal_grid(
                 samples, [0, 1], 25, False, _plt.get_cmap("seismic"),
             )
             _plt.close()
@@ -66,7 +66,7 @@ def test_basic_sampling(
                     "able to create a 2d plot with at least 2d data."
                 )
 
-        _hmc_tomography.Visualization.visualize_2_dimensions(samples, 0, 1, 25, False)
+        _hmclab.Visualization.visualize_2_dimensions(samples, 0, 1, 25, False)
         _plt.close()
 
     # Remove the file

@@ -1,5 +1,5 @@
 from types import FunctionType as _FunctionType
-from hmc_tomography.Priors import _AbstractPrior
+from hmclab.Priors import _AbstractPrior
 import numpy as _numpy
 import matplotlib.pyplot as _plt
 import gc as _gc

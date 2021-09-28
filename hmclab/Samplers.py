@@ -10,7 +10,7 @@ Sampling can be initialised from an instance of a sampler:
 
 .. code-block:: python
 
-    from hmc_tomography import HMC
+    from hmclab import HMC
 
     HMC_instance = HMC()
 
@@ -41,11 +41,11 @@ import h5py as _h5py
 import numpy as _numpy
 import tqdm.auto as _tqdm_au
 
-from hmc_tomography.Distributions import _AbstractDistribution
-from hmc_tomography.MassMatrices import Unit as _Unit
-from hmc_tomography.MassMatrices import _AbstractMassMatrix
-from hmc_tomography.Helpers.Timers import AccumulatingTimer as _AccumulatingTimer
-from hmc_tomography.Helpers.CustomExceptions import InvalidCaseError
+from hmclab.Distributions import _AbstractDistribution
+from hmclab.MassMatrices import Unit as _Unit
+from hmclab.MassMatrices import _AbstractMassMatrix
+from hmclab.Helpers.Timers import AccumulatingTimer as _AccumulatingTimer
+from hmclab.Helpers.CustomExceptions import InvalidCaseError
 
 import ipywidgets as _widgets
 from IPython.core.display import display as _display

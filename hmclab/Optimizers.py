@@ -14,7 +14,7 @@ from abc import abstractmethod as _abstractmethod
 import numpy as _numpy
 import tqdm.auto as _tqdm_au
 
-from hmc_tomography.Distributions import _AbstractDistribution
+from hmclab.Distributions import _AbstractDistribution
 
 
 class _AbstractOptimizer(_ABC):

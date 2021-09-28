@@ -3,11 +3,11 @@
 import numpy as _numpy
 import pytest as _pytest
 
-from hmc_tomography.Distributions.LinearMatrix import (
+from hmclab.Distributions.LinearMatrix import (
     _LinearMatrix_dense_forward_dense_covariance,
 )
 
-from hmc_tomography.Helpers.RandomMatrices import random_correlation_matrix
+from hmclab.Helpers.RandomMatrices import random_correlation_matrix
 
 dimension_data = [1, 10, 100]
 dimension_model = [1, 10, 100]

@@ -1,18 +1,18 @@
 """A collection of integrated tests.
 """
-from hmc_tomography.Distributions import Normal
+from hmclab.Distributions import Normal
 import os as _os
-import hmc_tomography as _hmc_tomography
+import hmclab as _hmclab
 
-_ad = _hmc_tomography.Distributions._AbstractDistribution
-_as = _hmc_tomography.Samplers._AbstractSampler
+_ad = _hmclab.Distributions._AbstractDistribution
+_as = _hmclab.Samplers._AbstractSampler
 
 
 def test_basic_sampling():
 
     distribution = Normal.create_default(dimensions=10)
 
-    sampler_instance = _hmc_tomography.Samplers.HMC()
+    sampler_instance = _hmclab.Samplers.HMC()
 
     filename = "temporary_file.h5"
 

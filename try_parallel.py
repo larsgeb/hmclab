@@ -1,4 +1,4 @@
-import hmc_tomography
+import hmclab
 import matplotlib.pyplot as plt
 
 resample = True
@@ -7,11 +7,11 @@ resample = True
 chains = 3
 
 # 3 samplers
-samplers = [hmc_tomography.Samplers.RWMH() for i in range(chains)]
+samplers = [hmclab.Samplers.RWMH() for i in range(chains)]
 
 # 3 posteriors (that are not the same!)
 posteriors = [
-    hmc_tomography.Distributions.Himmelblau(temperature=temp) for temp in [100, 10, 3]
+    hmclab.Distributions.Himmelblau(temperature=temp) for temp in [100, 10, 3]
 ]
 
 # 3 separate sample files
@@ -19,12 +19,12 @@ filenames = [f"samples_parallel_{i}.h5" for i in range(chains)]
 
 if resample:
     # Execute parallel sampling
-    hmc_tomography.Samplers.ParallelSampleSMP(
+    hmclab.Samplers.ParallelSampleSMP(
         samplers, filenames, posteriors, 100000, exchange_interval=100
     )
 
 
-samples_objs = [hmc_tomography.Samples(filename) for filename in filenames]
+samples_objs = [hmclab.Samples(filename) for filename in filenames]
 
 samples_RWMH_parallel = [so.numpy for so in samples_objs]
 
@@ -34,7 +34,7 @@ for so in samples_objs:
 
 print("\x1b[2K\r")
 
-sampler = hmc_tomography.Samplers.RWMH()
+sampler = hmclab.Samplers.RWMH()
 posterior = posteriors[-1]
 filename_RWMH = "samples0.h5"
 
@@ -46,7 +46,7 @@ if resample:
         autotuning=True,
         overwrite_existing_file=True,
     )
-samples_obj_RWMH = hmc_tomography.Samples(filename_RWMH)
+samples_obj_RWMH = hmclab.Samples(filename_RWMH)
 samples_RWMH = samples_obj_RWMH.numpy
 print("\x1b[2K\r")
 

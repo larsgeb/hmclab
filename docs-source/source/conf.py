@@ -14,11 +14,11 @@
 
 import os
 import sys
-import hmc_tomography
+import hmclab
 
 
 sys.path.insert(0, os.path.abspath("../../"))
-sys.path.insert(0, os.path.abspath("../../hmc_tomography/Tests"))
+sys.path.insert(0, os.path.abspath("../../hmclab/Tests"))
 sys.path.insert(0, os.path.abspath("../../examples"))
 
 # - Custom configuration -----------------------------------------------------
@@ -39,9 +39,9 @@ copyright = "2019-2021, Andrea Zunino, Andreas Fichtner, Lars Gebraad"
 author = "Andrea Zunino, Andreas Fichtner, Lars Gebraad"
 
 # The short X.Y version
-version = hmc_tomography.__version__
+version = hmclab.__version__
 # The full version, including alpha/beta/rc tags
-release = hmc_tomography.__version__
+release = hmclab.__version__
 
 
 # -- General configuration ---------------------------------------------------

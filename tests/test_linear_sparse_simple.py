@@ -4,7 +4,7 @@ import numpy as _numpy
 import scipy as _scipy
 import pytest as _pytest
 
-from hmc_tomography.Distributions.LinearMatrix import (
+from hmclab.Distributions.LinearMatrix import (
     _LinearMatrix_sparse_forward_simple_covariance,
 )
 

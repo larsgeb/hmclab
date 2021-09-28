@@ -8,8 +8,8 @@ import scipy as _scipy
 import scipy.sparse as _sparse
 import scipy.sparse.linalg as _sparse_linalg
 
-from hmc_tomography.Distributions import _AbstractDistribution
-from hmc_tomography.Helpers import RandomMatrices as _RandomMatrices
+from hmclab.Distributions import _AbstractDistribution
+from hmclab.Helpers import RandomMatrices as _RandomMatrices
 
 
 class LinearMatrix(_AbstractDistribution):
@@ -359,7 +359,7 @@ class _LinearMatrix_sparse_forward_simple_covariance(_AbstractDistribution):
             if use_mkl:
                 try:
                     # Fails with OSError if MKL is not found
-                    from hmc_tomography.Helpers.InterfaceMKL import sparse_gemv
+                    from hmclab.Helpers.InterfaceMKL import sparse_gemv
 
                     # MKL binding works only for sparse matrices
                     if type(G) != _sparse.csr_matrix:

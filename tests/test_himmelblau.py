@@ -3,14 +3,14 @@ import os as _os
 import numpy as _numpy
 import pytest as _pytest
 
-import hmc_tomography as _hmc_tomography
+import hmclab as _hmclab
 
-sampler_classes = _hmc_tomography.Samplers._AbstractSampler.__subclasses__()
+sampler_classes = _hmclab.Samplers._AbstractSampler.__subclasses__()
 
 
 @_pytest.mark.parametrize("sampler_class", sampler_classes)
 def test_sampling_visualization_himmelblau(sampler_class):
-    dist = _hmc_tomography.Distributions.Himmelblau(temperature=100)
+    dist = _hmclab.Distributions.Himmelblau(temperature=100)
 
     filename = "temporary_file.h5"
 
@@ -28,7 +28,7 @@ def test_sampling_visualization_himmelblau(sampler_class):
 
     print(f"Samples written to disk: {samples_written_expected}")
 
-    with _hmc_tomography.Samples(filename) as samples:
+    with _hmclab.Samples(filename) as samples:
         assert samples[:, :].shape == (3, samples_written_expected)
 
     _os.remove(filename)
@@ -36,7 +36,7 @@ def test_sampling_visualization_himmelblau(sampler_class):
 
 @_pytest.mark.parametrize("sampler_class", sampler_classes)
 def test_sampling_interrupt_himmelblau(sampler_class):
-    dist = _hmc_tomography.Distributions.Himmelblau(temperature=100)
+    dist = _hmclab.Distributions.Himmelblau(temperature=100)
 
     filename = "temporary_file.h5"
 
@@ -52,7 +52,7 @@ def test_sampling_interrupt_himmelblau(sampler_class):
         _numpy.floor(sampler.current_proposal / sampler.online_thinning) + 1
     )
 
-    with _hmc_tomography.Samples(filename) as samples:
+    with _hmclab.Samples(filename) as samples:
         assert samples[:, :].shape == (3, samples_written_expected)
 
     _os.remove(filename)

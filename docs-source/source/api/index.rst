@@ -1,7 +1,7 @@
 API reference
 =============
 
-.. module:: hmc_tomography
+.. module:: hmclab
 
 .. warning:: 
 
@@ -11,7 +11,7 @@ API reference
     updates.
 
 These packages describe the modules, classes and methods that constitute the 
-:code:`hmc_tomography` package. Here you'll find detailed explanations of how all the 
+:code:`hmclab` package. Here you'll find detailed explanations of how all the 
 components work together.
 
 .. toctree::

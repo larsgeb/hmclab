@@ -1,4 +1,4 @@
-from hmc_tomography.Helpers import (
+from hmclab.Helpers import (
     BetterABC,
     RandomMatrices,
     InterfaceMKL,

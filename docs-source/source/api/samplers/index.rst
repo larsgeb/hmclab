@@ -2,7 +2,7 @@
 Samplers
 ========
 
-.. automodule:: hmc_tomography.Samplers
+.. automodule:: hmclab.Samplers
     :no-members:
 
 Available classes within `Samplers`:

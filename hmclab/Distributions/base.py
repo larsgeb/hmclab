@@ -11,10 +11,10 @@ from typing import Union as _Union
 
 import numpy as _numpy
 
-from hmc_tomography.Helpers import RandomMatrices as _RandomMatrices
-from hmc_tomography.Helpers.BetterABC import abstractattribute as _abstractattribute
-from hmc_tomography.Helpers.BetterABC import ABCMeta as _ABCMeta
-from hmc_tomography.Helpers import CustomExceptions as _CustomExceptions
+from hmclab.Helpers import RandomMatrices as _RandomMatrices
+from hmclab.Helpers.BetterABC import abstractattribute as _abstractattribute
+from hmclab.Helpers.BetterABC import ABCMeta as _ABCMeta
+from hmclab.Helpers import CustomExceptions as _CustomExceptions
 
 
 class _AbstractDistribution(metaclass=_ABCMeta):
@@ -26,14 +26,14 @@ class _AbstractDistribution(metaclass=_ABCMeta):
 
     The abstract methods (e.g. functions that *need* to be created by the user) of this
     class are:
-    1. :meth:`hmc_tomography.Distributions._AbstractDistribution.misfit`
-    2. :meth:`hmc_tomography.Distributions._AbstractDistribution.gradient`
+    1. :meth:`hmclab.Distributions._AbstractDistribution.misfit`
+    2. :meth:`hmclab.Distributions._AbstractDistribution.gradient`
     Make sure the signature of these functions is correct when implementing. Special
     care needs to be given to input and output shapes of NumPy arrays, all of which
     should be column vectors (n×1). Reshaping can be done within the function at will.
 
     One abstract attribute is also required:
-    :meth:`hmc_tomography.Distributions._AbstractDistribution.dimensions`
+    :meth:`hmclab.Distributions._AbstractDistribution.dimensions`
 
 
     """
@@ -64,7 +64,7 @@ class _AbstractDistribution(metaclass=_ABCMeta):
     
     Boolean describing if the distribution is normalized, i.e. if we can use it in
     mixtures of distributions. Is computed typically only after running
-    :meth:`hmc_tomography.Distributions._AbstractDistribution.normalize`"""
+    :meth:`hmclab.Distributions._AbstractDistribution.normalize`"""
 
     @_abstractmethod
     def misfit(self, coordinates: _numpy.ndarray) -> float:
@@ -379,7 +379,7 @@ class StandardNormal1D(_AbstractDistribution):
         """Compute misfit of distribution.
 
         Method to compute the misfit of a distribution for a given model m. See,
-        :meth:`hmc_tomography.Distributions._AbstractDistribution.misfit` for details.
+        :meth:`hmclab.Distributions._AbstractDistribution.misfit` for details.
         """
         _CustomExceptions.Assertions.assert_shape(m, (1, 1))
 
@@ -389,7 +389,7 @@ class StandardNormal1D(_AbstractDistribution):
         """Compute gradient of distribution.
 
         Method to compute the gradient of a distribution for a given model m. See,
-        :meth:`hmc_tomography.Distributions._AbstractDistribution.gradient` for details.
+        :meth:`hmclab.Distributions._AbstractDistribution.gradient` for details.
         """
         _CustomExceptions.Assertions.assert_shape(m, (1, 1))
 

@@ -2,7 +2,7 @@
 Distributions
 #############
 
-.. automodule:: hmc_tomography.Distributions
+.. automodule:: hmclab.Distributions
    :no-members:
    :show-inheritance:
 

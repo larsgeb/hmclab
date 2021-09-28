@@ -14,7 +14,7 @@ required methods and their signatures (required in- and outputs).
 """
 # import warnings as _warnings # TODO check why this was here
 
-from hmc_tomography.Distributions.base import (
+from hmclab.Distributions.base import (
     AdditiveDistribution,
     BayesRule,
     CompositeDistribution,
@@ -26,10 +26,10 @@ from hmc_tomography.Distributions.base import (
     Mixture,
     _AbstractDistribution,
 )
-from hmc_tomography.Distributions.LinearMatrix import LinearMatrix
+from hmclab.Distributions.LinearMatrix import LinearMatrix
 
-from hmc_tomography.Distributions.SourceLocation import SourceLocation2D
-from hmc_tomography.Distributions.SourceLocation import SourceLocation3D
+from hmclab.Distributions.SourceLocation import SourceLocation2D
+from hmclab.Distributions.SourceLocation import SourceLocation3D
 
 __all__ = [
     "_AbstractDistribution",
@@ -49,7 +49,7 @@ __all__ = [
 
 # Try to import 2D FWI examples if psvWave is installed, otherwise, don't fail
 try:
-    from hmc_tomography.Distributions.ElasticFullWaveform2D import ElasticFullWaveform2D
+    from hmclab.Distributions.ElasticFullWaveform2D import ElasticFullWaveform2D
 
     __all__ += ["ElasticFullWaveform2D"]
 

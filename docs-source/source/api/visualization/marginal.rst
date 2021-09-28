@@ -2,4 +2,4 @@
 marginal
 ********
 
-.. automethod:: hmc_tomography.Visualization.marginal
+.. automethod:: hmclab.Visualization.marginal

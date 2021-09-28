@@ -20,11 +20,11 @@ from abc import abstractmethod as _abstractmethod
 
 import numpy as _numpy
 
-from hmc_tomography.Helpers.CustomExceptions import (
+from hmclab.Helpers.CustomExceptions import (
     AbstractMethodError as _AbstractMethodError,
 )
 
-from hmc_tomography.Helpers.CustomExceptions import Assertions
+from hmclab.Helpers.CustomExceptions import Assertions
 
 
 class _AbstractMassMatrix(_ABC):

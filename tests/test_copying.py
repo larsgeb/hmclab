@@ -1,6 +1,6 @@
 """A collection of integrated tests.
 """
-from hmc_tomography import Distributions
+from hmclab import Distributions
 import os as _os
 import copy as _copy
 import h5py as _h5py
@@ -8,13 +8,13 @@ import h5py as _h5py
 import numpy as _numpy
 import pytest as _pytest
 
-import hmc_tomography as _hmc_tomography
-from hmc_tomography.Helpers.CustomExceptions import (
+import hmclab as _hmclab
+from hmclab.Helpers.CustomExceptions import (
     InvalidCaseError as _InvalidCaseError,
 )
 
-_ad = _hmc_tomography.Distributions._AbstractDistribution
-_as = _hmc_tomography.Samplers._AbstractSampler
+_ad = _hmclab.Distributions._AbstractDistribution
+_as = _hmclab.Samplers._AbstractSampler
 
 dimensions = [1, 2, 100]
 distribution_classes = [Distributions.Normal]
@@ -82,7 +82,7 @@ def test_samples_file(
         + 1
     )
 
-    with _hmc_tomography.Samples(filename) as samples:
+    with _hmclab.Samples(filename) as samples:
         # Assert that the HDF array has the right dimensions
         assert samples.numpy.shape == (
             distribution.dimensions + 1,

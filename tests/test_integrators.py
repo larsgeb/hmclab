@@ -2,11 +2,11 @@ import os as _os
 
 import numpy as _numpy
 
-import hmc_tomography as _hmc_tomography
+import hmclab as _hmclab
 
 
 def test_leapfrog():
-    dist = _hmc_tomography.Distributions.Himmelblau(temperature=100)
+    dist = _hmclab.Distributions.Himmelblau(temperature=100)
 
     filename = "temporary_file.h5"
 
@@ -14,7 +14,7 @@ def test_leapfrog():
     if _os.path.exists(filename):
         _os.remove(filename)
 
-    sampler = _hmc_tomography.Samplers.HMC()
+    sampler = _hmclab.Samplers.HMC()
 
     sampler.sample(
         filename, dist, proposals=1000, stepsize=1.0, integrator="lf", max_time=2.0
@@ -26,14 +26,14 @@ def test_leapfrog():
 
     print(f"Samples written to disk: {samples_written_expected}")
 
-    with _hmc_tomography.Samples(filename) as samples:
+    with _hmclab.Samples(filename) as samples:
         assert samples[:, :].shape == (3, samples_written_expected)
 
     _os.remove(filename)
 
 
 def test_four_stage():
-    dist = _hmc_tomography.Distributions.Himmelblau(temperature=100)
+    dist = _hmclab.Distributions.Himmelblau(temperature=100)
 
     filename = "temporary_file.h5"
 
@@ -41,7 +41,7 @@ def test_four_stage():
     if _os.path.exists(filename):
         _os.remove(filename)
 
-    sampler = _hmc_tomography.Samplers.HMC()
+    sampler = _hmclab.Samplers.HMC()
 
     sampler.sample(
         filename, dist, proposals=1000, stepsize=3.0, integrator="4s", max_time=2.0
@@ -53,14 +53,14 @@ def test_four_stage():
 
     print(f"Samples written to disk: {samples_written_expected}")
 
-    with _hmc_tomography.Samples(filename) as samples:
+    with _hmclab.Samples(filename) as samples:
         assert samples[:, :].shape == (3, samples_written_expected)
 
     _os.remove(filename)
 
 
 def test_three_stage():
-    dist = _hmc_tomography.Distributions.Himmelblau(temperature=100)
+    dist = _hmclab.Distributions.Himmelblau(temperature=100)
 
     filename = "temporary_file.h5"
 
@@ -68,7 +68,7 @@ def test_three_stage():
     if _os.path.exists(filename):
         _os.remove(filename)
 
-    sampler = _hmc_tomography.Samplers.HMC()
+    sampler = _hmclab.Samplers.HMC()
 
     sampler.sample(
         filename, dist, proposals=1000, stepsize=3.0, integrator="3s", max_time=2.0
@@ -80,7 +80,7 @@ def test_three_stage():
 
     print(f"Samples written to disk: {samples_written_expected}")
 
-    with _hmc_tomography.Samples(filename) as samples:
+    with _hmclab.Samples(filename) as samples:
         assert samples[:, :].shape == (3, samples_written_expected)
 
     _os.remove(filename)

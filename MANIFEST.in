@@ -1,2 +1,2 @@
 include versioneer.py
-include hmc_tomography/_version.py
+include hmclab/_version.py

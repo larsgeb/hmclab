@@ -42,7 +42,7 @@ def get_config():
     cfg.style = "git-describe"
     cfg.tag_prefix = ""
     cfg.parentdir_prefix = ""
-    cfg.versionfile_source = "hmc_tomography/_version.py"
+    cfg.versionfile_source = "hmclab/_version.py"
     cfg.verbose = False
     return cfg
 

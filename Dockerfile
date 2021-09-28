@@ -17,8 +17,8 @@ RUN unzip hippylib-3.0.0.zip
 WORKDIR hippylib-hippylib-0402982/
 RUN pip install -e .
 
-COPY . ~/hmc-tomography
-WORKDIR ~/hmc-tomography
+COPY . ~/hmclab
+WORKDIR ~/hmclab
 
 RUN python3.7 -m pip install -e .[testing]
 #RUN python3.7 -m pip install -v psvWave
@@ -28,5 +28,5 @@ ARG DEBIAN_FRONTEND=dialog
 
 #ENV HDF5_DISABLE_VERSION_CHECK 2
 
-WORKDIR /hmc-tomography/examples/notebooks
+WORKDIR /hmclab/examples/notebooks
 CMD ["jupyter", "notebook", "--port=8888", "--no-browser", "--ip=0.0.0.0", "--allow-root"] 

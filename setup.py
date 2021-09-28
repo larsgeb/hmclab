@@ -7,13 +7,13 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
-    name="hmc-tomography",
+    name="hmclab",
     author="Lars Gebraad, Andrea Zunino, Andreas Fichtner",
     author_email="lars.gebraad@erdw.ethz.ch",
     description="An example HMC tomography package",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/larsgeb/hmc-tomography",
+    url="https://github.com/larsgeb/hmclab",
     packages=setuptools.find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -60,5 +60,5 @@ setuptools.setup(
             "psvWave",
         ],
     },
-    entry_points={"console_scripts": ["hmc_tomography=hmc_tomography.__main__:cli"]},
+    entry_points={"console_scripts": ["hmclab=hmclab.__main__:cli"]},
 )

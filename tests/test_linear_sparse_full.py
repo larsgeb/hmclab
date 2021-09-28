@@ -4,11 +4,11 @@ import numpy as _numpy
 import scipy as _scipy
 import pytest as _pytest
 
-from hmc_tomography.Distributions.LinearMatrix import (
+from hmclab.Distributions.LinearMatrix import (
     _LinearMatrix_sparse_forward_sparse_covariance,
 )
 
-from hmc_tomography.Helpers.RandomMatrices import random_correlation_matrix
+from hmclab.Helpers.RandomMatrices import random_correlation_matrix
 
 dimension_data = [1, 10, 100]
 dimension_model = [1, 10, 100]

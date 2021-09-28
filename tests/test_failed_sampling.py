@@ -5,13 +5,13 @@ import os as _os
 import numpy as _numpy
 import pytest as _pytest
 
-import hmc_tomography as _hmc_tomography
-from hmc_tomography.Helpers.CustomExceptions import (
+import hmclab as _hmclab
+from hmclab.Helpers.CustomExceptions import (
     InvalidCaseError as _InvalidCaseError,
 )
 
-_ad = _hmc_tomography.Distributions._AbstractDistribution
-_as = _hmc_tomography.Samplers._AbstractSampler
+_ad = _hmclab.Distributions._AbstractDistribution
+_as = _hmclab.Samplers._AbstractSampler
 
 dimensions = [1, 2, 10]
 distribution_classes = _ad.__subclasses__()
@@ -54,7 +54,7 @@ def test_basic_sampling(
             proposals=proposals,
             ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
             max_time=1.0,
-            mass_matrix=_hmc_tomography.MassMatrices.Unit(434),
+            mass_matrix=_hmclab.MassMatrices.Unit(434),
         )
     except Exception as e:
         print(e)

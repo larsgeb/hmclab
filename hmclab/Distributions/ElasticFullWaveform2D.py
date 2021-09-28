@@ -5,8 +5,8 @@ from typing import Union as _Union, List as _List
 import numpy as _numpy
 import psvWave as _psvWave
 
-from hmc_tomography.Distributions import _AbstractDistribution
-from hmc_tomography.Helpers.CustomExceptions import (
+from hmclab.Distributions import _AbstractDistribution
+from hmclab.Helpers.CustomExceptions import (
     InvalidCaseError as _InvalidCaseError,
 )
 

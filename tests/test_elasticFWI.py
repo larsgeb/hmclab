@@ -3,8 +3,8 @@ import os as _os
 import numpy as _numpy
 import pytest as _pytest
 
-import hmc_tomography as _hmc_tomography
-from hmc_tomography.Helpers.CustomExceptions import InvalidCaseError
+import hmclab as _hmclab
+from hmclab.Helpers.CustomExceptions import InvalidCaseError
 import sys
 
 installed = "psvWave" in sys.modules
@@ -14,7 +14,7 @@ installed = "psvWave" in sys.modules
     not installed, reason="Skipping test for which required packages are not installed."
 )
 def test_elasticFWI_creation():
-    likelihood = _hmc_tomography.Distributions.ElasticFullWaveform2D.create_default(
+    likelihood = _hmclab.Distributions.ElasticFullWaveform2D.create_default(
         4800, "tests/configurations/default_testing_configuration.ini",
     )
 
@@ -24,24 +24,24 @@ def test_elasticFWI_creation():
     except InvalidCaseError:
         pass
 
-    _hmc_tomography.Distributions.ElasticFullWaveform2D(likelihood, temperature=2)
+    _hmclab.Distributions.ElasticFullWaveform2D(likelihood, temperature=2)
 
     # This should fail with a ValueError
     try:
-        _hmc_tomography.Distributions.ElasticFullWaveform2D(42)
+        _hmclab.Distributions.ElasticFullWaveform2D(42)
     except ValueError as e:
         print(e)
 
     # This should fail with a ValueError
     try:
-        _hmc_tomography.Distributions.ElasticFullWaveform2D(
+        _hmclab.Distributions.ElasticFullWaveform2D(
             "tests/configurations/default_testing_configuration.ini",
         )
     except ValueError as e:
         print(e)
 
     ux, uz = likelihood.fdModel.get_observed_data()
-    _hmc_tomography.Distributions.ElasticFullWaveform2D(
+    _hmclab.Distributions.ElasticFullWaveform2D(
         "tests/configurations/default_testing_configuration.ini", ux_obs=ux, uz_obs=uz,
     )
 
@@ -50,7 +50,7 @@ def test_elasticFWI_creation():
     not installed, reason="Skipping test for which required packages are not installed."
 )
 def test_elasticFWI_gradient():
-    likelihood = _hmc_tomography.Distributions.ElasticFullWaveform2D.create_default(
+    likelihood = _hmclab.Distributions.ElasticFullWaveform2D.create_default(
         4800, "tests/configurations/default_testing_configuration.ini",
     )
 
@@ -74,7 +74,7 @@ def test_elasticFWI_gradient():
     not installed, reason="Skipping test for which required packages are not installed."
 )
 def test_elasticFWI_sampling():
-    likelihood = _hmc_tomography.Distributions.ElasticFullWaveform2D.create_default(
+    likelihood = _hmclab.Distributions.ElasticFullWaveform2D.create_default(
         4800, "tests/configurations/default_testing_configuration.ini",
     )
     likelihood.temperature = 100.0
@@ -91,9 +91,9 @@ def test_elasticFWI_sampling():
     upper_rho = template * 1700
     upper_bounds = _numpy.vstack((upper_vp, upper_vs, upper_rho))
 
-    prior = _hmc_tomography.Distributions.Uniform(lower_bounds, upper_bounds)
+    prior = _hmclab.Distributions.Uniform(lower_bounds, upper_bounds)
 
-    posterior = _hmc_tomography.Distributions.BayesRule([prior, likelihood])
+    posterior = _hmclab.Distributions.BayesRule([prior, likelihood])
 
     filename = "temporary_file.h5"
 
@@ -101,7 +101,7 @@ def test_elasticFWI_sampling():
     if _os.path.exists(filename):
         _os.remove(filename)
 
-    _hmc_tomography.Samplers.HMC().sample(
+    _hmclab.Samplers.HMC().sample(
         filename,
         posterior,
         proposals=10,

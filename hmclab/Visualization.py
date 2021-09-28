@@ -7,8 +7,8 @@ import matplotlib.gridspec as _gridspec
 import matplotlib.pyplot as _plt
 import numpy as _numpy
 
-from hmc_tomography.Helpers import Processing as _Processing
-from hmc_tomography.Samples import Samples as _Samples
+from hmclab.Helpers import Processing as _Processing
+from hmclab.Samples import Samples as _Samples
 
 
 def marginal_grid(
@@ -206,7 +206,7 @@ def visualize_2_dimensions(
 
     Parameters
     ==========
-    samples : hmc_tomography.Samples
+    samples : hmclab.Samples
         Samples object.
     dim1 : int
         First dimension to investigate.
