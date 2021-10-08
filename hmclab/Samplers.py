@@ -148,6 +148,9 @@ class _AbstractSampler(_ABC):
     accepted_proposals = 0
     """An integer representing the amount of accepted proposals."""
 
+    disable_progressbar: bool = False
+    """A bool describing whether or not to disable the TQDM progressbar"""
+
     # distribution = type("NoDistribution", (object,), {"name": None})
     # """The distribution """
     # TODO: assert why this was in the class
@@ -226,11 +229,11 @@ class _AbstractSampler(_ABC):
         run_details["samples written (after online thinning)"] = written_samples
         run_details["amount of writes"] = self.amount_of_writes
         run_details["dimensions"] = self.dimensions
-        run_details["distribution"] = (
+        run_details["distribution"] = ((
             self.distribution.name
             if (self.distribution.name is not None)
             else self.distribution
-        )
+        ) if self.distribution is not None else None)
 
         # Tuning settings (panel 2) ----------------------------------------------------
         settings = {}
@@ -329,6 +332,7 @@ class _AbstractSampler(_ABC):
         ram_buffer_size: int,
         overwrite_existing_file: bool,
         max_time: int,
+        disable_progressbar:bool = False,
         diagnostic_mode: bool = False,
         **kwargs,
     ):
@@ -477,6 +481,8 @@ class _AbstractSampler(_ABC):
             ), "The maximal runtime (`max_time`) should be a float larger than zero."
             self.max_time = max_time
 
+        self.disable_progressbar = disable_progressbar
+
         # Prepare diagnostic mode if needed --------------------------------------------
         self.diagnostic_mode = diagnostic_mode
 
@@ -583,6 +589,7 @@ class _AbstractSampler(_ABC):
                 leave=True,
                 dynamic_ncols=True,
                 position=self.sampler_index,  # only relevant for parallel sampling
+                disable=self.disable_progressbar,
             )
         except Exception:
             self.proposals_iterator = _tqdm_au.trange(
@@ -590,6 +597,7 @@ class _AbstractSampler(_ABC):
                 desc=f"Tot. acc rate: {0:.2f}. Progress",
                 leave=True,
                 position=self.sampler_index,  # only relevant for parallel sampling
+                disable=self.disable_progressbar,
             )
 
         # Start time for updating progressbar
@@ -1069,6 +1077,7 @@ class RWMH(_AbstractSampler):
         target_acceptance_rate: float = 0.65,
         learning_rate: float = 0.75,
         queue=None,
+        disable_progressbar=False,
     ):
         """Sampling using the Metropolis-Hastings algorithm.
 
@@ -1147,6 +1156,7 @@ class RWMH(_AbstractSampler):
                 autotuning=autotuning,
                 target_acceptance_rate=target_acceptance_rate,
                 learning_rate=learning_rate,
+                disable_progressbar=disable_progressbar,
             )
         except Exception as e:
             if self.samples_hdf5_filehandle is not None:
@@ -1424,6 +1434,7 @@ class HMC(_AbstractSampler):
         target_acceptance_rate: float = 0.65,
         learning_rate: float = 0.75,
         queue=None,
+        disable_progressbar=False,
     ):
         """Sampling using the Hamiltonian Monte Carlo algorithm.
 
@@ -1515,7 +1526,9 @@ class HMC(_AbstractSampler):
                 ram_buffer_size=ram_buffer_size,
                 overwrite_existing_file=overwrite_existing_file,
                 max_time=max_time,
+                disable_progressbar=disable_progressbar,
             )
+
         except Exception as e:
             if self.samples_hdf5_filehandle is not None:
                 self.samples_hdf5_filehandle.close()
@@ -1984,6 +1997,26 @@ class PipeMatrix:
                 self.left_pipes[point1][point2].close()
                 self.right_pipes[point1][point2].close()
 
+import os
+import sys
+class MyProc(_Process):
+    pass
+    # def run(self):
+    #     # Define the logging in run(), MyProc's entry function when it is .start()-ed 
+    #     #     p = MyProc()
+    #     #     p.start()
+    #     self.initialize_logging()
+
+    #     print('Now output is captured.')
+
+    #     # Now do stuff...
+
+    # def initialize_logging(self):
+    #     sys.stdout = open(str(os.getpid()) + ".out", "a")
+    #     sys.stderr = open(str(os.getpid()) + "_error.out", "a")
+
+    #     print('stdout initialized')
+
 
 class ParallelSampleSMP:
     # SMP stands for Shared Memory Parallelism, i.e. single machine parallel sampling
@@ -2119,7 +2152,7 @@ class ParallelSampleSMP:
                 }
 
                 ps.append(
-                    _Process(
+                    MyProc(
                         target=sampler.sample,
                         args=(filename, posterior),
                         kwargs=total_kwargs,
@@ -2160,12 +2193,13 @@ class ParallelSampleSMP:
     def _repr_html_(self):
 
         tab = _widgets.Tab()
-        tab.children = [
-            sampler._repr_html_(
-                nested=True, widget_data=self.sampler_widget_data[f"{i}"]
-            )
-            for i, sampler in enumerate(self.samplers)
-        ]
+        if self.sampler_widget_data :
+            tab.children = [
+                sampler._repr_html_(
+                    nested=True, widget_data=self.sampler_widget_data[f"{i}"]
+                )
+                for i, sampler in enumerate(self.samplers)
+            ]
 
         for i in range(len(tab.children)):
             tab.set_title(i, f"Sampler {i}")

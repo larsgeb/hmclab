@@ -13,7 +13,7 @@ Run the following inside your local copy of the source code:
 .. code-block:: bash    
     
     > $ conda env create -f environment.yml
-    > $ conda activate hmctomo
+    > $ conda activate hmclab
     > $ pip install -e .
 
 After this you can use the code anywhere on your system, or start a Jupyter Notebook
@@ -33,8 +33,8 @@ Python version and dependencies, run the following from your terminal:
 
 .. code-block:: bash    
     
-    > $ conda create -n hmctomo python=3.7
-    > $ conda activate hmctomo
+    > $ conda create -n hmclab python=3.7
+    > $ conda activate hmclab
     > $ conda install notebook pip
 
 You can also create this environment byu first downloading this repo, and running the
@@ -43,7 +43,7 @@ following command inside of it:
 .. code-block:: bash    
 
     > $ conda env create -f environment.yml
-    > $ conda activate hmctomo
+    > $ conda activate hmclab
 
 This does exactly the same as the previous commands.
 
