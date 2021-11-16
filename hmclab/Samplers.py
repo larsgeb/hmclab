@@ -1025,6 +1025,15 @@ class _AbstractSampler(_ABC):
             )
         return self.functions_to_diagnose + self.sampler_specific_functions_to_diagnose
 
+    def load_results(self, burn_in:int =0)->_numpy.array:
+
+        assert burn_in >= 0
+
+        from hmclab.Samples import Samples as _Samples
+        with _Samples(self.samples_hdf5_filename, burn_in=burn_in) as samples:
+            samples_numpy = samples.numpy
+
+        return samples_numpy
 
 class RWMH(_AbstractSampler):
     stepsize: _Union[float, _numpy.ndarray] = 1.0
