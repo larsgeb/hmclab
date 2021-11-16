@@ -87,7 +87,7 @@ class SourceLocation2D(_AbstractDistribution):
             (x - self.receiver_array_x) ** 2.0 + (z - self.receiver_array_z) ** 2.0
         ) ** 0.5
 
-        return self.misfit_bounds(coordinates) + 0.5 * _numpy.sum(
+        return self.misfit_bounds(coordinates) + 0.5 * _numpy.nansum(
             ((self.observed_data - (T + distances / v)) / self.data_std) ** 2
         )
 
@@ -419,7 +419,7 @@ class SourceLocation3D(_AbstractDistribution):
             + (z - self.receiver_array_z) ** 2.0
         ) ** 0.5
 
-        return self.misfit_bounds(coordinates) + 0.5 * _numpy.sum(
+        return self.misfit_bounds(coordinates) + 0.5 * _numpy.nansum(
             ((self.observed_data - (T + distances / v)) / self.data_std) ** 2
         )
 
@@ -447,11 +447,11 @@ class SourceLocation3D(_AbstractDistribution):
         misfit_grad = (t_calc - self.observed_data) / (self.data_std ** 2)
 
         # Applying chain rule
-        gx = _numpy.sum(misfit_grad * data_grad_x, axis=1)
-        gy = _numpy.sum(misfit_grad * data_grad_y, axis=1)
-        gz = _numpy.sum(misfit_grad * data_grad_z, axis=1)
-        gT = _numpy.sum(misfit_grad * data_grad_T, axis=1)
-        gv = _numpy.sum(misfit_grad * data_grad_v)
+        gx = _numpy.nansum(misfit_grad * data_grad_x, axis=1)
+        gy = _numpy.nansum(misfit_grad * data_grad_y, axis=1)
+        gz = _numpy.nansum(misfit_grad * data_grad_z, axis=1)
+        gT = _numpy.nansum(misfit_grad * data_grad_T, axis=1)
+        gv = _numpy.nansum(misfit_grad * data_grad_v)
 
         # Compiling into total gradient
         total_grad = _numpy.zeros_like(coordinates)
