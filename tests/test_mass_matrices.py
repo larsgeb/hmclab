@@ -2,8 +2,10 @@
 """
 import numpy as _numpy
 import pytest as _pytest
+import os as _os
 
-from hmclab import MassMatrices as _MassMatrices
+from hmclab import MassMatrices as _MassMatrices, Samplers as _Samplers
+from hmclab.Distributions import Normal as _Normal
 
 dimensions = [1, 10, 100]
 subclasses = _MassMatrices._AbstractMassMatrix.__subclasses__()
@@ -95,3 +97,44 @@ def test_kinetic_energy_gradient(
         assert _numpy.allclose(kinetic_energy_gradient, 0.0)
 
     return True
+
+
+@_pytest.mark.parametrize("dimensions", dimensions)
+def test_basic_sampling(
+    dimensions: int,
+):
+
+    means = _numpy.zeros((dimensions, 1))
+    covariance = _numpy.eye(dimensions)
+    distribution = _Normal(means, covariance)
+
+    sampler_instance = _Samplers.HMC()
+
+    filename = "temporary_file.h5"
+
+    # Remove file before attempting to sample
+    if _os.path.exists(filename):
+        _os.remove(filename)
+
+    proposals = 1000
+
+    sampler_instance.sample(
+        filename,
+        distribution,
+        proposals=proposals,
+        online_thinning=10,
+        ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
+        max_time=1.0,
+        autotuning=False,
+    )
+    if sampler_instance.amount_of_writes > 0:
+        # 10 percent burn_in
+        burn_in = int(0.1 * sampler_instance.amount_of_writes)
+        sampler_instance.load_results(burn_in=burn_in)
+
+    # Check if the file was created. If it wasn't, fail
+    if not _os.path.exists(filename):
+        _pytest.fail("Samples file wasn't created")
+
+    # Remove the file
+    _os.remove(filename)

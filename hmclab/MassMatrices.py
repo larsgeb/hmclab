@@ -218,6 +218,92 @@ class Diagonal(_AbstractMassMatrix):
         return Diagonal(diagonal)
 
 
+from scipy.linalg import cho_factor as _cho_factor, cho_solve as _cho_solve
+
+
+class Full(_AbstractMassMatrix):
+    """The full mass matrix.
+
+    This mass matrix or metric performs scaling on all dimensions, as well as rotations.
+    It is ideal when it is know a-priori that parameters might be heavily correlated.
+
+    """
+
+    def __init__(
+        self,
+        full: _numpy.ndarray,
+        rng: _numpy.random.Generator = None,
+        do_hermitian_check=True,
+    ):
+        """Constructor for diagonal mass matrices."""
+        self.name = "diagonal mass matrix"
+
+        self.mass_matrix = _numpy.asarray(full)
+
+        if do_hermitian_check:
+            assert _numpy.all(self.mass_matrix == self.mass_matrix.T)
+
+        if self.mass_matrix is None or type(self.mass_matrix) != _numpy.ndarray:
+            raise ValueError("The diagonal mass matrix did not receive a diagonal")
+
+        self.cholesky, self.cholesky_lower = _cho_factor(self.mass_matrix, lower=True)
+        self.cholesky = _numpy.tril(self.cholesky)
+        self.dimensions = self.mass_matrix.shape[0]
+
+        if rng is not None:
+            self.rng = rng
+
+    def kinetic_energy(self, momentum: _numpy.ndarray) -> float:
+        """
+
+        Parameters
+        ----------
+        momentum
+
+        Returns
+        -------
+
+        """
+        return 0.5 * _numpy.vdot(
+            momentum, _cho_solve((self.cholesky, self.cholesky_lower), momentum)
+        )
+
+    def kinetic_energy_gradient(self, momentum: _numpy.ndarray) -> _numpy.ndarray:
+        """
+
+        Parameters
+        ----------
+        momentum
+
+        Returns
+        -------
+
+        """
+        return _cho_solve((self.cholesky, self.cholesky_lower), momentum)
+
+    def generate_momentum(self, repeat=1) -> _numpy.ndarray:
+        """
+
+        Returns
+        -------
+
+        """
+        return self.cholesky @ self.rng.normal(size=(self.dimensions, repeat))
+
+    @property
+    def matrix(self) -> _numpy.ndarray:
+        return self.mass_matrix
+
+    @staticmethod
+    def create_default(dimensions: int) -> "Full":
+        mass_matrix = (
+            _numpy.eye(dimensions)
+            + 0.1 * _numpy.eye(dimensions, k=-1)
+            + 0.1 * _numpy.eye(dimensions, k=1)
+        )
+        return Full(mass_matrix)
+
+
 class LBFGS(_AbstractMassMatrix):
     """The experimental adaptive LBFGS mass matrix.
 

@@ -15,7 +15,7 @@ from hmclab.Helpers.CustomExceptions import (
 _ad = _hmclab.Distributions._AbstractDistribution
 _as = _hmclab.Samplers._AbstractSampler
 
-dimensions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 100]
+dimensions = [1, 2, 3, 5, 50]
 distribution_classes = _ad.__subclasses__()
 sampler_classes = _as.__subclasses__()
 proposals = [10, 1000]
