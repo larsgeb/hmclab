@@ -32,7 +32,6 @@ setuptools.setup(
         "pyyaml",
         "jax",
         "ipywidgets",
-
     ],
     extras_require={
         "dev": [
@@ -50,6 +49,7 @@ setuptools.setup(
             "pre-commit",
             "codecov",
             "pytest",
+            "pytest-cov",
             "pytest-harvest",
             "pytest-ordering",
             "pytest_notebook",
@@ -57,6 +57,7 @@ setuptools.setup(
             "ipywidgets",
             "nbformat",
             "nbconvert < 6.0.0",
+        ]
     },
     entry_points={"console_scripts": ["hmclab=hmclab.__main__:cli"]},
 )

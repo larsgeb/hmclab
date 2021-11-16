@@ -10,7 +10,7 @@ _ad = _hmclab.Distributions._AbstractDistribution
 _as = _hmclab.Samplers._AbstractSampler
 
 dimensions = [1, 2, 10]
-proposals = [10000]
+proposals = [1000]
 
 
 @_pytest.mark.parametrize("dimensions", dimensions)
