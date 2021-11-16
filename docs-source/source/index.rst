@@ -1,6 +1,6 @@
-##############
-HMC Tomography
-##############
+######
+HMCLab
+######
 
 .. toctree::
     :maxdepth: 1
@@ -16,7 +16,7 @@ HMC Tomography
 
 .. note::
 
-   This documentation is far from complete. Please let us know if you miss something.
+   This documentation can never be complete. Please let us know if you miss something.
 
 .. warning::
 
