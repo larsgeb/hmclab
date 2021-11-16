@@ -16,8 +16,7 @@ _ad = _hmclab.Distributions._AbstractDistribution
 _as = _hmclab.Samplers._AbstractSampler
 
 dimensions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 100]
-# distribution_classes = [_Distributions.Normal]
-distribution_classes = _Distributions._AbstractDistribution.__subclasses__()
+distribution_classes = _ad.__subclasses__()
 sampler_classes = _as.__subclasses__()
 proposals = [10, 1000]
 autotuning = [True, False]
@@ -133,3 +132,4 @@ def test_samples_file(
 
     # Remove the file
     _os.remove(filename)
+

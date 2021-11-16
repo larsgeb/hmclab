@@ -542,11 +542,11 @@ class _AbstractSampler(_ABC):
             self.end_time - self.start_time
         ).total_seconds()
 
+        self._close_sampler_specific()
+
         self.samples_hdf5_filehandle.close()
         self.samples_hdf5_filehandle = None
         self.samples_hdf5_dataset = None
-
-        self._close_sampler_specific()
 
         if self.diagnostic_mode:
             # This block shows the percentage of time spent in each part of the sampler.
@@ -1619,6 +1619,8 @@ class HMC(_AbstractSampler):
         # Set the mass matrix if it is not yet set using the default: a unit mass
         if self.mass_matrix is None:
             self.mass_matrix = _Unit(self.dimensions)
+
+        self.mass_matrix.rng = self.rng
 
         # Assert that the mass matrix is the right type and dimension
         assert isinstance(self.mass_matrix, _AbstractMassMatrix), (
