@@ -781,11 +781,12 @@ class _AbstractSampler(_ABC):
         try:
             if overwrite:  # honor overwrite flag
                 flag = "w"
-                _warnings.warn(
-                    f"\r\nSilently overwriting samples file ({name}) if it exists.",
-                    Warning,
-                    stacklevel=100,
-                )
+                if self.diagnostic_mode:
+                    _warnings.warn(
+                        f"\r\nSilently overwriting samples file ({name}) if it exists.",
+                        Warning,
+                        stacklevel=100,
+                    )
             else:
                 flag = "w-"
 
@@ -1253,6 +1254,10 @@ class RWMH(_AbstractSampler):
             self.acceptance_rates = self.acceptance_rates[: self.current_proposal]
             self.stepsizes = self.stepsizes[: self.current_proposal]
 
+            # Also write these to the hdf5 dataset
+            self.samples_hdf5_dataset.attrs["acceptance_rates"] = self.acceptance_rates
+            self.samples_hdf5_dataset.attrs["stepsizes"] = self.stepsizes
+
     def _write_tuning_settings(self):
         if type(self.stepsize) == float:
             self.samples_hdf5_dataset.attrs["stepsize"] = self.stepsize
@@ -1301,14 +1306,15 @@ class RWMH(_AbstractSampler):
         )
 
         if self.stepsize <= 0:
-            _warnings.warn(
-                "The timestep of the algorithm went below zero. You possibly "
-                "started the algorithm in a region with extremely strong "
-                "gradients. The sampler will now default to a minimum timestep of "
-                f"{self.minimal_stepsize}. If this doesn't work, and if choosing "
-                "a different initial model does not make this warning go away, try"
-                "setting a smaller minimal time step and initial time step value."
-            )
+            if self.diagnostic_mode:
+                _warnings.warn(
+                    "The timestep of the algorithm went below zero. You possibly "
+                    "started the algorithm in a region with extremely strong "
+                    "gradients. The sampler will now default to a minimum timestep of "
+                    f"{self.minimal_stepsize}. If this doesn't work, and if choosing "
+                    "a different initial model does not make this warning go away, try"
+                    "setting a smaller minimal time step and initial time step value."
+                )
             self.stepsize = max(self.stepsize, self.minimal_stepsize)
 
     def _propose(self):
@@ -1671,6 +1677,10 @@ class HMC(_AbstractSampler):
             self.acceptance_rates = self.acceptance_rates[: self.current_proposal]
             self.stepsizes = self.stepsizes[: self.current_proposal]
 
+            # Also write these to the hdf5 dataset
+            self.samples_hdf5_dataset.attrs["acceptance_rates"] = self.acceptance_rates
+            self.samples_hdf5_dataset.attrs["stepsizes"] = self.stepsizes
+
     def _write_tuning_settings(self):
         self.samples_hdf5_dataset.attrs["stepsize"] = self.stepsize
         self.samples_hdf5_dataset.attrs["amount_of_steps"] = self.amount_of_steps
@@ -1753,14 +1763,15 @@ class HMC(_AbstractSampler):
         )
 
         if proposed_stepsize <= 0:
-            _warnings.warn(
-                "The stepsize of the algorithm went below zero. You possibly "
-                "started the algorithm in a region with extremely strong "
-                "gradients. The sampler will now default to a minimum stepsize of "
-                f"{self.minimal_stepsize}. If this doesn't work, and if choosing "
-                "a different initial model does not make this warning go away, try"
-                "setting a smaller minimal stepsize and initial stepsize value."
-            )
+            if self.diagnostic_mode:
+                _warnings.warn(
+                    "The stepsize of the algorithm went below zero. You possibly "
+                    "started the algorithm in a region with extremely strong "
+                    "gradients. The sampler will now default to a minimum stepsize of "
+                    f"{self.minimal_stepsize}. If this doesn't work, and if choosing "
+                    "a different initial model does not make this warning go away, try"
+                    "setting a smaller minimal stepsize and initial stepsize value."
+                )
             proposed_stepsize = max(proposed_stepsize, self.minimal_stepsize)
 
         if (
