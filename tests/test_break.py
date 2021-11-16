@@ -9,22 +9,22 @@ import _thread
 
 def interruptor():
     # Simulate a CTRL+C event
-    _time.sleep(0.1)
+    _time.sleep(1)
     _thread.interrupt_main()
 
 
 # Build a slow version just so that we don't generate crazy amounts of samples
 class SlowStandardNormal(_hmclab.Distributions.StandardNormal1D):
     def misfit(self, m):
-        _time.sleep(0.0001)
+        _time.sleep(0.01)
         return super().misfit(m)
 
     def gradient(self, m):
-        _time.sleep(0.0001)
+        _time.sleep(0.01)
         return super().gradient(m)
 
 
-@_pytest.mark.parametrize("execution_number", range(100))
+@_pytest.mark.parametrize("execution_number", range(10))
 def test_break(execution_number):
 
     # Create some arbitrary posterior
@@ -45,7 +45,7 @@ def test_break(execution_number):
     sampler.sample(
         filename,
         posterior,
-        proposals=1000,
+        proposals=10000,
         ram_buffer_size=1,
         amount_of_steps=2,
         stepsize=0.03,
