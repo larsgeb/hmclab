@@ -31,6 +31,8 @@ setuptools.setup(
         "h5py",
         "pyyaml",
         "jax",
+        "ipywidgets",
+
     ],
     extras_require={
         "dev": [
@@ -55,10 +57,6 @@ setuptools.setup(
             "ipywidgets",
             "nbformat",
             "nbconvert < 6.0.0",
-            "pybind11",
-            "cmake",
-            "psvWave",
-        ],
     },
     entry_points={"console_scripts": ["hmclab=hmclab.__main__:cli"]},
 )
