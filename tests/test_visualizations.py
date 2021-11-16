@@ -16,7 +16,8 @@ proposals = [1000]
 @_pytest.mark.parametrize("dimensions", dimensions)
 @_pytest.mark.parametrize("proposals", proposals)
 def test_basic_sampling(
-    dimensions: int, proposals: int,
+    dimensions: int,
+    proposals: int,
 ):
 
     distribution = Normal.create_default(dimensions=dimensions)
@@ -48,7 +49,11 @@ def test_basic_sampling(
 
         try:
             _hmclab.Visualization.marginal_grid(
-                samples, [0, 1], 25, False, _plt.get_cmap("seismic"),
+                samples,
+                [0, 1],
+                25,
+                False,
+                _plt.get_cmap("seismic"),
             )
             _plt.close()
 

@@ -229,11 +229,15 @@ class _AbstractSampler(_ABC):
         run_details["samples written (after online thinning)"] = written_samples
         run_details["amount of writes"] = self.amount_of_writes
         run_details["dimensions"] = self.dimensions
-        run_details["distribution"] = ((
-            self.distribution.name
-            if (self.distribution.name is not None)
-            else self.distribution
-        ) if self.distribution is not None else None)
+        run_details["distribution"] = (
+            (
+                self.distribution.name
+                if (self.distribution.name is not None)
+                else self.distribution
+            )
+            if self.distribution is not None
+            else None
+        )
 
         # Tuning settings (panel 2) ----------------------------------------------------
         settings = {}
@@ -332,7 +336,7 @@ class _AbstractSampler(_ABC):
         ram_buffer_size: int,
         overwrite_existing_file: bool,
         max_time: int,
-        disable_progressbar:bool = False,
+        disable_progressbar: bool = False,
         diagnostic_mode: bool = False,
         **kwargs,
     ):
@@ -1026,15 +1030,17 @@ class _AbstractSampler(_ABC):
             )
         return self.functions_to_diagnose + self.sampler_specific_functions_to_diagnose
 
-    def load_results(self, burn_in:int =0)->_numpy.array:
+    def load_results(self, burn_in: int = 0) -> _numpy.array:
 
         assert burn_in >= 0
 
         from hmclab.Samples import Samples as _Samples
+
         with _Samples(self.samples_hdf5_filename, burn_in=burn_in) as samples:
             samples_numpy = samples.numpy
 
         return samples_numpy
+
 
 class RWMH(_AbstractSampler):
     stepsize: _Union[float, _numpy.ndarray] = 1.0
@@ -2038,12 +2044,15 @@ class PipeMatrix:
                 self.left_pipes[point1][point2].close()
                 self.right_pipes[point1][point2].close()
 
+
 import os
 import sys
+
+
 class MyProc(_Process):
     pass
     # def run(self):
-    #     # Define the logging in run(), MyProc's entry function when it is .start()-ed 
+    #     # Define the logging in run(), MyProc's entry function when it is .start()-ed
     #     #     p = MyProc()
     #     #     p.start()
     #     self.initialize_logging()
@@ -2234,7 +2243,7 @@ class ParallelSampleSMP:
     def _repr_html_(self):
 
         tab = _widgets.Tab()
-        if self.sampler_widget_data :
+        if self.sampler_widget_data:
             tab.children = [
                 sampler._repr_html_(
                     nested=True, widget_data=self.sampler_widget_data[f"{i}"]

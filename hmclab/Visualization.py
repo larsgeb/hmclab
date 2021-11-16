@@ -20,9 +20,7 @@ def marginal_grid(
     color_1d="black",
     figsize=(8, 8),
 ):
-    """Method to visualize 1D and 2D marginals for multiple dimensions simultaneously.
-
-    """
+    """Method to visualize 1D and 2D marginals for multiple dimensions simultaneously."""
     number_of_plots = len(dimensions_list)
 
     _plt.figure(figsize=figsize)
@@ -186,7 +184,11 @@ def marginal(
 
     # Plot histogram on diagonal
     axis.hist(
-        samples[dimension, :], bins=bins, density=False, range=dim_range, color=color,
+        samples[dimension, :],
+        bins=bins,
+        density=False,
+        range=dim_range,
+        color=color,
     )
 
     if show:
@@ -253,10 +255,14 @@ def visualize_2_dimensions(
     axis_1d_traceplot.plot(samples[dim2, :], "--", color=color_1d)
     axis_1d_traceplot.set_xlim([0, samples[dim2, :].size])
     axis_autocorrelation.plot(
-        _Processing.autocorrelation(samples[dim1, :]), "r", label=f"Dimension {dim1}",
+        _Processing.autocorrelation(samples[dim1, :]),
+        "r",
+        label=f"Dimension {dim1}",
     )
     axis_autocorrelation.plot(
-        _Processing.autocorrelation(samples[dim2, :]), "b", label=f"Dimension {dim2}",
+        _Processing.autocorrelation(samples[dim2, :]),
+        "b",
+        label=f"Dimension {dim2}",
     )
     axis_autocorrelation.plot(
         _Processing.crosscorrelation(samples[dim1, :], samples[dim2, :]),

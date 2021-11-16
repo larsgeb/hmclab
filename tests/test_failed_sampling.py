@@ -24,7 +24,10 @@ proposals = [10, 1000]  # , 731, 1500]
 @_pytest.mark.parametrize("dimensions", dimensions)
 @_pytest.mark.parametrize("proposals", proposals)
 def test_basic_sampling(
-    sampler_class: _as, distribution_class: _ad, dimensions: int, proposals: int,
+    sampler_class: _as,
+    distribution_class: _ad,
+    dimensions: int,
+    proposals: int,
 ):
 
     try:

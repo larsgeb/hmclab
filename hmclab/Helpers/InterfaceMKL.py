@@ -65,8 +65,7 @@ def sparse_gemv(A: sparse.csr_matrix, x: np.ndarray) -> np.ndarray:
 
 
 def double_sparse_gemv_via_MKL(A, x):
-    """Double precision sparse GEMV, M being sparse, V dense.
-    """
+    """Double precision sparse GEMV, M being sparse, V dense."""
     # Check input types
     if not sparse.isspmatrix_csr(A):
         raise ValueError("Matrix must be in csr format.")
@@ -134,8 +133,7 @@ def double_sparse_gemv_via_MKL(A, x):
 
 
 def single_sparse_gemv_via_MKL(A, x):
-    """Single precision sparse GEMV, M being sparse, V dense.
-    """
+    """Single precision sparse GEMV, M being sparse, V dense."""
     # Check input types
     if not sparse.isspmatrix_csr(A):
         raise ValueError("Matrix must be in csr format.")

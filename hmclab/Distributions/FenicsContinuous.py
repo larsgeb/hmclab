@@ -190,13 +190,10 @@ class FenicsContinuous(_AbstractPrior):
                 self.stiffness_matrix_sparse @ (coordinates - self.mean_discrete())
             )
         elif not self.dense and not self.lump_for_misfit:
-            return (
-                self.stiffness_matrix_sparse
-                @ _spsolve(
-                    self.mass_matrix_sparse,
-                    self.stiffness_matrix_sparse @ (coordinates - self.mean_discrete()),
-                )[:, _numpy.newaxis]
-            )
+            return self.stiffness_matrix_sparse @ _spsolve(
+                self.mass_matrix_sparse,
+                self.stiffness_matrix_sparse @ (coordinates - self.mean_discrete()),
+            )[:, _numpy.newaxis]
         elif not self.dense:
             # Is the lumped inverse mass matrix already computed?
             self.check_lumped_inverse_mass()

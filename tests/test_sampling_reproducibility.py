@@ -19,7 +19,7 @@ _as = _hmclab.Samplers._AbstractSampler
 
 dimensions = [1, 2, 3]
 distribution_classes = _Distributions._AbstractDistribution.__subclasses__()
-sampler_classes = [hmclab.Samplers.HMC]# _as.__subclasses__()
+sampler_classes = [hmclab.Samplers.HMC]  # _as.__subclasses__()
 proposals = [10, 1000]
 autotuning = [True, False]
 
@@ -57,10 +57,18 @@ def test_samples_file(
         _os.remove(filename_2)
 
     sampler_instance_1.sample(
-        filename_1, distribution, proposals=proposals, max_time=0.5, autotuning=autotuning
+        filename_1,
+        distribution,
+        proposals=proposals,
+        max_time=0.5,
+        autotuning=autotuning,
     )
     sampler_instance_2.sample(
-        filename_2, distribution, proposals=proposals, max_time=0.5, autotuning=autotuning
+        filename_2,
+        distribution,
+        proposals=proposals,
+        max_time=0.5,
+        autotuning=autotuning,
     )
 
     # Check if the file was created. If it wasn't, fail
@@ -81,7 +89,9 @@ def test_samples_file(
         + 1
     )
 
-    with _hmclab.Samples(filename_1) as samples_1, _hmclab.Samples(filename_2) as samples_2:
+    with _hmclab.Samples(filename_1) as samples_1, _hmclab.Samples(
+        filename_2
+    ) as samples_2:
         # Assert that the HDF array has the right dimensions
         assert samples_1.numpy.shape == (
             distribution.dimensions + 1,
@@ -92,13 +102,16 @@ def test_samples_file(
             samples_written_expected_2,
         )
 
-        min_written_samples = min(samples_written_expected_1, samples_written_expected_2)
+        min_written_samples = min(
+            samples_written_expected_1, samples_written_expected_2
+        )
 
         samples_1_n = samples_1.numpy
         samples_2_n = samples_2.numpy
 
-        assert _numpy.all(samples_1[:,:min_written_samples] == samples_2[:,:min_written_samples])
-
+        assert _numpy.all(
+            samples_1[:, :min_written_samples] == samples_2[:, :min_written_samples]
+        )
 
     # Remove the file
     _os.remove(filename_1)

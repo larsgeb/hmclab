@@ -15,7 +15,8 @@ installed = "psvWave" in sys.modules
 )
 def test_elasticFWI_creation():
     likelihood = _hmclab.Distributions.ElasticFullWaveform2D.create_default(
-        4800, "tests/configurations/default_testing_configuration.ini",
+        4800,
+        "tests/configurations/default_testing_configuration.ini",
     )
 
     # This should fail with a InvalidCaseError
@@ -42,7 +43,9 @@ def test_elasticFWI_creation():
 
     ux, uz = likelihood.fdModel.get_observed_data()
     _hmclab.Distributions.ElasticFullWaveform2D(
-        "tests/configurations/default_testing_configuration.ini", ux_obs=ux, uz_obs=uz,
+        "tests/configurations/default_testing_configuration.ini",
+        ux_obs=ux,
+        uz_obs=uz,
     )
 
 
@@ -51,7 +54,8 @@ def test_elasticFWI_creation():
 )
 def test_elasticFWI_gradient():
     likelihood = _hmclab.Distributions.ElasticFullWaveform2D.create_default(
-        4800, "tests/configurations/default_testing_configuration.ini",
+        4800,
+        "tests/configurations/default_testing_configuration.ini",
     )
 
     likelihood.temperature = 1.0
@@ -75,7 +79,8 @@ def test_elasticFWI_gradient():
 )
 def test_elasticFWI_sampling():
     likelihood = _hmclab.Distributions.ElasticFullWaveform2D.create_default(
-        4800, "tests/configurations/default_testing_configuration.ini",
+        4800,
+        "tests/configurations/default_testing_configuration.ini",
     )
     likelihood.temperature = 100.0
 

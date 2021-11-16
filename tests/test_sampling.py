@@ -61,7 +61,7 @@ def test_basic_sampling(
     )
     if sampler_instance.amount_of_writes > 0:
         # 10 percent burn_in
-        burn_in = int(0.1*sampler_instance.amount_of_writes)
+        burn_in = int(0.1 * sampler_instance.amount_of_writes)
         sampler_instance.load_results(burn_in=burn_in)
 
     # Check if the file was created. If it wasn't, fail
@@ -132,4 +132,3 @@ def test_samples_file(
 
     # Remove the file
     _os.remove(filename)
-
