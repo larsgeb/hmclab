@@ -1405,6 +1405,10 @@ class HMC(_AbstractSampler):
     """A NumPy ndarray containing all past acceptance rates. Collected if autotuning is
     True."""
 
+    randomize_stepsize: bool = True
+    """Boolean describing whether or not to randomize the stepsize slightly for every trajectory,
+    by a Uniform~[0.5-1.5] * stepsize."""
+
     stepsizes: _numpy.ndarray = None
     """A NumPy ndarray containing all past stepsizes for the HMC algorithm. Collected if
     autotuning is True."""
@@ -1769,9 +1773,14 @@ class HMC(_AbstractSampler):
         position = self.current_model.copy()
         momentum = self.current_momentum.copy()
 
+        if self.randomize_stepsize:
+            local_stepsize = self.rng.uniform(0.5, 1.5) * self.stepsize
+        else:
+            local_stepsize = self.stepsize
+
         # Leapfrog integration ---------------------------------------------------------
         position += (
-            0.5 * self.stepsize * self.mass_matrix.kinetic_energy_gradient(momentum)
+            0.5 * local_stepsize * self.mass_matrix.kinetic_energy_gradient(momentum)
         )
 
         self.distribution.corrector(position, momentum)
@@ -1791,9 +1800,9 @@ class HMC(_AbstractSampler):
         # Integration loop
         for i in integration_iterator:
             # Momentum step
-            momentum -= self.stepsize * self.distribution.gradient(position)
+            momentum -= local_stepsize * self.distribution.gradient(position)
             # Position step
-            position += self.stepsize * self.mass_matrix.kinetic_energy_gradient(
+            position += local_stepsize * self.mass_matrix.kinetic_energy_gradient(
                 momentum
             )
             # Correct bounds
@@ -1801,10 +1810,10 @@ class HMC(_AbstractSampler):
 
         # Full momentum and half step position after loop ------------------------------
         # Momentum step
-        momentum -= self.stepsize * self.distribution.gradient(position)
+        momentum -= local_stepsize * self.distribution.gradient(position)
         # Position step
         position += (
-            0.5 * self.stepsize * self.mass_matrix.kinetic_energy_gradient(momentum)
+            0.5 * local_stepsize * self.mass_matrix.kinetic_energy_gradient(momentum)
         )
         self.distribution.corrector(position, momentum)
 
@@ -1819,11 +1828,16 @@ class HMC(_AbstractSampler):
         b1 = 0.191667800000000000000
         b2 = 1.0 / 2.0 - b1
 
-        a1 *= self.stepsize
-        a2 *= self.stepsize
-        a3 *= self.stepsize
-        b1 *= self.stepsize
-        b2 *= self.stepsize
+        if self.randomize_stepsize:
+            local_stepsize = self.rng.uniform(0.5, 1.5) * self.stepsize
+        else:
+            local_stepsize = self.stepsize
+
+        a1 *= local_stepsize
+        a2 *= local_stepsize
+        a3 *= local_stepsize
+        b1 *= local_stepsize
+        b2 *= local_stepsize
 
         # Make sure not to alter a view but a copy of the passed arrays.
         position = self.current_model.copy()
@@ -1880,10 +1894,15 @@ class HMC(_AbstractSampler):
         b1 = 0.29619504261126
         b2 = 1.0 - 2.0 * b1
 
-        a1 *= self.stepsize
-        a2 *= self.stepsize
-        b1 *= self.stepsize
-        b2 *= self.stepsize
+        if self.randomize_stepsize:
+            local_stepsize = self.rng.uniform(0.5, 1.5) * self.stepsize
+        else:
+            local_stepsize = self.stepsize
+
+        a1 *= local_stepsize
+        a2 *= local_stepsize
+        b1 *= local_stepsize
+        b2 *= local_stepsize
 
         # Make sure not to alter a view but a copy of the passed arrays.
         position = self.current_model.copy()
