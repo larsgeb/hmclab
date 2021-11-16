@@ -2,7 +2,7 @@
 Visualization
 #############
 
-.. module:: hmc_tomography.Visualization
+.. module:: hmclab.Visualization
 
 Available visualization methods:
 

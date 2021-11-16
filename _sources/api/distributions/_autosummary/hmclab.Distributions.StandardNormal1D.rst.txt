@@ -1,0 +1,47 @@
+﻿StandardNormal1D
+================
+
+.. currentmodule:: hmclab.Distributions
+
+.. autoclass:: StandardNormal1D
+   :members:                                 
+   :show-inheritance:                        
+   :inherited-members:                       
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+   
+      ~StandardNormal1D.__init__
+      ~StandardNormal1D.corrector
+      ~StandardNormal1D.create_default
+      ~StandardNormal1D.generate
+      ~StandardNormal1D.gradient
+      ~StandardNormal1D.misfit
+      ~StandardNormal1D.misfit_bounds
+      ~StandardNormal1D.normalize
+      ~StandardNormal1D.update_bounds
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~StandardNormal1D.dimensions
+      ~StandardNormal1D.lower_bounds
+      ~StandardNormal1D.mean
+      ~StandardNormal1D.name
+      ~StandardNormal1D.normalized
+      ~StandardNormal1D.std
+      ~StandardNormal1D.upper_bounds
+   
+   

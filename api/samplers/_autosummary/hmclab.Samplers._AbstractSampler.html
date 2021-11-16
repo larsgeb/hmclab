@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>_AbstractSampler &mdash; HMCLab archive/parallel-tempering-33-g7bdeca4-dirty documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/autoclasstoc.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="RWMH" href="hmclab.Samplers.RWMH.html" />
+    <link rel="prev" title="Samplers" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> HMCLab
+            <img src="../../../_static/hmctom.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                archive/parallel-tempering-33-g7bdeca4-dirty
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">HMC Tomography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../hmc.html">The Hamiltonian Monte Carlo algorithm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../setup.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks.html">Notebooks: Examples and tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../distributions/index.html">Distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../massmatrices/index.html">MassMatrices</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Samplers</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">_AbstractSampler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hmclab.Samplers.RWMH.html">RWMH</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hmclab.Samplers.HMC.html">HMC</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../optimizers/index.html">Optimizers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../visualization/index.html">Visualization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/hmclab.Samples.html">Samples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../py-modindex.html">Module index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../genindex.html">Alphabetic index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">HMCLab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">API reference</a> &raquo;</li>
+          <li><a href="../index.html">Samplers</a> &raquo;</li>
+      <li>_AbstractSampler</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/api/samplers/_autosummary/hmclab.Samplers._AbstractSampler.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="abstractsampler">
+<h1>_AbstractSampler<a class="headerlink" href="#abstractsampler" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">hmclab.Samplers.</span></span><span class="sig-name descname"><span class="pre">_AbstractSampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/hmclab/Samplers.html#_AbstractSampler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hmclab.Samplers._AbstractSampler" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Abstract base class for Markov chain Monte Carlo samplers.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/hmclab/Samplers.html#_AbstractSampler.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Constructor that sets the random number generator for the sampler. Pass a
+seed to make a Markov chain reproducible (given that all settings are re-used.)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>seed</strong> (<em>int</em>) – Description of parameter <cite>seed</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.__init__" title="hmclab.Samplers._AbstractSampler.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a></p></td>
+<td><p>Constructor that sets the random number generator for the sampler.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_diagnostics</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_results</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.print_results" title="hmclab.Samplers._AbstractSampler.print_results"><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_results</span></code></a></p></td>
+<td><p>Print Jupyter widget from <cite>_repr_html_()</cite> to stdout.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.accepted_proposals" title="hmclab.Samplers._AbstractSampler.accepted_proposals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">accepted_proposals</span></code></a></p></td>
+<td><p>An integer representing the amount of accepted proposals.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.amount_of_writes" title="hmclab.Samplers._AbstractSampler.amount_of_writes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">amount_of_writes</span></code></a></p></td>
+<td><p>A positive integer representing the amount of times the sampler has written to disk.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.current_model" title="hmclab.Samplers._AbstractSampler.current_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_model</span></code></a></p></td>
+<td><p>A NumPy array containing the model at the current state of the Markov chain.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.current_proposal" title="hmclab.Samplers._AbstractSampler.current_proposal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_proposal</span></code></a></p></td>
+<td><p>An integer representing the current proposal index (before thinning) of the Markov chain.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.current_proposal_after_thinning" title="hmclab.Samplers._AbstractSampler.current_proposal_after_thinning"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_proposal_after_thinning</span></code></a></p></td>
+<td><p>An integer representing the current proposal index after thinning of the Markov chain.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.current_x" title="hmclab.Samplers._AbstractSampler.current_x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_x</span></code></a></p></td>
+<td><p>A float containing <span class="math notranslate nohighlight">\(\chi = -\log\left( p\right)\)</span> (i.e.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.diagnostic_mode" title="hmclab.Samplers._AbstractSampler.diagnostic_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">diagnostic_mode</span></code></a></p></td>
+<td><p>Boolean describing whether functions need to be profiled for performance.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.dimensions" title="hmclab.Samplers._AbstractSampler.dimensions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dimensions</span></code></a></p></td>
+<td><p>An integer representing the dimensionality in which the MCMC sampler works.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.disable_progressbar" title="hmclab.Samplers._AbstractSampler.disable_progressbar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">disable_progressbar</span></code></a></p></td>
+<td><p>A bool describing whether or not to disable the TQDM progressbar</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.distribution" title="hmclab.Samplers._AbstractSampler.distribution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">distribution</span></code></a></p></td>
+<td><p>The _AbstractDistribution-derived object on which the sampler works.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.end_time" title="hmclab.Samplers._AbstractSampler.end_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">end_time</span></code></a></p></td>
+<td><p>Time (and date) at which sampling was terminated / finished.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.exchange_interval" title="hmclab.Samplers._AbstractSampler.exchange_interval"><code class="xref py py-obj docutils literal notranslate"><span class="pre">exchange_interval</span></code></a></p></td>
+<td><p>Integer describing how many samples lie between the attempted swap of states between samplers.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.exchange_schedule" title="hmclab.Samplers._AbstractSampler.exchange_schedule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">exchange_schedule</span></code></a></p></td>
+<td><p>A pre-communicated exchange schedule determining when and which samplers try to exchange states.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.functions_to_diagnose" title="hmclab.Samplers._AbstractSampler.functions_to_diagnose"><code class="xref py py-obj docutils literal notranslate"><span class="pre">functions_to_diagnose</span></code></a></p></td>
+<td><p>Array of functions to be profiled, typically contains functions only from the abstract base class.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">main_thread_keyboard_interrupt</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.max_time" title="hmclab.Samplers._AbstractSampler.max_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_time</span></code></a></p></td>
+<td><p>A float representing the maximum time in seconds that sampling is allowed to take before it is automatically terminated.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.name" title="hmclab.Samplers._AbstractSampler.name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span></code></a></p></td>
+<td><p>The name of the sampler</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.online_thinning" title="hmclab.Samplers._AbstractSampler.online_thinning"><code class="xref py py-obj docutils literal notranslate"><span class="pre">online_thinning</span></code></a></p></td>
+<td><p>An integer representing the interval between stored samples.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.parallel" title="hmclab.Samplers._AbstractSampler.parallel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parallel</span></code></a></p></td>
+<td><p>A boolean describing if this sampler works in an array of multiple samplers.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.pipe_matrix" title="hmclab.Samplers._AbstractSampler.pipe_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pipe_matrix</span></code></a></p></td>
+<td><p>A matrix of two-way communicators between samplers.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.progressbar_refresh_rate" title="hmclab.Samplers._AbstractSampler.progressbar_refresh_rate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">progressbar_refresh_rate</span></code></a></p></td>
+<td><p>A float representing how many seconds lies between an update of the progress bar statistics (acceptance rate etc.).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.proposals" title="hmclab.Samplers._AbstractSampler.proposals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">proposals</span></code></a></p></td>
+<td><p>An integer representing the amount of requested proposals for a run.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.proposed_model" title="hmclab.Samplers._AbstractSampler.proposed_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">proposed_model</span></code></a></p></td>
+<td><p>A NumPy array containing the model at the proposed state of the Markov chain.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.proposed_x" title="hmclab.Samplers._AbstractSampler.proposed_x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">proposed_x</span></code></a></p></td>
+<td><p>A float containing <span class="math notranslate nohighlight">\(\chi = -\log\left( p\right)\)</span> (i.e.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.ram_buffer" title="hmclab.Samplers._AbstractSampler.ram_buffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ram_buffer</span></code></a></p></td>
+<td><p>A NumPy ndarray containing the samples that are as of yet not written to disk.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.ram_buffer_size" title="hmclab.Samplers._AbstractSampler.ram_buffer_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ram_buffer_size</span></code></a></p></td>
+<td><p>A positive integer indicating the size of the RAM buffer in amount of samples.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rng</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.sampler_index" title="hmclab.Samplers._AbstractSampler.sampler_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sampler_index</span></code></a></p></td>
+<td><p>An integer describing the index of the parallel sampler in the array of samplers.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.sampler_specific_functions_to_diagnose" title="hmclab.Samplers._AbstractSampler.sampler_specific_functions_to_diagnose"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sampler_specific_functions_to_diagnose</span></code></a></p></td>
+<td><p>Array of sampler specific functions to be profiled.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.samples_hdf5_dataset" title="hmclab.Samplers._AbstractSampler.samples_hdf5_dataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">samples_hdf5_dataset</span></code></a></p></td>
+<td><p>A string containing the HDF5 group of the hdf5 file to which samples will be stored.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.samples_hdf5_filehandle" title="hmclab.Samplers._AbstractSampler.samples_hdf5_filehandle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">samples_hdf5_filehandle</span></code></a></p></td>
+<td><p>A HDF5 file handle of the hdf5 file to which samples will be stored.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.samples_hdf5_filename" title="hmclab.Samplers._AbstractSampler.samples_hdf5_filename"><code class="xref py py-obj docutils literal notranslate"><span class="pre">samples_hdf5_filename</span></code></a></p></td>
+<td><p>A string containing the path+filename of the hdf5 file to which samples will be stored.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.start_time" title="hmclab.Samplers._AbstractSampler.start_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_time</span></code></a></p></td>
+<td><p>Time (and date) at which sampling was started.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hmclab.Samplers._AbstractSampler.times_started" title="hmclab.Samplers._AbstractSampler.times_started"><code class="xref py py-obj docutils literal notranslate"><span class="pre">times_started</span></code></a></p></td>
+<td><p>An integer representing how often this sampler object has started sampling.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><em class="property"> <span class="pre">=</span> <span class="pre">'Monte</span> <span class="pre">Carlo</span> <span class="pre">sampler</span> <span class="pre">abstract</span> <span class="pre">base</span> <span class="pre">class'</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.name" title="Permalink to this definition"></a></dt>
+<dd><p>The name of the sampler</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.dimensions">
+<span class="sig-name descname"><span class="pre">dimensions</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.dimensions" title="Permalink to this definition"></a></dt>
+<dd><p>An integer representing the dimensionality in which the MCMC sampler works.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.distribution">
+<span class="sig-name descname"><span class="pre">distribution</span></span><em class="property"><span class="pre">:</span> <a class="reference internal" href="../../distributions/_autosummary/hmclab.Distributions._AbstractDistribution.html#hmclab.Distributions._AbstractDistribution" title="hmclab.Distributions.base._AbstractDistribution"><span class="pre">hmclab.Distributions.base._AbstractDistribution</span></a></em><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.distribution" title="Permalink to this definition"></a></dt>
+<dd><p>The _AbstractDistribution-derived object on which the sampler works.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.samples_hdf5_filename">
+<span class="sig-name descname"><span class="pre">samples_hdf5_filename</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.samples_hdf5_filename" title="Permalink to this definition"></a></dt>
+<dd><p>A string containing the path+filename of the hdf5 file to which samples will be
+stored.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.samples_hdf5_filehandle">
+<span class="sig-name descname"><span class="pre">samples_hdf5_filehandle</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.samples_hdf5_filehandle" title="Permalink to this definition"></a></dt>
+<dd><p>A HDF5 file handle of the hdf5 file to which samples will be stored.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.samples_hdf5_dataset">
+<span class="sig-name descname"><span class="pre">samples_hdf5_dataset</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.samples_hdf5_dataset" title="Permalink to this definition"></a></dt>
+<dd><p>A string containing the HDF5 group of the hdf5 file to which samples will be
+stored.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.ram_buffer_size">
+<span class="sig-name descname"><span class="pre">ram_buffer_size</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.ram_buffer_size" title="Permalink to this definition"></a></dt>
+<dd><p>A positive integer indicating the size of the RAM buffer in amount of samples.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.ram_buffer">
+<span class="sig-name descname"><span class="pre">ram_buffer</span></span><em class="property"><span class="pre">:</span> <span class="pre">numpy.ndarray</span></em><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.ram_buffer" title="Permalink to this definition"></a></dt>
+<dd><p>A NumPy ndarray containing the samples that are as of yet not written to disk.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.current_model">
+<span class="sig-name descname"><span class="pre">current_model</span></span><em class="property"><span class="pre">:</span> <span class="pre">numpy.ndarray</span></em><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.current_model" title="Permalink to this definition"></a></dt>
+<dd><p>A NumPy array containing the model at the current state of the Markov chain.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.proposed_model">
+<span class="sig-name descname"><span class="pre">proposed_model</span></span><em class="property"><span class="pre">:</span> <span class="pre">numpy.ndarray</span></em><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.proposed_model" title="Permalink to this definition"></a></dt>
+<dd><p>A NumPy array containing the model at the proposed state of the Markov chain.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.current_x">
+<span class="sig-name descname"><span class="pre">current_x</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.current_x" title="Permalink to this definition"></a></dt>
+<dd><p>A float containing <span class="math notranslate nohighlight">\(\chi = -\log\left( p\right)\)</span> (i.e. the misfit,
+negative log probability) of the distribution at the current state of the
+Markov chain.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.proposed_x">
+<span class="sig-name descname"><span class="pre">proposed_x</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.proposed_x" title="Permalink to this definition"></a></dt>
+<dd><p>A float containing <span class="math notranslate nohighlight">\(\chi = -\log\left( p\right)\)</span> (i.e. the misfit,
+negative log probability) of the distribution at the proposed state of the
+Markov chain.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.amount_of_writes">
+<span class="sig-name descname"><span class="pre">amount_of_writes</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.amount_of_writes" title="Permalink to this definition"></a></dt>
+<dd><p>A positive integer representing the amount of times the sampler has written to
+disk.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.progressbar_refresh_rate">
+<span class="sig-name descname"><span class="pre">progressbar_refresh_rate</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><em class="property"> <span class="pre">=</span> <span class="pre">0.25</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.progressbar_refresh_rate" title="Permalink to this definition"></a></dt>
+<dd><p>A float representing how many seconds lies between an update of the progress bar
+statistics (acceptance rate etc.).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.max_time">
+<span class="sig-name descname"><span class="pre">max_time</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.max_time" title="Permalink to this definition"></a></dt>
+<dd><p>A float representing the maximum time in seconds that sampling is allowed to take
+before it is automatically terminated. The value None is used for unlimited time.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.times_started">
+<span class="sig-name descname"><span class="pre">times_started</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><em class="property"> <span class="pre">=</span> <span class="pre">0</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.times_started" title="Permalink to this definition"></a></dt>
+<dd><p>An integer representing how often this sampler object has started sampling.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.proposals">
+<span class="sig-name descname"><span class="pre">proposals</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.proposals" title="Permalink to this definition"></a></dt>
+<dd><p>An integer representing the amount of requested proposals for a run.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.online_thinning">
+<span class="sig-name descname"><span class="pre">online_thinning</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.online_thinning" title="Permalink to this definition"></a></dt>
+<dd><p>An integer representing the interval between stored samples. Defaults to 1, i.e.
+all samples are stored.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.current_proposal">
+<span class="sig-name descname"><span class="pre">current_proposal</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><em class="property"> <span class="pre">=</span> <span class="pre">0</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.current_proposal" title="Permalink to this definition"></a></dt>
+<dd><p>An integer representing the current proposal index (before thinning) of the
+Markov chain.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.current_proposal_after_thinning">
+<span class="sig-name descname"><span class="pre">current_proposal_after_thinning</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><em class="property"> <span class="pre">=</span> <span class="pre">0</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.current_proposal_after_thinning" title="Permalink to this definition"></a></dt>
+<dd><p>An integer representing the current proposal index after thinning of the
+Markov chain.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.accepted_proposals">
+<span class="sig-name descname"><span class="pre">accepted_proposals</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><em class="property"> <span class="pre">=</span> <span class="pre">0</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.accepted_proposals" title="Permalink to this definition"></a></dt>
+<dd><p>An integer representing the amount of accepted proposals.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.disable_progressbar">
+<span class="sig-name descname"><span class="pre">disable_progressbar</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><em class="property"> <span class="pre">=</span> <span class="pre">False</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.disable_progressbar" title="Permalink to this definition"></a></dt>
+<dd><p>A bool describing whether or not to disable the TQDM progressbar</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.end_time">
+<span class="sig-name descname"><span class="pre">end_time</span></span><em class="property"><span class="pre">:</span> <span class="pre">datetime.datetime</span></em><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.end_time" title="Permalink to this definition"></a></dt>
+<dd><p>Time (and date) at which sampling was terminated / finished.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.start_time">
+<span class="sig-name descname"><span class="pre">start_time</span></span><em class="property"><span class="pre">:</span> <span class="pre">datetime.datetime</span></em><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.start_time" title="Permalink to this definition"></a></dt>
+<dd><p>Time (and date) at which sampling was started.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.diagnostic_mode">
+<span class="sig-name descname"><span class="pre">diagnostic_mode</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><em class="property"> <span class="pre">=</span> <span class="pre">True</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.diagnostic_mode" title="Permalink to this definition"></a></dt>
+<dd><p>Boolean describing whether functions need to be profiled for performance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.functions_to_diagnose">
+<span class="sig-name descname"><span class="pre">functions_to_diagnose</span></span><em class="property"><span class="pre">:</span> <span class="pre">List</span></em><em class="property"> <span class="pre">=</span> <span class="pre">[]</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.functions_to_diagnose" title="Permalink to this definition"></a></dt>
+<dd><p>Array of functions to be profiled, typically contains functions only from the
+abstract base class.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.sampler_specific_functions_to_diagnose">
+<span class="sig-name descname"><span class="pre">sampler_specific_functions_to_diagnose</span></span><em class="property"><span class="pre">:</span> <span class="pre">List</span></em><em class="property"> <span class="pre">=</span> <span class="pre">[]</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.sampler_specific_functions_to_diagnose" title="Permalink to this definition"></a></dt>
+<dd><p>Array of sampler specific functions to be profiled.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.parallel">
+<span class="sig-name descname"><span class="pre">parallel</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><em class="property"> <span class="pre">=</span> <span class="pre">False</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.parallel" title="Permalink to this definition"></a></dt>
+<dd><p>A boolean describing if this sampler works in an array of multiple samplers.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.sampler_index">
+<span class="sig-name descname"><span class="pre">sampler_index</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><em class="property"> <span class="pre">=</span> <span class="pre">0</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.sampler_index" title="Permalink to this definition"></a></dt>
+<dd><p>An integer describing the index of the parallel sampler in the array of samplers.
+Essential for two-way communication.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.exchange_schedule">
+<span class="sig-name descname"><span class="pre">exchange_schedule</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.exchange_schedule" title="Permalink to this definition"></a></dt>
+<dd><p>A pre-communicated exchange schedule determining when and which samplers try to
+exchange states.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.pipe_matrix">
+<span class="sig-name descname"><span class="pre">pipe_matrix</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.pipe_matrix" title="Permalink to this definition"></a></dt>
+<dd><p>A matrix of two-way communicators between samplers. Indexed using
+<cite>sampler_index.</cite></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.exchange_interval">
+<span class="sig-name descname"><span class="pre">exchange_interval</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.exchange_interval" title="Permalink to this definition"></a></dt>
+<dd><p>Integer describing how many samples lie between the attempted swap of states
+between samplers.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hmclab.Samplers._AbstractSampler.print_results">
+<span class="sig-name descname"><span class="pre">print_results</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/hmclab/Samplers.html#_AbstractSampler.print_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hmclab.Samplers._AbstractSampler.print_results" title="Permalink to this definition"></a></dt>
+<dd><p>Print Jupyter widget from <cite>_repr_html_()</cite> to stdout.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="Samplers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hmclab.Samplers.RWMH.html" class="btn btn-neutral float-right" title="RWMH" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2021, Andrea Zunino, Andreas Fichtner, Lars Gebraad.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

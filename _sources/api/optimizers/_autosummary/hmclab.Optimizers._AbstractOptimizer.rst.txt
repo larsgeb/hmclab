@@ -1,0 +1,37 @@
+﻿\_AbstractOptimizer
+===================
+
+.. currentmodule:: hmclab.Optimizers
+
+.. autoclass:: _AbstractOptimizer
+   :members:                                 
+   :show-inheritance:                        
+   :inherited-members:                       
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+   
+      ~_AbstractOptimizer.__init__
+      ~_AbstractOptimizer.iterate
+      ~_AbstractOptimizer.iterate_once
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~_AbstractOptimizer.dimensions
+      ~_AbstractOptimizer.name
+      ~_AbstractOptimizer.target
+   
+   

@@ -1,82 +1,43 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>Distributions &mdash; HMCLab archive/parallel-tempering-11-g497b41c documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/autoclasstoc.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+  <title>Distributions &mdash; HMCLab archive/parallel-tempering-33-g7bdeca4-dirty documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/autoclasstoc.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="_AbstractDistribution" href="_autosummary/hmc_tomography.Distributions._AbstractDistribution.html" />
+    <link rel="next" title="_AbstractDistribution" href="_autosummary/hmclab.Distributions._AbstractDistribution.html" />
     <link rel="prev" title="API reference" href="../index.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../../index.html" class="icon icon-home"> HMCLab
-          
-
-          
-            
             <img src="../../_static/hmctom.png" class="logo" alt="Logo"/>
-          
           </a>
-
-          
-            
-            
               <div class="version">
-                archive/parallel-tempering-11-g497b41c
+                archive/parallel-tempering-33-g7bdeca4-dirty
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -84,19 +45,8 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../index.html">HMC Tomography</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../hmc.html">The Hamiltonian Monte Carlo algorithm</a></li>
@@ -104,98 +54,56 @@
 <li class="toctree-l1"><a class="reference internal" href="../../notebooks.html">Notebooks: Examples and tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">API reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Distributions</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/hmc_tomography.Distributions._AbstractDistribution.html">_AbstractDistribution</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/hmc_tomography.Distributions.StandardNormal1D.html">StandardNormal1D</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/hmc_tomography.Distributions.Normal.html">Normal</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/hmc_tomography.Distributions.Laplace.html">Laplace</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/hmc_tomography.Distributions.Uniform.html">Uniform</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/hmc_tomography.Distributions.LinearMatrix.html">LinearMatrix</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/hmc_tomography.Distributions.CompositeDistribution.html">CompositeDistribution</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/hmc_tomography.Distributions.AdditiveDistribution.html">AdditiveDistribution</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/hmc_tomography.Distributions.BayesRule.html">BayesRule</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/hmc_tomography.Distributions.Himmelblau.html">Himmelblau</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/hmc_tomography.Distributions.SourceLocation2D.html">SourceLocation2D</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/hmc_tomography.Distributions.SourceLocation3D.html">SourceLocation3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/hmclab.Distributions._AbstractDistribution.html">_AbstractDistribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/hmclab.Distributions.StandardNormal1D.html">StandardNormal1D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/hmclab.Distributions.Normal.html">Normal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/hmclab.Distributions.Laplace.html">Laplace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/hmclab.Distributions.Uniform.html">Uniform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/hmclab.Distributions.LinearMatrix.html">LinearMatrix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/hmclab.Distributions.CompositeDistribution.html">CompositeDistribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/hmclab.Distributions.AdditiveDistribution.html">AdditiveDistribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/hmclab.Distributions.BayesRule.html">BayesRule</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/hmclab.Distributions.Himmelblau.html">Himmelblau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/hmclab.Distributions.SourceLocation2D.html">SourceLocation2D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/hmclab.Distributions.SourceLocation3D.html">SourceLocation3D</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../massmatrices/index.html">MassMatrices</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../samplers/index.html">Samplers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../optimizers/index.html">Optimizers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../visualization/index.html">Visualization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../_autosummary/hmc_tomography.Samples.html">Samples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/hmclab.Samples.html">Samples</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../py-modindex.html">Module index</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Alphabetic index</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">HMCLab</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="../index.html">API reference</a> &raquo;</li>
-        
       <li>Distributions</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../../_sources/api/distributions/index.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   
 <style>
 /* CSS overrides for sphinx_rtd_theme */
@@ -220,12 +128,12 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="module-hmc_tomography.Distributions">
-<span id="distributions"></span><h1>Distributions<a class="headerlink" href="#module-hmc_tomography.Distributions" title="Permalink to this headline">¶</a></h1>
+<section id="module-hmclab.Distributions">
+<span id="distributions"></span><h1>Distributions<a class="headerlink" href="#module-hmclab.Distributions" title="Permalink to this headline"></a></h1>
 <p>Distribution classes and associated methods.</p>
 <p>The classes in this module describe statistical distributions. Most of them are
 non-normalized having implications for quantifying the evidence term of Bayes’ rule.</p>
-<p>All of the classes inherit from <a class="reference internal" href="_autosummary/hmc_tomography.Distributions._AbstractDistribution.html#hmc_tomography.Distributions._AbstractDistribution" title="hmc_tomography.Distributions._AbstractDistribution"><code class="xref py py-class docutils literal notranslate"><span class="pre">_AbstractDistribution</span></code></a>; a base class outlining
+<p>All of the classes inherit from <a class="reference internal" href="_autosummary/hmclab.Distributions._AbstractDistribution.html#hmclab.Distributions._AbstractDistribution" title="hmclab.Distributions._AbstractDistribution"><code class="xref py py-class docutils literal notranslate"><span class="pre">_AbstractDistribution</span></code></a>; a base class outlining
 required methods and their signatures (required in- and outputs).</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -239,92 +147,75 @@ required methods and their signatures (required in- and outputs).</p>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/hmc_tomography.Distributions._AbstractDistribution.html#hmc_tomography.Distributions._AbstractDistribution" title="hmc_tomography.Distributions._AbstractDistribution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_AbstractDistribution</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/hmclab.Distributions._AbstractDistribution.html#hmclab.Distributions._AbstractDistribution" title="hmclab.Distributions._AbstractDistribution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_AbstractDistribution</span></code></a></p></td>
 <td><p>Abstract base class for distributions.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/hmc_tomography.Distributions.StandardNormal1D.html#hmc_tomography.Distributions.StandardNormal1D" title="hmc_tomography.Distributions.StandardNormal1D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StandardNormal1D</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/hmclab.Distributions.StandardNormal1D.html#hmclab.Distributions.StandardNormal1D" title="hmclab.Distributions.StandardNormal1D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StandardNormal1D</span></code></a></p></td>
 <td><p>Standard normal distribution in 1 dimension.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/hmc_tomography.Distributions.Normal.html#hmc_tomography.Distributions.Normal" title="hmc_tomography.Distributions.Normal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Normal</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/hmclab.Distributions.Normal.html#hmclab.Distributions.Normal" title="hmclab.Distributions.Normal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Normal</span></code></a></p></td>
 <td><p>Normal distribution in model space.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/hmc_tomography.Distributions.Laplace.html#hmc_tomography.Distributions.Laplace" title="hmc_tomography.Distributions.Laplace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Laplace</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/hmclab.Distributions.Laplace.html#hmclab.Distributions.Laplace" title="hmclab.Distributions.Laplace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Laplace</span></code></a></p></td>
 <td><p>Laplace distribution in model space.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/hmc_tomography.Distributions.Uniform.html#hmc_tomography.Distributions.Uniform" title="hmc_tomography.Distributions.Uniform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Uniform</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/hmclab.Distributions.Uniform.html#hmclab.Distributions.Uniform" title="hmclab.Distributions.Uniform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Uniform</span></code></a></p></td>
 <td><p>Uniform bounded or unbouded distribution in model space.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/hmc_tomography.Distributions.LinearMatrix.html#hmc_tomography.Distributions.LinearMatrix" title="hmc_tomography.Distributions.LinearMatrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearMatrix</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/hmclab.Distributions.LinearMatrix.html#hmclab.Distributions.LinearMatrix" title="hmclab.Distributions.LinearMatrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearMatrix</span></code></a></p></td>
 <td><p>Likelihood model based on a linear forward model given as <span class="math notranslate nohighlight">\(G \mathbf{m} = \mathbf{d}\)</span> coupled with Gaussian observational errors.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/hmc_tomography.Distributions.CompositeDistribution.html#hmc_tomography.Distributions.CompositeDistribution" title="hmc_tomography.Distributions.CompositeDistribution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CompositeDistribution</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/hmclab.Distributions.CompositeDistribution.html#hmclab.Distributions.CompositeDistribution" title="hmclab.Distributions.CompositeDistribution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CompositeDistribution</span></code></a></p></td>
 <td><p>Distribution distribution combined from multiple unconditional distributions.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/hmc_tomography.Distributions.AdditiveDistribution.html#hmc_tomography.Distributions.AdditiveDistribution" title="hmc_tomography.Distributions.AdditiveDistribution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AdditiveDistribution</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/hmclab.Distributions.AdditiveDistribution.html#hmclab.Distributions.AdditiveDistribution" title="hmclab.Distributions.AdditiveDistribution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AdditiveDistribution</span></code></a></p></td>
 <td><p>Distribution generated by summing the characteristic functions of two other distributions.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/hmc_tomography.Distributions.BayesRule.html#hmc_tomography.Distributions.BayesRule" title="hmc_tomography.Distributions.BayesRule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BayesRule</span></code></a></p></td>
-<td><p>A class to apply (the unnormalized) Bayes’ rule to two or more distributions.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/hmclab.Distributions.BayesRule.html#hmclab.Distributions.BayesRule" title="hmclab.Distributions.BayesRule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BayesRule</span></code></a></p></td>
+<td><p>A class to apply (the unnormalized) Bayes' rule to two or more distributions.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/hmc_tomography.Distributions.Himmelblau.html#hmc_tomography.Distributions.Himmelblau" title="hmc_tomography.Distributions.Himmelblau"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Himmelblau</span></code></a></p></td>
-<td><p>Himmelblau’s 2-dimensional function.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/hmclab.Distributions.Himmelblau.html#hmclab.Distributions.Himmelblau" title="hmclab.Distributions.Himmelblau"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Himmelblau</span></code></a></p></td>
+<td><p>Himmelblau's 2-dimensional function.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/hmc_tomography.Distributions.SourceLocation2D.html#hmc_tomography.Distributions.SourceLocation2D" title="hmc_tomography.Distributions.SourceLocation2D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SourceLocation2D</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/hmclab.Distributions.SourceLocation2D.html#hmclab.Distributions.SourceLocation2D" title="hmclab.Distributions.SourceLocation2D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SourceLocation2D</span></code></a></p></td>
 <td><p>Earthquake source location in 2D using a single velocity for the subsurface.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/hmc_tomography.Distributions.SourceLocation3D.html#hmc_tomography.Distributions.SourceLocation3D" title="hmc_tomography.Distributions.SourceLocation3D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SourceLocation3D</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/hmclab.Distributions.SourceLocation3D.html#hmclab.Distributions.SourceLocation3D" title="hmclab.Distributions.SourceLocation3D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SourceLocation3D</span></code></a></p></td>
 <td><p>Earthquake source location in 3D using a single velocity for the subsurface.</p></td>
 </tr>
 </tbody>
 </table>
-</div>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="_autosummary/hmc_tomography.Distributions._AbstractDistribution.html" class="btn btn-neutral float-right" title="_AbstractDistribution" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../index.html" class="btn btn-neutral float-left" title="API reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="_autosummary/hmclab.Distributions._AbstractDistribution.html" class="btn btn-neutral float-right" title="_AbstractDistribution" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2019-2021, Andrea Zunino, Andreas Fichtner, Lars Gebraad.
-
-    </p>
+    <p>&#169; Copyright 2019-2021, Andrea Zunino, Andreas Fichtner, Lars Gebraad.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

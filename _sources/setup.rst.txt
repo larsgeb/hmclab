@@ -1,7 +1,7 @@
 Installation
 ============
 
-Installing the :code:`hmc_tomography` package is dead-simple. It requires you to have 
+Installing the :code:`hmclab` package is dead-simple. It requires you to have 
 Python 3.7 on your system. Using either virtual environments or :code:`Conda` is
 recommended.
 
@@ -13,7 +13,7 @@ Run the following inside your local copy of the source code:
 .. code-block:: bash    
     
     > $ conda env create -f environment.yml
-    > $ conda activate hmctomo
+    > $ conda activate hmclab
     > $ pip install -e .
 
 After this you can use the code anywhere on your system, or start a Jupyter Notebook
@@ -33,8 +33,8 @@ Python version and dependencies, run the following from your terminal:
 
 .. code-block:: bash    
     
-    > $ conda create -n hmctomo python=3.7
-    > $ conda activate hmctomo
+    > $ conda create -n hmclab python=3.7
+    > $ conda activate hmclab
     > $ conda install notebook pip
 
 You can also create this environment byu first downloading this repo, and running the
@@ -43,7 +43,7 @@ following command inside of it:
 .. code-block:: bash    
 
     > $ conda env create -f environment.yml
-    > $ conda activate hmctomo
+    > $ conda activate hmclab
 
 This does exactly the same as the previous commands.
 
@@ -65,7 +65,7 @@ appropriate environment activated):
 
 .. code-block:: bash    
     
-    > $ pip install -e git+git@github.com:larsgeb/hmc-tomography.git@master#egg=hmc_tomography
+    > $ pip install -e git+git@github.com:larsgeb/hmclab.git@master#egg=hmclab
 
 This won't work as long as the GitHub repo is private. If you've set up SSH keys with 
 your GitHub account, and we've granted you access, you can run the following command 
@@ -73,7 +73,7 @@ instead:
 
 .. code-block:: bash    
 
-    > $ pip install -e git+ssh://git@github.com/larsgeb/hmc-tomography.git#egg=hmc_tomography
+    > $ pip install -e git+ssh://git@github.com/larsgeb/hmclab.git#egg=hmclab
 
 Installation option 2
 ---------------------
@@ -83,8 +83,8 @@ activated):
 
 .. code-block:: bash    
     
-    > $ git clone git@github.com:larsgeb/hmc-tomography.git
-    > $ cd hmc-tomography
+    > $ git clone git@github.com:larsgeb/hmclab.git
+    > $ cd hmclab
     > $ pip install -e .
 
 This also won't work as long as the GitHub repo is private and you don't have access. 
@@ -101,11 +101,11 @@ etc. Once you have activated the proper environment in your shell, run the follo
     > $ pip install -e .
 
 If the command succeeds, you now have access to the package from your Python 3.7 
-distribution by importing :code:`hmc_tomography`:
+distribution by importing :code:`hmclab`:
 
 .. code-block:: python
 
-    import hmc_tomography
+    import hmclab
 
 Installing development dependencies
 ***********************************
@@ -119,7 +119,7 @@ In :code:`Bash`:
     
         # from github
     > $ pip install -e \ 
-        git+git@github.com:larsgeb/hmc-tomography.git@master#egg=hmc_tomography[dev]
+        git+git@github.com:larsgeb/hmclab.git@master#egg=hmclab[dev]
     
         # from local clone
     > $ pip install -e .[dev] 
@@ -130,7 +130,7 @@ In :code:`Bash`:
     
         # from github
     > $ pip install -e\ 
-        git+git@github.com:larsgeb/hmc-tomography.git@master#egg=hmc_tomography\[dev\] 
+        git+git@github.com:larsgeb/hmclab.git@master#egg=hmclab\[dev\] 
     
         # from local clone
     > $ pip install -e .\[dev\] 

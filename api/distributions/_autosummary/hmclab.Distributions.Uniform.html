@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Uniform &mdash; HMCLab archive/parallel-tempering-33-g7bdeca4-dirty documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/autoclasstoc.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="LinearMatrix" href="hmclab.Distributions.LinearMatrix.html" />
+    <link rel="prev" title="Laplace" href="hmclab.Distributions.Laplace.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> HMCLab
+            <img src="../../../_static/hmctom.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                archive/parallel-tempering-33-g7bdeca4-dirty
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">HMC Tomography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../hmc.html">The Hamiltonian Monte Carlo algorithm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../setup.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks.html">Notebooks: Examples and tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Distributions</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="hmclab.Distributions._AbstractDistribution.html">_AbstractDistribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hmclab.Distributions.StandardNormal1D.html">StandardNormal1D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hmclab.Distributions.Normal.html">Normal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hmclab.Distributions.Laplace.html">Laplace</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Uniform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hmclab.Distributions.LinearMatrix.html">LinearMatrix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hmclab.Distributions.CompositeDistribution.html">CompositeDistribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hmclab.Distributions.AdditiveDistribution.html">AdditiveDistribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hmclab.Distributions.BayesRule.html">BayesRule</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hmclab.Distributions.Himmelblau.html">Himmelblau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hmclab.Distributions.SourceLocation2D.html">SourceLocation2D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hmclab.Distributions.SourceLocation3D.html">SourceLocation3D</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../massmatrices/index.html">MassMatrices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../samplers/index.html">Samplers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../optimizers/index.html">Optimizers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../visualization/index.html">Visualization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/hmclab.Samples.html">Samples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../py-modindex.html">Module index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../genindex.html">Alphabetic index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">HMCLab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">API reference</a> &raquo;</li>
+          <li><a href="../index.html">Distributions</a> &raquo;</li>
+      <li>Uniform</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/api/distributions/_autosummary/hmclab.Distributions.Uniform.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="uniform">
+<h1>Uniform<a class="headerlink" href="#uniform" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="hmclab.Distributions.Uniform">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">hmclab.Distributions.</span></span><span class="sig-name descname"><span class="pre">Uniform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/hmclab/Distributions/base.html#Uniform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hmclab.Distributions.Uniform" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="hmclab.Distributions._AbstractDistribution.html#hmclab.Distributions._AbstractDistribution" title="hmclab.Distributions.base._AbstractDistribution"><code class="xref py py-class docutils literal notranslate"><span class="pre">hmclab.Distributions.base._AbstractDistribution</span></code></a></p>
+<p>Uniform bounded or unbouded distribution in model space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lower_bounds</strong> (<em>numpy.ndarray</em><em> or </em><em>None</em>) – Numpy array of shape (dimensions, 1) that contains the lower limits of each
+parameter.</p></li>
+<li><p><strong>upper_bounds</strong> (<em>numpy.ndarray</em><em> or </em><em>None</em>) – Numpy array of shape (dimensions, 1) that contains the upper limits of each
+parameter.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="hmclab.Distributions.Uniform.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lower_bounds</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_bounds</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/hmclab/Distributions/base.html#Uniform.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hmclab.Distributions.Uniform.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hmclab.Distributions.Uniform.__init__" title="hmclab.Distributions.Uniform.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hmclab.Distributions.Uniform.corrector" title="hmclab.Distributions.Uniform.corrector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrector</span></code></a></p></td>
+<td><p>Correct HMC trajectory.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_default</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hmclab.Distributions.Uniform.dimensions" title="hmclab.Distributions.Uniform.dimensions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dimensions</span></code></a></p></td>
+<td><p>Dimensionality of misfit space.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hmclab.Distributions.Uniform.gradient" title="hmclab.Distributions.Uniform.gradient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gradient</span></code></a></p></td>
+<td><p>Method to compute the gradient of a uniform distribution.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hmclab.Distributions.Uniform.misfit" title="hmclab.Distributions.Uniform.misfit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">misfit</span></code></a></p></td>
+<td><p>Method to compute the misfit of a uniform distribution.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hmclab.Distributions.Uniform.misfit_bounds" title="hmclab.Distributions.Uniform.misfit_bounds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">misfit_bounds</span></code></a></p></td>
+<td><p>Compute misfit of bounded distribution.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#hmclab.Distributions.Uniform.normalize" title="hmclab.Distributions.Uniform.normalize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalize</span></code></a></p></td>
+<td><p>Normalize distribution.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#hmclab.Distributions.Uniform.update_bounds" title="hmclab.Distributions.Uniform.update_bounds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_bounds</span></code></a></p></td>
+<td><p>Update bounded distribution.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">lower_bounds</span></code></p></td>
+<td><p>Lower bounds for every parameter.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span></code></p></td>
+<td><p>Name of the distribution.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalized</span></code></p></td>
+<td><p>Boolean describing if the distribution is normalized.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">upper_bounds</span></code></p></td>
+<td><p>Upper bounds for every parameter.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="hmclab.Distributions.Uniform.dimensions">
+<span class="sig-name descname"><span class="pre">dimensions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#hmclab.Distributions.Uniform.dimensions" title="Permalink to this definition"></a></dt>
+<dd><p>Dimensionality of misfit space.</p>
+<p>This is an abstract parameter. If it is not defined either in your class
+directly or in its constructor (the __init__ function) then attempting to use
+the class will raise a NotImplementedError.</p>
+<p>Access it like a parameter, not a function: <code class="code docutils literal notranslate"><span class="pre">distribution.dimensions</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hmclab.Distributions.Uniform.misfit">
+<span class="sig-name descname"><span class="pre">misfit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coordinates</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../../_modules/hmclab/Distributions/base.html#Uniform.misfit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hmclab.Distributions.Uniform.misfit" title="Permalink to this definition"></a></dt>
+<dd><p>Method to compute the misfit of a uniform distribution.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hmclab.Distributions.Uniform.gradient">
+<span class="sig-name descname"><span class="pre">gradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coordinates</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="reference internal" href="../../../_modules/hmclab/Distributions/base.html#Uniform.gradient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hmclab.Distributions.Uniform.gradient" title="Permalink to this definition"></a></dt>
+<dd><p>Method to compute the gradient of a uniform distribution.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hmclab.Distributions.Uniform.corrector">
+<span class="sig-name descname"><span class="pre">corrector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coordinates</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">momentum</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hmclab.Distributions.Uniform.corrector" title="Permalink to this definition"></a></dt>
+<dd><p>Correct HMC trajectory.</p>
+<p>Method to correct an HMC particle for bounded distributions, which is called
+after every time integration step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coordinates</strong> (<em>numpy.ndarray</em>) – Numpy array shaped as (dimensions, 1) representing a column vector
+containing the coordinates <span class="math notranslate nohighlight">\(\mathbf{m}\)</span> upon which to operate by
+reference.</p></li>
+<li><p><strong>momentum</strong> (<em>numpy.ndarray</em>) – Numpy array shaped as (dimensions, 1) representing a column vector
+containing the momenta <span class="math notranslate nohighlight">\(\mathbf{p}\)</span> upon which to operate by
+reference.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hmclab.Distributions.Uniform.misfit_bounds">
+<span class="sig-name descname"><span class="pre">misfit_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coordinates</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#hmclab.Distributions.Uniform.misfit_bounds" title="Permalink to this definition"></a></dt>
+<dd><p>Compute misfit of bounded distribution.</p>
+<p>Method to compute the misfit associated with the truncated part of the
+distribution. Used internally.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hmclab.Distributions.Uniform.normalize">
+<span class="sig-name descname"><span class="pre">normalize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hmclab.Distributions.Uniform.normalize" title="Permalink to this definition"></a></dt>
+<dd><p>Normalize distribution.</p>
+<p>Method to compute the normalization constant of a distribution. As this might
+take significant time, it is not done in initialization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>AttributeError</strong> – An AttributeError is raised if the distribution provides no way to be
+    normalized, e.g. when the normalization constant is intractable.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hmclab.Distributions.Uniform.update_bounds">
+<span class="sig-name descname"><span class="pre">update_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lower</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hmclab.Distributions.Uniform.update_bounds" title="Permalink to this definition"></a></dt>
+<dd><p>Update bounded distribution.</p>
+<p>This method updates the bounds of a distribution. Note that invocating it,
+does not require both bounds to be passed.</p>
+<p>If both vectors are passed, ensure that all upper bounds are above the
+corresponding lower bounds.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lower</strong> (numpy.ndarray or <cite>None</cite>) – Either an array shaped as (dimensions, 1) with floats for the lower bounds,
+or <cite>None</cite> for no bounds. If some dimensions should be bounded, while others
+should not, use <code class="docutils literal notranslate"><span class="pre">-numpy.inf</span></code> within the vector as needed.</p></li>
+<li><p><strong>upper</strong> (numpy.ndarray or <cite>None</cite>) – Either an array shaped as (dimensions, 1) with floats for the upper bounds,
+or <cite>None</cite> for no bounds. If some dimensions should be bounded, while others
+should not, use <code class="docutils literal notranslate"><span class="pre">numpy.inf</span></code> within the vector as needed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – A ValueError is raised if the supplied upper and lower bounds are
+    incompatible.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="hmclab.Distributions.Laplace.html" class="btn btn-neutral float-left" title="Laplace" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hmclab.Distributions.LinearMatrix.html" class="btn btn-neutral float-right" title="LinearMatrix" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2021, Andrea Zunino, Andreas Fichtner, Lars Gebraad.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

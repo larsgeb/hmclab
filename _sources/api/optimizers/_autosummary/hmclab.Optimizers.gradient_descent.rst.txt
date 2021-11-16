@@ -1,0 +1,37 @@
+﻿gradient\_descent
+=================
+
+.. currentmodule:: hmclab.Optimizers
+
+.. autoclass:: gradient_descent
+   :members:                                 
+   :show-inheritance:                        
+   :inherited-members:                       
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+   
+      ~gradient_descent.__init__
+      ~gradient_descent.iterate
+      ~gradient_descent.iterate_once
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~gradient_descent.dimensions
+      ~gradient_descent.name
+      ~gradient_descent.target
+   
+   

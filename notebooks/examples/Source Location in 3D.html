@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Source Location in 3D &mdash; HMCLab archive/parallel-tempering-33-g7bdeca4-dirty documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/autoclasstoc.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Probabilistic Elastic FWI" href="Probabilistic%20Elastic%20FWI.html" />
+    <link rel="prev" title="Linear (sparse) forward operator" href="Linear%20%28sparse%29%20forward%20operator.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> HMCLab
+            <img src="../../_static/hmctom.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                archive/parallel-tempering-33-g7bdeca4-dirty
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">HMC Tomography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../hmc.html">The Hamiltonian Monte Carlo algorithm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../setup.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../notebooks.html">Notebooks: Examples and tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/0%20-%20Getting%20started.html">Tutorial 0 - Getting started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/1%20-%20Tuning%20Hamiltonian%20Monte%20Carlo.html">Tutorial 1 - Tuning Hamiltonian Monte Carlo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/2%20-%20Separate%20priors%20per%20dimension.html">Tutorial 2 - Separate priors per dimension</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/3%20-%20Creating%20your%20own%20inverse%20problem.html">Tutorial 3 - Creating your own inverse problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/4%20-%20Running%20parallel%20Markov%20chains.html">Tutorial 4 - Running parallel Markov chains</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Linear%20%28dense%29%20forward%20operator.html">Linear (dense) forward operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Linear%20%28sparse%29%20forward%20operator.html">Linear (sparse) forward operator</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Source Location in 3D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Probabilistic%20Elastic%20FWI.html">Probabilistic Elastic FWI</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../py-modindex.html">Module index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Alphabetic index</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">HMCLab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../notebooks.html">Notebooks: Examples and tutorials</a> &raquo;</li>
+      <li>Source Location in 3D</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notebooks/examples/Source Location in 3D.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="Source-Location-in-3D">
+<h1>Source Location in 3D<a class="headerlink" href="#Source-Location-in-3D" title="Permalink to this headline"></a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">hmclab</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">hmclab.Distributions</span> <span class="kn">import</span> <span class="n">SourceLocation</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">psvWave</span>
+
+
+<span class="n">settings</span> <span class="o">=</span> <span class="n">psvWave</span><span class="o">.</span><span class="n">get_dictionary</span><span class="p">()</span>
+
+<span class="c1"># Create a 10x10 km domain</span>
+<span class="n">settings</span><span class="p">[</span><span class="s2">&quot;domain&quot;</span><span class="p">][</span><span class="s2">&quot;nx_inner&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">500</span>
+<span class="n">settings</span><span class="p">[</span><span class="s2">&quot;domain&quot;</span><span class="p">][</span><span class="s2">&quot;nz_inner&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">500</span>
+<span class="n">settings</span><span class="p">[</span><span class="s2">&quot;domain&quot;</span><span class="p">][</span><span class="s2">&quot;dx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">settings</span><span class="p">[</span><span class="s2">&quot;domain&quot;</span><span class="p">][</span><span class="s2">&quot;dz&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">settings</span><span class="p">[</span><span class="s2">&quot;domain&quot;</span><span class="p">][</span><span class="s2">&quot;dt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.001</span>
+<span class="n">settings</span><span class="p">[</span><span class="s2">&quot;domain&quot;</span><span class="p">][</span><span class="s2">&quot;nt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10000</span>
+
+<span class="n">settings</span><span class="p">[</span><span class="s2">&quot;sources&quot;</span><span class="p">][</span><span class="s2">&quot;peak_frequency&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">settings</span><span class="p">[</span><span class="s2">&quot;sources&quot;</span><span class="p">][</span><span class="s2">&quot;n_shots&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">settings</span><span class="p">[</span><span class="s2">&quot;sources&quot;</span><span class="p">][</span><span class="s2">&quot;n_sources&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">settings</span><span class="p">[</span><span class="s2">&quot;sources&quot;</span><span class="p">][</span><span class="s2">&quot;moment_angles&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">48</span><span class="p">,</span> <span class="mi">79</span><span class="p">,</span> <span class="mi">12</span><span class="p">]</span>
+<span class="n">settings</span><span class="p">[</span><span class="s2">&quot;sources&quot;</span><span class="p">][</span><span class="s2">&quot;ix_sources&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">350</span><span class="p">]</span>  <span class="c1"># in grid index</span>
+<span class="n">settings</span><span class="p">[</span><span class="s2">&quot;sources&quot;</span><span class="p">][</span><span class="s2">&quot;iz_sources&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">200</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">375</span><span class="p">]</span>  <span class="c1"># in grid index</span>
+<span class="n">settings</span><span class="p">[</span><span class="s2">&quot;sources&quot;</span><span class="p">][</span><span class="s2">&quot;which_source_to_fire_in_which_shot&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+
+<span class="n">settings</span><span class="p">[</span><span class="s2">&quot;medium&quot;</span><span class="p">][</span><span class="s2">&quot;scalar_vs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">settings</span><span class="p">[</span><span class="s2">&quot;receivers&quot;</span><span class="p">][</span><span class="s2">&quot;ix_receivers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">65</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">420</span><span class="p">]</span>
+<span class="n">settings</span><span class="p">[</span><span class="s2">&quot;receivers&quot;</span><span class="p">][</span><span class="s2">&quot;iz_receivers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+<span class="n">settings</span><span class="p">[</span><span class="s2">&quot;inversion&quot;</span><span class="p">][</span><span class="s2">&quot;snapshot_interval&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1000</span>
+
+<span class="n">settings</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">ModuleNotFoundError</span>                       Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-2-7340d34c568c&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-fg">----&gt; 1</span><span class="ansi-red-fg"> </span><span class="ansi-green-fg">import</span> psvWave
+<span class="ansi-green-intense-fg ansi-bold">      2</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span> settings <span class="ansi-blue-fg">=</span> psvWave<span class="ansi-blue-fg">.</span>get_dictionary<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span>
+
+<span class="ansi-green-fg">~/Documents/Software/psvWave/psvWave/__init__.py</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span> <span class="ansi-green-fg">from</span> <span class="ansi-blue-fg">.</span>_version <span class="ansi-green-fg">import</span> get_versions
+<span class="ansi-green-fg">----&gt; 6</span><span class="ansi-red-fg"> </span><span class="ansi-green-fg">from</span> __psvWave_cpp <span class="ansi-green-fg">import</span> fdModel <span class="ansi-green-fg">as</span> fdModel
+<span class="ansi-green-intense-fg ansi-bold">      7</span>
+<span class="ansi-green-intense-fg ansi-bold">      8</span> __version__ <span class="ansi-blue-fg">=</span> get_versions<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">&#34;version&#34;</span><span class="ansi-blue-fg">]</span>
+
+<span class="ansi-red-fg">ModuleNotFoundError</span>: No module named &#39;__psvWave_cpp&#39;
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="n">receivers_x</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;receivers&quot;</span><span class="p">][</span><span class="s2">&quot;ix_receivers&quot;</span><span class="p">])</span>
+    <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;domain&quot;</span><span class="p">][</span><span class="s2">&quot;dx&quot;</span><span class="p">])</span>
+    <span class="o">/</span> <span class="mf">1000.0</span>
+<span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+<span class="n">receivers_z</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;receivers&quot;</span><span class="p">][</span><span class="s2">&quot;iz_receivers&quot;</span><span class="p">])</span>
+    <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;domain&quot;</span><span class="p">][</span><span class="s2">&quot;dz&quot;</span><span class="p">])</span>
+    <span class="o">/</span> <span class="mf">1000.0</span>
+<span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+
+<span class="n">sources_x</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;sources&quot;</span><span class="p">][</span><span class="s2">&quot;ix_sources&quot;</span><span class="p">])</span>
+    <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;domain&quot;</span><span class="p">][</span><span class="s2">&quot;dx&quot;</span><span class="p">])</span>
+    <span class="o">/</span> <span class="mf">1000.0</span>
+<span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+<span class="n">sources_z</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;sources&quot;</span><span class="p">][</span><span class="s2">&quot;iz_sources&quot;</span><span class="p">])</span>
+    <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;domain&quot;</span><span class="p">][</span><span class="s2">&quot;dz&quot;</span><span class="p">])</span>
+    <span class="o">/</span> <span class="mf">1000.0</span>
+<span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+
+
+<span class="n">numpy</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;bin/5/receivers_x.npy&quot;</span><span class="p">,</span> <span class="n">receivers_x</span><span class="p">)</span>
+<span class="n">numpy</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;bin/5/receivers_z.npy&quot;</span><span class="p">,</span> <span class="n">receivers_z</span><span class="p">)</span>
+<span class="n">numpy</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;bin/5/sources_x.npy&quot;</span><span class="p">,</span> <span class="n">sources_x</span><span class="p">)</span>
+<span class="n">numpy</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;bin/5/sources_z.npy&quot;</span><span class="p">,</span> <span class="n">sources_z</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="n">psvWave</span><span class="o">.</span><span class="n">write_dictionary</span><span class="p">(</span><span class="s2">&quot;bin/5/fd_settings.ini&quot;</span><span class="p">,</span> <span class="n">settings</span><span class="p">)</span>
+<span class="n">fdModel</span> <span class="o">=</span> <span class="n">psvWave</span><span class="o">.</span><span class="n">fdModel</span><span class="p">(</span><span class="s2">&quot;bin/5/fd_settings.ini&quot;</span><span class="p">)</span>
+
+<span class="n">fdModel</span><span class="o">.</span><span class="n">plot_domain</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">scipy.ndimage</span> <span class="kn">import</span> <span class="n">gaussian_filter</span><span class="p">,</span> <span class="n">gaussian_filter1d</span>
+
+<span class="n">vp</span><span class="p">,</span> <span class="n">vs</span><span class="p">,</span> <span class="n">rho</span> <span class="o">=</span> <span class="n">fdModel</span><span class="o">.</span><span class="n">get_parameter_fields</span><span class="p">()</span>
+
+<span class="n">vp</span> <span class="o">=</span> <span class="mi">2000</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">vp</span><span class="p">)</span>
+<span class="n">rho</span> <span class="o">=</span> <span class="mi">1500</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">rho</span><span class="p">)</span>
+
+<span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">321321</span><span class="p">)</span>
+<span class="n">anomalies</span> <span class="o">=</span> <span class="n">gaussian_filter</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="o">*</span><span class="n">vp</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">anomalies</span> <span class="o">=</span> <span class="mi">200</span> <span class="o">*</span> <span class="n">anomalies</span> <span class="o">/</span> <span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">anomalies</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+<span class="n">vp</span> <span class="o">=</span> <span class="n">vp</span> <span class="o">+</span> <span class="n">anomalies</span>
+
+<span class="n">anomalies_2</span> <span class="o">=</span> <span class="n">gaussian_filter</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="o">*</span><span class="n">vp</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">anomalies_2</span> <span class="o">=</span> <span class="mi">200</span> <span class="o">*</span> <span class="n">anomalies_2</span> <span class="o">/</span> <span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">anomalies_2</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+<span class="n">rho</span> <span class="o">=</span> <span class="n">rho</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">anomalies</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">anomalies_2</span>
+
+<span class="n">fdModel</span><span class="o">.</span><span class="n">set_parameter_fields</span><span class="p">(</span><span class="n">vp</span><span class="p">,</span> <span class="n">vs</span><span class="p">,</span> <span class="n">rho</span><span class="p">)</span>
+
+<span class="n">numpy</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;bin/5/vp.npy&quot;</span><span class="p">,</span> <span class="n">vp</span><span class="p">)</span>
+<span class="n">numpy</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;bin/5/vs.npy&quot;</span><span class="p">,</span> <span class="n">vs</span><span class="p">)</span>
+<span class="n">numpy</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;bin/5/rho.npy&quot;</span><span class="p">,</span> <span class="n">rho</span><span class="p">)</span>
+
+<span class="n">axes</span> <span class="o">=</span> <span class="n">fdModel</span><span class="o">.</span><span class="n">plot_fields</span><span class="p">(</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="p">[</span><span class="n">vp</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1.2</span><span class="p">,</span> <span class="n">vs</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1.2</span><span class="p">,</span> <span class="n">rho</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1.2</span><span class="p">],</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="p">[</span><span class="n">vp</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">,</span> <span class="n">vs</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">,</span> <span class="n">rho</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">:</span>
+    <span class="n">axis</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Create &#39;true&#39; data</span>
+<span class="c1"># print(&quot;Faking observed data&quot;)</span>
+<span class="k">for</span> <span class="n">i_shot</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">fdModel</span><span class="o">.</span><span class="n">n_shots</span><span class="p">):</span>
+    <span class="n">fdModel</span><span class="o">.</span><span class="n">forward_simulate</span><span class="p">(</span><span class="n">i_shot</span><span class="p">,</span> <span class="n">omp_threads_override</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+
+<span class="c1"># Cheating of course, as this is synthetically generated data.</span>
+<span class="n">ux_obs</span><span class="p">,</span> <span class="n">uz_obs</span> <span class="o">=</span> <span class="n">fdModel</span><span class="o">.</span><span class="n">get_synthetic_data</span><span class="p">()</span>
+
+<span class="n">numpy</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;bin/5/ux_obs.npy&quot;</span><span class="p">,</span> <span class="n">ux_obs</span><span class="p">)</span>
+<span class="n">numpy</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;bin/5/uz_obs.npy&quot;</span><span class="p">,</span> <span class="n">uz_obs</span><span class="p">)</span>
+
+<span class="n">_</span> <span class="o">=</span> <span class="n">fdModel</span><span class="o">.</span><span class="n">plot_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">(</span><span class="n">ux_obs</span><span class="p">,</span> <span class="n">uz_obs</span><span class="p">),</span> <span class="n">exagerration</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="n">ux_obs</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;bin/5/ux_obs.npy&quot;</span><span class="p">)</span>
+<span class="n">uz_obs</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;bin/5/uz_obs.npy&quot;</span><span class="p">)</span>
+
+<span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">32312</span><span class="p">)</span>
+
+<span class="n">ux_obs_noise_addded</span> <span class="o">=</span> <span class="n">ux_obs</span> <span class="o">+</span> <span class="mf">3e-4</span> <span class="o">*</span> <span class="n">gaussian_filter1d</span><span class="p">(</span>
+    <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="o">*</span><span class="n">ux_obs</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span>
+<span class="p">)</span>
+<span class="n">uz_obs_noise_addded</span> <span class="o">=</span> <span class="n">uz_obs</span> <span class="o">+</span> <span class="mf">3e-4</span> <span class="o">*</span> <span class="n">gaussian_filter1d</span><span class="p">(</span>
+    <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="o">*</span><span class="n">ux_obs</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span>
+<span class="p">)</span>
+
+<span class="n">_</span> <span class="o">=</span> <span class="n">fdModel</span><span class="o">.</span><span class="n">plot_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">(</span><span class="n">ux_obs_noise_addded</span><span class="p">,</span> <span class="n">uz_obs_noise_addded</span><span class="p">),</span> <span class="n">exagerration</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="n">time_step</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+
+<span class="n">particle_velocity</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="n">particle_velocity_max</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">i_shot</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">fdModel</span><span class="o">.</span><span class="n">n_shots</span><span class="p">):</span>
+    <span class="n">particle_velocity</span><span class="p">[</span><span class="n">i_shot</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">fdModel</span><span class="o">.</span><span class="n">get_snapshots</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="n">i_shot</span><span class="p">,</span> <span class="n">time_step</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span><span class="o">.</span><span class="n">T</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">+</span> <span class="n">fdModel</span><span class="o">.</span><span class="n">get_snapshots</span><span class="p">()[</span><span class="mi">1</span><span class="p">][</span><span class="n">i_shot</span><span class="p">,</span> <span class="n">time_step</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span><span class="o">.</span><span class="n">T</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="p">)</span>
+    <span class="n">particle_velocity_max</span><span class="p">[</span><span class="n">i_shot</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">particle_velocity</span><span class="p">[</span><span class="n">i_shot</span><span class="p">]))</span>
+
+<span class="n">field_extr</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">particle_velocity_max</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i_shot</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">fdModel</span><span class="o">.</span><span class="n">n_shots</span><span class="p">):</span>
+
+    <span class="n">field</span> <span class="o">=</span> <span class="n">particle_velocity</span><span class="p">[</span><span class="n">i_shot</span><span class="p">]</span>
+
+    <span class="n">fdModel</span><span class="o">.</span><span class="n">plot_domain</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">())</span>
+
+    <span class="n">extent</span> <span class="o">=</span> <span class="n">fdModel</span><span class="o">.</span><span class="n">get_extent</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+        <span class="n">field</span><span class="p">,</span>
+        <span class="n">vmin</span><span class="o">=-</span><span class="n">field_extr</span><span class="p">,</span>
+        <span class="n">vmax</span><span class="o">=</span><span class="n">field_extr</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s2">&quot;seismic&quot;</span><span class="p">),</span>
+        <span class="n">extent</span><span class="o">=</span><span class="p">[</span>
+            <span class="n">extent</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">extent</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">extent</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+            <span class="n">extent</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+        <span class="p">],</span>
+    <span class="p">)</span>
+
+    <span class="n">cbar</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+    <span class="n">cbar</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="s2">&quot;particle velocity&quot;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Shot </span><span class="si">{</span><span class="n">i_shot</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">, time </span><span class="si">{</span><span class="n">time_step</span> <span class="o">*</span> <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;inversion&#39;</span><span class="p">][</span><span class="s1">&#39;snapshot_interval&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;domain&#39;</span><span class="p">][</span><span class="s1">&#39;dt&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> seconds&quot;</span>
+    <span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="n">velocity</span> <span class="o">=</span> <span class="n">ux_obs_noise_addded</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">uz_obs_noise_addded</span> <span class="o">**</span> <span class="mi">2</span>
+
+<span class="n">exceed_noise</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">velocity</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i_shot</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">fdModel</span><span class="o">.</span><span class="n">n_shots</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+    <span class="n">noise_level</span> <span class="o">=</span> <span class="n">velocity</span><span class="p">[</span><span class="n">i_shot</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">150</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i_rec</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ux_obs_noise_addded</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">fdModel</span><span class="o">.</span><span class="n">dt</span> <span class="o">*</span> <span class="n">fdModel</span><span class="o">.</span><span class="n">nt</span><span class="p">,</span> <span class="n">fdModel</span><span class="o">.</span><span class="n">nt</span><span class="p">),</span>
+            <span class="n">velocity</span><span class="p">[</span><span class="n">i_shot</span><span class="p">,</span> <span class="n">i_rec</span><span class="p">,</span> <span class="p">:],</span>
+        <span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">noise_level</span> <span class="o">*</span> <span class="mi">5</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">])</span>
+
+    <span class="n">exceed_noise</span><span class="p">[</span><span class="n">i_shot</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">velocity</span><span class="p">[</span><span class="n">i_shot</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">&gt;</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">noise_level</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="k">for</span> <span class="n">i_shot</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">fdModel</span><span class="o">.</span><span class="n">n_shots</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">exceed_noise</span><span class="p">[</span><span class="n">i_shot</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="n">arrival_times</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">fdModel</span><span class="o">.</span><span class="n">n_shots</span><span class="p">,</span> <span class="n">ux_obs_noise_addded</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+<span class="k">for</span> <span class="n">i_shot</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">fdModel</span><span class="o">.</span><span class="n">n_shots</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i_rec</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ux_obs_noise_addded</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="n">arrival_times</span><span class="p">[</span><span class="n">i_shot</span><span class="p">,</span> <span class="n">i_rec</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">fdModel</span><span class="o">.</span><span class="n">dt</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">exceed_noise</span><span class="p">[</span><span class="n">i_shot</span><span class="p">,</span> <span class="n">i_rec</span><span class="p">,</span> <span class="p">:])[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.05</span>
+        <span class="p">)</span>
+
+<span class="n">numpy</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;bin/5/arrival_times.npy&quot;</span><span class="p">,</span> <span class="n">arrival_times</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="n">arrival_times</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;bin/5/arrival_times.npy&quot;</span><span class="p">)</span>
+
+<span class="n">receivers_x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;bin/5/receivers_x.npy&quot;</span><span class="p">)</span>
+<span class="n">receivers_z</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;bin/5/receivers_z.npy&quot;</span><span class="p">)</span>
+<span class="n">sources_x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;bin/5/sources_x.npy&quot;</span><span class="p">)</span>
+<span class="n">sources_z</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;bin/5/sources_z.npy&quot;</span><span class="p">)</span>
+
+<span class="n">arrival_times</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="n">likelihood</span> <span class="o">=</span> <span class="n">SourceLocation</span><span class="p">(</span>
+    <span class="n">receivers_x</span><span class="p">,</span> <span class="n">receivers_z</span><span class="p">,</span> <span class="n">arrival_times</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">arrival_times</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.1</span>
+<span class="p">)</span>
+<span class="n">likelihood</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="n">likelihood</span><span class="o">.</span><span class="n">plot_data</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">hmclab.Distributions</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Normal</span><span class="p">,</span>
+    <span class="n">Uniform</span><span class="p">,</span>
+    <span class="n">CompositeDistribution</span><span class="p">,</span>
+    <span class="n">BayesRule</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">event_1_x_prior</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="n">event_2_x_prior</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="n">event_3_x_prior</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+<span class="n">max_speed</span> <span class="o">=</span> <span class="mi">5</span>  <span class="c1"># km/s</span>
+
+<span class="c1"># This is the time at any station, some wave is observed, meaning that origin time has to be before this.</span>
+<span class="n">latest_first_arrival</span> <span class="o">=</span> <span class="mi">4</span>  <span class="c1"># sec</span>
+
+<span class="n">event_1_z_prior</span> <span class="o">=</span> <span class="n">Uniform</span><span class="p">([</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">latest_first_arrival</span> <span class="o">*</span> <span class="n">max_speed</span><span class="p">])</span>
+<span class="n">event_2_z_prior</span> <span class="o">=</span> <span class="n">event_1_z_prior</span>
+<span class="n">event_3_z_prior</span> <span class="o">=</span> <span class="n">event_1_z_prior</span>
+<span class="n">event_1_t_prior</span> <span class="o">=</span> <span class="n">Uniform</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="n">latest_first_arrival</span><span class="p">])</span>
+<span class="n">event_2_t_prior</span> <span class="o">=</span> <span class="n">event_1_t_prior</span>
+<span class="n">event_3_t_prior</span> <span class="o">=</span> <span class="n">event_1_t_prior</span>
+
+<span class="n">speed_prior</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">lower_bounds</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">],</span> <span class="n">upper_bounds</span><span class="o">=</span><span class="p">[</span><span class="n">max_speed</span><span class="p">])</span>
+
+<span class="n">prior</span> <span class="o">=</span> <span class="n">CompositeDistribution</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="n">event_1_x_prior</span><span class="p">,</span>
+        <span class="n">event_1_z_prior</span><span class="p">,</span>
+        <span class="n">event_1_t_prior</span><span class="p">,</span>
+        <span class="n">event_2_x_prior</span><span class="p">,</span>
+        <span class="n">event_2_z_prior</span><span class="p">,</span>
+        <span class="n">event_2_t_prior</span><span class="p">,</span>
+        <span class="n">event_3_x_prior</span><span class="p">,</span>
+        <span class="n">event_3_z_prior</span><span class="p">,</span>
+        <span class="n">event_3_t_prior</span><span class="p">,</span>
+        <span class="n">speed_prior</span><span class="p">,</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+
+<span class="n">posterior</span> <span class="o">=</span> <span class="n">BayesRule</span><span class="p">([</span><span class="n">prior</span><span class="p">,</span> <span class="n">likelihood</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">hmclab.Samplers</span> <span class="kn">import</span> <span class="n">HMC</span><span class="p">,</span> <span class="n">RWMH</span>
+
+<span class="n">rwmh</span> <span class="o">=</span> <span class="n">RWMH</span><span class="p">()</span>
+
+<span class="n">rwmh</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+    <span class="s2">&quot;bin/5/rwmh_trial.h5&quot;</span><span class="p">,</span>
+    <span class="n">posterior</span><span class="p">,</span>
+    <span class="n">initial_model</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])[:,</span> <span class="kc">None</span><span class="p">],</span>
+    <span class="n">autotuning</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">proposals</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span>
+    <span class="n">online_thinning</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">overwrite_existing_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">max_time</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">hmc</span> <span class="o">=</span> <span class="n">HMC</span><span class="p">()</span>
+
+<span class="n">hmc</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+    <span class="s2">&quot;bin/5/hmc_trial.h5&quot;</span><span class="p">,</span>
+    <span class="n">posterior</span><span class="p">,</span>
+    <span class="n">initial_model</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])[:,</span> <span class="kc">None</span><span class="p">],</span>
+    <span class="n">autotuning</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">proposals</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span>
+    <span class="n">online_thinning</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">overwrite_existing_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">max_time</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hmclab</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span><span class="s2">&quot;bin/5/rwmh_trial.h5&quot;</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">as</span> <span class="n">samples_no_burn</span><span class="p">:</span>
+    <span class="n">line_rwmh</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">samples_no_burn</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">size</span><span class="p">),</span>
+        <span class="n">samples_no_burn</span><span class="p">[</span><span class="mi">7</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+        <span class="s2">&quot;r&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="k">with</span> <span class="n">hmclab</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span><span class="s2">&quot;bin/5/hmc_trial.h5&quot;</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">as</span> <span class="n">samples_no_burn</span><span class="p">:</span>
+    <span class="n">line_hmc</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">samples_no_burn</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">size</span><span class="p">),</span>
+        <span class="n">samples_no_burn</span><span class="p">[</span><span class="mi">7</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+        <span class="s2">&quot;k&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;fraction of short chain&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="n">hmc</span> <span class="o">=</span> <span class="n">HMC</span><span class="p">()</span>
+
+<span class="n">hmc</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+    <span class="s2">&quot;bin/5/hmc_5_minutes.h5&quot;</span><span class="p">,</span>
+    <span class="n">posterior</span><span class="p">,</span>
+    <span class="n">initial_model</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])[:,</span> <span class="kc">None</span><span class="p">],</span>
+    <span class="n">autotuning</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">proposals</span><span class="o">=</span><span class="mi">200000</span><span class="p">,</span>
+    <span class="n">online_thinning</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">overwrite_existing_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">max_time</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hmclab</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span><span class="s2">&quot;bin/5/hmc_5_minutes.h5&quot;</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="mi">100</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="k">with</span> <span class="n">hmclab</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span><span class="s2">&quot;bin/5/hmc_5_minutes.h5&quot;</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
+    <span class="n">samples_n</span> <span class="o">=</span> <span class="n">samples</span><span class="o">.</span><span class="n">numpy</span>
+
+<span class="n">hmclab</span><span class="o">.</span><span class="n">Visualization</span><span class="o">.</span><span class="n">marginal_grid</span><span class="p">(</span><span class="n">samples_n</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">])</span>
+<span class="n">hmclab</span><span class="o">.</span><span class="n">Visualization</span><span class="o">.</span><span class="n">marginal_grid</span><span class="p">(</span><span class="n">samples_n</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">9</span><span class="p">])</span>
+<span class="n">hmclab</span><span class="o">.</span><span class="n">Visualization</span><span class="o">.</span><span class="n">marginal_grid</span><span class="p">(</span><span class="n">samples_n</span><span class="p">,</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="n">data_samples</span> <span class="o">=</span> <span class="mi">50</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;We have </span><span class="si">{</span><span class="n">samples_n</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> samples, let&#39;s select </span><span class="si">{</span><span class="n">data_samples</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+<span class="n">selection</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">samples_n</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">data_samples</span><span class="p">)</span>
+
+<span class="c1"># We also discard the last dimension, misfit</span>
+<span class="n">selection</span> <span class="o">=</span> <span class="n">samples_n</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">selection</span><span class="p">]</span>
+
+<span class="kn">from</span> <span class="nn">cycler</span> <span class="kn">import</span> <span class="n">cycler</span>
+
+<span class="n">figure</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+<span class="n">likelihood</span><span class="o">.</span><span class="n">plot_data</span><span class="p">(</span><span class="n">figure</span><span class="o">=</span><span class="n">figure</span><span class="p">)</span>
+
+<span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s2">&quot;tab10&quot;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_samples</span><span class="p">):</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">likelihood</span><span class="o">.</span><span class="n">forward_vector</span><span class="p">(</span><span class="n">selection</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="kc">None</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+            <span class="n">likelihood</span><span class="o">.</span><span class="n">receiver_array_x</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">event</span><span class="p">,</span> <span class="p">:],</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">cmap</span><span class="p">(</span><span class="n">event</span><span class="p">),</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<span class="n">_</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mf">5.2</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">LinearSegmentedColormap</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="n">ncolors</span> <span class="o">=</span> <span class="mi">256</span>
+    <span class="n">color_array</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s2">&quot;seismic&quot;</span><span class="p">)(</span><span class="nb">range</span><span class="p">(</span><span class="n">ncolors</span><span class="p">))</span>
+    <span class="n">color_array</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">ncolors</span><span class="p">)</span>
+    <span class="n">color_array</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">cmap</span><span class="p">(</span><span class="n">event</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">map_object</span> <span class="o">=</span> <span class="n">LinearSegmentedColormap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;event_specific&quot;</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="n">color_array</span>
+    <span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">register_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="n">map_object</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">hist2d</span><span class="p">(</span>
+        <span class="n">samples_n</span><span class="p">[</span><span class="n">event</span> <span class="o">*</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="n">samples_n</span><span class="p">[</span><span class="n">event</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="nb">range</span><span class="o">=</span><span class="p">[[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">]],</span>
+        <span class="n">bins</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;event_specific&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="n">likelihood</span><span class="o">.</span><span class="n">receiver_array_x</span><span class="p">,</span> <span class="n">likelihood</span><span class="o">.</span><span class="n">receiver_array_z</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;receivers&quot;</span>
+<span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+        <span class="n">sources_x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">event</span><span class="p">],</span>
+        <span class="n">sources_z</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">event</span><span class="p">],</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">cmap</span><span class="p">(</span><span class="n">event</span><span class="p">),</span>
+        <span class="n">s</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Event </span><span class="si">{</span><span class="n">event</span><span class="si">}</span><span class="s2"> true location&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="c1"># plt.xlim([likelihood.receiver_array_x.min(), likelihood.receiver_array_x.max()])</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="n">threshold_samples</span> <span class="o">=</span> <span class="n">samples_n</span><span class="p">[:,</span> <span class="n">samples_n</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">&lt;</span> <span class="mf">2.1</span><span class="p">]</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="n">ncolors</span> <span class="o">=</span> <span class="mi">256</span>
+    <span class="n">color_array</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s2">&quot;seismic&quot;</span><span class="p">)(</span><span class="nb">range</span><span class="p">(</span><span class="n">ncolors</span><span class="p">))</span>
+    <span class="n">color_array</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">ncolors</span><span class="p">)</span>
+    <span class="n">color_array</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">cmap</span><span class="p">(</span><span class="n">event</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">map_object</span> <span class="o">=</span> <span class="n">LinearSegmentedColormap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;event_specific&quot;</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="n">color_array</span>
+    <span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">register_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="n">map_object</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">hist2d</span><span class="p">(</span>
+        <span class="n">threshold_samples</span><span class="p">[</span><span class="n">event</span> <span class="o">*</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="n">threshold_samples</span><span class="p">[</span><span class="n">event</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="nb">range</span><span class="o">=</span><span class="p">[[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">]],</span>
+        <span class="n">bins</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;event_specific&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="n">likelihood</span><span class="o">.</span><span class="n">receiver_array_x</span><span class="p">,</span> <span class="n">likelihood</span><span class="o">.</span><span class="n">receiver_array_z</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;receivers&quot;</span>
+<span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+        <span class="n">sources_x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">event</span><span class="p">],</span>
+        <span class="n">sources_z</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">event</span><span class="p">],</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">cmap</span><span class="p">(</span><span class="n">event</span><span class="p">),</span>
+        <span class="n">s</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Event </span><span class="si">{</span><span class="n">event</span><span class="si">}</span><span class="s2"> true location&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="c1"># plt.xlim([likelihood.receiver_array_x.min(), likelihood.receiver_array_x.max()])</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="n">chains</span> <span class="o">=</span> <span class="mi">6</span>
+
+<span class="c1"># 3 samplers</span>
+<span class="n">samplers</span> <span class="o">=</span> <span class="p">[</span><span class="n">HMC</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">chains</span><span class="p">)]</span>
+
+<span class="c1"># 3 posteriors (that are not the same!)</span>
+<span class="n">posteriors</span> <span class="o">=</span> <span class="p">[</span><span class="n">posterior</span><span class="p">]</span> <span class="o">*</span> <span class="n">chains</span>
+
+<span class="c1"># 3 separate sample files</span>
+<span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;bin/5/hmc_parallel_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.h5&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">chains</span><span class="p">)]</span>
+
+
+<span class="n">obj</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">hmclab</span><span class="o">.</span><span class="n">Samplers</span><span class="o">.</span><span class="n">ParallelSampleSMP</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+        <span class="n">samplers</span><span class="p">,</span>
+        <span class="n">filenames</span><span class="p">,</span>
+        <span class="n">posteriors</span><span class="p">,</span>
+        <span class="n">overwrite_existing_files</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">proposals</span><span class="o">=</span><span class="mi">20000</span><span class="p">,</span>
+        <span class="n">exchange</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">initial_model</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])[:,</span> <span class="kc">None</span><span class="p">],</span>
+        <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;autotuning&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;max_time&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;online_thinning&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">},</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">print_results</span><span class="p">()</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="n">samples_n</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i_chain</span><span class="p">,</span> <span class="n">filename</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">filenames</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">hmclab</span><span class="o">.</span><span class="n">Samples</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">burn_in</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">as</span> <span class="n">samples</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">:</span><span class="mi">100</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+        <span class="n">samples_n</span><span class="p">[</span><span class="n">i_chain</span><span class="p">]</span> <span class="o">=</span> <span class="n">samples</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">:]</span>
+
+<span class="n">samples_combined</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">samples_n</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">LinearSegmentedColormap</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="n">ncolors</span> <span class="o">=</span> <span class="mi">256</span>
+    <span class="n">color_array</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s2">&quot;seismic&quot;</span><span class="p">)(</span><span class="nb">range</span><span class="p">(</span><span class="n">ncolors</span><span class="p">))</span>
+    <span class="n">color_array</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">ncolors</span><span class="p">)</span>
+    <span class="n">color_array</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">cmap</span><span class="p">(</span><span class="n">event</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">map_object</span> <span class="o">=</span> <span class="n">LinearSegmentedColormap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;event_specific&quot;</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="n">color_array</span>
+    <span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">register_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="n">map_object</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">hist2d</span><span class="p">(</span>
+        <span class="n">samples_combined</span><span class="p">[</span><span class="n">event</span> <span class="o">*</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="n">samples_combined</span><span class="p">[</span><span class="n">event</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="nb">range</span><span class="o">=</span><span class="p">[[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">]],</span>
+        <span class="n">bins</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;event_specific&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="n">likelihood</span><span class="o">.</span><span class="n">receiver_array_x</span><span class="p">,</span> <span class="n">likelihood</span><span class="o">.</span><span class="n">receiver_array_z</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;receivers&quot;</span>
+<span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+        <span class="n">sources_x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">event</span><span class="p">],</span>
+        <span class="n">sources_z</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">event</span><span class="p">],</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">cmap</span><span class="p">(</span><span class="n">event</span><span class="p">),</span>
+        <span class="n">s</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Event </span><span class="si">{</span><span class="n">event</span><span class="si">}</span><span class="s2"> true location&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="c1"># plt.xlim([likelihood.receiver_array_x.min(), likelihood.receiver_array_x.max()])</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-python notranslate"><div class="highlight"><pre>
+<span></span><span class="n">threshold_samples</span> <span class="o">=</span> <span class="n">samples_combined</span><span class="p">[:,</span> <span class="n">samples_combined</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">&lt;</span> <span class="mf">2.1</span><span class="p">]</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="n">ncolors</span> <span class="o">=</span> <span class="mi">256</span>
+    <span class="n">color_array</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s2">&quot;seismic&quot;</span><span class="p">)(</span><span class="nb">range</span><span class="p">(</span><span class="n">ncolors</span><span class="p">))</span>
+    <span class="n">color_array</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">ncolors</span><span class="p">)</span>
+    <span class="n">color_array</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">cmap</span><span class="p">(</span><span class="n">event</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">map_object</span> <span class="o">=</span> <span class="n">LinearSegmentedColormap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;event_specific&quot;</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="n">color_array</span>
+    <span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">register_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="n">map_object</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">hist2d</span><span class="p">(</span>
+        <span class="n">threshold_samples</span><span class="p">[</span><span class="n">event</span> <span class="o">*</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="n">threshold_samples</span><span class="p">[</span><span class="n">event</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="nb">range</span><span class="o">=</span><span class="p">[[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">]],</span>
+        <span class="n">bins</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;event_specific&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="n">likelihood</span><span class="o">.</span><span class="n">receiver_array_x</span><span class="p">,</span> <span class="n">likelihood</span><span class="o">.</span><span class="n">receiver_array_z</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;receivers&quot;</span>
+<span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+        <span class="n">sources_x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">event</span><span class="p">],</span>
+        <span class="n">sources_z</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">event</span><span class="p">],</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">cmap</span><span class="p">(</span><span class="n">event</span><span class="p">),</span>
+        <span class="n">s</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Event </span><span class="si">{</span><span class="n">event</span><span class="si">}</span><span class="s2"> true location&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="c1"># plt.xlim([likelihood.receiver_array_x.min(), likelihood.receiver_array_x.max()])</span>
+</pre></div>
+</div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Linear%20%28sparse%29%20forward%20operator.html" class="btn btn-neutral float-left" title="Linear (sparse) forward operator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Probabilistic%20Elastic%20FWI.html" class="btn btn-neutral float-right" title="Probabilistic Elastic FWI" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2021, Andrea Zunino, Andreas Fichtner, Lars Gebraad.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

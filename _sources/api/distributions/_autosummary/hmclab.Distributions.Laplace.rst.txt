@@ -1,0 +1,48 @@
+﻿Laplace
+=======
+
+.. currentmodule:: hmclab.Distributions
+
+.. autoclass:: Laplace
+   :members:                                 
+   :show-inheritance:                        
+   :inherited-members:                       
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+   
+      ~Laplace.__init__
+      ~Laplace.corrector
+      ~Laplace.create_default
+      ~Laplace.dimensions
+      ~Laplace.generate
+      ~Laplace.gradient
+      ~Laplace.misfit
+      ~Laplace.misfit_bounds
+      ~Laplace.normalize
+      ~Laplace.update_bounds
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Laplace.lower_bounds
+      ~Laplace.name
+      ~Laplace.normalized
+      ~Laplace.upper_bounds
+      ~Laplace.means
+      ~Laplace.dispersions
+      ~Laplace.inverse_dispersions
+   
+   

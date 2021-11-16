@@ -1,0 +1,45 @@
+﻿LinearMatrix
+============
+
+.. currentmodule:: hmclab.Distributions
+
+.. autoclass:: LinearMatrix
+   :members:                                 
+   :show-inheritance:                        
+   :inherited-members:                       
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+   
+      ~LinearMatrix.__init__
+      ~LinearMatrix.corrector
+      ~LinearMatrix.create_default
+      ~LinearMatrix.dimensions
+      ~LinearMatrix.generate
+      ~LinearMatrix.gradient
+      ~LinearMatrix.misfit
+      ~LinearMatrix.misfit_bounds
+      ~LinearMatrix.normalize
+      ~LinearMatrix.update_bounds
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~LinearMatrix.lower_bounds
+      ~LinearMatrix.name
+      ~LinearMatrix.normalized
+      ~LinearMatrix.upper_bounds
+   
+   

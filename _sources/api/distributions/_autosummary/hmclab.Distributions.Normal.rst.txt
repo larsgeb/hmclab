@@ -1,0 +1,50 @@
+﻿Normal
+======
+
+.. currentmodule:: hmclab.Distributions
+
+.. autoclass:: Normal
+   :members:                                 
+   :show-inheritance:                        
+   :inherited-members:                       
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+   
+      ~Normal.__init__
+      ~Normal.corrector
+      ~Normal.create_default
+      ~Normal.dimensions
+      ~Normal.generate
+      ~Normal.gradient
+      ~Normal.misfit
+      ~Normal.misfit_bounds
+      ~Normal.normalize
+      ~Normal.update_bounds
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Normal.lower_bounds
+      ~Normal.name
+      ~Normal.normalized
+      ~Normal.upper_bounds
+      ~Normal.diagonal
+      ~Normal.means
+      ~Normal.covariance
+      ~Normal.inverse_covariance
+      ~Normal.normalization_constant
+   
+   

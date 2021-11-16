@@ -2,7 +2,7 @@
 MassMatrices
 ############
 
-.. automodule:: hmc_tomography.MassMatrices
+.. automodule:: hmclab.MassMatrices
    :no-members:
 
 Available classes within `MassMatrices`:
