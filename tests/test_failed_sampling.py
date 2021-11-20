@@ -16,6 +16,7 @@ _as = _hmclab.Samplers._AbstractSampler
 dimensions = [1, 2, 10]
 distribution_classes = _ad.__subclasses__()
 sampler_classes = _as.__subclasses__()
+sampler_classes.remove(_hmclab.Samplers._AbstractVisualSampler)
 proposals = [10, 1000]  # , 731, 1500]
 
 

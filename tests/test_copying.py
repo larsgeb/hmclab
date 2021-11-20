@@ -9,6 +9,7 @@ import numpy as _numpy
 import pytest as _pytest
 
 import hmclab as _hmclab
+
 from hmclab.Helpers.CustomExceptions import (
     InvalidCaseError as _InvalidCaseError,
 )
@@ -19,6 +20,7 @@ _as = _hmclab.Samplers._AbstractSampler
 dimensions = [1, 2, 100]
 distribution_classes = [Distributions.Normal]
 sampler_classes = _as.__subclasses__()
+sampler_classes.remove(_hmclab.Samplers._AbstractVisualSampler)
 proposals = [10, 1000]
 autotuning = [True, False]
 
