@@ -6,6 +6,7 @@ import pytest as _pytest
 import hmclab as _hmclab
 
 sampler_classes = _hmclab.Samplers._AbstractSampler.__subclasses__()
+sampler_classes.remove(_hmclab.Samplers._AbstractVisualSampler)
 
 
 @_pytest.mark.parametrize("sampler_class", sampler_classes)

@@ -38,6 +38,7 @@ from multiprocessing import (
 )
 import copy as _copy
 import h5py as _h5py
+from matplotlib import pyplot as _plt
 import numpy as _numpy
 import tqdm.auto as _tqdm_au
 
@@ -48,7 +49,7 @@ from hmclab.Helpers.Timers import AccumulatingTimer as _AccumulatingTimer
 from hmclab.Helpers.CustomExceptions import InvalidCaseError
 
 import ipywidgets as _widgets
-from IPython.core.display import display as _display
+from IPython.core.display import display as _display, display_markdown
 
 dev_assertion_message = (
     "Something went wrong internally, please report this to the developers."
@@ -2045,27 +2046,8 @@ class PipeMatrix:
                 self.right_pipes[point1][point2].close()
 
 
-import os
-import sys
-
-
 class MyProc(_Process):
     pass
-    # def run(self):
-    #     # Define the logging in run(), MyProc's entry function when it is .start()-ed
-    #     #     p = MyProc()
-    #     #     p.start()
-    #     self.initialize_logging()
-
-    #     print('Now output is captured.')
-
-    #     # Now do stuff...
-
-    # def initialize_logging(self):
-    #     sys.stdout = open(str(os.getpid()) + ".out", "a")
-    #     sys.stderr = open(str(os.getpid()) + "_error.out", "a")
-
-    #     print('stdout initialized')
 
 
 class ParallelSampleSMP:
@@ -2260,3 +2242,335 @@ class ParallelSampleSMP:
 
     def print_results(self):
         print(self._repr_html_())
+
+
+class _AbstractVisualSampler(_AbstractSampler):
+    """This class acts as a superclass to all possible visual variations on the algorithms.
+
+    We directly 'hijack' 3 methods; the constructor, _init_sampler and _close_sampler, to
+    create and close the plots. The beauty is that this can still call the original methods
+    from _AbstractSampler. We also need to define some general function (i.e. that are used
+    for all visual samplers) that override subclass methods. Since this is not possible
+    from the superclass, we provide that function (update plots) itself to be linked in the
+    subclass.
+    """
+
+    misfits_to_plot: _numpy.array
+    """Array of stored misfits that are plotted"""
+    samples_to_plot: _numpy.array
+    """Array of stored samples that are plotted"""
+    plot_update_interval: int = 100
+    """Update interval (in number of samples) of the plots. Might strongly influence
+    algorithm performance."""
+    animate_proposals: bool = False
+    """Whether to animate the proposals themselves. Animation is controlled by subclass."""
+    animation_domain = None
+    """Array describing  the extents of the animation domain for the samples, in
+    [xmin, xmax, ymin, ymax]. If not supplied, the domain is dynamically extended."""
+    dims_to_plot = [0, 1]
+    """Which dimensions to animate samples for."""
+
+    def __init__(
+        self,
+        plot_update_interval=None,
+        dims_to_plot=None,
+        animate_proposals=None,
+        animation_domain=None,
+    ):
+
+        # Parse parameters
+        if plot_update_interval is not None:
+            self.plot_update_interval = plot_update_interval
+
+        if dims_to_plot is not None:
+            self.dims_to_plot = dims_to_plot
+
+        if animate_proposals is not None:
+            self.animate_proposals = animate_proposals
+
+        # If we are animating proposals, we take a neglegible performance hit to draw,
+        # every sample, hence we set the interval to 1.
+        if self.animate_proposals:
+            self.plot_update_interval = 1
+
+        if animation_domain is not None:
+            self.animation_domain = animation_domain
+
+        # Call the original constructor
+        super().__init__()
+
+    def _init_sampler(
+        self,
+        samples_hdf5_filename: str,
+        distribution: _AbstractDistribution,
+        initial_model: _numpy.ndarray,
+        proposals: int,
+        online_thinning: int,
+        ram_buffer_size: int,
+        overwrite_existing_file: bool,
+        max_time: int,
+        disable_progressbar: bool = False,
+        diagnostic_mode: bool = False,
+        **kwargs,
+    ):
+
+        dimensions = distribution.dimensions
+        for dim in self.dims_to_plot:
+            assert (
+                dim < dimensions
+            ), "You requested to animate a dimension which is not in the distribution"
+        assert self.plot_update_interval > 0
+        if self.animation_domain is not None:
+            assert self.animation_domain[1] > self.animation_domain[0]
+            assert self.animation_domain[3] > self.animation_domain[2]
+
+        # Create arrays to store animation parameters
+        self.misfits_to_plot = _numpy.empty((proposals, 1))
+        self.samples_to_plot = _numpy.empty((proposals, 2))
+
+        # Create collection of plots
+        self.plots = {}
+        self.plots["global_misfit"] = {}
+        self.plots["samples"] = {}
+
+        # Create figure
+        self.plots["figure"] = _plt.figure(figsize=(10, 5))
+        _plt.show(block=False)
+
+        # Subplot 1; misfits over time
+        self.plots["global_misfit"]["axis"] = _plt.subplot(121)
+        self.plots["global_misfit"]["title"] = _plt.title("Misfit over time")
+        self.plots["global_misfit"]["axis"].set_xlim([0, proposals])
+        self.plots["global_misfit"]["axis"].set_xlabel("sample index")
+        self.plots["global_misfit"]["axis"].set_ylabel("Unnormalized -log(p)")
+        self.plots["global_misfit"]["scatterplot"] = None
+
+        # Subplot 2; samples over time
+        self.plots["samples"]["axis"] = _plt.subplot(122)
+        self.plots["samples"]["title"] = _plt.title("2d marginal over time")
+        self.plots["samples"]["axis"].set_xlabel(
+            f"Model dimension {self.dims_to_plot[0]}"
+        )
+        self.plots["samples"]["axis"].set_ylabel(
+            f"Model dimension {self.dims_to_plot[1]}"
+        )
+        self.plots["samples"]["scatterplot"] = None
+        if self.animation_domain is not None:
+            self.plots["samples"]["axis"].set_xlim(
+                [self.animation_domain[0], self.animation_domain[1]]
+            )
+            self.plots["samples"]["axis"].set_ylim(
+                [self.animation_domain[2], self.animation_domain[3]]
+            )
+
+        # Run original function
+        return super()._init_sampler(
+            samples_hdf5_filename,
+            distribution,
+            initial_model,
+            proposals,
+            online_thinning,
+            ram_buffer_size,
+            overwrite_existing_file,
+            max_time,
+            disable_progressbar=disable_progressbar,
+            diagnostic_mode=diagnostic_mode,
+            **kwargs,
+        )
+
+    def _update_plots_after_acceptance(self, force=False):
+
+        if len(_plt.get_fignums()) == 0:
+            # If the figure is closed by the user, we skip the plotting
+            return
+
+        # Load current state
+        self.misfits_to_plot[self.current_proposal] = self.current_x
+        self.samples_to_plot[self.current_proposal, :] = self.current_model[
+            self.dims_to_plot
+        ].flatten()
+
+        # Beat the data into a nice shape
+        index, misfit = (
+            _numpy.arange(self.misfits_to_plot[: self.current_proposal + 1].size)[
+                :, None
+            ],
+            self.misfits_to_plot[: self.current_proposal + 1],
+        )
+        samples_x, samples_y = (
+            self.samples_to_plot[: self.current_proposal + 1, 0, None],
+            self.samples_to_plot[: self.current_proposal + 1, 1, None],
+        )
+
+        if self.plots["global_misfit"]["scatterplot"] is None:
+            # Create plots if they are not there yet ...
+            self.plots["global_misfit"]["scatterplot"] = self.plots["global_misfit"][
+                "axis"
+            ].scatter(index, misfit, s=10, c="r")
+
+            self.plots["samples"]["scatterplot"] = self.plots["samples"][
+                "axis"
+            ].scatter(samples_x, samples_y, s=10)
+
+        else:
+            # ... or update them
+            if self.current_proposal % self.plot_update_interval == 0 or force:
+                self.plots["global_misfit"]["scatterplot"].set_offsets(
+                    _numpy.hstack((index, misfit))
+                )
+                self.plots["global_misfit"]["axis"].set_ylim(
+                    [
+                        misfit.min() - 0.1 * (misfit.max() - misfit.min()),
+                        misfit.max() + 0.1 * (misfit.max() - misfit.min()),
+                    ]
+                )
+
+                self.plots["samples"]["scatterplot"].set_offsets(
+                    _numpy.hstack((samples_x, samples_y))
+                )
+
+                if self.animation_domain is None:
+                    # Update the bounds as fit if they were not given by the user
+                    self.plots["samples"]["axis"].set_xlim(
+                        [samples_x.min(), samples_x.max()]
+                    )
+                    self.plots["samples"]["axis"].set_ylim(
+                        [samples_y.min(), samples_y.max()]
+                    )
+                self.plots["figure"].canvas.draw()
+                _plt.pause(0.00001)
+
+    def _close_sampler(self):
+
+        # Set the maximum sample on the misfit plot to the latest sample
+        self._update_plots_after_acceptance(force=True)
+        self.plots["global_misfit"]["axis"].set_xlim([0, self.current_proposal + 1])
+
+        self.plots["figure"].canvas.draw()
+        _plt.pause(0.00001)
+        _plt.close()
+        return super()._close_sampler()
+
+
+class RWMH_visual(_AbstractVisualSampler, RWMH):
+    """Visual version of Random Walk Metropolis Hastings"""
+
+    def _evaluate_acceptance(self):
+        """Animate every new sample after criterion evaluation"""
+        return_value = super()._evaluate_acceptance()
+        self._update_plots_after_acceptance()
+        return return_value
+
+
+class HMC_visual(_AbstractVisualSampler, HMC):
+    """Visual version of Hamiltonian Monte Carlo"""
+
+    def _evaluate_acceptance(self):
+        """Animate every new sample after criterion evaluation"""
+        return_value = super()._evaluate_acceptance()
+        self._update_plots_after_acceptance()
+        return return_value
+
+    def _propagate_leapfrog_visual(self):
+        """Animate the leapfrog integration."""
+
+        if not self.animate_proposals or len(_plt.get_fignums()) == 0:
+            # If the figure is closed by the user, we skip the plotting
+            return super()._propagate_leapfrog()
+
+        position = self.current_model.copy()
+        momentum = self.current_momentum.copy()
+
+        # These are the positions stored for animating the trajectory
+        positions_x = _numpy.array([])
+        positions_y = _numpy.array([])
+
+        positions_x = _numpy.append(positions_x, position[self.dims_to_plot[0]])
+        positions_y = _numpy.append(positions_y, position[self.dims_to_plot[1]])
+
+        self.plots["samples"]["scatterplot_proposal"] = self.plots["samples"][
+            "axis"
+        ].plot(positions_x, positions_y, "r--")
+        line = self.plots["samples"]["scatterplot_proposal"].pop(0)
+        self.plots["figure"].canvas.draw()
+        _plt.pause(0.00001)
+
+        if self.randomize_stepsize:
+            local_stepsize = self.rng.uniform(0.5, 1.5) * self.stepsize
+        else:
+            local_stepsize = self.stepsize
+
+        # Leapfrog integration ---------------------------------------------------------
+        position += (
+            0.5 * local_stepsize * self.mass_matrix.kinetic_energy_gradient(momentum)
+        )
+
+        line.set_xdata(
+            _numpy.append(line.get_xdata().flatten(), position[self.dims_to_plot[0]])
+        )
+        line.set_ydata(
+            _numpy.append(line.get_ydata().flatten(), position[self.dims_to_plot[1]])
+        )
+        self.plots["figure"].canvas.draw()
+        _plt.pause(0.00001)
+
+        self.distribution.corrector(position, momentum)
+
+        # verbose_integration
+        verbose_integration = False
+        if verbose_integration:
+            integration_iterator = _tqdm_au.trange(
+                self.amount_of_steps - 1,
+                position=2,
+                leave=False,
+                desc="Leapfrog integration",
+            )
+        else:
+            integration_iterator = range(self.amount_of_steps - 1)
+
+        # Integration loop
+        for i in integration_iterator:
+            # Momentum step
+            momentum -= local_stepsize * self.distribution.gradient(position)
+            # Position step
+            position += local_stepsize * self.mass_matrix.kinetic_energy_gradient(
+                momentum
+            )
+
+            line.set_xdata(
+                _numpy.append(
+                    line.get_xdata().flatten(), position[self.dims_to_plot[0]]
+                )
+            )
+            line.set_ydata(
+                _numpy.append(
+                    line.get_ydata().flatten(), position[self.dims_to_plot[1]]
+                )
+            )
+            self.plots["figure"].canvas.draw()
+            _plt.pause(0.00001)
+
+            # Correct bounds
+            self.distribution.corrector(position, momentum)
+
+        # Full momentum and half step position after loop ------------------------------
+        # Momentum step
+        momentum -= local_stepsize * self.distribution.gradient(position)
+        # Position step
+        position += (
+            0.5 * local_stepsize * self.mass_matrix.kinetic_energy_gradient(momentum)
+        )
+        self.distribution.corrector(position, momentum)
+
+        self.proposed_model = position.copy()
+        self.proposed_momentum = momentum.copy()
+
+        line.remove()
+
+    integrators = {
+        "lf": _propagate_leapfrog_visual,
+    }
+    integrators_full_names = {
+        "lf": "leapfrog integrator",
+    }
+    available_integrators = integrators.keys()

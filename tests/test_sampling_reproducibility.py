@@ -19,7 +19,9 @@ _as = _hmclab.Samplers._AbstractSampler
 
 dimensions = [1, 2, 3]
 distribution_classes = _Distributions._AbstractDistribution.__subclasses__()
-sampler_classes = [hmclab.Samplers.HMC]  # _as.__subclasses__()
+sampler_classes = _as.__subclasses__()
+sampler_classes.remove(_hmclab.Samplers._AbstractVisualSampler)
+
 proposals = [10, 1000]
 autotuning = [True, False]
 
