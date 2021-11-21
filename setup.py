@@ -62,5 +62,4 @@ setuptools.setup(
             "nbconvert < 6.0.0",
         ]
     },
-    entry_points={"console_scripts": ["hmclab=hmclab.__main__:cli"]},
 )
