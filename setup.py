@@ -10,10 +10,13 @@ setuptools.setup(
     name="hmclab",
     author="Lars Gebraad, Andrea Zunino, Andreas Fichtner",
     author_email="lars.gebraad@erdw.ethz.ch",
-    description="An example HMC tomography package",
+    description="HMC and MCMC samplers for Geophyics",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/larsgeb/hmclab",
+        project_urls={
+        "Bug Tracker": "https://github.com/larsgeb/hmclab/issues",
+    },
     packages=setuptools.find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",
