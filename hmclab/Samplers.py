@@ -2264,6 +2264,8 @@ class _AbstractVisualSampler(_AbstractSampler):
     algorithm performance."""
     animate_proposals: bool = False
     """Whether to animate the proposals themselves. Animation is controlled by subclass."""
+    leave_proposal_animation: bool = False
+    """Whether to leave the animation of the proposals."""
     animation_domain = None
     """Array describing  the extents of the animation domain for the samples, in
     [xmin, xmax, ymin, ymax]. If not supplied, the domain is dynamically extended."""
@@ -2275,6 +2277,7 @@ class _AbstractVisualSampler(_AbstractSampler):
         plot_update_interval=None,
         dims_to_plot=None,
         animate_proposals=None,
+        leave_proposal_animation=None,
         animation_domain=None,
     ):
 
@@ -2292,6 +2295,9 @@ class _AbstractVisualSampler(_AbstractSampler):
         # every sample, hence we set the interval to 1.
         if self.animate_proposals:
             self.plot_update_interval = 1
+
+        if leave_proposal_animation is not None:
+            self.leave_proposal_animation = leave_proposal_animation
 
         if animation_domain is not None:
             self.animation_domain = animation_domain
@@ -2565,7 +2571,8 @@ class HMC_visual(_AbstractVisualSampler, HMC):
         self.proposed_model = position.copy()
         self.proposed_momentum = momentum.copy()
 
-        line.remove()
+        if not self.leave_proposal_animation:
+            line.remove()
 
     integrators = {
         "lf": _propagate_leapfrog_visual,
