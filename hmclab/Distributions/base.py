@@ -157,13 +157,13 @@ class _AbstractDistribution(metaclass=_ABCMeta):
         """
         raise AttributeError("This distribution is not normalizable.")
 
-    def generate(self) -> _numpy.ndarray:
+    def generate(self, repeat) -> _numpy.ndarray:
         """Draw samples from distribution.
 
         Returns
         -------
         sample : numpy.ndarray
-            A numpy array shaped as (dimensions, 1) containing a sample of the
+            A numpy array shaped as (dimensions, repeat) containing a sample of the
             distribution.
 
         Raises
@@ -468,6 +468,8 @@ class Normal(_AbstractDistribution):
         """Covariance matrix determinant and dimensionality factored in single
         likelihood term. Uncomputed if normalized() is never called."""
 
+        self.generate_ready = False
+
         # Parse means
         if type(means) == float or type(means) == int:
             _warnings.warn(
@@ -522,6 +524,9 @@ class Normal(_AbstractDistribution):
         else:
             # Else, brute force calculation of the inverse using numpy.
             self.inverse_covariance: _numpy.ndarray = _numpy.linalg.inv(self.covariance)
+
+        if self.dimensions == 1:
+            self.diagonal = True
 
         # Process optional bounds ------------------------------------------------------
         self.update_bounds(lower_bounds, upper_bounds)
@@ -583,10 +588,22 @@ class Normal(_AbstractDistribution):
             + self.dimensions * _numpy.log(2 * _numpy.pi)
         )
 
-    def generate(self) -> _numpy.ndarray:
-        raise NotImplementedError(
-            "Generating samples from this distribution is not implemented or supported."
-        )
+    def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
+
+        if not self.generate_ready:
+            if self.diagonal:
+                self.standard_deviation = self.covariance**0.5
+            else:        
+                # Perform Cholesky decompisition
+                pass
+            self.generate_ready = True
+
+        if self.diagonal:
+            return rng.normal(size=(self.dimensions, repeat)) * self.standard_deviation + self.means
+        else:        
+            raise NotImplementedError(
+                "Generating samples from this distribution is not implemented or supported."
+            )
 
     @staticmethod
     def create_default(dimensions: int) -> "Normal":
