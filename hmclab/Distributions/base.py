@@ -595,15 +595,18 @@ class Normal(_AbstractDistribution):
 
         if not self.generate_ready:
             if self.diagonal:
-                self.standard_deviation = self.covariance**0.5
-            else:        
+                self.standard_deviation = self.covariance ** 0.5
+            else:
                 # Perform Cholesky decompisition
                 pass
             self.generate_ready = True
 
         if self.diagonal:
-            return rng.normal(size=(self.dimensions, repeat)) * self.standard_deviation + self.means
-        else:        
+            return (
+                rng.normal(size=(self.dimensions, repeat)) * self.standard_deviation
+                + self.means
+            )
+        else:
             raise NotImplementedError(
                 "Generating samples from this distribution is not implemented or supported."
             )
@@ -1277,5 +1280,3 @@ class Mixture(_AbstractDistribution):
     def generate(self, repeat) -> _numpy.ndarray:
         # TODO; this one is doable
         raise NotImplementedError
-
-

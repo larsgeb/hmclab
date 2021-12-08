@@ -53,6 +53,7 @@ def test_generation(pclass: _Distributions._AbstractDistribution, dimensions: in
 
     return True
 
+
 @_pytest.mark.parametrize("pclass", subclasses)
 @_pytest.mark.parametrize("dimensions", dimensions)
 def test_misfit(pclass: _Distributions._AbstractDistribution, dimensions: int):
