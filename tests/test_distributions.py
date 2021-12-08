@@ -36,6 +36,25 @@ def test_creation(pclass: _Distributions._AbstractDistribution, dimensions: int)
 
 @_pytest.mark.parametrize("pclass", subclasses)
 @_pytest.mark.parametrize("dimensions", dimensions)
+def test_generation(pclass: _Distributions._AbstractDistribution, dimensions: int):
+    try:
+        distribution: _Distributions._AbstractDistribution = pclass.create_default(
+            dimensions
+        )
+    except _InvalidCaseError:
+        return 0
+
+    try:
+        samples = distribution.generate(100)
+    except NotImplementedError:
+        return 0
+
+    assert samples.shape == (distribution.dimensions, 100)
+
+    return True
+
+@_pytest.mark.parametrize("pclass", subclasses)
+@_pytest.mark.parametrize("dimensions", dimensions)
 def test_misfit(pclass: _Distributions._AbstractDistribution, dimensions: int):
     try:
         distribution: _Distributions._AbstractDistribution = pclass.create_default(

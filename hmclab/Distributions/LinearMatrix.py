@@ -119,8 +119,8 @@ class LinearMatrix(_AbstractDistribution):
         """"""
         return self.Distribution.gradient(coordinates)
 
-    def generate(self):
-        return self.Distribution.generate()
+    def generate(self, repeat: int):
+        return self.Distribution.generate(repeat)
 
     @staticmethod
     def create_default(
@@ -204,7 +204,7 @@ class _LinearMatrix_dense_forward_simple_covariance(_AbstractDistribution):
         else:
             return self.Gt @ ((self.G @ coordinates - self.d) / self.data_variance)
 
-    def generate(self) -> _numpy.ndarray:
+    def generate(self, repeat: int) -> _numpy.ndarray:
         raise NotImplementedError()
 
     @staticmethod
@@ -287,7 +287,7 @@ class _LinearMatrix_dense_forward_dense_covariance(_AbstractDistribution):
         else:
             return self.Gt @ self.invcov @ (self.G @ coordinates - self.d)
 
-    def generate(self) -> _numpy.ndarray:
+    def generate(self, repeat: int) -> _numpy.ndarray:
         raise NotImplementedError()
 
     @staticmethod
@@ -422,7 +422,7 @@ class _LinearMatrix_sparse_forward_simple_covariance(_AbstractDistribution):
         else:
             return self.Gt @ ((self.G @ coordinates - self.d) / self.data_variance)
 
-    def generate(self) -> _numpy.ndarray:
+    def generate(self, repeat: int) -> _numpy.ndarray:
         raise NotImplementedError()
 
     @staticmethod
@@ -477,7 +477,7 @@ class _LinearMatrix_sparse_forward_sparse_covariance(_AbstractDistribution):
             (self.G @ coordinates - self.d).astype(self.data_covariance.dtype)
         )
 
-    def generate(self) -> _numpy.ndarray:
+    def generate(self, repeat: int) -> _numpy.ndarray:
         raise NotImplementedError()
 
     @staticmethod

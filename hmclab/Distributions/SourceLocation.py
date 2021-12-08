@@ -133,7 +133,7 @@ class SourceLocation2D(_AbstractDistribution):
             total_grad[2::3, 0] = gT
             return total_grad
 
-    def generate(self) -> _numpy.ndarray:
+    def generate(self, repeat: int) -> _numpy.ndarray:
         raise NotImplementedError(
             "Generating samples from this distribution is not implemented or supported."
         )
@@ -470,7 +470,7 @@ class SourceLocation3D(_AbstractDistribution):
             total_grad[3::4, 0] = gT
             return total_grad
 
-    def generate(self) -> _numpy.ndarray:
+    def generate(self, repeat: int) -> _numpy.ndarray:
         raise NotImplementedError(
             "Generating samples from this distribution is not implemented or supported."
         )
