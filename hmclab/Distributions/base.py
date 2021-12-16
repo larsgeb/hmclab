@@ -1280,3 +1280,43 @@ class Mixture(_AbstractDistribution):
     def generate(self, repeat) -> _numpy.ndarray:
         # TODO; this one is doable
         raise NotImplementedError
+
+
+def EvaluationLimiter_ClassConstructor(
+    base,
+    limit,
+    gradient_count: int = 1,
+    throw_interrupt=True,
+):
+    class EvaluationLimiter(base):
+        def __init__(self, *args, **kwargs):
+            self.limit = limit
+            self.gradient_count = gradient_count
+            self.throw_interrupt = throw_interrupt
+
+            if self.limit == 0:
+                self.throw_interrupt = False
+
+            self.evaluations = 0
+
+            super().__init__(*args, **kwargs)
+
+        def misfit(self, coordinates: _numpy.ndarray) -> float:
+
+            if self.throw_interrupt and self.evaluations > self.limit:
+                self.evaluations=0
+                raise KeyboardInterrupt
+
+            self.evaluations += 1
+            return super().misfit(coordinates)
+
+        def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
+
+            if self.throw_interrupt and self.evaluations > self.limit:
+                self.evaluations=0
+                raise KeyboardInterrupt
+
+            self.evaluations += self.gradient_count
+            return super().gradient(coordinates)
+
+    return EvaluationLimiter

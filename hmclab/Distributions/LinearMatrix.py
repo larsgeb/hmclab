@@ -122,6 +122,9 @@ class LinearMatrix(_AbstractDistribution):
     def generate(self, repeat: int):
         return self.Distribution.generate(repeat)
 
+    def forward(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
+        return self.Distribution.G @ coordinates
+
     @staticmethod
     def create_default(
         dimensions: int, dtype=_numpy.dtype("float64")
