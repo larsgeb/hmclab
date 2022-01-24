@@ -3,8 +3,6 @@ own file.
 
 """
 
-import warnings as _warnings
-
 from abc import abstractmethod as _abstractmethod
 from typing import List as _List
 from typing import Union as _Union
@@ -475,14 +473,9 @@ class Normal(_AbstractDistribution):
 
         # Parse means
         if type(means) == float or type(means) == int:
-            _warnings.warn(
-                "Seems that you only passed a float/int as the means vector. "
-                "It will be used as a single mean for all dimensions.",
-                Warning,
-            )
             means = _numpy.ones((self.dimensions, 1)) * means
-        elif means.shape != (self.dimensions, 1):
-            raise ValueError("Incorrect size of means vector.")
+        else:
+            means.shape = (self.dimensions, 1)
         self.means: _numpy.ndarray = means
 
         # Parse covariance
@@ -494,25 +487,14 @@ class Normal(_AbstractDistribution):
         ):
             covariance = _numpy.float64(covariance)
             self.diagonal = True
-            _warnings.warn(
-                "Seems that you only passed a float/int as the covariance matrix. "
-                "It will be used as a single covariance for all dimensions.",
-                Warning,
-            )
         elif covariance.shape == (means.size, means.size):
             # Supplied a full covariance matrix, could be either NumPy or SciPy
             # matrix.
             self.diagonal = False
-        elif covariance.shape == (means.size, 1):
+        else:
             # Supplied a diagonal of a covariance matrix
             self.diagonal = True
-            _warnings.warn(
-                "Seems that you only passed a vector as the covariance matrix. "
-                "It will be used as the covariance diagonal.",
-                Warning,
-            )
-        else:
-            raise ValueError("Covariance matrix shape not understood.")
+            covariance.shape = (self.dimensions, 1)
         self.covariance = covariance
 
         # Precomputing inverses to speed up misfit and gradient computation ------------
@@ -650,10 +632,12 @@ class Laplace(_AbstractDistribution):
         # Automatically get dimensionality from means
         self.dimensions = means.size
 
+        means.shape = (self.dimensions, 1)
         self.means = means
         """A float or numpy.ndarray of shape (dimensions, 1) of floats describing the
         mean of the uncorrelated multivariate Laplace distribution."""
 
+        dispersions.shape = (self.dimensions, 1)
         self.dispersions = dispersions
         """A positive float or numpy.ndarray of shape (dimensions, 1) of positive floats
         describing the dispersion of the uncorrelated multivariate Laplace
@@ -1304,7 +1288,7 @@ def EvaluationLimiter_ClassConstructor(
         def misfit(self, coordinates: _numpy.ndarray) -> float:
 
             if self.throw_interrupt and self.evaluations > self.limit:
-                self.evaluations=0
+                self.evaluations = 0
                 raise KeyboardInterrupt
 
             self.evaluations += 1
@@ -1313,7 +1297,7 @@ def EvaluationLimiter_ClassConstructor(
         def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
 
             if self.throw_interrupt and self.evaluations > self.limit:
-                self.evaluations=0
+                self.evaluations = 0
                 raise KeyboardInterrupt
 
             self.evaluations += self.gradient_count
