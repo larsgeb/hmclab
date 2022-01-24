@@ -1076,6 +1076,8 @@ class RWMH(_AbstractSampler):
     """Minimal step length which is chosen if timestep becomes zero or negative during
     autotuning."""
 
+    _stepsize_non_scalar_part = 1.0
+
     name = "Random Walk Metropolis Hastings"
 
     def sample(
@@ -1208,8 +1210,14 @@ class RWMH(_AbstractSampler):
                 f"equal to 1.0, otherwise the Markov chain does not converge. Chosen: "
                 f"{self.learning_rate}"
             )
+
+            if type(self.stepsize) == _numpy.ndarray:
+                self._stepsize_non_scalar_part = self.stepsize
+                self.stepsize = 1.0
+                
+
             assert type(self.stepsize) == float, (
-                "Autotuning RWMH is only implemented for scalar stepsizes. If you need"
+                "Autotuning RWMH is only implemented for scalar stepsizes. If you need "
                 "it for non-scalar steps, write us an email."
             )
             self.acceptance_rates = _numpy.empty((self.proposals, 1))
@@ -1328,7 +1336,7 @@ class RWMH(_AbstractSampler):
 
         # Propose a new model according to the MH Random Walk algorithm with a Gaussian
         # proposal distribution
-        self.proposed_model = self.current_model + self.stepsize * self.rng.normal(
+        self.proposed_model = self.current_model + self.stepsize * self._stepsize_non_scalar_part * self.rng.normal(
             size=(self.dimensions, 1)
         )
         assert self.proposed_model.shape == (self.dimensions, 1), dev_assertion_message
@@ -1770,6 +1778,8 @@ class HMC(_AbstractSampler):
         proposed_stepsize = self.stepsize - schedule_weight * (
             self.target_acceptance_rate - min(acceptance_rate, 1)
         )
+        if _numpy.log(self.proposed_h) - _numpy.log(self.current_h) > 2:
+            proposed_stepsize = self.stepsize * (1.0-schedule_weight) + schedule_weight * 1e-6  *  self.stepsize
 
         if proposed_stepsize <= 0:
             if self.diagnostic_mode:
@@ -1781,7 +1791,7 @@ class HMC(_AbstractSampler):
                     "a different initial model does not make this warning go away, try"
                     "setting a smaller minimal stepsize and initial stepsize value."
                 )
-            proposed_stepsize = max(proposed_stepsize, self.minimal_stepsize)
+            proposed_stepsize = self.minimal_stepsize
 
         if (
             _numpy.abs(_numpy.log10(proposed_stepsize) - _numpy.log10(self.stepsize))
