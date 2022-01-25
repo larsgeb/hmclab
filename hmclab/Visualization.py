@@ -71,13 +71,15 @@ def marginal_grid(
             axis.set_ylabel("relative density")
 
         # Plot histogram on diagonal
-        axis.hist(
+        _,edges,_ = axis.hist(
             samples[dimensions_list[i_plot], :],
             bins=bins,
             density=False,
             range=dim_range[i_plot],
             color=color_1d,
         )
+
+        axis.set_xlim([edges[0], edges[-1]])
 
         xlim = axis.get_xlim()
 
@@ -266,7 +268,6 @@ def visualize_2_dimensions(
     )
     axis_autocorrelation.plot(
         _Processing.crosscorrelation(samples[dim1, :], samples[dim2, :]),
-        "k",
         alpha=0.25,
         label="Cross",
         color=color_1d,
