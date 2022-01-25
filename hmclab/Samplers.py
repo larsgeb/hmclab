@@ -789,12 +789,6 @@ class _AbstractSampler(_ABC):
         try:
             if overwrite:  # honor overwrite flag
                 flag = "w"
-                if self.diagnostic_mode:
-                    _warnings.warn(
-                        f"\r\nSilently overwriting samples file ({name}) if it exists.",
-                        Warning,
-                        stacklevel=100,
-                    )
             else:
                 flag = "w-"
 
@@ -1459,6 +1453,7 @@ class HMC(_AbstractSampler):
         samples_hdf5_filename: str,
         distribution: _AbstractDistribution,
         stepsize: float = 0.1,
+        randomize_stepsize: bool = None,
         amount_of_steps: int = 10,
         mass_matrix: _AbstractMassMatrix = None,
         integrator: str = "lf",
@@ -1510,6 +1505,9 @@ class HMC(_AbstractSampler):
         online_thinning: int
             An integer representing the degree of online thinning, i.e. the interval
             between storing samples.
+        randomize_stepsize: bool
+            A boolean enabling the randomization of the stepsize, which helps avoiding
+            MCMC resonance.
         diagnostic_mode: bool
             A boolean describing if subroutines of sampling should be timed. Useful for
             finding slow parts of the algorithm. Will add overhead to each function.
@@ -1552,6 +1550,7 @@ class HMC(_AbstractSampler):
                 samples_hdf5_filename=samples_hdf5_filename,
                 distribution=distribution,
                 stepsize=stepsize,
+                randomize_stepsize=randomize_stepsize,
                 amount_of_steps=amount_of_steps,
                 mass_matrix=mass_matrix,
                 integrator=integrator,
@@ -1593,6 +1592,7 @@ class HMC(_AbstractSampler):
         # Parse all possible kwargs
         for key in (
             "stepsize",
+            "randomize_stepsize",
             "amount_of_steps",
             "mass_matrix",
             "integrator",
@@ -2370,7 +2370,17 @@ class _AbstractVisualSampler(_AbstractSampler):
         _plt.show(block=False)
 
         # Subplot 1; misfits over time
-        self.plots["global_misfit"]["axis"] = _plt.subplot(121)
+        ar = 2
+        if self.animation_domain is not None:
+            ar = 1 + (self.animation_domain[1] - self.animation_domain[0]) / (
+                self.animation_domain[3] - self.animation_domain[2]
+            )
+
+        a0, a1 = self.plots["figure"].subplots(
+            1, 2, gridspec_kw={"width_ratios": [1, ar]}
+        )
+
+        self.plots["global_misfit"]["axis"] = a0  # _plt.subplot(121)
         self.plots["global_misfit"]["title"] = _plt.title("Misfit over time")
         self.plots["global_misfit"]["axis"].set_xlim([0, proposals])
         self.plots["global_misfit"]["axis"].set_xlabel("sample index")
@@ -2378,7 +2388,8 @@ class _AbstractVisualSampler(_AbstractSampler):
         self.plots["global_misfit"]["scatterplot"] = None
 
         # Subplot 2; samples over time
-        self.plots["samples"]["axis"] = _plt.subplot(122)
+        self.plots["samples"]["axis"] = a1  # _plt.subplot(122)
+        self.plots["samples"]["axis"].set_aspect(1)
         self.plots["samples"]["title"] = _plt.title("2d marginal over time")
         self.plots["samples"]["axis"].set_xlabel(
             f"Model dimension {self.dims_to_plot[0]}"
@@ -2388,8 +2399,14 @@ class _AbstractVisualSampler(_AbstractSampler):
         )
         self.plots["samples"]["scatterplot"] = None
         if self.background_image is not None:
+            from matplotlib import ticker as _ticker
+
             self.plots["samples"]["axis"].contour(
-                self.x1s, self.x2s, self.background_image, alpha=0.5
+                self.x1s,
+                self.x2s,
+                _numpy.exp(-self.background_image),
+                levels=20,
+                alpha=0.5,
             )
         if self.animation_domain is not None:
             self.plots["samples"]["axis"].set_xlim(
@@ -2525,14 +2542,14 @@ class HMC_visual(_AbstractVisualSampler, HMC):
         # These are the positions stored for animating the trajectory
         positions_x = _numpy.array([])
         positions_y = _numpy.array([])
-
         positions_x = _numpy.append(positions_x, position[self.dims_to_plot[0]])
         positions_y = _numpy.append(positions_y, position[self.dims_to_plot[1]])
 
         self.plots["samples"]["scatterplot_proposal"] = self.plots["samples"][
             "axis"
-        ].plot(positions_x, positions_y, "r--", label="trajectories")
+        ].plot(positions_x, positions_y, "r", alpha=0.5, label="trajectories", zorder=0)
         line = self.plots["samples"]["scatterplot_proposal"].pop(0)
+
         self.plots["figure"].canvas.draw()
         _plt.pause(0.00001)
 
@@ -2552,6 +2569,36 @@ class HMC_visual(_AbstractVisualSampler, HMC):
         line.set_ydata(
             _numpy.append(line.get_ydata().flatten(), position[self.dims_to_plot[1]])
         )
+
+        positions_x = _numpy.array([])
+        positions_y = _numpy.array([])
+        positions_x = _numpy.append(positions_x, position[self.dims_to_plot[0]])
+        positions_y = _numpy.append(positions_y, position[self.dims_to_plot[1]])
+        self.plots["samples"]["scatterplot_proposal_grads"] = self.plots["samples"][
+            "axis"
+        ].plot(
+            positions_x,
+            positions_y,
+            "r",
+            marker=".",
+            ls="",
+            alpha=1,
+            markersize=3,
+            label="computed gradients",
+            zorder=0,
+        )
+        line_grads = self.plots["samples"]["scatterplot_proposal_grads"].pop(0)
+        line_grads.set_xdata(
+            _numpy.append(
+                line_grads.get_xdata().flatten(), position[self.dims_to_plot[0]]
+            )
+        )
+        line_grads.set_ydata(
+            _numpy.append(
+                line_grads.get_ydata().flatten(), position[self.dims_to_plot[1]]
+            )
+        )
+
         self.plots["figure"].canvas.draw()
         _plt.pause(0.00001)
 
@@ -2578,6 +2625,9 @@ class HMC_visual(_AbstractVisualSampler, HMC):
                 momentum
             )
 
+            # Correct bounds
+            self.distribution.corrector(position, momentum)
+
             line.set_xdata(
                 _numpy.append(
                     line.get_xdata().flatten(), position[self.dims_to_plot[0]]
@@ -2588,11 +2638,18 @@ class HMC_visual(_AbstractVisualSampler, HMC):
                     line.get_ydata().flatten(), position[self.dims_to_plot[1]]
                 )
             )
+            line_grads.set_xdata(
+                _numpy.append(
+                    line_grads.get_xdata().flatten(), position[self.dims_to_plot[0]]
+                )
+            )
+            line_grads.set_ydata(
+                _numpy.append(
+                    line_grads.get_ydata().flatten(), position[self.dims_to_plot[1]]
+                )
+            )
             self.plots["figure"].canvas.draw()
             _plt.pause(0.00001)
-
-            # Correct bounds
-            self.distribution.corrector(position, momentum)
 
         # Full momentum and half step position after loop ------------------------------
         # Momentum step
@@ -2603,11 +2660,21 @@ class HMC_visual(_AbstractVisualSampler, HMC):
         )
         self.distribution.corrector(position, momentum)
 
+        line.set_xdata(
+            _numpy.append(line.get_xdata().flatten(), position[self.dims_to_plot[0]])
+        )
+        line.set_ydata(
+            _numpy.append(line.get_ydata().flatten(), position[self.dims_to_plot[1]])
+        )
+        self.plots["figure"].canvas.draw()
+        _plt.pause(0.00001)
+
         self.proposed_model = position.copy()
         self.proposed_momentum = momentum.copy()
 
         if not self.leave_proposal_animation:
             line.remove()
+            line_grads.remove()
 
     integrators = {
         "lf": _propagate_leapfrog_visual,
