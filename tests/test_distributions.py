@@ -5,9 +5,7 @@ import numpy as _numpy
 import pytest as _pytest
 
 from hmclab import Distributions as _Distributions
-from hmclab.Helpers.CustomExceptions import (
-    InvalidCaseError as _InvalidCaseError,
-)
+from hmclab.Helpers.CustomExceptions import InvalidCaseError as _InvalidCaseError
 
 dimensions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 50]
 subclasses = _Distributions._AbstractDistribution.__subclasses__()

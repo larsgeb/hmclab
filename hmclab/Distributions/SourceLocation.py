@@ -4,9 +4,7 @@ import numpy as _numpy
 import matplotlib.pyplot as _plt
 
 from hmclab.Distributions import _AbstractDistribution
-from hmclab.Helpers.CustomExceptions import (
-    InvalidCaseError as _InvalidCaseError,
-)
+from hmclab.Helpers.CustomExceptions import InvalidCaseError as _InvalidCaseError
 import math as _math
 
 

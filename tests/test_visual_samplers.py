@@ -8,9 +8,7 @@ import matplotlib.pyplot as _plt
 import pytest as _pytest
 
 import hmclab as _hmclab
-from hmclab.Helpers.CustomExceptions import (
-    InvalidCaseError as _InvalidCaseError,
-)
+from hmclab.Helpers.CustomExceptions import InvalidCaseError as _InvalidCaseError
 
 _ad = _hmclab.Distributions._AbstractDistribution
 _as = _hmclab.Samplers._AbstractVisualSampler

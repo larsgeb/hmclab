@@ -20,9 +20,7 @@ from abc import abstractmethod as _abstractmethod
 
 import numpy as _numpy
 
-from hmclab.Helpers.CustomExceptions import (
-    AbstractMethodError as _AbstractMethodError,
-)
+from hmclab.Helpers.CustomExceptions import AbstractMethodError as _AbstractMethodError
 
 from hmclab.Helpers.CustomExceptions import Assertions
 

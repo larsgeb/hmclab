@@ -6,9 +6,7 @@ import numpy as _numpy
 import psvWave as _psvWave
 
 from hmclab.Distributions import _AbstractDistribution
-from hmclab.Helpers.CustomExceptions import (
-    InvalidCaseError as _InvalidCaseError,
-)
+from hmclab.Helpers.CustomExceptions import InvalidCaseError as _InvalidCaseError
 
 
 class ElasticFullWaveform2D(_AbstractDistribution):
