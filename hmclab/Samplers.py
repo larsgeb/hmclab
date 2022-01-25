@@ -460,6 +460,9 @@ class _AbstractSampler(_ABC):
 
         if initial_model is None:
             initial_model = _numpy.zeros((self.dimensions, 1))
+        else:
+            initial_model = _numpy.array(initial_model)
+            initial_model.shape = (initial_model.size, 1)
 
         assert initial_model.shape == (self.dimensions, 1), (
             f"The initial model (`initial_model`) dimension is incompatible with the "
@@ -1214,7 +1217,6 @@ class RWMH(_AbstractSampler):
             if type(self.stepsize) == _numpy.ndarray:
                 self._stepsize_non_scalar_part = self.stepsize
                 self.stepsize = 1.0
-                
 
             assert type(self.stepsize) == float, (
                 "Autotuning RWMH is only implemented for scalar stepsizes. If you need "
@@ -1336,8 +1338,11 @@ class RWMH(_AbstractSampler):
 
         # Propose a new model according to the MH Random Walk algorithm with a Gaussian
         # proposal distribution
-        self.proposed_model = self.current_model + self.stepsize * self._stepsize_non_scalar_part * self.rng.normal(
-            size=(self.dimensions, 1)
+        self.proposed_model = (
+            self.current_model
+            + self.stepsize
+            * self._stepsize_non_scalar_part
+            * self.rng.normal(size=(self.dimensions, 1))
         )
         assert self.proposed_model.shape == (self.dimensions, 1), dev_assertion_message
 
@@ -1779,7 +1784,10 @@ class HMC(_AbstractSampler):
             self.target_acceptance_rate - min(acceptance_rate, 1)
         )
         if _numpy.log(self.proposed_h) - _numpy.log(self.current_h) > 2:
-            proposed_stepsize = self.stepsize * (1.0-schedule_weight) + schedule_weight * 1e-6  *  self.stepsize
+            proposed_stepsize = (
+                self.stepsize * (1.0 - schedule_weight)
+                + schedule_weight * 1e-6 * self.stepsize
+            )
 
         if proposed_stepsize <= 0:
             if self.diagnostic_mode:
@@ -2282,6 +2290,9 @@ class _AbstractVisualSampler(_AbstractSampler):
     dims_to_plot = [0, 1]
     """Which dimensions to animate samples for."""
 
+    background_image = None
+    """Array storing a background image to plot behind the samples."""
+
     def __init__(
         self,
         plot_update_interval=None,
@@ -2289,6 +2300,8 @@ class _AbstractVisualSampler(_AbstractSampler):
         animate_proposals=None,
         leave_proposal_animation=None,
         animation_domain=None,
+        background=None,
+        seed=None,
     ):
 
         # Parse parameters
@@ -2312,8 +2325,11 @@ class _AbstractVisualSampler(_AbstractSampler):
         if animation_domain is not None:
             self.animation_domain = animation_domain
 
+        if background is not None:
+            self.x1s, self.x2s, self.background_image = background
+
         # Call the original constructor
-        super().__init__()
+        super().__init__(seed=seed)
 
     def _init_sampler(
         self,
@@ -2371,6 +2387,10 @@ class _AbstractVisualSampler(_AbstractSampler):
             f"Model dimension {self.dims_to_plot[1]}"
         )
         self.plots["samples"]["scatterplot"] = None
+        if self.background_image is not None:
+            self.plots["samples"]["axis"].contour(
+                self.x1s, self.x2s, self.background_image, alpha=0.5
+            )
         if self.animation_domain is not None:
             self.plots["samples"]["axis"].set_xlim(
                 [self.animation_domain[0], self.animation_domain[1]]
@@ -2378,6 +2398,8 @@ class _AbstractVisualSampler(_AbstractSampler):
             self.plots["samples"]["axis"].set_ylim(
                 [self.animation_domain[2], self.animation_domain[3]]
             )
+
+        self.plots["samples"]["legend"] = None
 
         # Run original function
         return super()._init_sampler(
@@ -2426,7 +2448,10 @@ class _AbstractVisualSampler(_AbstractSampler):
 
             self.plots["samples"]["scatterplot"] = self.plots["samples"][
                 "axis"
-            ].scatter(samples_x, samples_y, s=10)
+            ].scatter(samples_x, samples_y, s=30, label="samples")
+
+            if self.plots["samples"]["legend"] is None:
+                self.plots["samples"]["legend"] = self.plots["samples"]["axis"].legend()
 
         else:
             # ... or update them
@@ -2506,7 +2531,7 @@ class HMC_visual(_AbstractVisualSampler, HMC):
 
         self.plots["samples"]["scatterplot_proposal"] = self.plots["samples"][
             "axis"
-        ].plot(positions_x, positions_y, "r--")
+        ].plot(positions_x, positions_y, "r--", label="trajectories")
         line = self.plots["samples"]["scatterplot_proposal"].pop(0)
         self.plots["figure"].canvas.draw()
         _plt.pause(0.00001)
