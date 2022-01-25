@@ -2399,7 +2399,6 @@ class _AbstractVisualSampler(_AbstractSampler):
         )
         self.plots["samples"]["scatterplot"] = None
         if self.background_image is not None:
-            from matplotlib import ticker as _ticker
 
             self.plots["samples"]["axis"].contour(
                 self.x1s,
@@ -2407,6 +2406,7 @@ class _AbstractVisualSampler(_AbstractSampler):
                 _numpy.exp(-self.background_image),
                 levels=20,
                 alpha=0.5,
+                zorder=0,
             )
         if self.animation_domain is not None:
             self.plots["samples"]["axis"].set_xlim(
