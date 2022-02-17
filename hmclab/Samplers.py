@@ -230,7 +230,7 @@ class _AbstractSampler(_ABC):
         run_details["samples written (after online thinning)"] = written_samples
         run_details["amount of writes"] = self.amount_of_writes
         run_details["dimensions"] = self.dimensions
-        run_details["distribution"] = (
+        run_details["distribution"] = str(
             (
                 self.distribution.name
                 if (self.distribution.name is not None)
