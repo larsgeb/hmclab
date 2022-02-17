@@ -33,8 +33,8 @@ setuptools.setup(
         "tqdm",
         "h5py",
         "pyyaml",
-        "jax",
         "ipywidgets",
+        "multiprocess,",
     ],
     extras_require={
         "dev": [
