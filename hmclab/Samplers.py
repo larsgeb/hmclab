@@ -1788,11 +1788,6 @@ class HMC(_AbstractSampler):
         proposed_stepsize = self.stepsize - schedule_weight * (
             self.target_acceptance_rate - min(acceptance_rate, 1)
         )
-        if _numpy.log(self.proposed_h) - _numpy.log(self.current_h) > 2:
-            proposed_stepsize = (
-                self.stepsize * (1.0 - schedule_weight)
-                + schedule_weight * 1e-6 * self.stepsize
-            )
 
         if proposed_stepsize <= 0:
             if self.diagnostic_mode:
