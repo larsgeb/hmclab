@@ -155,7 +155,7 @@ class _AbstractDistribution(metaclass=_ABCMeta):
         """
         raise AttributeError("This distribution is not normalizable.")
 
-    def generate(self, repeat) -> _numpy.ndarray:
+    def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
         """Draw samples from distribution.
 
         Returns
@@ -688,7 +688,7 @@ class Laplace(_AbstractDistribution):
         else:
             raise ValueError("Covariance matrix shape not understood.")
 
-    def generate(self, repeat: int) -> _numpy.ndarray:
+    def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
         raise NotImplementedError(
             "Generating samples from this distribution is not implemented or supported."
         )
@@ -746,9 +746,10 @@ class Uniform(_AbstractDistribution):
         """Method to compute the gradient of a uniform distribution."""
         return _numpy.zeros((self.dimensions, 1)) + self.misfit_bounds(coordinates)
 
-    def generate(self, repeat: int) -> _numpy.ndarray:
-        raise NotImplementedError(
-            "Generating samples from this distribution is not implemented or supported."
+    def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
+
+        return rng.uniform(
+            self.lower_bounds, self.upper_bounds, (self.dimensions, repeat)
         )
 
     @staticmethod
@@ -857,10 +858,14 @@ class CompositeDistribution(_AbstractDistribution):
 
         return gradient + self.misfit_bounds(coordinates)
 
-    def generate(self, repeat: int) -> _numpy.ndarray:
-        raise NotImplementedError(
-            "Generating samples from this distribution is not implemented or supported."
-        )
+    def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
+
+        samples = []
+
+        for distribution in self.separate_distributions:
+            samples.append(distribution.generate(repeat=repeat, rng=rng))
+
+        return _numpy.vstack(samples)
 
     def collapse_bounds(self):
         """Method to restructure all composite bounds into top level object."""
@@ -1006,7 +1011,7 @@ class AdditiveDistribution(_AbstractDistribution):
 
         return gradient + self.misfit_bounds(coordinates)
 
-    def generate(self, repeat: int) -> _numpy.ndarray:
+    def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
         raise NotImplementedError(
             "Generating samples from this distribution is not implemented or supported."
         )
@@ -1204,7 +1209,7 @@ class Himmelblau(_AbstractDistribution):
         gradient[1] = 2 * (x**2 + 2 * y * (x + y**2 - 7) + y - 11)
         return gradient / self.temperature
 
-    def generate(self, repeat: int) -> _numpy.ndarray:
+    def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
         raise NotImplementedError(
             "Generating samples from this distribution is not implemented or supported."
         )
@@ -1261,7 +1266,7 @@ class Mixture(_AbstractDistribution):
 
         return Mixture([Normal1, Normal2], [0.5, 0.5])
 
-    def generate(self, repeat) -> _numpy.ndarray:
+    def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
         # TODO; this one is doable
         raise NotImplementedError
 
