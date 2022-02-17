@@ -20,3 +20,4 @@ docs-source/source/examples
 .pytest_cache/
 **/_autosummary
 coverage.xml
+.DS_Store
