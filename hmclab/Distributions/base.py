@@ -560,7 +560,7 @@ class Normal(_AbstractDistribution):
             or type(self.covariance) == _numpy.float32
             or type(self.covariance) == int
         ):
-            determinant = self.covariance ** self.dimensions
+            determinant = self.covariance**self.dimensions
         elif self.covariance.shape == (self.means.size, self.means.size):
             determinant = _numpy.linalg.det(self.covariance)
         elif self.covariance.shape == (self.means.size, 1):
@@ -577,7 +577,7 @@ class Normal(_AbstractDistribution):
 
         if not self.generate_ready:
             if self.diagonal:
-                self.standard_deviation = self.covariance ** 0.5
+                self.standard_deviation = self.covariance**0.5
             else:
                 # Perform Cholesky decompisition
                 pass
@@ -1191,7 +1191,7 @@ class Himmelblau(_AbstractDistribution):
         x = coordinates[0, 0]
         y = coordinates[1, 0]
         return self.misfit_bounds(coordinates) + float(
-            ((x ** 2 + y - 11) ** 2 + (x + y ** 2 - 7) ** 2) / self.temperature
+            ((x**2 + y - 11) ** 2 + (x + y**2 - 7) ** 2) / self.temperature
         )
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
@@ -1200,8 +1200,8 @@ class Himmelblau(_AbstractDistribution):
         x = coordinates[0]
         y = coordinates[1]
         gradient = _numpy.zeros((self.dimensions, 1))
-        gradient[0] = 2 * (2 * x * (x ** 2 + y - 11) + x + y ** 2 - 7)
-        gradient[1] = 2 * (x ** 2 + 2 * y * (x + y ** 2 - 7) + y - 11)
+        gradient[0] = 2 * (2 * x * (x**2 + y - 11) + x + y**2 - 7)
+        gradient[1] = 2 * (x**2 + 2 * y * (x + y**2 - 7) + y - 11)
         return gradient / self.temperature
 
     def generate(self, repeat: int) -> _numpy.ndarray:
