@@ -30,7 +30,7 @@ from datetime import datetime as _datetime
 from typing import Union as _Union
 from typing import List as _List
 from typing import Dict as _Dict
-from multiprocessing import (
+from multiprocess import (
     Process as _Process,
     Pipe as _Pipe,
     Value as _Value,
@@ -49,7 +49,7 @@ from hmclab.Helpers.Timers import AccumulatingTimer as _AccumulatingTimer
 from hmclab.Helpers.CustomExceptions import InvalidCaseError
 
 import ipywidgets as _widgets
-from IPython.core.display import display as _display, display_markdown
+from IPython.core.display import display as _display
 
 dev_assertion_message = (
     "Something went wrong internally, please report this to the developers."
@@ -588,6 +588,10 @@ class _AbstractSampler(_ABC):
 
     def _sample_loop(self):
         """The actual sampling code."""
+
+        # This avoids some weird stdout bugs on OSX. Doesn't do anythign than
+        # fiddle with the stdout.
+        print(" ", end="", flush=True)
 
         # Create progressbar -----------------------------------------------------------
         try:
@@ -1185,6 +1189,7 @@ class RWMH(_AbstractSampler):
 
         if self.parallel:
             queue.put({f"{self.sampler_index}": self._widget_data()})
+            queue.close()
 
         return self
 
@@ -2154,7 +2159,7 @@ class ParallelSampleSMP:
         self.exchange_schedule = exchange_schedule
 
         # A queue to which the final sampling details are passed at the end of sampling
-        self.queue = _Queue()
+        self.queue = _Queue(maxsize=number_of_chains)
         main_thread_keyboard_interrupt = _Value("f", 0)
 
         # Settings within the samplers -------------------------------------------------
