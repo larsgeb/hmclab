@@ -26,6 +26,7 @@ setuptools.setup(
     ],
     python_requires=">=3.7",
     install_requires=[
+        "obspy",
         "numpy",
         "scipy",
         "termcolor",
@@ -34,7 +35,8 @@ setuptools.setup(
         "h5py",
         "pyyaml",
         "ipywidgets",
-        "multiprocess,",
+        "multiprocess",
+        "tilemapbase",
     ],
     extras_require={
         "dev": [
