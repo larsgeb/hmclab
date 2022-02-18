@@ -22,14 +22,15 @@ RUN apt-get --yes -qq update \
                       zsh \
  && apt-get --yes -qq clean \
  && rm -rf /var/lib/apt/lists/*
+
 SHELL ["/bin/bash", "-c"]
 
 RUN conda init bash
 RUN conda init zsh
-
 RUN conda create -n hmclab python==3.9
 RUN echo "conda activate hmclab" >> $HOME/.zshrc
 RUN echo "conda activate hmclab" >> $HOME/.bashrc
+
 SHELL ["conda", "run", "-n", "hmclab", "/bin/bash", "-c"]
 
 RUN mkdir /home/hmclab
@@ -40,9 +41,8 @@ RUN cd /home/hmclab && \
 
 RUN pip install psvWave==0.2.1
 
-RUN touch /home/start_server.sh && \
-    echo "cd hmclab/notebooks && jupyter notebook --allow-root --no-browser --port=4324 --ip=0.0.0.0" \
-    >> /home/start_server.sh && \
-    chmod +x /home/start_server.sh 
 
-CMD ["/bin/zsh" ]
+CMD ["conda", "run", "--no-capture-output", "-n", "hmclab", "jupyter", \
+     "notebook", "--notebook-dir=hmclab/notebooks", "--ip=0.0.0.0", \
+     "--port=8888", "--allow-root", "--NotebookApp.token=''", \
+     "--NotebookApp.password=''"]

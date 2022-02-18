@@ -1,0 +1,7 @@
+**/.git
+**/Dockerfile
+hmclab.egg-info
+dist
+build
+docs
+docs-source
