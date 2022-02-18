@@ -119,8 +119,8 @@ class LinearMatrix(_AbstractDistribution):
         """"""
         return self.Distribution.gradient(coordinates)
 
-    def generate(self, repeat: int):
-        return self.Distribution.generate(repeat)
+    def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
+        return self.Distribution.generate(repeat, rng=rng)
 
     def forward(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
         return self.Distribution.G @ coordinates
@@ -156,7 +156,7 @@ class _LinearMatrix_dense_forward_simple_covariance(_AbstractDistribution):
         else:
             # There are no float32 for normal numeric instances
             self.data_variance = data_variance
-        self.data_sigma = self.data_variance ** 0.5
+        self.data_sigma = self.data_variance**0.5
 
         # Depending on whether the data or the model space dimension is bigger,
         # performance of the misfit and gradient algorithm differs. If the data
@@ -207,7 +207,7 @@ class _LinearMatrix_dense_forward_simple_covariance(_AbstractDistribution):
         else:
             return self.Gt @ ((self.G @ coordinates - self.d) / self.data_variance)
 
-    def generate(self, repeat: int) -> _numpy.ndarray:
+    def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
         raise NotImplementedError()
 
     @staticmethod
@@ -290,7 +290,7 @@ class _LinearMatrix_dense_forward_dense_covariance(_AbstractDistribution):
         else:
             return self.Gt @ self.invcov @ (self.G @ coordinates - self.d)
 
-    def generate(self, repeat: int) -> _numpy.ndarray:
+    def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
         raise NotImplementedError()
 
     @staticmethod
@@ -326,7 +326,7 @@ class _LinearMatrix_sparse_forward_simple_covariance(_AbstractDistribution):
             self.data_variance = data_variance.astype(dtype)
         else:
             self.data_variance = data_variance
-        self.data_sigma = self.data_variance ** 0.5
+        self.data_sigma = self.data_variance**0.5
         self.use_mkl = use_mkl
         self.dtype = dtype
 
@@ -425,7 +425,7 @@ class _LinearMatrix_sparse_forward_simple_covariance(_AbstractDistribution):
         else:
             return self.Gt @ ((self.G @ coordinates - self.d) / self.data_variance)
 
-    def generate(self, repeat: int) -> _numpy.ndarray:
+    def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
         raise NotImplementedError()
 
     @staticmethod
@@ -480,7 +480,7 @@ class _LinearMatrix_sparse_forward_sparse_covariance(_AbstractDistribution):
             (self.G @ coordinates - self.d).astype(self.data_covariance.dtype)
         )
 
-    def generate(self, repeat: int) -> _numpy.ndarray:
+    def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
         raise NotImplementedError()
 
     @staticmethod
