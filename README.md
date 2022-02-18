@@ -3,11 +3,11 @@
 [![Python version](https://img.shields.io/badge/python-3.7-blue)]() [![GitHub CI Build status](https://github.com/larsgeb/hmclab/workflows/Python%20application/badge.svg)]() [![codecov](https://codecov.io/gh/larsgeb/hmclab/branch/master/graph/badge.svg?token=6svV9YDRhd)](https://codecov.io/gh/larsgeb/hmclab) [![license](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black) [![GitHub releases](https://img.shields.io/badge/download-latest%20release-green.svg)](https://github.com/larsgeb/hmclab/releases/latest)
 
 
-**HMCLab** is a numerical laboratory for Monte Carlo sampling and other algorithms
-in seismological and geophysical research. We provide all the ingredients to 
-set up probabilistic (and deterministic) inverse problems, appraise them, and
-analyse them. This includes a plethora of prior distributions, different 
-physical modelling modules and various MCMC (and other) algorithms. 
+**HMCLab** is a numerical laboratory for research in Bayesian seismology. We
+provide all the ingredients to set up probabilistic (and deterministic) inverse
+problems, appraise them, and analyse them. This includes a plethora of prior
+distributions, different physical modelling modules and various MCMC (and
+other) algorithms. 
 
 Here is a partial inventory of what we provide:
 
@@ -44,7 +44,7 @@ Here is a partial inventory of what we provide:
 
 **Demos:**
 1. [Elastic 2d FWI](notebooks/examples/Elastic%202d%20FWI.ipynb)
-2. [Locating quakes on Grimsvötn, Iceland](notebooks/examples/Locating%20quakes%20on%20Grimsvötn,%20Iceland.%20ipynb)
+2. [Locating quakes on Grimsvötn, Iceland](notebooks/examples/Locating%20quakes%20on%20Grimsvötn%2C%20Iceland.ipynb)
 3. [Sampling linear equations](notebooks/examples/Sampling%20linear%20equations.ipynb)
 4. [Sampling sparse linear equations](notebooks/examples/Sampling%20sparse%20linear%20equations.ipynb)
 
@@ -52,10 +52,17 @@ Manual:
 https://larsgeb.github.io/hmclab/
 
 
-
+notebooks/examples/Locating%20quakes%20on%20Grimsvötn%2C%20Iceland.ipynb
 ## A flying start: Jupyter notebook server in a Docker with all dependencies
 
-We build two docker images: one for AMD64 (should work on most Linux/Windows/MacOS intel systems), and ARM64 (should work on Mac M1). You can automatically get the appropriate version and start the notebook server by running:
+In the sections after these we illustrate how to use this package. If, however,
+you simply want to try out some of the notebooks, we recommend running our 
+Docker images. This also ensures that the C++ codes for the FWI module are well
+compiled and you have all the appropriate requirements.
+
+We build two docker images: one for AMD64 (should work on most Linux/Windows/
+MacOS intel systems), and ARM64 (should work on Mac M1). You can automatically
+get the appropriate version and start the notebook server by running:
 
 ```bash
 docker run -p 8888:8888 larsgebraad/hmclab
