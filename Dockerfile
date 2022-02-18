@@ -45,4 +45,4 @@ RUN pip install psvWave==0.2.1
 CMD ["conda", "run", "--no-capture-output", "-n", "hmclab", "jupyter", \
      "notebook", "--notebook-dir=hmclab/notebooks", "--ip=0.0.0.0", \
      "--port=8888", "--allow-root", "--NotebookApp.token=''", \
-     "--NotebookApp.password=''"]
+     "--NotebookApp.password=''", "--no-browser"]

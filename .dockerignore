@@ -5,3 +5,5 @@ dist
 build
 docs
 docs-source
+**/*.h5
+**/*.npy
