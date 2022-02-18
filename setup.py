@@ -10,7 +10,7 @@ setuptools.setup(
     name="hmclab",
     author="Lars Gebraad, Andrea Zunino, Andreas Fichtner",
     author_email="lars.gebraad@erdw.ethz.ch",
-    description="HMC and MCMC samplers for Geophyics",
+    description="A numerical laboratory for Bayesian Seismology",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/larsgeb/hmclab",
@@ -20,7 +20,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",
-        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.9",
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
     ],
