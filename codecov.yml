@@ -1,2 +1,4 @@
 ignore:
   - "**/*/_version*"
+  - "versioneer.py"
+  - "setup.py"
