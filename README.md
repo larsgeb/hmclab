@@ -34,7 +34,19 @@ Here is a partial inventory of what we provide:
 - Interfaces to non-linear optimization methods from SciPy
 - Animated versions of various algorithms
 
+**Tutorials:**
 
+0. [Getting started.ipynb](notebooks/tutorials/0%20-%20Getting%20started.ipynb)
+1. [Tuning Hamiltonian Monte Carlo.ipynb](notebooks/tutorials/1%20-%20Tuning%20Hamiltonian%20Monte%20Carlo.ipynb)
+2. [Separate priors per dimension.ipynb](notebooks/tutorials/2%20-%20Separate%20priors%20per%20dimension.ipynb)
+3. [Creating your own inverse problem.ipynb](notebooks/tutorials/3%20-%20Creating%20your%20own%20inverse%20problem.ipynb)
+4. [Running parallel Markov chains.ipynb](notebooks/tutorials/4%20-%20Running%20parallel%20Markov%20chains.ipynb)
+
+**Demos:**
+1. [Elastic 2d FWI](notebooks/examples/Elastic%202d%20FWI.ipynb)
+2. [Locating quakes on Grimsvötn, Iceland](notebooks/examples/Locating%20quakes%20on%20Grimsvötn,%20Iceland.%20ipynb)
+3. [Sampling linear equations](notebooks/examples/Sampling%20linear%20equations.ipynb)
+4. [Sampling sparse linear equations](notebooks/examples/Sampling%20sparse%20linear%20equations.ipynb)
 
 Manual:
 https://larsgeb.github.io/hmclab/
