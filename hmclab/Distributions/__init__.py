@@ -24,6 +24,7 @@ from hmclab.Distributions.base import (
     StandardNormal1D,
     Uniform,
     Mixture,
+    EvaluationLimiter_ClassConstructor,
     _AbstractDistribution,
 )
 from hmclab.Distributions.LinearMatrix import LinearMatrix
@@ -45,6 +46,7 @@ __all__ = [
     "SourceLocation2D",
     "SourceLocation3D",
     "Mixture",
+    "EvaluationLimiter_ClassConstructor",
 ]
 
 # Try to import 2D FWI examples if psvWave is installed, otherwise, don't fail

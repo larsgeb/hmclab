@@ -1,32 +1,48 @@
+FROM condaforge/miniforge3
+WORKDIR /home
 
-FROM continuumio/miniconda3:4.7.12
+RUN apt-get --yes -qq update \
+ && apt-get --yes -qq upgrade \
+ && DEBIAN_FRONTEND=noninteractive \ 
+ apt-get --yes -qq install \
+                      build-essential \
+                      cmake \
+                      curl \
+                      g++ \
+                      gcc \
+                      gfortran \
+                      git \
+                      libblas-dev \
+                      liblapack-dev \
+                      libopenmpi-dev \
+                      openmpi-bin \
+                      wget \
+                      htop \
+                      nano \
+                      zsh \
+ && apt-get --yes -qq clean \
+ && rm -rf /var/lib/apt/lists/*
+
+SHELL ["/bin/bash", "-c"]
+
+RUN conda init bash
+RUN conda init zsh
+RUN conda create -n hmclab python==3.9
+RUN echo "conda activate hmclab" >> $HOME/.zshrc
+RUN echo "conda activate hmclab" >> $HOME/.bashrc
+
+SHELL ["conda", "run", "-n", "hmclab", "/bin/bash", "-c"]
+
+RUN mkdir /home/hmclab
+ADD .  /home/hmclab
+
+RUN cd /home/hmclab && \
+    pip install -e . 
+
+RUN pip install psvWave==0.2.1
 
 
-ARG DEBIAN_FRONTEND=noninteractive
-
-RUN apt update
-RUN apt install unzip
-
-RUN conda create -n p37 -c conda-forge python=3.7 fenics
-ENV PATH /opt/conda/envs/p37/bin:$PATH
-RUN /bin/bash -c "source activate p37"
-RUN conda install -c anaconda hdf5=1.12.0
-RUN which python
-RUN wget https://zenodo.org/record/3634136/files/hippylib/hippylib-3.0.0.zip
-RUN unzip hippylib-3.0.0.zip
-WORKDIR hippylib-hippylib-0402982/
-RUN pip install -e .
-
-COPY . ~/hmclab
-WORKDIR ~/hmclab
-
-RUN python3.7 -m pip install -e .[testing]
-#RUN python3.7 -m pip install -v psvWave
-RUN python3.7 -m pip install install jupyter
-
-ARG DEBIAN_FRONTEND=dialog
-
-#ENV HDF5_DISABLE_VERSION_CHECK 2
-
-WORKDIR /hmclab/examples/notebooks
-CMD ["jupyter", "notebook", "--port=8888", "--no-browser", "--ip=0.0.0.0", "--allow-root"] 
+CMD ["conda", "run", "--no-capture-output", "-n", "hmclab", "jupyter", \
+     "notebook", "--notebook-dir=hmclab/notebooks", "--ip=0.0.0.0", \
+     "--port=8888", "--allow-root", "--NotebookApp.token=''", \
+     "--NotebookApp.password=''", "--no-browser"]

@@ -19,3 +19,5 @@ docs-source/source/examples
 *.NOGIT
 .pytest_cache/
 **/_autosummary
+coverage.xml
+.DS_Store

@@ -5,9 +5,7 @@ import numpy as _numpy
 import pytest as _pytest
 
 from hmclab import Distributions as _Distributions
-from hmclab.Helpers.CustomExceptions import (
-    InvalidCaseError as _InvalidCaseError,
-)
+from hmclab.Helpers.CustomExceptions import InvalidCaseError as _InvalidCaseError
 
 dimensions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 50]
 subclasses = _Distributions._AbstractDistribution.__subclasses__()
@@ -30,6 +28,26 @@ def test_creation(pclass: _Distributions._AbstractDistribution, dimensions: int)
 
     # Check if the right amount of dimensions
     assert distribution.dimensions == dimensions
+
+    return True
+
+
+@_pytest.mark.parametrize("pclass", subclasses)
+@_pytest.mark.parametrize("dimensions", dimensions)
+def test_generation(pclass: _Distributions._AbstractDistribution, dimensions: int):
+    try:
+        distribution: _Distributions._AbstractDistribution = pclass.create_default(
+            dimensions
+        )
+    except _InvalidCaseError:
+        return 0
+
+    try:
+        samples = distribution.generate(100)
+    except NotImplementedError:
+        return 0
+
+    assert samples.shape == (distribution.dimensions, 100)
 
     return True
 

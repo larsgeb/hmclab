@@ -4,9 +4,7 @@ import numpy as _numpy
 import matplotlib.pyplot as _plt
 
 from hmclab.Distributions import _AbstractDistribution
-from hmclab.Helpers.CustomExceptions import (
-    InvalidCaseError as _InvalidCaseError,
-)
+from hmclab.Helpers.CustomExceptions import InvalidCaseError as _InvalidCaseError
 import math as _math
 
 
@@ -98,7 +96,7 @@ class SourceLocation2D(_AbstractDistribution):
         dx = x - self.receiver_array_x
         dz = z - self.receiver_array_z
 
-        d = (dx ** 2.0 + dz ** 2.0) ** 0.5
+        d = (dx**2.0 + dz**2.0) ** 0.5
 
         # Data
         t_calc = T + d / v
@@ -110,7 +108,7 @@ class SourceLocation2D(_AbstractDistribution):
         data_grad_T = _numpy.ones_like(data_grad_x)
 
         # Misfit gradient
-        misfit_grad = (t_calc - self.observed_data) / (self.data_std ** 2)
+        misfit_grad = (t_calc - self.observed_data) / (self.data_std**2)
 
         # Applying chain rule
         gx = _numpy.sum(misfit_grad * data_grad_x, axis=1)
@@ -133,7 +131,7 @@ class SourceLocation2D(_AbstractDistribution):
             total_grad[2::3, 0] = gT
             return total_grad
 
-    def generate(self) -> _numpy.ndarray:
+    def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
         raise NotImplementedError(
             "Generating samples from this distribution is not implemented or supported."
         )
@@ -431,7 +429,7 @@ class SourceLocation3D(_AbstractDistribution):
         dy = y - self.receiver_array_y
         dz = z - self.receiver_array_z
 
-        d = (dx ** 2.0 + dy ** 2.0 + dz ** 2.0) ** 0.5
+        d = (dx**2.0 + dy**2.0 + dz**2.0) ** 0.5
 
         # Data
         t_calc = T + d / v
@@ -444,7 +442,7 @@ class SourceLocation3D(_AbstractDistribution):
         data_grad_T = _numpy.ones_like(data_grad_x)
 
         # Misfit gradient
-        misfit_grad = (t_calc - self.observed_data) / (self.data_std ** 2)
+        misfit_grad = (t_calc - self.observed_data) / (self.data_std**2)
 
         # Applying chain rule
         gx = _numpy.nansum(misfit_grad * data_grad_x, axis=1)
@@ -470,7 +468,7 @@ class SourceLocation3D(_AbstractDistribution):
             total_grad[3::4, 0] = gT
             return total_grad
 
-    def generate(self) -> _numpy.ndarray:
+    def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
         raise NotImplementedError(
             "Generating samples from this distribution is not implemented or supported."
         )

@@ -10,10 +10,13 @@ setuptools.setup(
     name="hmclab",
     author="Lars Gebraad, Andrea Zunino, Andreas Fichtner",
     author_email="lars.gebraad@erdw.ethz.ch",
-    description="An example HMC tomography package",
+    description="HMC and MCMC samplers for Geophyics",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/larsgeb/hmclab",
+    project_urls={
+        "Bug Tracker": "https://github.com/larsgeb/hmclab/issues",
+    },
     packages=setuptools.find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -23,6 +26,7 @@ setuptools.setup(
     ],
     python_requires=">=3.7",
     install_requires=[
+        "obspy",
         "numpy",
         "scipy",
         "termcolor",
@@ -30,8 +34,9 @@ setuptools.setup(
         "tqdm",
         "h5py",
         "pyyaml",
-        "jax",
         "ipywidgets",
+        "multiprocess",
+        "tilemapbase",
     ],
     extras_require={
         "dev": [
@@ -59,5 +64,4 @@ setuptools.setup(
             "nbconvert < 6.0.0",
         ]
     },
-    entry_points={"console_scripts": ["hmclab=hmclab.__main__:cli"]},
 )

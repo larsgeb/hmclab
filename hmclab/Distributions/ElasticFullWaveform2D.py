@@ -6,9 +6,7 @@ import numpy as _numpy
 import psvWave as _psvWave
 
 from hmclab.Distributions import _AbstractDistribution
-from hmclab.Helpers.CustomExceptions import (
-    InvalidCaseError as _InvalidCaseError,
-)
+from hmclab.Helpers.CustomExceptions import InvalidCaseError as _InvalidCaseError
 
 
 class ElasticFullWaveform2D(_AbstractDistribution):
@@ -132,7 +130,7 @@ class ElasticFullWaveform2D(_AbstractDistribution):
             omp_threads_override=omp_threads_override,
         )
 
-    def generate(self) -> _numpy.ndarray:
+    def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
         raise _InvalidCaseError(
             "Can't generate samples from non-analytic distributions."
         )
@@ -296,8 +294,8 @@ class BlobParametrization:
                 index = i_x * nz + i_z
                 distance = _numpy.exp(
                     -(
-                        ((self.coordinates_x - x_cor) / (0.5 ** 0.5 * dx)) ** 2
-                        + ((self.coordinates_z - z_cor) / (0.5 ** 0.5 * dz)) ** 2
+                        ((self.coordinates_x - x_cor) / (0.5**0.5 * dx)) ** 2
+                        + ((self.coordinates_z - z_cor) / (0.5**0.5 * dz)) ** 2
                     )
                 )
 

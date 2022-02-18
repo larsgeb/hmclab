@@ -3,8 +3,6 @@ own file.
 
 """
 
-import warnings as _warnings
-
 from abc import abstractmethod as _abstractmethod
 from typing import List as _List
 from typing import Union as _Union
@@ -157,13 +155,13 @@ class _AbstractDistribution(metaclass=_ABCMeta):
         """
         raise AttributeError("This distribution is not normalizable.")
 
-    def generate(self) -> _numpy.ndarray:
+    def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
         """Draw samples from distribution.
 
         Returns
         -------
         sample : numpy.ndarray
-            A numpy array shaped as (dimensions, 1) containing a sample of the
+            A numpy array shaped as (dimensions, repeat) containing a sample of the
             distribution.
 
         Raises
@@ -402,6 +400,9 @@ class StandardNormal1D(_AbstractDistribution):
         else:
             raise _CustomExceptions.InvalidCaseError()
 
+    def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
+        return rng.normal(0.0, 1.0, (1, repeat))
+
 
 class Normal(_AbstractDistribution):
     """Normal distribution in model space.
@@ -468,16 +469,13 @@ class Normal(_AbstractDistribution):
         """Covariance matrix determinant and dimensionality factored in single
         likelihood term. Uncomputed if normalized() is never called."""
 
+        self.generate_ready = False
+
         # Parse means
         if type(means) == float or type(means) == int:
-            _warnings.warn(
-                "Seems that you only passed a float/int as the means vector. "
-                "It will be used as a single mean for all dimensions.",
-                Warning,
-            )
             means = _numpy.ones((self.dimensions, 1)) * means
-        elif means.shape != (self.dimensions, 1):
-            raise ValueError("Incorrect size of means vector.")
+        else:
+            means.shape = (self.dimensions, 1)
         self.means: _numpy.ndarray = means
 
         # Parse covariance
@@ -489,25 +487,14 @@ class Normal(_AbstractDistribution):
         ):
             covariance = _numpy.float64(covariance)
             self.diagonal = True
-            _warnings.warn(
-                "Seems that you only passed a float/int as the covariance matrix. "
-                "It will be used as a single covariance for all dimensions.",
-                Warning,
-            )
         elif covariance.shape == (means.size, means.size):
             # Supplied a full covariance matrix, could be either NumPy or SciPy
             # matrix.
             self.diagonal = False
-        elif covariance.shape == (means.size, 1):
+        else:
             # Supplied a diagonal of a covariance matrix
             self.diagonal = True
-            _warnings.warn(
-                "Seems that you only passed a vector as the covariance matrix. "
-                "It will be used as the covariance diagonal.",
-                Warning,
-            )
-        else:
-            raise ValueError("Covariance matrix shape not understood.")
+            covariance.shape = (self.dimensions, 1)
         self.covariance = covariance
 
         # Precomputing inverses to speed up misfit and gradient computation ------------
@@ -522,6 +509,9 @@ class Normal(_AbstractDistribution):
         else:
             # Else, brute force calculation of the inverse using numpy.
             self.inverse_covariance: _numpy.ndarray = _numpy.linalg.inv(self.covariance)
+
+        if self.dimensions == 1:
+            self.diagonal = True
 
         # Process optional bounds ------------------------------------------------------
         self.update_bounds(lower_bounds, upper_bounds)
@@ -570,7 +560,7 @@ class Normal(_AbstractDistribution):
             or type(self.covariance) == _numpy.float32
             or type(self.covariance) == int
         ):
-            determinant = self.covariance ** self.dimensions
+            determinant = self.covariance**self.dimensions
         elif self.covariance.shape == (self.means.size, self.means.size):
             determinant = _numpy.linalg.det(self.covariance)
         elif self.covariance.shape == (self.means.size, 1):
@@ -583,10 +573,25 @@ class Normal(_AbstractDistribution):
             + self.dimensions * _numpy.log(2 * _numpy.pi)
         )
 
-    def generate(self) -> _numpy.ndarray:
-        raise NotImplementedError(
-            "Generating samples from this distribution is not implemented or supported."
-        )
+    def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
+
+        if not self.generate_ready:
+            if self.diagonal:
+                self.standard_deviation = self.covariance**0.5
+            else:
+                # Perform Cholesky decompisition
+                pass
+            self.generate_ready = True
+
+        if self.diagonal:
+            return (
+                rng.normal(size=(self.dimensions, repeat)) * self.standard_deviation
+                + self.means
+            )
+        else:
+            raise NotImplementedError(
+                "Generating samples from this distribution is not implemented or supported."
+            )
 
     @staticmethod
     def create_default(dimensions: int) -> "Normal":
@@ -627,10 +632,12 @@ class Laplace(_AbstractDistribution):
         # Automatically get dimensionality from means
         self.dimensions = means.size
 
+        means.shape = (self.dimensions, 1)
         self.means = means
         """A float or numpy.ndarray of shape (dimensions, 1) of floats describing the
         mean of the uncorrelated multivariate Laplace distribution."""
 
+        dispersions.shape = (self.dimensions, 1)
         self.dispersions = dispersions
         """A positive float or numpy.ndarray of shape (dimensions, 1) of positive floats
         describing the dispersion of the uncorrelated multivariate Laplace
@@ -681,7 +688,7 @@ class Laplace(_AbstractDistribution):
         else:
             raise ValueError("Covariance matrix shape not understood.")
 
-    def generate(self) -> _numpy.ndarray:
+    def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
         raise NotImplementedError(
             "Generating samples from this distribution is not implemented or supported."
         )
@@ -739,9 +746,10 @@ class Uniform(_AbstractDistribution):
         """Method to compute the gradient of a uniform distribution."""
         return _numpy.zeros((self.dimensions, 1)) + self.misfit_bounds(coordinates)
 
-    def generate(self) -> _numpy.ndarray:
-        raise NotImplementedError(
-            "Generating samples from this distribution is not implemented or supported."
+    def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
+
+        return rng.uniform(
+            self.lower_bounds, self.upper_bounds, (self.dimensions, repeat)
         )
 
     @staticmethod
@@ -850,10 +858,14 @@ class CompositeDistribution(_AbstractDistribution):
 
         return gradient + self.misfit_bounds(coordinates)
 
-    def generate(self) -> _numpy.ndarray:
-        raise NotImplementedError(
-            "Generating samples from this distribution is not implemented or supported."
-        )
+    def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
+
+        samples = []
+
+        for distribution in self.separate_distributions:
+            samples.append(distribution.generate(repeat=repeat, rng=rng))
+
+        return _numpy.vstack(samples)
 
     def collapse_bounds(self):
         """Method to restructure all composite bounds into top level object."""
@@ -999,7 +1011,7 @@ class AdditiveDistribution(_AbstractDistribution):
 
         return gradient + self.misfit_bounds(coordinates)
 
-    def generate(self) -> _numpy.ndarray:
+    def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
         raise NotImplementedError(
             "Generating samples from this distribution is not implemented or supported."
         )
@@ -1184,7 +1196,7 @@ class Himmelblau(_AbstractDistribution):
         x = coordinates[0, 0]
         y = coordinates[1, 0]
         return self.misfit_bounds(coordinates) + float(
-            ((x ** 2 + y - 11) ** 2 + (x + y ** 2 - 7) ** 2) / self.temperature
+            ((x**2 + y - 11) ** 2 + (x + y**2 - 7) ** 2) / self.temperature
         )
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
@@ -1193,11 +1205,11 @@ class Himmelblau(_AbstractDistribution):
         x = coordinates[0]
         y = coordinates[1]
         gradient = _numpy.zeros((self.dimensions, 1))
-        gradient[0] = 2 * (2 * x * (x ** 2 + y - 11) + x + y ** 2 - 7)
-        gradient[1] = 2 * (x ** 2 + 2 * y * (x + y ** 2 - 7) + y - 11)
+        gradient[0] = 2 * (2 * x * (x**2 + y - 11) + x + y**2 - 7)
+        gradient[1] = 2 * (x**2 + 2 * y * (x + y**2 - 7) + y - 11)
         return gradient / self.temperature
 
-    def generate(self) -> _numpy.ndarray:
+    def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
         raise NotImplementedError(
             "Generating samples from this distribution is not implemented or supported."
         )
@@ -1253,3 +1265,47 @@ class Mixture(_AbstractDistribution):
         Normal2 = Normal.create_default(dimensions)
 
         return Mixture([Normal1, Normal2], [0.5, 0.5])
+
+    def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
+        # TODO; this one is doable
+        raise NotImplementedError
+
+
+def EvaluationLimiter_ClassConstructor(
+    base,
+    limit,
+    gradient_count: int = 1,
+    throw_interrupt=True,
+):
+    class EvaluationLimiter(base):
+        def __init__(self, *args, **kwargs):
+            self.limit = limit
+            self.gradient_count = gradient_count
+            self.throw_interrupt = throw_interrupt
+
+            if self.limit == 0:
+                self.throw_interrupt = False
+
+            self.evaluations = 0
+
+            super().__init__(*args, **kwargs)
+
+        def misfit(self, coordinates: _numpy.ndarray) -> float:
+
+            if self.throw_interrupt and self.evaluations > self.limit:
+                self.evaluations = 0
+                raise KeyboardInterrupt
+
+            self.evaluations += 1
+            return super().misfit(coordinates)
+
+        def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
+
+            if self.throw_interrupt and self.evaluations > self.limit:
+                self.evaluations = 0
+                raise KeyboardInterrupt
+
+            self.evaluations += self.gradient_count
+            return super().gradient(coordinates)
+
+    return EvaluationLimiter

@@ -14,6 +14,8 @@ class Samples:
     datasetname = "samples_0"
 
     def __init__(self, filename, burn_in: int = 0):
+
+        self._inside_context = False
         self.filename = filename
         try:
             self.file_handle: _h5py.File = _h5py.File(self.filename, "r")
@@ -38,9 +40,11 @@ class Samples:
         return self.file_handle[self.datasetname][:, self.burn_in :][key]
 
     def __enter__(self):
+        self._inside_context = True
         return self
 
     def __exit__(self, type, value, traceback):
+        self._inside_context = False
         self.file_handle.close()
 
     def close(self):
@@ -52,7 +56,12 @@ class Samples:
 
     @property
     def numpy(self):
-        return self.file_handle[self.datasetname][:, self.burn_in :]
+        return_val = self.file_handle[self.datasetname][:, self.burn_in :]
+
+        if not self._inside_context:
+            self.close()
+
+        return return_val
 
     @property
     def h5(self):
