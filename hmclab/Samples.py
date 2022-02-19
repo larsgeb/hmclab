@@ -126,8 +126,6 @@ class Samples:
 def combine_samples(
     samples_list: _Union[_List[Samples], _List[str]],
     output_filename=None,
-    check_tuning_parameters=True,
-    burn_ins=None,
     cull_nan=True,
 ):
     assert (
@@ -159,6 +157,8 @@ def combine_samples(
                 :,
                 _numpy.logical_not(_numpy.isnan(_numpy.sum(ret_obj, axis=0))),
             ]
+    else:
+        raise NotImplemented
 
     if close_files:
         for samples_item in samples_list:
@@ -171,7 +171,9 @@ def _in_notebook():
     try:
         from IPython import get_ipython
 
-        if "IPKernelApp" not in get_ipython().config:  # pragma: no cover
+        if (
+            not get_ipython() or "IPKernelApp" not in get_ipython().config
+        ):  # pragma: no cover
             return False
     except ImportError:
         return False
