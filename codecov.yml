@@ -1,7 +1,9 @@
 ignore:
   - "**/*/_version*"
   - "*version.py"
+  - "_version.py"
   - "versioneer.py"
   - "setup.py"
   - "**/*/InterfaceMKL.py"
   - "**/*/CaptureStdout.py"
+  - "ElasticFullWaveform2D.py"
