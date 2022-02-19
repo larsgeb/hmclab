@@ -350,7 +350,7 @@ def test_plot(sampler_class: _as):
 @_pytest.mark.parametrize("sampler_class", sampler_classes)
 @_pytest.mark.parametrize("dimensions", dimensions)
 @_pytest.mark.parametrize("parallel_chains", [2, 3])
-@_pytest.mark.parametrize("exchange_interval", [1, 7])
+@_pytest.mark.parametrize("exchange_interval", [1, 5])
 @_pytest.mark.parametrize("exchange", [True, False])
 def test_parallel_sampling(
     sampler_class: _as,
@@ -384,6 +384,10 @@ def test_parallel_sampling(
         overwrite_existing_files=True,
     )
 
+    for filename in filenames:
+        with _hmclab.Samples(filename) as samples:
+            assert samples.numpy.shape == (dimensions + 1, 100)
+
     # Check if the file was created. If it wasn't, fail
     for filename in filenames:
         if not _os.path.exists(filename):
@@ -392,4 +396,4 @@ def test_parallel_sampling(
         # Remove the file
         _os.remove(filename)
 
-    controller_instance.print_results()
+    # controller_instance.print_results()

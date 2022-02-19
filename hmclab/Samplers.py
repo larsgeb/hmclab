@@ -808,74 +808,8 @@ class _AbstractSampler(_ABC):
                     "This file is already opened as HDF5 file. If you "
                     "want to write to it, close the filehandle."
                 )
-
-            # If it exists, prompt the user with a warning
-            _warnings.warn(
-                f"\r\nIt seems that the samples file ({name}) already exists, or the "
-                f"file could otherwise not be created.",
-                Warning,
-                stacklevel=100,
-            )
-
-            # Keep track of user input
-            choice_made = False
-
-            # Keep trying until the user makes a valid choice
-            while not choice_made:
-
-                # Prompt user with three options, abort, overwrite, or new filename
-                if nested:
-                    # If this is not the first time that this is called, also print the
-                    # warning again
-                    input_choice = input(
-                        f"{name} also exists. (n)ew file name, (o)verwrite, (s)kip "
-                        "sampling or (a)bort code? >> "
-                    )
-                else:
-                    input_choice = input(
-                        "(n)ew file name, (o)verwrite, (s)kip sampling or (a)bort "
-                        "code? >> "
-                    )
-
-                # Act on choice
-                if input_choice == "n":
-                    # User wants a new file
-                    choice_made = True
-
-                    # Ask user for the new filename
-                    new_name = input("new file name? (adds missing .h5) >> ")
-
-                    # Call the current method again, with the new filename (recursion!)
-                    self._open_samples_hdf5(new_name, length, dtype=dtype, nested=True)
-
-                    # Exit from here
-                    return
-
-                elif input_choice == "o":
-                    # User wants to overwrite the file
-                    choice_made = True
-
-                    # Create file, truncate if exists. This should never give an
-                    # error on file exists, but could fail for other reasons. Therefore,
-                    # no try-catch block.
-                    self.samples_hdf5_filehandle = _h5py.File(
-                        name, "w", libver="latest"
-                    )
-
-                elif input_choice == "a":
-                    # User wants to abort code
-                    choice_made = True
-                    raise FileExistsError(
-                        "Aborting code execution due to samples file existing."
-                    )
-
-                elif input_choice == "s":
-                    # User wants to abort sampling, but continue code
-                    choice_made = True
-                    raise FileExistsError(
-                        "Skipping sampling due to samples file existing. Code "
-                        "execution continues."
-                    )
+            else:
+                raise e  # pragma: no cover
 
         # Update the filename in the sampler object for later retrieval
         self.samples_hdf5_filename = name
