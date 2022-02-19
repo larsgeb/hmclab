@@ -130,9 +130,6 @@ class _AbstractSampler(_ABC):
     """A float representing the maximum time in seconds that sampling is allowed to take
     before it is automatically terminated. The value None is used for unlimited time."""
 
-    times_started: int = 0
-    """An integer representing how often this sampler object has started sampling."""
-
     proposals: int = None
     """An integer representing the amount of requested proposals for a run."""
 
@@ -201,114 +198,6 @@ class _AbstractSampler(_ABC):
     exchange_interval: int = None
     """Integer describing how many samples lie between the attempted swap of states
     between samplers."""
-
-    def __str__(self) -> str:
-        """Method for converting a sampler object to string, handy in outputs. Works for
-        derived classes."""
-        return f"An instance of the {self.name} sampler object."
-
-    def _widget_data(self) -> _Dict:
-        """Method for returning post-sampling summary data to be displayed in e.g.
-        Jupyter widgets."""
-
-        # Run details (panel 1) --------------------------------------------------------
-        run_details = {}
-        proposed_samples = self.current_proposal if self.current_proposal > 0 else None
-        acceptance_rate = self.accepted_proposals / (self.current_proposal + 1)
-        if not (self.start_time is None or self.end_time is None):
-            runtime = (self.end_time - self.start_time).total_seconds()
-            run_details["local start time (not timezone aware)"] = self.start_time
-            run_details["runtime (seconds)"] = runtime
-            run_details["proposals per seconds"] = proposed_samples / runtime
-        written_samples = (
-            self.current_proposal_after_thinning + 1
-            if self.current_proposal_after_thinning > 0
-            else None
-        )
-
-        run_details["acceptance rate"] = acceptance_rate
-        run_details["output file"] = self.samples_hdf5_filename
-        run_details["proposals made (excluding first position)"] = proposed_samples
-        run_details["samples written (after online thinning)"] = written_samples
-        run_details["amount of writes"] = self.amount_of_writes
-        run_details["dimensions"] = self.dimensions
-        run_details["distribution"] = str(
-            (
-                self.distribution.name
-                if (self.distribution.name is not None)
-                else self.distribution
-            )
-            if self.distribution is not None
-            else None
-        )
-
-        # Tuning settings (panel 2) ----------------------------------------------------
-        settings = {}
-        settings["proposals"] = self.proposals
-        settings["online thinning (store every ...-th sample)"] = self.online_thinning
-
-        # Combine with algorithm specific settings
-        settings = {**settings, **self._tuning_settings()}
-
-        # Algorithm (panel 3) ----------------------------------------------------------
-        algorithm = {}
-        algorithm["algorithm used"] = self.name
-        algorithm["diagnostic mode"] = self.diagnostic_mode
-        algorithm["ram buffer size"] = self.ram_buffer_size
-        algorithm["this object has started sampling ... times"] = self.times_started
-
-        return {
-            "Details of last run": run_details,
-            "Tuning settings": settings,
-            "Algorithm": algorithm,
-        }
-
-    def print_results(self) -> None:
-        """Print Jupyter widget from `_repr_html_()` to stdout."""
-        print(self._repr_html_())
-
-    def _repr_html_(
-        self, nested: bool = False, widget_data: _Dict = None
-    ) -> _Union[None, _widgets.Tab]:
-        """Create a Jupyter widget with the sampling results and statistics."""
-
-        default_layout = _widgets.Layout(padding="10px")
-
-        # Helper function to make a Tab from a Python Dictionary
-        def dictionary_to_widget(dictionary):
-            left_column = _widgets.VBox(
-                [_widgets.Label(str(key)) for key in dictionary.keys()],
-                layout=default_layout,
-            )
-            right_column = _widgets.VBox(
-                [_widgets.Label(str(key)) for key in dictionary.values()],
-                layout=default_layout,
-            )
-            return _widgets.HBox([left_column, right_column], layout=default_layout)
-
-        # Obtain sampling data
-        if widget_data is None:
-            widget_data = self._widget_data()
-
-        # Create tab object
-        tab = _widgets.Tab()
-
-        # Populate children with sampling data
-        tab.children = [
-            dictionary_to_widget(panel_data) for panel_data in widget_data.values()
-        ]
-        panel_headings = [key for key in widget_data.keys()]
-        for i in range(len(tab.children)):
-            tab.set_title(i, panel_headings[i])
-
-        # Return results, or print and return nothing.
-        if nested:
-            # This is used when multiple samplers ran in parallel, and the tabs of each
-            # individual sampler still need to be combined.
-            return tab
-        else:
-            _display(tab)
-            return ""
 
     def __init__(
         self,
@@ -530,93 +419,6 @@ class _AbstractSampler(_ABC):
         )
         self.samples_hdf5_dataset.attrs["sampler"] = self.name
 
-    def _close_sampler(self):
-
-        self.samples_hdf5_dataset.attrs["acceptance_rate"] = self.accepted_proposals / (
-            self.current_proposal + 1
-        )
-
-        # Manually check for ram_buffer_size = 1 + failed written sample
-        if self.ram_buffer_size == 1 and _numpy.all(
-            self.samples_hdf5_dataset[:, -1] == 0.0
-        ):
-            self.samples_hdf5_dataset[:, -1] = self.ram_buffer[:, 0]
-
-        self.samples_hdf5_dataset.attrs["end_time"] = _datetime.now().strftime(
-            "%d-%b-%Y (%H:%M:%S.%f)"
-        )
-        self.samples_hdf5_dataset.attrs["runtime"] = str(
-            self.end_time - self.start_time
-        )
-        self.samples_hdf5_dataset.attrs["runtime_seconds"] = (
-            self.end_time - self.start_time
-        ).total_seconds()
-
-        self._close_sampler_specific()
-
-        self.samples_hdf5_filehandle.close()
-        self.samples_hdf5_filehandle = None
-        self.samples_hdf5_dataset = None
-
-        if self.diagnostic_mode:
-            # This block shows the percentage of time spent in each part of the sampler.
-            percentage_time_spent = {}
-            print("Detailed statistics:")
-
-            total_time = (self.end_time - self.start_time).total_seconds()
-
-            print(f"Total runtime: {total_time:.2f} seconds")
-
-            for fn in self.functions_to_diagnose:
-                percentage_time_spent[fn.function.__name__] = (
-                    100 * fn.time_spent / total_time
-                )
-            print()
-            print("General sampler components:")
-            print("{:<30} {:<30}".format("Function", "percentage of time"))
-            for name, percentage in percentage_time_spent.items():
-                print("{:<30} {:<30.2f}".format(name, percentage))
-
-            percentage_time_spent = {}
-            for fn in self.sampler_specific_functions_to_diagnose:
-                percentage_time_spent[fn.function.__name__] = (
-                    100 * fn.time_spent / total_time
-                )
-            print()
-            print(f"{self.name} specific components:")
-            print("{:<30} {:<30}".format("Function", "percentage of time"))
-            for name, percentage in percentage_time_spent.items():
-                print("{:<30} {:<30.2f}".format(name, percentage))
-
-    def _sample_loop(self):
-        """The actual sampling code."""
-
-        # This avoids some weird stdout bugs on OSX. Doesn't do anythign than
-        # fiddle with the stdout.
-        print(" ", end="", flush=True)
-
-        # Create progressbar -----------------------------------------------------------
-        try:
-            self.proposals_iterator = _tqdm_au.trange(
-                self.proposals,
-                desc=f"Tot. acc rate: {0:.2f}. Progress",
-                leave=True,
-                dynamic_ncols=True,
-                position=self.sampler_index,  # only relevant for parallel sampling
-                disable=self.disable_progressbar,
-            )
-        except Exception:
-            self.proposals_iterator = _tqdm_au.trange(
-                self.proposals,
-                desc=f"Tot. acc rate: {0:.2f}. Progress",
-                leave=True,
-                position=self.sampler_index,  # only relevant for parallel sampling
-                disable=self.disable_progressbar,
-            )
-
-        # Start time for updating progressbar
-        self.last_update_time = _time()
-
         # Capture NumPy exceptions -----------------------------------------------------
         class Log(object):
             messages = []
@@ -626,11 +428,42 @@ class _AbstractSampler(_ABC):
 
         self.log = Log()
         _numpy.seterrcall(self.log)
-        _numpy.seterr(all="log")  # seterr to known value
+        _numpy.seterr(all="log")
+
+        # This avoids some weird stdout bugs on OSX. Doesn't do anything than
+        # fiddle with the stdout.
+        print(" ", end="", flush=True)
+
+    def create_progressbar(self):
+        try:
+            iterator = _tqdm_au.trange(
+                self.proposals,
+                desc=f"Tot. acc rate: {0:.2f}. Progress",
+                leave=True,
+                dynamic_ncols=True,
+                position=self.sampler_index,  # only relevant for parallel sampling
+                disable=self.disable_progressbar,
+            )
+        except Exception:
+            iterator = _tqdm_au.trange(
+                self.proposals,
+                desc=f"Tot. acc rate: {0:.2f}. Progress",
+                leave=True,
+                position=self.sampler_index,  # only relevant for parallel sampling
+                disable=self.disable_progressbar,
+            )
+        self.last_update_progressbar = _time()
+        return iterator
+
+    def _sample_loop(self):
+        """The actual sampling code."""
+
+        # Create progressbar -----------------------------------------------------------
+        self.iterator = self.create_progressbar()
 
         # Run the Markov process -------------------------------------------------------
         self.start_time = _datetime.now()
-        self.times_started += 1
+
         try:
             # If the sampler is given a maximum time, start timer now
             scheduled_termination_time = 0
@@ -638,14 +471,12 @@ class _AbstractSampler(_ABC):
                 scheduled_termination_time = _time() + self.max_time
 
             # Iterate through amount of proposals
-            for self.current_proposal in self.proposals_iterator:
+            for self.current_proposal in self.iterator:
 
                 # Propose a new sample.
-                # The underlying method changes when different algorithms are selected.
                 self._propose()
 
                 # Evaluate acceptance criterium.
-                # The underlying method changes when different algorithms are selected.
                 self._evaluate_acceptance()
 
                 # Parallel communication section -------------
@@ -732,23 +563,7 @@ class _AbstractSampler(_ABC):
 
                 # --------------------------------------------
 
-                # If we are on a thinning number ... (i.e. one of the non-discarded
-                # samples)
-                if self.current_proposal % self.online_thinning == 0:
-
-                    # Write sample to ram array
-                    self._sample_to_ram()
-
-                    # Calculate the index this sample has after thinning
-                    after_thinning = int(self.current_proposal / self.online_thinning)
-
-                    # Check if this number is at the end of the buffer ...
-                    if (
-                        after_thinning % self.ram_buffer_size
-                    ) == self.ram_buffer_size - 1:
-
-                        # If so, write samples to disk
-                        self._samples_to_disk()
+                self._save_sample()
 
                 # Update the progressbar
                 self._update_progressbar()
@@ -765,18 +580,35 @@ class _AbstractSampler(_ABC):
             pass
         except Exception as e:
             # Any other exception, we don't know how to handle
-            self.proposals_iterator.close()
-            self.proposals_iterator = None
+            self.iterator.close()
+            self.iterator = None
             self._samples_to_disk()
             self.end_time = _datetime.now()
             self._close_sampler()
             raise e
         finally:  # Write out the last samples not on a full buffer --------------------
-            self.proposals_iterator.close()
-            self.proposals_iterator = None
+            self.iterator.close()
+            self.iterator = None
             self._samples_to_disk()
             self.end_time = _datetime.now()
             self._close_sampler()
+
+    def _save_sample(self):
+        # If we are on a thinning number ... (i.e. one of the non-discarded
+        # samples)
+        if self.current_proposal % self.online_thinning == 0:
+
+            # Write sample to ram array
+            self._sample_to_ram()
+
+            # Calculate the index this sample has after thinning
+            after_thinning = int(self.current_proposal / self.online_thinning)
+
+            # Check if this number is at the end of the buffer ...
+            if (after_thinning % self.ram_buffer_size) == self.ram_buffer_size - 1:
+
+                # If so, write samples to disk
+                self._samples_to_disk()
 
     def _open_samples_hdf5(
         self,
@@ -829,30 +661,6 @@ class _AbstractSampler(_ABC):
         # Set the current index of samples to the start of the file
         self.samples_hdf5_dataset.attrs["write_index"] = -1
         self.samples_hdf5_dataset.attrs["last_written_sample"] = -1
-
-    def _update_progressbar(self):
-
-        if (
-            self.current_proposal == 0
-            or (_time() - self.last_update_time) > self.progressbar_refresh_rate
-            or self.current_proposal == self.proposals - 1
-        ):
-            self.last_update_time = _time()
-
-            # Calculate acceptance rate
-            acceptance_rate = self.accepted_proposals / (self.current_proposal + 1)
-
-            if self.parallel:
-                self.proposals_iterator.set_description(
-                    f"Sampler {self.sampler_index}, tot. acc rate: "
-                    f"{acceptance_rate:.2f}. Progress",
-                    refresh=False,
-                )
-            else:
-                self.proposals_iterator.set_description(
-                    f"Tot. acc rate: {acceptance_rate:.2f}. Progress",
-                    refresh=False,
-                )
 
     def _sample_to_ram(self):
         # Calculate proposal number after thinning
@@ -930,6 +738,99 @@ class _AbstractSampler(_ABC):
             self.samples_hdf5_dataset.attrs["last_written_sample"] = end - 1
             self.samples_hdf5_dataset.flush()
 
+    def load_results(self, burn_in: int = 0) -> _numpy.array:
+
+        assert burn_in >= 0
+
+        from hmclab.Samples import Samples as _Samples
+
+        with _Samples(self.samples_hdf5_filename, burn_in=burn_in) as samples:
+            samples_numpy = samples.numpy
+
+        return samples_numpy
+
+    def _update_progressbar(self):
+
+        if (
+            self.current_proposal == 0
+            or (_time() - self.last_update_progressbar) > self.progressbar_refresh_rate
+            or self.current_proposal == self.proposals - 1
+        ):
+            self.last_update_progressbar = _time()
+
+            # Calculate acceptance rate
+            acceptance_rate = self.accepted_proposals / (self.current_proposal + 1)
+
+            if self.parallel:
+                self.iterator.set_description(
+                    f"Sampler {self.sampler_index}, tot. acc rate: "
+                    f"{acceptance_rate:.2f}. Progress",
+                    refresh=False,
+                )
+            else:
+                self.iterator.set_description(
+                    f"Tot. acc rate: {acceptance_rate:.2f}. Progress",
+                    refresh=False,
+                )
+
+    def _close_sampler(self):
+
+        self.samples_hdf5_dataset.attrs["acceptance_rate"] = self.accepted_proposals / (
+            self.current_proposal + 1
+        )
+
+        # Manually check for ram_buffer_size = 1 + failed written sample
+        if self.ram_buffer_size == 1 and _numpy.all(
+            self.samples_hdf5_dataset[:, -1] == 0.0
+        ):
+            self.samples_hdf5_dataset[:, -1] = self.ram_buffer[:, 0]
+
+        self.samples_hdf5_dataset.attrs["end_time"] = _datetime.now().strftime(
+            "%d-%b-%Y (%H:%M:%S.%f)"
+        )
+        self.samples_hdf5_dataset.attrs["runtime"] = str(
+            self.end_time - self.start_time
+        )
+        self.samples_hdf5_dataset.attrs["runtime_seconds"] = (
+            self.end_time - self.start_time
+        ).total_seconds()
+
+        self._close_sampler_specific()
+
+        self.samples_hdf5_filehandle.close()
+        self.samples_hdf5_filehandle = None
+        self.samples_hdf5_dataset = None
+
+        if self.diagnostic_mode:
+            # This block shows the percentage of time spent in each part of the sampler.
+            percentage_time_spent = {}
+            print("Detailed statistics:")
+
+            total_time = (self.end_time - self.start_time).total_seconds()
+
+            print(f"Total runtime: {total_time:.2f} seconds")
+
+            for fn in self.functions_to_diagnose:
+                percentage_time_spent[fn.function.__name__] = (
+                    100 * fn.time_spent / total_time
+                )
+            print()
+            print("General sampler components:")
+            print("{:<30} {:<30}".format("Function", "percentage of time"))
+            for name, percentage in percentage_time_spent.items():
+                print("{:<30} {:<30.2f}".format(name, percentage))
+
+            percentage_time_spent = {}
+            for fn in self.sampler_specific_functions_to_diagnose:
+                percentage_time_spent[fn.function.__name__] = (
+                    100 * fn.time_spent / total_time
+                )
+            print()
+            print(f"{self.name} specific components:")
+            print("{:<30} {:<30}".format("Function", "percentage of time"))
+            for name, percentage in percentage_time_spent.items():
+                print("{:<30} {:<30.2f}".format(name, percentage))
+
     @_abstractmethod
     def _propose(self):
         raise _AbstractMethodError()
@@ -966,16 +867,111 @@ class _AbstractSampler(_ABC):
             )
         return self.functions_to_diagnose + self.sampler_specific_functions_to_diagnose
 
-    def load_results(self, burn_in: int = 0) -> _numpy.array:
+    def __str__(self) -> str:
+        """Method for converting a sampler object to string, handy in outputs. Works for
+        derived classes."""
+        return f"An instance of the {self.name} sampler object."
 
-        assert burn_in >= 0
+    def _widget_data(self) -> _Dict:
+        """Method for returning post-sampling summary data to be displayed in e.g.
+        Jupyter widgets."""
 
-        from hmclab.Samples import Samples as _Samples
+        # Run details (panel 1) --------------------------------------------------------
+        run_details = {}
+        proposed_samples = self.current_proposal if self.current_proposal > 0 else None
+        acceptance_rate = self.accepted_proposals / (self.current_proposal + 1)
+        if not (self.start_time is None or self.end_time is None):
+            runtime = (self.end_time - self.start_time).total_seconds()
+            run_details["local start time (not timezone aware)"] = self.start_time
+            run_details["runtime (seconds)"] = runtime
+            run_details["proposals per seconds"] = proposed_samples / runtime
+        written_samples = (
+            self.current_proposal_after_thinning + 1
+            if self.current_proposal_after_thinning > 0
+            else None
+        )
 
-        with _Samples(self.samples_hdf5_filename, burn_in=burn_in) as samples:
-            samples_numpy = samples.numpy
+        run_details["acceptance rate"] = acceptance_rate
+        run_details["output file"] = self.samples_hdf5_filename
+        run_details["proposals made (excluding first position)"] = proposed_samples
+        run_details["samples written (after online thinning)"] = written_samples
+        run_details["amount of writes"] = self.amount_of_writes
+        run_details["dimensions"] = self.dimensions
+        run_details["distribution"] = str(
+            (
+                self.distribution.name
+                if (self.distribution.name is not None)
+                else self.distribution
+            )
+            if self.distribution is not None
+            else None
+        )
 
-        return samples_numpy
+        # Tuning settings (panel 2) ----------------------------------------------------
+        settings = {}
+        settings["proposals"] = self.proposals
+        settings["online thinning (store every ...-th sample)"] = self.online_thinning
+
+        # Combine with algorithm specific settings
+        settings = {**settings, **self._tuning_settings()}
+
+        # Algorithm (panel 3) ----------------------------------------------------------
+        algorithm = {}
+        algorithm["algorithm used"] = self.name
+        algorithm["diagnostic mode"] = self.diagnostic_mode
+        algorithm["ram buffer size"] = self.ram_buffer_size
+        return {
+            "Details of last run": run_details,
+            "Tuning settings": settings,
+            "Algorithm": algorithm,
+        }
+
+    def print_results(self) -> None:
+        """Print Jupyter widget from `_repr_html_()` to stdout."""
+        print(self._repr_html_())
+
+    def _repr_html_(
+        self, nested: bool = False, widget_data: _Dict = None
+    ) -> _Union[None, _widgets.Tab]:
+        """Create a Jupyter widget with the sampling results and statistics."""
+
+        default_layout = _widgets.Layout(padding="10px")
+
+        # Helper function to make a Tab from a Python Dictionary
+        def dictionary_to_widget(dictionary):
+            left_column = _widgets.VBox(
+                [_widgets.Label(str(key)) for key in dictionary.keys()],
+                layout=default_layout,
+            )
+            right_column = _widgets.VBox(
+                [_widgets.Label(str(key)) for key in dictionary.values()],
+                layout=default_layout,
+            )
+            return _widgets.HBox([left_column, right_column], layout=default_layout)
+
+        # Obtain sampling data
+        if widget_data is None:
+            widget_data = self._widget_data()
+
+        # Create tab object
+        tab = _widgets.Tab()
+
+        # Populate children with sampling data
+        tab.children = [
+            dictionary_to_widget(panel_data) for panel_data in widget_data.values()
+        ]
+        panel_headings = [key for key in widget_data.keys()]
+        for i in range(len(tab.children)):
+            tab.set_title(i, panel_headings[i])
+
+        # Return results, or print and return nothing.
+        if nested:
+            # This is used when multiple samplers ran in parallel, and the tabs of each
+            # individual sampler still need to be combined.
+            return tab
+        else:
+            _display(tab)
+            return ""
 
 
 class RWMH(_AbstractSampler):
