@@ -3,6 +3,8 @@
 import numpy as _numpy
 import pytest as _pytest
 import os as _os
+import uuid as _uuid
+
 
 from hmclab import MassMatrices as _MassMatrices
 from hmclab import Samplers as _Samplers
@@ -132,7 +134,8 @@ def test_basic_sampling(
 
     sampler_instance = _Samplers.HMC()
 
-    filename = "temporary_file.h5"
+    unique_name = _uuid.uuid4().hex.upper()
+    filename = f"temporary_file_{unique_name}.h5"
 
     # Remove file before attempting to sample
     if _os.path.exists(filename):

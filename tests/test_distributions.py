@@ -7,7 +7,7 @@ import pytest as _pytest
 from hmclab import Distributions as _Distributions
 from hmclab.Helpers.CustomExceptions import InvalidCaseError as _InvalidCaseError
 
-dimensions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 50]
+dimensions = [1, 2, 5, 50]
 subclasses = _Distributions._AbstractDistribution.__subclasses__()
 deltas = [1e-10, 1e-2, -1e-10, -1e-2]
 
@@ -50,6 +50,22 @@ def test_generation(pclass: _Distributions._AbstractDistribution, dimensions: in
     assert samples.shape == (distribution.dimensions, 100)
 
     return True
+
+
+@_pytest.mark.parametrize("pclass", subclasses)
+@_pytest.mark.parametrize("dimensions", dimensions)
+def test_normalization(pclass: _Distributions._AbstractDistribution, dimensions: int):
+    try:
+        distribution: _Distributions._AbstractDistribution = pclass.create_default(
+            dimensions
+        )
+    except _InvalidCaseError:
+        return 0
+
+    try:
+        distribution.normalize()
+    except AttributeError:
+        return 0
 
 
 @_pytest.mark.parametrize("pclass", subclasses)
@@ -202,36 +218,3 @@ def test_gradient(
         results_bag.relative_error = 0
 
     return True
-
-
-@_pytest.mark.plot
-def test_gradient_plots(module_results_df):
-    """
-    Shows that the `module_results_df` fixture already contains what you need
-    """
-    # drop the 'pytest_obj' column
-    module_results_df.drop("pytest_obj", axis=1, inplace=True)
-
-    for name, df in module_results_df[
-        module_results_df.test_type == "gradient"
-    ].groupby("class_name"):
-
-        for dimensions, df_dim in df.groupby("dimensions"):
-            if not _numpy.all(_numpy.isnan(df_dim.relative_error)):
-                _plt.scatter(
-                    df_dim.delta,
-                    _numpy.abs(df_dim.relative_error),
-                    alpha=0.5,
-                    label=dimensions,
-                )
-        ax = _plt.gca()
-        _plt.grid(True)
-        _plt.xlim([-2e-2, 2e-2])
-        _plt.ylim([-1e-7, 1e0])
-        ax.set_xscale("symlog", linthreshx=1e-11)
-        ax.set_yscale("symlog", linthreshy=1e-8)
-        _plt.legend()
-        _plt.title(name)
-        ax.set_xticks([-1e-3, -1e-6, -1e-9, 0, 1e-9, 1e-6, 1e-3])
-
-        _plt.show()

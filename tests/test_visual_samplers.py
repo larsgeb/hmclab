@@ -2,19 +2,23 @@
 """
 from typing import List as _List
 import os as _os
+import uuid as _uuid
+
 
 import numpy as _numpy
 import matplotlib.pyplot as _plt
 import pytest as _pytest
+import uuid as _uuid
+
 
 import hmclab as _hmclab
 
 _ad = _hmclab.Distributions._AbstractDistribution
 _as = _hmclab.Samplers._AbstractVisualSampler
 
-dimensions = [2, 10]
+dimensions = [2, 4]
 sampler_classes = _as.__subclasses__()
-proposals = [1000]
+proposals = [100]
 autotuning = [True]
 plot_update_interval = [1, 7]
 dims_to_plot = [[0, 1], [4, 9]]
@@ -62,7 +66,8 @@ def test_basic_sampling(
 
     assert isinstance(sampler_instance, _as)
 
-    filename = "temporary_file.h5"
+    unique_name = _uuid.uuid4().hex.upper()
+    filename = f"temporary_file_{unique_name}.h5"
 
     # Remove file before attempting to sample
     if _os.path.exists(filename):

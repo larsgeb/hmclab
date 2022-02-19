@@ -2,6 +2,8 @@ import os as _os
 
 import numpy as _numpy
 import pytest as _pytest
+import uuid as _uuid
+
 
 import hmclab as _hmclab
 from hmclab.Helpers.CustomExceptions import InvalidCaseError
@@ -100,7 +102,8 @@ def test_elasticFWI_sampling():
 
     posterior = _hmclab.Distributions.BayesRule([prior, likelihood])
 
-    filename = "temporary_file.h5"
+    unique_name = _uuid.uuid4().hex.upper()
+    filename = f"temporary_file_{unique_name}.h5"
 
     # Remove file before attempting to sample
     if _os.path.exists(filename):

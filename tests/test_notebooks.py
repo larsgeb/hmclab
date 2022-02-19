@@ -12,7 +12,7 @@ fixture = NBRegressionFixture(
 fixture.diff_color_words = False
 
 # Find all notebook files
-notebooks = glob.glob("examples/notebooks/*.ipynb")
+notebooks = glob.glob("notebooks/tutorials/*.ipynb")
 
 
 @pytest.mark.parametrize("notebook_fh", notebooks)
@@ -32,7 +32,9 @@ def test_notebook(notebook_fh):
             cell["outputs"] = []
 
             # Format the cell using black, removing trailing newlines
-            cell.source = format_str(cell.source, mode=FileMode()).rstrip()
+            cell.source = format_str(
+                cell.source.replace("%matplotlib notebook", ""), mode=FileMode()
+            ).rstrip()
 
     # Write to file
     nbformat.write(notebook, notebook_fh)

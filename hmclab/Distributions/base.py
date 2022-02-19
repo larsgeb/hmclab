@@ -52,7 +52,7 @@ class _AbstractDistribution(metaclass=_ABCMeta):
 
         Access it like a parameter, not a function: :code:`distribution.dimensions`.
         """
-        pass
+        raise _AbstractMethodError
 
     lower_bounds: _Union[_numpy.ndarray, None] = None
     """Lower bounds for every parameter. If initialized to None, no bounds are used."""

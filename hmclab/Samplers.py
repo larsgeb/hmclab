@@ -49,7 +49,7 @@ from hmclab.Helpers.Timers import AccumulatingTimer as _AccumulatingTimer
 from hmclab.Helpers.CustomExceptions import InvalidCaseError
 
 import ipywidgets as _widgets
-from IPython import display as _display
+from IPython.display import display as _display
 
 from hmclab.Helpers.CustomExceptions import AbstractMethodError as _AbstractMethodError
 
@@ -786,10 +786,6 @@ class _AbstractSampler(_ABC):
     ) -> int:
 
         choice_made = False
-
-        # Add file extension
-        if not name.endswith(".h5"):
-            name += ".h5"
 
         # Try to create file
         try:

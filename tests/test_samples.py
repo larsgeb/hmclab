@@ -5,6 +5,8 @@ import os as _os
 
 import numpy as _numpy
 import pytest as _pytest
+import uuid as _uuid
+
 
 import hmclab as _hmclab
 from hmclab.Helpers.CustomExceptions import InvalidCaseError as _InvalidCaseError
@@ -38,7 +40,8 @@ def test_samples_detail(
 
     assert isinstance(sampler_instance, _as)
 
-    filename = "temporary_file.h5"
+    unique_name = _uuid.uuid4().hex.upper()
+    filename = f"temporary_file_{unique_name}.h5"
 
     # Remove file before attempting to sample
     if _os.path.exists(filename):
@@ -54,7 +57,7 @@ def test_samples_detail(
 
     # Check if the file was created. If it wasn't, fail
     if not _os.path.exists(filename):
-        _pytest.fail("Samples file wasn't created")
+        _pytest.fail("Samples file wasn't created")  # pragma: no cover
 
     with _hmclab.Samples(filename) as samples:
         samples.print_details()
@@ -90,7 +93,7 @@ def test_samples_concat(
     # Remove file before attempting to sample
     for filename in filenames:
         if _os.path.exists(filename):
-            _os.remove(filename)
+            _os.remove(filename)  # pragma: no cover
 
         sampler_instance.sample(
             filename,
@@ -102,7 +105,7 @@ def test_samples_concat(
 
         # Check if the file was created. If it wasn't, fail
         if not _os.path.exists(filename):
-            _pytest.fail("Samples file wasn't created")
+            _pytest.fail("Samples file wasn't created")  # pragma: no cover
 
     combined_samples = _combine_samples(filenames)
 
@@ -113,3 +116,12 @@ def test_samples_concat(
 
         # Remove the file
         _os.remove(filename)
+
+
+def test_samples_exception_cases():
+
+    filename = "non_existent_file.h5"
+
+    with _pytest.raises(ValueError):
+        with _hmclab.Samples(filename) as _:
+            pass  # pragma: no cover

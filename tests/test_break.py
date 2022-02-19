@@ -5,6 +5,7 @@ import pytest as _pytest
 import time as _time
 import threading
 import _thread
+import uuid as _uuid
 
 
 def interruptor():
@@ -31,7 +32,8 @@ def test_break(execution_number):
     prior = _hmclab.Distributions.Uniform([-1], [1])
     posterior = _hmclab.Distributions.BayesRule([prior, SlowStandardNormal()])
 
-    filename = "temporary_file.h5"
+    unique_name = _uuid.uuid4().hex.upper()
+    filename = f"temporary_file_{unique_name}.h5"
     if _os.path.exists(filename):
         _os.remove(filename)  # pragma: no cover
 

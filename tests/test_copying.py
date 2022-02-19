@@ -4,6 +4,8 @@ from hmclab import Distributions
 import os as _os
 import copy as _copy
 import h5py as _h5py
+import uuid as _uuid
+
 
 import numpy as _numpy
 import pytest as _pytest
@@ -61,7 +63,8 @@ def test_samples_file(
 
     sampler_instance = sampler_class()
 
-    filename = "temporary_file.h5"
+    unique_name = _uuid.uuid4().hex.upper()
+    filename = f"temporary_file_{unique_name}.h5"
 
     # Remove file before attempting to sample
     if _os.path.exists(filename):

@@ -5,6 +5,8 @@ import os as _os
 import pytest as _pytest
 import hmclab as _hmclab
 import matplotlib.pyplot as _plt
+import uuid as _uuid
+
 
 _ad = _hmclab.Distributions._AbstractDistribution
 _as = _hmclab.Samplers._AbstractSampler
@@ -24,7 +26,8 @@ def test_basic_sampling(
 
     sampler_instance = _hmclab.Samplers.HMC()
 
-    filename = "temporary_file.h5"
+    unique_name = _uuid.uuid4().hex.upper()
+    filename = f"temporary_file_{unique_name}.h5"
 
     # Remove file before attempting to sample
     if _os.path.exists(filename):

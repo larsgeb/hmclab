@@ -1,6 +1,8 @@
 import os as _os
 
 import numpy as _numpy
+import uuid as _uuid
+
 
 import hmclab as _hmclab
 
@@ -8,7 +10,8 @@ import hmclab as _hmclab
 def test_leapfrog():
     dist = _hmclab.Distributions.Himmelblau(temperature=100)
 
-    filename = "temporary_file.h5"
+    unique_name = _uuid.uuid4().hex.upper()
+    filename = f"temporary_file_{unique_name}.h5"
 
     # Remove file before attempting to sample
     if _os.path.exists(filename):
@@ -35,7 +38,8 @@ def test_leapfrog():
 def test_four_stage():
     dist = _hmclab.Distributions.Himmelblau(temperature=100)
 
-    filename = "temporary_file.h5"
+    unique_name = _uuid.uuid4().hex.upper()
+    filename = f"temporary_file_{unique_name}.h5"
 
     # Remove file before attempting to sample
     if _os.path.exists(filename):
@@ -62,7 +66,8 @@ def test_four_stage():
 def test_three_stage():
     dist = _hmclab.Distributions.Himmelblau(temperature=100)
 
-    filename = "temporary_file.h5"
+    unique_name = _uuid.uuid4().hex.upper()
+    filename = f"temporary_file_{unique_name}.h5"
 
     # Remove file before attempting to sample
     if _os.path.exists(filename):
