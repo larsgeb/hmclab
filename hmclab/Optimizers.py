@@ -16,6 +16,8 @@ import tqdm.auto as _tqdm_au
 
 from hmclab.Distributions import _AbstractDistribution
 
+from typing import Tuple as _Tuple, List as _List
+
 
 class _AbstractOptimizer(_ABC):
     """Abstract base class for optimization routines."""
@@ -25,77 +27,32 @@ class _AbstractOptimizer(_ABC):
     target: _AbstractDistribution
 
     @_abstractmethod
-    def iterate_once(
-        self,
-    ) -> _numpy.ndarray:
-        """
-        Parameters
-        ----------
-        proposals
-        online_thinning
-        sample_ram_buffer_size
-        samples_filename
-
-        """
-        pass
-
-    @_abstractmethod
     def iterate(
         self,
     ) -> _numpy.ndarray:
-        """
-        Parameters
-        ----------
-        proposals
-        online_thinning
-        sample_ram_buffer_size
-        samples_filename
-
-        """
         pass
 
 
 class gradient_descent(_AbstractOptimizer):
-    """An unscaled gradient descent optimization routine."""
-
-    def __init__(
-        self,
-        target: _AbstractDistribution,
-        epsilon: float = 0.1,
-    ):
-        # Setting the passed objects -------------------------------------------
-        self.dimensions = target.dimensions
-        self.target: _AbstractDistribution = target
-        self.epsilon = epsilon
-
-    def iterate_once(self, initial_model, epsilon: float = 0.1):
-        # Initial model
-        if initial_model is None:
-            initial_model = _numpy.zeros((self.dimensions, 1))
-        else:
-            assert initial_model.shape == (self.dimensions, 1)
-
-        g = self.target.gradient(initial_model)
-
-        new_model = initial_model - g * epsilon
-
-        return new_model
+    def __init__(self):
+        pass
 
     def iterate(
         self,
-        initial_model,
+        target: _AbstractDistribution,
+        initial_model: _numpy.ndarray = None,
         epsilon: float = 0.1,
         nmax: int = 100,
-        online_thinning: int = 1,
-    ):
-        if initial_model is None:
-            m = _numpy.zeros((self.dimensions, 1))
-        else:
-            assert initial_model.shape == (self.dimensions, 1)
-            m = initial_model
+    ) -> _Tuple[_numpy.ndarray, float, _List[_numpy.ndarray], _List[float]]:
 
-        xs = []
-        ms = []
+        dimensions = target.dimensions
+
+        # If no initial model is given, start at zeros
+        if initial_model is None:
+            m = _numpy.zeros((dimensions, 1))
+        else:
+            assert initial_model.shape == (dimensions, 1)
+            m = initial_model
 
         # Create progress bar
         try:
@@ -112,57 +69,55 @@ class gradient_descent(_AbstractOptimizer):
                 leave=True,
             )
 
-        for iteration in iterations:
-            xs.append(self.target.misfit(m))
+        # Compute initial misfit
+        x = target.misfit(m)
+
+        # Create the returns
+        xs = []
+        ms = []
+
+        # Add starting model and misfit to the returns
+        xs.append(x)
+        ms.append(m)
+
+        for _ in iterations:
+
+            # Compute gradient
+            g = target.gradient(m)
+            # Update model
+            m = m - epsilon * g
+
+            # Compute misfit and store
+            x = target.misfit(m)
+            iterations.set_description(f"Misfit: {x:.4e}")
+            # Place current model and misfit
+            xs.append(x)
             ms.append(m)
-            m = m - epsilon * (self.target.gradient(m))
 
-        return m, _numpy.array(ms), _numpy.array(xs)
+        return m, x, _numpy.array(ms), _numpy.array(xs)
 
 
-class simple_preconditioned_gradient_descent(_AbstractOptimizer):
-    def __init__(
+class preconditioned_gradient_descent(_AbstractOptimizer):
+    def __init__(self):
+        pass
+
+    def iterate(
         self,
         target: _AbstractDistribution,
+        initial_model: _numpy.ndarray = None,
         epsilon: float = 0.1,
         regularization: float = 1.0,
-    ):
-        # Setting the passed objects -------------------------------------------
-        self.dimensions = target.dimensions
-        self.target: _AbstractDistribution = target
-        self.epsilon = epsilon
-        self.regularization = regularization
-
-    def iterate_once(self, initial_model, epsilon: float = 0.1):
-        # Initial model
-        if initial_model is None:
-            initial_model = _numpy.zeros((self.dimensions, 1))
-        else:
-            assert initial_model.shape == (self.dimensions, 1)
-
-        g = self.target.gradient(initial_model)
-
-        precond = _numpy.diag(1.0 / (_numpy.diag(g @ g.T) + self.regularization))
-
-        new_model = initial_model - epsilon * (precond @ g)
-
-        return new_model
-
-    def iterate(
-        self,
-        initial_model,
-        epsilon: float = 0.1,
         nmax: int = 100,
-        online_thinning: int = 1,
-    ):
-        if initial_model is None:
-            m = _numpy.zeros((self.dimensions, 1))
-        else:
-            assert initial_model.shape == (self.dimensions, 1)
-            m = initial_model
+    ) -> _Tuple[_numpy.ndarray, float, _List[_numpy.ndarray], _List[float]]:
 
-        xs = []
-        ms = []
+        dimensions = target.dimensions
+
+        # If no initial model is given, start at zeros
+        if initial_model is None:
+            m = _numpy.zeros((dimensions, 1))
+        else:
+            assert initial_model.shape == (dimensions, 1)
+            m = initial_model
 
         # Create progress bar
         try:
@@ -179,14 +134,30 @@ class simple_preconditioned_gradient_descent(_AbstractOptimizer):
                 leave=True,
             )
 
-        for iteration in iterations:
-            xs.append(self.target.misfit(m))
+        # Compute initial misfit
+        x = target.misfit(m)
+
+        # Create the returns
+        xs = []
+        ms = []
+
+        # Add starting model and misfit to the returns
+        xs.append(x)
+        ms.append(m)
+
+        for _ in iterations:
+
+            # Compute gradient
+            g = target.gradient(m)
+            preconditioner = _numpy.diag(1.0 / (_numpy.diag(g @ g.T) + regularization))
+            # Update model
+            m = m - epsilon * (preconditioner @ g)
+
+            # Compute misfit and store
+            x = target.misfit(m)
+            iterations.set_description(f"Misfit: {x:.4e}")
+            # Place current model and misfit
+            xs.append(x)
             ms.append(m)
 
-            g = self.target.gradient(m)
-
-            precond = _numpy.diag(1.0 / (_numpy.diag(g @ g.T) + self.regularization))
-
-            m = m - epsilon * (precond @ g)
-
-        return m, _numpy.array(ms), _numpy.array(xs)
+        return m, x, _numpy.array(ms), _numpy.array(xs)
