@@ -3,3 +3,14 @@ exclude_lines =
     pragma: no cover
     @abstract
     _AbstractMethodError()
+
+[run]
+omit =
+    setup.py
+    versioneer.py
+    hmclab/_version.py
+    hmclab/Distributions/ElasticFullWaveform2D.py
+    hmclab/Helpers/InterfaceMKL.py"
+    hmclab/Helpers/CaptureStdout.py"
+    tests/test_elasticFWI.py
+    
