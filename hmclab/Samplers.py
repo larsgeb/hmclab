@@ -973,6 +973,36 @@ class _AbstractSampler(_ABC):
             _display(tab)
             return ""
 
+    def autotune(self, acceptance_rate):
+        # Write out parameters
+        self.acceptance_rates[self.current_proposal] = acceptance_rate
+        self.stepsizes[self.current_proposal] = self.stepsize
+
+        # Compute weight according to diminishing scheme, see also:
+        # The No-U-Turn Sampler: Adaptively Setting Path Lengths in Hamiltonian
+        # Monte Carlo, Hoffman & Gelman, 2014, equation (5).
+        schedule_weight = (self.current_proposal + 1) ** (-self.learning_rate)
+
+        if _numpy.isnan(acceptance_rate):
+            acceptance_rate = 0
+
+        # Update stepsize
+        self.stepsize -= schedule_weight * (
+            self.target_acceptance_rate - min(acceptance_rate, 1)
+        )
+
+        if self.stepsize <= 0:
+            if self.diagnostic_mode:
+                _warnings.warn(
+                    "The timestep of the algorithm went below zero. You possibly "
+                    "started the algorithm in a region with extremely strong "
+                    "gradients. The sampler will now default to a minimum timestep of "
+                    f"{self.minimal_stepsize}. If this doesn't work, and if choosing "
+                    "a different initial model does not make this warning go away, try"
+                    "setting a smaller minimal time step and initial time step value."
+                )
+            self.stepsize = max(self.stepsize, self.minimal_stepsize)
+
 
 class RWMH(_AbstractSampler):
     stepsize: _Union[float, _numpy.ndarray] = 1.0
@@ -1232,36 +1262,6 @@ class RWMH(_AbstractSampler):
             }
 
         return settings
-
-    def autotune(self, acceptance_rate):
-        # Write out parameters
-        self.acceptance_rates[self.current_proposal] = acceptance_rate
-        self.stepsizes[self.current_proposal] = self.stepsize
-
-        # Compute weight according to diminishing scheme, see also:
-        # The No-U-Turn Sampler: Adaptively Setting Path Lengths in Hamiltonian
-        # Monte Carlo, Hoffman & Gelman, 2014, equation (5).
-        schedule_weight = (self.current_proposal + 1) ** (-self.learning_rate)
-
-        if _numpy.isnan(acceptance_rate):
-            acceptance_rate = 0
-
-        # Update stepsize
-        self.stepsize -= schedule_weight * (
-            self.target_acceptance_rate - min(acceptance_rate, 1)
-        )
-
-        if self.stepsize <= 0:
-            if self.diagnostic_mode:
-                _warnings.warn(
-                    "The timestep of the algorithm went below zero. You possibly "
-                    "started the algorithm in a region with extremely strong "
-                    "gradients. The sampler will now default to a minimum timestep of "
-                    f"{self.minimal_stepsize}. If this doesn't work, and if choosing "
-                    "a different initial model does not make this warning go away, try"
-                    "setting a smaller minimal time step and initial time step value."
-                )
-            self.stepsize = max(self.stepsize, self.minimal_stepsize)
 
     def _propose(self):
 
@@ -1700,47 +1700,6 @@ class HMC(_AbstractSampler):
             self.current_model = _numpy.copy(self.proposed_model)
             self.current_x = self.proposed_x
             self.accepted_proposals += 1
-
-    def autotune(self, acceptance_rate):
-        # Write out parameters
-        self.acceptance_rates[self.current_proposal] = acceptance_rate
-        self.stepsizes[self.current_proposal] = self.stepsize
-
-        # Compute weight according to diminishing scheme, see also:
-        # The No-U-Turn Sampler: Adaptively Setting Path Lengths in Hamiltonian
-        # Monte Carlo, Hoffman & Gelman, 2014, equation (5).
-        schedule_weight = (self.current_proposal + 1) ** (-self.learning_rate)
-
-        if _numpy.isnan(acceptance_rate):
-            acceptance_rate = 0
-
-        # Update stepsize
-        proposed_stepsize = self.stepsize - schedule_weight * (
-            self.target_acceptance_rate - min(acceptance_rate, 1)
-        )
-
-        if proposed_stepsize <= 0:
-            if self.diagnostic_mode:
-                _warnings.warn(
-                    "The stepsize of the algorithm went below zero. You possibly "
-                    "started the algorithm in a region with extremely strong "
-                    "gradients. The sampler will now default to a minimum stepsize of "
-                    f"{self.minimal_stepsize}. If this doesn't work, and if choosing "
-                    "a different initial model does not make this warning go away, try"
-                    "setting a smaller minimal stepsize and initial stepsize value."
-                )
-            proposed_stepsize = self.minimal_stepsize
-
-        if (
-            _numpy.abs(_numpy.log10(proposed_stepsize) - _numpy.log10(self.stepsize))
-            > 1
-        ):
-            if proposed_stepsize > self.stepsize:
-                self.stepsize *= 10
-            else:
-                self.stepsize *= 0.1
-        else:
-            self.stepsize = proposed_stepsize
 
     def _propagate_leapfrog(
         self,
