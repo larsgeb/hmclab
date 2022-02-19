@@ -51,6 +51,8 @@ from hmclab.Helpers.CustomExceptions import InvalidCaseError
 import ipywidgets as _widgets
 from IPython.core.display import display as _display
 
+from hmclab.Helpers.CustomExceptions import AbstractMethodError as _AbstractMethodError
+
 dev_assertion_message = (
     "Something went wrong internally, please report this to the developers."
 )
@@ -998,32 +1000,32 @@ class _AbstractSampler(_ABC):
 
     @_abstractmethod
     def _propose(self):
-        pass
+        raise _AbstractMethodError()
 
     @_abstractmethod
     def _evaluate_acceptance(self):
         """This abstract method evaluates the acceptance criterion in the MCMC
         algorithm. Pass or fail, it updates the objects attributes accordingly;
         modifying current_model and current_x as needed."""
-        pass
+        raise _AbstractMethodError()
 
     @_abstractmethod
     def _write_tuning_settings(self):
         """An abstract method that writes all the relevant tuning settings of the
         algorithm to the HDF5 file."""
-        pass
+        raise _AbstractMethodError()
 
     @_abstractmethod
     def _init_sampler_specific(self):
         """An abstract method that sets up all required attributes and methods for the
         algorithm."""
-        pass
+        raise _AbstractMethodError()
 
     @_abstractmethod
     def _close_sampler_specific(self):
         """An abstract method that does any post-sampling operations for the
         algorithm."""
-        pass
+        raise _AbstractMethodError()
 
     def get_diagnostics(self):
         if not self.diagnostic_mode:

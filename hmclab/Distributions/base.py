@@ -15,6 +15,9 @@ from hmclab.Helpers.BetterABC import ABCMeta as _ABCMeta
 from hmclab.Helpers import CustomExceptions as _CustomExceptions
 
 
+from hmclab.Helpers.CustomExceptions import AbstractMethodError as _AbstractMethodError
+
+
 class _AbstractDistribution(metaclass=_ABCMeta):
     """Abstract base class for distributions.
 
@@ -99,11 +102,7 @@ class _AbstractDistribution(metaclass=_ABCMeta):
         intractable should not be used in mixtures. These distributions can be combined
         using Bayes' rule with other mixtures.
         """
-        raise _CustomExceptions.AbstractMethodError(
-            "You tried accessing an abstract method directly through a class. This is "
-            "not allowed. Create an instance of this object and call this method from "
-            "the instance."
-        )
+        raise _AbstractMethodError()
 
     @_abstractmethod
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
@@ -133,11 +132,7 @@ class _AbstractDistribution(metaclass=_ABCMeta):
         This method is called many times in an HMC appraisal. It is therefore
         beneficial to optimize the implementation.
         """
-        raise _CustomExceptions.AbstractMethodError(
-            "You tried accessing an abstract method directly through a class. This is "
-            "not allowed. Create an instance of this object and call this method from "
-            "the instance."
-        )
+        raise _AbstractMethodError()
 
     def normalize(self):
         """Normalize distribution.
@@ -155,6 +150,7 @@ class _AbstractDistribution(metaclass=_ABCMeta):
         """
         raise AttributeError("This distribution is not normalizable.")
 
+    @_abstractmethod
     def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
         """Draw samples from distribution.
 
@@ -174,11 +170,7 @@ class _AbstractDistribution(metaclass=_ABCMeta):
         require the implementation.
 
         """
-        raise _CustomExceptions.AbstractMethodError(
-            "You tried accessing an abstract method directly through a class. This is "
-            "not allowed. Create an instance of this object and call this method from "
-            "the instance."
-        )
+        raise _AbstractMethodError()
 
     @staticmethod
     def create_default(dimensions: int) -> "_AbstractDistribution":
@@ -209,12 +201,7 @@ class _AbstractDistribution(metaclass=_ABCMeta):
             a model for the requested dimensionality.
 
         """
-        raise NotImplementedError(
-            "You tried creating a default distribution. Although you have used this "
-            "method correctly, it wasn't implemented in the derived class. Create the "
-            "static method `create_default(dimensions)` which returns a distribution, "
-            "and try calling this method again."
-        )
+        raise NotImplementedError()
 
     def corrector(self, coordinates: _numpy.ndarray, momentum: _numpy.ndarray):
         """Correct HMC trajectory.

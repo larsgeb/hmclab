@@ -47,7 +47,7 @@ class _AbstractMassMatrix(_ABC):
         ----------
         momentum
         """
-        float()
+        raise _AbstractMethodError()
 
     @_abstractmethod
     def kinetic_energy_gradient(self, momentum: _numpy.ndarray) -> _numpy.ndarray:
@@ -58,11 +58,11 @@ class _AbstractMassMatrix(_ABC):
         ----------
         momentum
         """
-        return _numpy.ndarray(())
+        raise _AbstractMethodError()
 
     @_abstractmethod
     def generate_momentum(self) -> _numpy.ndarray:
-        return _numpy.ndarray(())
+        raise _AbstractMethodError()
 
     @staticmethod
     def create_default(dimensions: int) -> "_AbstractMassMatrix":
@@ -392,7 +392,7 @@ class LBFGS(_AbstractMassMatrix):
 
             Hinv_y = self.Hinv(y_update)
 
-            gamma2 = rho ** 2 * _numpy.vdot(y_update, y_update) + rho
+            gamma2 = rho**2 * _numpy.vdot(y_update, y_update) + rho
 
             beta = gamma2 * _numpy.vdot(s_update, self.H(s_update))
             theta = _numpy.sqrt(rho / (beta * gamma2))
@@ -505,7 +505,7 @@ class LBFGS(_AbstractMassMatrix):
         logdet = 0.0
         for i in range(self.currently_stored_gradients):
             alpha = 1.0 / (1.0 + _numpy.dot(self.u[:, i], self.v[:, i]))
-            logdet += _numpy.log(alpha ** 2)
+            logdet += _numpy.log(alpha**2)
 
         return logdet
 
