@@ -55,7 +55,7 @@ def test_basic_sampling(
             distribution,
             proposals=proposals,
             ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
-            max_time=1.0,
+            max_time=0.1,
             mass_matrix=_hmclab.MassMatrices.Unit(434),
         )
     except Exception as e:
@@ -67,7 +67,7 @@ def test_basic_sampling(
         proposals=proposals,
         online_thinning=10,
         ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
-        max_time=1.0,
+        max_time=0.1,
         overwrite_existing_file=True,
     )
 

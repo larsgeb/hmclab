@@ -35,7 +35,7 @@ def test_basic_sampling(
         distribution,
         proposals=proposals,
         online_thinning=1,
-        max_time=1.0,
+        max_time=0.1,
         autotuning=True,
     )
 

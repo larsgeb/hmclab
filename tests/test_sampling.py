@@ -54,7 +54,7 @@ def test_basic_sampling(
         proposals=proposals,
         online_thinning=10,
         ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
-        max_time=1.0,
+        max_time=0.1,
         autotuning=autotuning,
     )
     if sampler_instance.amount_of_writes > 0:
@@ -97,7 +97,7 @@ def test_samples_file(
         _os.remove(filename)  # pragma: no cover
 
     sampler_instance.sample(
-        filename, distribution, proposals=proposals, max_time=0.5, autotuning=autotuning
+        filename, distribution, proposals=proposals, max_time=0.1, autotuning=autotuning
     )
 
     # Check if the file was created. If it wasn't, fail

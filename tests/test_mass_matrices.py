@@ -146,7 +146,7 @@ def test_basic_sampling(
         proposals=proposals,
         online_thinning=10,
         ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
-        max_time=1.0,
+        max_time=0.1,
         autotuning=False,
     )
     if sampler_instance.amount_of_writes > 0:

@@ -49,7 +49,7 @@ def test_samples_detail(
         distribution,
         proposals=proposals,
         ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
-        max_time=1.0,
+        max_time=0.1,
     )
 
     # Check if the file was created. If it wasn't, fail
@@ -97,7 +97,7 @@ def test_samples_concat(
             distribution,
             proposals=proposals,
             ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
-            max_time=1.0,
+            max_time=0.1,
         )
 
         # Check if the file was created. If it wasn't, fail

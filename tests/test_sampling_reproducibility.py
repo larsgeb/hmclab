@@ -17,7 +17,7 @@ distribution_classes = _Distributions._AbstractDistribution.__subclasses__()
 sampler_classes = _as.__subclasses__()
 sampler_classes.remove(_hmclab.Samplers._AbstractVisualSampler)
 
-proposals = [10, 1000]
+proposals = [3, 10]
 autotuning = [True, False]
 
 
@@ -57,14 +57,14 @@ def test_samples_file(
         filename_1,
         distribution,
         proposals=proposals,
-        max_time=0.5,
+        max_time=0.1,
         autotuning=autotuning,
     )
     sampler_instance_2.sample(
         filename_2,
         distribution,
         proposals=proposals,
-        max_time=0.5,
+        max_time=0.1,
         autotuning=autotuning,
     )
 
@@ -102,9 +102,6 @@ def test_samples_file(
         min_written_samples = min(
             samples_written_expected_1, samples_written_expected_2
         )
-
-        samples_1_n = samples_1.numpy
-        samples_2_n = samples_2.numpy
 
         assert _numpy.all(
             samples_1[:, :min_written_samples] == samples_2[:, :min_written_samples]

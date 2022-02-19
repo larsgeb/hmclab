@@ -17,7 +17,7 @@ def test_leapfrog():
     sampler = _hmclab.Samplers.HMC()
 
     sampler.sample(
-        filename, dist, proposals=1000, stepsize=1.0, integrator="lf", max_time=2.0
+        filename, dist, proposals=1000, stepsize=1.0, integrator="lf", max_time=0.1
     )
 
     samples_written_expected = int(
@@ -44,7 +44,7 @@ def test_four_stage():
     sampler = _hmclab.Samplers.HMC()
 
     sampler.sample(
-        filename, dist, proposals=1000, stepsize=3.0, integrator="4s", max_time=2.0
+        filename, dist, proposals=1000, stepsize=3.0, integrator="4s", max_time=0.1
     )
 
     samples_written_expected = int(
@@ -71,7 +71,7 @@ def test_three_stage():
     sampler = _hmclab.Samplers.HMC()
 
     sampler.sample(
-        filename, dist, proposals=1000, stepsize=3.0, integrator="3s", max_time=2.0
+        filename, dist, proposals=1000, stepsize=3.0, integrator="3s", max_time=0.1
     )
 
     samples_written_expected = int(

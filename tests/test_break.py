@@ -9,7 +9,7 @@ import _thread
 
 def interruptor():
     # Simulate a CTRL+C event
-    _time.sleep(1)
+    _time.sleep(0.1)
     _thread.interrupt_main()
 
 

@@ -8,13 +8,11 @@ import matplotlib.pyplot as _plt
 import pytest as _pytest
 
 import hmclab as _hmclab
-from hmclab.Helpers.CustomExceptions import InvalidCaseError as _InvalidCaseError
 
 _ad = _hmclab.Distributions._AbstractDistribution
 _as = _hmclab.Samplers._AbstractVisualSampler
 
 dimensions = [2, 10]
-distribution_classes = [_hmclab.Distributions.Normal]
 sampler_classes = _as.__subclasses__()
 proposals = [1000]
 autotuning = [True]
@@ -35,7 +33,6 @@ def run_before_and_after_tests():
 
 
 @_pytest.mark.parametrize("sampler_class", sampler_classes)
-@_pytest.mark.parametrize("distribution_class", distribution_classes)
 @_pytest.mark.parametrize("dimensions", dimensions)
 @_pytest.mark.parametrize("proposals", proposals)
 @_pytest.mark.parametrize("autotuning", autotuning)
@@ -45,7 +42,6 @@ def run_before_and_after_tests():
 @_pytest.mark.parametrize("animation_domain", animation_domain)
 def test_basic_sampling(
     sampler_class: _as,
-    distribution_class: _ad,
     dimensions: int,
     proposals: int,
     autotuning: bool,
@@ -55,10 +51,7 @@ def test_basic_sampling(
     animation_domain: _numpy.array,
 ):
 
-    try:
-        distribution: _ad = distribution_class.create_default(dimensions)
-    except _InvalidCaseError:
-        return 0
+    distribution = _hmclab.Distributions.Normal.create_default(dimensions)
 
     sampler_instance = sampler_class(
         plot_update_interval=plot_update_interval,
@@ -82,7 +75,7 @@ def test_basic_sampling(
             proposals=proposals,
             online_thinning=10,
             ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
-            max_time=2.0,
+            max_time=0.1,
             autotuning=autotuning,
         )
         if sampler_instance.amount_of_writes > 0:
