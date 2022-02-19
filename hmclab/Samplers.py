@@ -1049,21 +1049,26 @@ class RWMH(_AbstractSampler):
 
     def sample(
         self,
+        # Required settings
         samples_hdf5_filename: str,
         distribution: _AbstractDistribution,
+        # Algorithm settings
         stepsize: _Union[float, _numpy.ndarray] = 1.0,
+        autotuning: bool = False,
+        target_acceptance_rate: float = 0.35,
+        learning_rate: float = 0.75,
+        # Markov chain settings
         initial_model: _numpy.ndarray = None,
         proposals: int = 100,
         online_thinning: int = 1,
+        # Code settings
         diagnostic_mode: bool = False,
         ram_buffer_size: int = None,
         overwrite_existing_file: bool = False,
         max_time: float = None,
-        autotuning: bool = False,
-        target_acceptance_rate: float = 0.65,
-        learning_rate: float = 0.75,
-        queue=None,
         disable_progressbar=False,
+        # Not to be used by users
+        queue=None,
     ):
         """Sampling using the Metropolis-Hastings algorithm.
 
@@ -1125,23 +1130,26 @@ class RWMH(_AbstractSampler):
 
 
         """
-        # We put the creation of the sampler entirely in a try/catch block, so we can
-        # actually close the hdf5 file if something goes wrong.
         self._init_sampler(
+            # Required settings
             samples_hdf5_filename=samples_hdf5_filename,
             distribution=distribution,
+            # Algorithm settings
             stepsize=stepsize,
-            initial_model=initial_model,
-            proposals=proposals,
-            diagnostic_mode=diagnostic_mode,
-            online_thinning=online_thinning,
-            ram_buffer_size=ram_buffer_size,
-            overwrite_existing_file=overwrite_existing_file,
-            max_time=max_time,
             autotuning=autotuning,
             target_acceptance_rate=target_acceptance_rate,
             learning_rate=learning_rate,
+            # Markov chain settings
+            initial_model=initial_model,
+            proposals=proposals,
+            online_thinning=online_thinning,
+            # Code settings
+            diagnostic_mode=diagnostic_mode,
+            ram_buffer_size=ram_buffer_size,
+            overwrite_existing_file=overwrite_existing_file,
+            max_time=max_time,
             disable_progressbar=disable_progressbar,
+            # Not to be used by users
             queue=queue,
         )
 
@@ -1381,25 +1389,30 @@ class HMC(_AbstractSampler):
 
     def sample(
         self,
+        # Required settings
         samples_hdf5_filename: str,
         distribution: _AbstractDistribution,
+        # Algorithm settings
         stepsize: float = 0.1,
         randomize_stepsize: bool = None,
         amount_of_steps: int = 10,
         mass_matrix: _AbstractMassMatrix = None,
         integrator: str = "lf",
+        autotuning: bool = False,
+        target_acceptance_rate: float = 0.65,
+        learning_rate: float = 0.75,
+        # Markov chain settings
         initial_model: _numpy.ndarray = None,
         proposals: int = 100,
         online_thinning: int = 1,
+        # Code settings
         diagnostic_mode: bool = False,
         ram_buffer_size: int = None,
         overwrite_existing_file: bool = False,
         max_time: float = None,
-        autotuning: bool = False,
-        target_acceptance_rate: float = 0.65,
-        learning_rate: float = 0.75,
-        queue=None,
         disable_progressbar=False,
+        # Not to be used by users
+        queue=None,
     ):
         """Sampling using the Hamiltonian Monte Carlo algorithm.
 
@@ -1478,24 +1491,29 @@ class HMC(_AbstractSampler):
         # actually close the hdf5 file if something goes wrong.
 
         self._init_sampler(
+            # Required settings
             samples_hdf5_filename=samples_hdf5_filename,
             distribution=distribution,
+            # Algorithm settings
             stepsize=stepsize,
             randomize_stepsize=randomize_stepsize,
             amount_of_steps=amount_of_steps,
             mass_matrix=mass_matrix,
             integrator=integrator,
-            initial_model=initial_model,
             autotuning=autotuning,
             target_acceptance_rate=target_acceptance_rate,
             learning_rate=learning_rate,
+            # Markov chain settings
+            initial_model=initial_model,
             proposals=proposals,
-            diagnostic_mode=diagnostic_mode,
             online_thinning=online_thinning,
+            # Code settings
+            diagnostic_mode=diagnostic_mode,
             ram_buffer_size=ram_buffer_size,
             overwrite_existing_file=overwrite_existing_file,
             max_time=max_time,
             disable_progressbar=disable_progressbar,
+            # Not to be used by users
             queue=queue,
         )
 
