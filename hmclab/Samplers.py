@@ -649,7 +649,9 @@ class _AbstractSampler(_ABC):
                 self._evaluate_acceptance()
 
                 # Parallel communication section -------------
-                if self.parallel and (self.exchange_interval is not None):
+                if self.parallel and (
+                    self.exchange_interval is not None
+                ):  # pragma: no cover
                     # Check if chain is in the schedule for current iteration
                     if self.current_proposal % self.exchange_interval == 0 and (
                         self.sampler_index
