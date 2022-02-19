@@ -42,7 +42,7 @@ def test_samples_detail(
 
     # Remove file before attempting to sample
     if _os.path.exists(filename):
-        _os.remove(filename)
+        _os.remove(filename)  # pragma: no cover
 
     sampler_instance.sample(
         filename,

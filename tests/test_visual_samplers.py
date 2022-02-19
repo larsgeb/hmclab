@@ -73,7 +73,7 @@ def test_basic_sampling(
 
     # Remove file before attempting to sample
     if _os.path.exists(filename):
-        _os.remove(filename)
+        _os.remove(filename)  # pragma: no cover
 
     try:
         sampler_instance.sample(
@@ -94,4 +94,4 @@ def test_basic_sampling(
 
     # Check if the file was created. If it wasn't, fail
     if _os.path.exists(filename):
-        _os.remove(filename)
+        _os.remove(filename)  # pragma: no cover

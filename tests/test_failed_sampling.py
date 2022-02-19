@@ -42,7 +42,7 @@ def test_basic_sampling(
 
     # Remove file before attempting to sample
     if _os.path.exists(filename):
-        _os.remove(filename)
+        _os.remove(filename)  # pragma: no cover
 
     try:
         sampler.sample()

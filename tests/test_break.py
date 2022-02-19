@@ -33,7 +33,7 @@ def test_break(execution_number):
 
     filename = "temporary_file.h5"
     if _os.path.exists(filename):
-        _os.remove(filename)
+        _os.remove(filename)  # pragma: no cover
 
     sampler = _hmclab.Samplers.HMC()
 

@@ -17,7 +17,7 @@ def test_sampling_visualization_himmelblau(sampler_class):
 
     # Remove file before attempting to sample
     if _os.path.exists(filename):
-        _os.remove(filename)
+        _os.remove(filename)  # pragma: no cover
 
     sampler = sampler_class()
 
@@ -43,7 +43,7 @@ def test_sampling_interrupt_himmelblau(sampler_class):
 
     # Remove file before attempting to sample
     if _os.path.exists(filename):
-        _os.remove(filename)
+        _os.remove(filename)  # pragma: no cover
 
     sampler = sampler_class()
 

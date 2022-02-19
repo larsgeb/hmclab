@@ -12,7 +12,7 @@ def test_leapfrog():
 
     # Remove file before attempting to sample
     if _os.path.exists(filename):
-        _os.remove(filename)
+        _os.remove(filename)  # pragma: no cover
 
     sampler = _hmclab.Samplers.HMC()
 
@@ -39,7 +39,7 @@ def test_four_stage():
 
     # Remove file before attempting to sample
     if _os.path.exists(filename):
-        _os.remove(filename)
+        _os.remove(filename)  # pragma: no cover
 
     sampler = _hmclab.Samplers.HMC()
 
@@ -66,7 +66,7 @@ def test_three_stage():
 
     # Remove file before attempting to sample
     if _os.path.exists(filename):
-        _os.remove(filename)
+        _os.remove(filename)  # pragma: no cover
 
     sampler = _hmclab.Samplers.HMC()
 

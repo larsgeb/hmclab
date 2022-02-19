@@ -136,7 +136,7 @@ def test_basic_sampling(
 
     # Remove file before attempting to sample
     if _os.path.exists(filename):
-        _os.remove(filename)  # pragma: no cover
+        _os.remove(filename)  # pragma: no cover  # pragma: no cover
 
     proposals = 1000
 

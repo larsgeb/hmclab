@@ -65,7 +65,7 @@ def test_samples_file(
 
     # Remove file before attempting to sample
     if _os.path.exists(filename):
-        _os.remove(filename)
+        _os.remove(filename)  # pragma: no cover
 
     sampler_instance.sample(
         filename, distribution, proposals=proposals, max_time=0.5, autotuning=autotuning
