@@ -8,3 +8,5 @@ def test_version():
 
     for k, i in versions.items():
         print(k, i)
+
+    print(hmclab.__version__)

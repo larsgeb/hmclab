@@ -1,3 +1,7 @@
+"""This helper is not used by any modules in the HMCLab package, but is in some
+modules that are in development. It is therefore excluded from testing."""
+
+
 from contextlib import contextmanager
 import ctypes
 import io

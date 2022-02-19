@@ -1,4 +1,7 @@
 ignore:
   - "**/*/_version*"
+  - "_version.py"
   - "versioneer.py"
   - "setup.py"
+  - "InterfaceMKL.py"
+  - "CaptureStdout.py"
