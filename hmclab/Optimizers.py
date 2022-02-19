@@ -42,7 +42,9 @@ class gradient_descent(_AbstractOptimizer):
         target: _AbstractDistribution,
         initial_model: _numpy.ndarray = None,
         epsilon: float = 0.1,
-        nmax: int = 100,
+        iterations: int = 100,
+        regularization: float = None,
+        strictly_monotonic=False,
     ) -> _Tuple[_numpy.ndarray, float, _List[_numpy.ndarray], _List[float]]:
 
         dimensions = target.dimensions
@@ -56,15 +58,15 @@ class gradient_descent(_AbstractOptimizer):
 
         # Create progress bar
         try:
-            iterations = _tqdm_au.trange(
-                nmax,
+            progressbar = _tqdm_au.trange(
+                iterations,
                 desc="Iterating",
                 leave=True,
                 dynamic_ncols=True,
             )
         except Exception:
-            iterations = _tqdm_au.trange(
-                nmax,
+            progressbar = _tqdm_au.trange(
+                iterations,
                 desc="Iterating",
                 leave=True,
             )
@@ -80,82 +82,43 @@ class gradient_descent(_AbstractOptimizer):
         xs.append(x)
         ms.append(m)
 
-        for _ in iterations:
+        for _ in progressbar:
 
             # Compute gradient
             g = target.gradient(m)
+
+            if regularization is not None:
+                preconditioner = _numpy.diag(
+                    1.0 / (_numpy.diag(g @ g.T) + regularization)
+                )
+                # Update model
+                g = preconditioner @ g
+
             # Update model
             m = m - epsilon * g
 
             # Compute misfit and store
             x = target.misfit(m)
-            iterations.set_description(f"Misfit: {x:.4e}")
-            # Place current model and misfit
-            xs.append(x)
-            ms.append(m)
 
-        return m, x, _numpy.array(ms), _numpy.array(xs)
+            if _numpy.isnan(x) or _numpy.isinf(x):
+                # Reset model and misfit
+                x = xs[-1]
+                m = ms[-1]
+                # And exit loop
+                progressbar.close()
+                print("Encountered infinite or NaN values, terminating")
+                break
 
+            if x > xs[-1] and strictly_monotonic:
+                # Reset model and misfit
+                x = xs[-1]
+                m = ms[-1]
+                # And exit loop
+                progressbar.close()
+                print("Value is not strictly decreasing, terminating")
+                break
 
-class preconditioned_gradient_descent(_AbstractOptimizer):
-    def __init__(self):
-        pass
-
-    def iterate(
-        self,
-        target: _AbstractDistribution,
-        initial_model: _numpy.ndarray = None,
-        epsilon: float = 0.1,
-        regularization: float = 1.0,
-        nmax: int = 100,
-    ) -> _Tuple[_numpy.ndarray, float, _List[_numpy.ndarray], _List[float]]:
-
-        dimensions = target.dimensions
-
-        # If no initial model is given, start at zeros
-        if initial_model is None:
-            m = _numpy.zeros((dimensions, 1))
-        else:
-            assert initial_model.shape == (dimensions, 1)
-            m = initial_model
-
-        # Create progress bar
-        try:
-            iterations = _tqdm_au.trange(
-                nmax,
-                desc="Iterating",
-                leave=True,
-                dynamic_ncols=True,
-            )
-        except Exception:
-            iterations = _tqdm_au.trange(
-                nmax,
-                desc="Iterating",
-                leave=True,
-            )
-
-        # Compute initial misfit
-        x = target.misfit(m)
-
-        # Create the returns
-        xs = []
-        ms = []
-
-        # Add starting model and misfit to the returns
-        xs.append(x)
-        ms.append(m)
-
-        for _ in iterations:
-
-            # Compute gradient
-            g = target.gradient(m)
-            preconditioner = _numpy.diag(1.0 / (_numpy.diag(g @ g.T) + regularization))
-            # Update model
-            m = m - epsilon * (preconditioner @ g)
-
-            # Compute misfit and store
-            x = target.misfit(m)
-            iterations.set_description(f"Misfit: {x:.4e}")
+            progressbar.set_description(f"Misfit: {x:.1e}")
             # Place current model and misfit
             xs.append(x)
             ms.append(m)
