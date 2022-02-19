@@ -10,7 +10,7 @@ omit =
     versioneer.py
     hmclab/_version.py
     hmclab/Distributions/ElasticFullWaveform2D.py
-    hmclab/Helpers/InterfaceMKL.py"
-    hmclab/Helpers/CaptureStdout.py"
+    hmclab/Helpers/InterfaceMKL.py
+    hmclab/Helpers/CaptureStdout.py
     tests/test_elasticFWI.py
     
