@@ -17,11 +17,10 @@ required methods and their signatures (required in- and outputs).
 import warnings as _warnings
 from abc import ABC as _ABC
 from abc import abstractmethod as _abstractmethod
-
+from scipy.linalg import cho_factor as _cho_factor, cho_solve as _cho_solve
 import numpy as _numpy
 
 from hmclab.Helpers.CustomExceptions import AbstractMethodError as _AbstractMethodError
-
 from hmclab.Helpers.CustomExceptions import Assertions
 
 
@@ -37,7 +36,7 @@ class _AbstractMassMatrix(_ABC):
     rng: _numpy.random.Generator = _numpy.random.default_rng()
 
     def full_name(self) -> str:
-        return self.name
+        raise _AbstractMethodError()
 
     @_abstractmethod
     def kinetic_energy(self, momentum: _numpy.ndarray) -> float:
@@ -98,11 +97,8 @@ class Unit(_AbstractMassMatrix):
         -------
 
         """
-        if momentum.shape != (momentum.size, 1):
-            raise ValueError(
-                f"The passed momentum vector is not of the right dimensions, "
-                f"which would be ({momentum.size, 1})."
-            )
+        if momentum.shape != (self.dimensions, 1):
+            raise ValueError()
         return 0.5 * (momentum.T @ momentum).item(0)
 
     def kinetic_energy_gradient(self, momentum: _numpy.ndarray) -> _numpy.ndarray:
@@ -116,6 +112,8 @@ class Unit(_AbstractMassMatrix):
         -------
 
         """
+        if momentum.shape != (self.dimensions, 1):
+            raise ValueError()
         return momentum
 
     def generate_momentum(self) -> _numpy.ndarray:
@@ -138,8 +136,8 @@ class Unit(_AbstractMassMatrix):
         return _numpy.eye(self.dimensions)
 
     @staticmethod
-    def create_default(dimensions: int) -> "Unit":
-        return Unit(dimensions)
+    def create_default(dimensions: int, rng: _numpy.random.Generator = None) -> "Unit":
+        return Unit(dimensions, rng)
 
 
 class Diagonal(_AbstractMassMatrix):
@@ -156,9 +154,6 @@ class Diagonal(_AbstractMassMatrix):
         self.name = "diagonal mass matrix"
 
         diagonal = _numpy.asarray(diagonal)
-
-        if diagonal is None or type(diagonal) != _numpy.ndarray:
-            raise ValueError("The diagonal mass matrix did not receive a diagonal")
 
         diagonal.shape = (diagonal.size, 1)
 
@@ -182,6 +177,8 @@ class Diagonal(_AbstractMassMatrix):
         -------
 
         """
+        if momentum.shape != (self.dimensions, 1):
+            raise ValueError()
         return 0.5 * _numpy.vdot(momentum, self.inverse_diagonal * momentum)
 
     def kinetic_energy_gradient(self, momentum: _numpy.ndarray) -> _numpy.ndarray:
@@ -195,6 +192,8 @@ class Diagonal(_AbstractMassMatrix):
         -------
 
         """
+        if momentum.shape != (self.dimensions, 1):
+            raise ValueError()
         return self.inverse_diagonal * momentum
 
     def generate_momentum(self) -> _numpy.ndarray:
@@ -211,12 +210,11 @@ class Diagonal(_AbstractMassMatrix):
         return _numpy.diagflat(self.diagonal)
 
     @staticmethod
-    def create_default(dimensions: int) -> "Diagonal":
+    def create_default(
+        dimensions: int, rng: _numpy.random.Generator = None
+    ) -> "Diagonal":
         diagonal = _numpy.ones((dimensions, 1))
-        return Diagonal(diagonal)
-
-
-from scipy.linalg import cho_factor as _cho_factor, cho_solve as _cho_solve
+        return Diagonal(diagonal, rng=rng)
 
 
 class Full(_AbstractMassMatrix):
@@ -239,10 +237,7 @@ class Full(_AbstractMassMatrix):
         self.mass_matrix = _numpy.asarray(full)
 
         if do_hermitian_check:
-            assert _numpy.all(self.mass_matrix == self.mass_matrix.T)
-
-        if self.mass_matrix is None or type(self.mass_matrix) != _numpy.ndarray:
-            raise ValueError("The diagonal mass matrix did not receive a diagonal")
+            assert _numpy.allclose(self.mass_matrix, self.mass_matrix.T)
 
         self.cholesky, self.cholesky_lower = _cho_factor(self.mass_matrix, lower=True)
         self.cholesky = _numpy.tril(self.cholesky)
@@ -262,6 +257,8 @@ class Full(_AbstractMassMatrix):
         -------
 
         """
+        if momentum.shape != (self.dimensions, 1):
+            raise ValueError()
         return 0.5 * _numpy.vdot(
             momentum, _cho_solve((self.cholesky, self.cholesky_lower), momentum)
         )
@@ -277,6 +274,8 @@ class Full(_AbstractMassMatrix):
         -------
 
         """
+        if momentum.shape != (self.dimensions, 1):
+            raise ValueError()
         return _cho_solve((self.cholesky, self.cholesky_lower), momentum)
 
     def generate_momentum(self, repeat=1) -> _numpy.ndarray:
@@ -293,13 +292,13 @@ class Full(_AbstractMassMatrix):
         return self.mass_matrix
 
     @staticmethod
-    def create_default(dimensions: int) -> "Full":
+    def create_default(dimensions: int, rng: _numpy.random.Generator = None) -> "Full":
         mass_matrix = (
             _numpy.eye(dimensions)
             + 0.1 * _numpy.eye(dimensions, k=-1)
             + 0.1 * _numpy.eye(dimensions, k=1)
         )
-        return Full(mass_matrix)
+        return Full(mass_matrix, rng=rng)
 
 
 class LBFGS(_AbstractMassMatrix):
@@ -356,9 +355,13 @@ class LBFGS(_AbstractMassMatrix):
             self.rng = rng
 
     def kinetic_energy(self, momentum: _numpy.ndarray) -> float:
+        if momentum.shape != (self.dimensions, 1):
+            raise ValueError()
         return 0.5 * _numpy.vdot(momentum, self.Hinv(momentum))
 
     def kinetic_energy_gradient(self, momentum: _numpy.ndarray) -> _numpy.ndarray:
+        if momentum.shape != (self.dimensions, 1):
+            raise ValueError()
         return self.Hinv(momentum)
 
     def generate_momentum(self) -> _numpy.ndarray:
@@ -509,6 +512,13 @@ class LBFGS(_AbstractMassMatrix):
 
         return logdet
 
+    @property
+    def matrix(self):
+
+        matrix = _numpy.empty((self.dimensions, self.dimensions))
+
+        return matrix
+
     @staticmethod
-    def create_default(dimensions: int) -> "LBFGS":
-        return LBFGS(dimensions)
+    def create_default(dimensions: int, rng: _numpy.random.Generator = None) -> "LBFGS":
+        return LBFGS(dimensions, rng=rng)

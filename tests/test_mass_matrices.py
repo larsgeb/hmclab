@@ -4,8 +4,11 @@ import numpy as _numpy
 import pytest as _pytest
 import os as _os
 
-from hmclab import MassMatrices as _MassMatrices, Samplers as _Samplers
+from hmclab import MassMatrices as _MassMatrices
+from hmclab import Samplers as _Samplers
+from hmclab import Distributions as _Distributions
 from hmclab.Distributions import Normal as _Normal
+
 
 dimensions = [1, 10, 100]
 subclasses = _MassMatrices._AbstractMassMatrix.__subclasses__()
@@ -24,15 +27,24 @@ def test_creation(mmclass: _MassMatrices._AbstractMassMatrix, dimensions: int):
     # Check if the right amount of dimensions
     assert mass_matrix.dimensions == dimensions
 
+    assert mass_matrix.matrix.shape == (dimensions, dimensions)
+
     return True
 
 
 @_pytest.mark.parametrize("mmclass", subclasses)
 @_pytest.mark.parametrize("dimensions", dimensions)
-def test_generate(mmclass: _MassMatrices._AbstractMassMatrix, dimensions: int):
+@_pytest.mark.parametrize("rng", [None, _numpy.random.default_rng()])
+def test_generate(
+    mmclass: _MassMatrices._AbstractMassMatrix,
+    dimensions: int,
+    rng: _numpy.random.Generator,
+):
 
     # Create the object
-    mass_matrix: _MassMatrices._AbstractMassMatrix = mmclass.create_default(dimensions)
+    mass_matrix: _MassMatrices._AbstractMassMatrix = mmclass.create_default(
+        dimensions, rng=rng
+    )
 
     # Generate momentum
     momentum = mass_matrix.generate_momentum()
@@ -59,6 +71,11 @@ def test_kinetic_energy(mmclass: _MassMatrices._AbstractMassMatrix, dimensions: 
 
     # Assert float type
     assert type(kinetic_energy) == float or type(kinetic_energy) == _numpy.float64
+
+    # Try to compute kinetic energy which SHOULD fail
+    momentum = _numpy.vstack((momentum, _numpy.ones((1, 1))))
+    with _pytest.raises(ValueError):
+        kinetic_energy = mass_matrix.kinetic_energy(momentum)
 
     return True
 
@@ -94,7 +111,12 @@ def test_kinetic_energy_gradient(
         )
         assert relative_error < 1e-2
     else:
-        assert _numpy.allclose(kinetic_energy_gradient, 0.0)
+        assert _numpy.allclose(kinetic_energy_gradient, 0.0)  # pragma: no cover
+
+    # Try to compute kinetic energy gradient which SHOULD fail
+    momentum = _numpy.vstack((momentum, _numpy.ones((1, 1))))
+    with _pytest.raises(ValueError):
+        kinetic_energy_gradient = mass_matrix.kinetic_energy_gradient(momentum)
 
     return True
 
@@ -114,7 +136,7 @@ def test_basic_sampling(
 
     # Remove file before attempting to sample
     if _os.path.exists(filename):
-        _os.remove(filename)
+        _os.remove(filename)  # pragma: no cover
 
     proposals = 1000
 
@@ -134,7 +156,39 @@ def test_basic_sampling(
 
     # Check if the file was created. If it wasn't, fail
     if not _os.path.exists(filename):
-        _pytest.fail("Samples file wasn't created")
+        _pytest.fail("Samples file wasn't created")  # pragma: no cover
 
     # Remove the file
     _os.remove(filename)
+
+
+def test_full_massmatrix():
+    """Test all parts of the full mass matrix that aren't hit yet."""
+    non_symmetric_matrix = _numpy.tri(10)
+
+    with _pytest.raises(AssertionError):
+        _MassMatrices.Full(non_symmetric_matrix)
+
+
+@_pytest.mark.parametrize("dimensions", dimensions)
+def test_lbfgs_massmatrix(dimensions):
+    """Test all parts of the L-BFGS mass matrix that aren't hit yet."""
+
+    # Create the object
+    mass_matrix = _MassMatrices.LBFGS.create_default(dimensions)
+
+    target_distribution = _Distributions.Normal.create_default(
+        dimensions, diagonal=True
+    )
+
+    for _ in range(100):
+        sample = target_distribution.generate()
+        gradient = target_distribution.gradient(sample)
+        mass_matrix.update(sample, gradient)
+
+    sample = target_distribution.generate()
+    gradient = target_distribution.gradient(sample)
+
+    # Adding the same sample many times is meant to force non-updates
+    for _ in range(100):
+        mass_matrix.update(sample, gradient)

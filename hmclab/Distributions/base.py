@@ -581,13 +581,14 @@ class Normal(_AbstractDistribution):
             )
 
     @staticmethod
-    def create_default(dimensions: int) -> "Normal":
+    def create_default(dimensions: int, diagonal=False) -> "Normal":
 
         # Create random means
         means = _numpy.random.rand(dimensions, 1)
 
-        # Create a PD matrix with some extra definiteness by adding the identity
-        correlation = _RandomMatrices.random_correlation_matrix(dimensions)
+        if not diagonal:
+            # Create a PD matrix with some extra definiteness by adding the identity
+            correlation = _RandomMatrices.random_correlation_matrix(dimensions)
 
         # Standard deviations between 1 and 2
         standard_deviations = _numpy.diag(
@@ -597,7 +598,10 @@ class Normal(_AbstractDistribution):
             + 1
         )
 
-        covariance = standard_deviations @ correlation @ standard_deviations
+        if diagonal:
+            covariance = _numpy.diag(standard_deviations * standard_deviations)
+        else:
+            covariance = standard_deviations @ correlation @ standard_deviations
 
         return Normal(means, covariance)
 

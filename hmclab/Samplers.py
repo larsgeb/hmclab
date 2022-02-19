@@ -49,7 +49,7 @@ from hmclab.Helpers.Timers import AccumulatingTimer as _AccumulatingTimer
 from hmclab.Helpers.CustomExceptions import InvalidCaseError
 
 import ipywidgets as _widgets
-from IPython.core.display import display as _display
+from IPython import display as _display
 
 from hmclab.Helpers.CustomExceptions import AbstractMethodError as _AbstractMethodError
 
@@ -104,12 +104,12 @@ class _AbstractSampler(_ABC):
     """A NumPy array containing the model at the proposed state of the Markov chain. """
 
     current_x: float = None
-    """A float containing :math:`\chi = -\log\left( p\\right)` (i.e. the misfit,
+    r"""A float containing :math:`\chi = -\log\left( p\\right)` (i.e. the misfit,
     negative log probability) of the distribution at the current state of the
     Markov chain."""
 
     proposed_x: float = None
-    """A float containing :math:`\chi = -\log\left( p\\right)` (i.e. the misfit,
+    r"""A float containing :math:`\chi = -\log\left( p\\right)` (i.e. the misfit,
     negative log probability) of the distribution at the proposed state of the
     Markov chain. """
 
