@@ -1,7 +1,5 @@
 """A collection of integrated tests.
 """
-import h5py as _h5py
-from numpy.random import seed
 from hmclab import Distributions as _Distributions
 import os as _os
 
@@ -9,7 +7,6 @@ import numpy as _numpy
 import pytest as _pytest
 
 import hmclab as _hmclab
-import hmclab
 from hmclab.Helpers.CustomExceptions import InvalidCaseError as _InvalidCaseError
 
 _ad = _hmclab.Distributions._AbstractDistribution

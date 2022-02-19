@@ -1,7 +1,5 @@
 """A collection of integrated tests.
 """
-import h5py as _h5py
-from hmclab import Distributions as _Distributions
 from hmclab.Samples import combine_samples as _combine_samples
 import os as _os
 

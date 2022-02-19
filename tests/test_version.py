@@ -1,12 +1,12 @@
-import hmclab
+import hmclab as _hmclab
 
 
 def test_version():
     """Check if the Versioneer code works."""
 
-    versions = hmclab._version.get_versions()
+    versions = _hmclab._version.get_versions()
 
     for k, i in versions.items():
         print(k, i)
 
-    print(hmclab.__version__)
+    print(_hmclab.__version__)

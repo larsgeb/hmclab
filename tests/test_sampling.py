@@ -1,7 +1,6 @@
 """A collection of integrated tests.
 """
 import h5py as _h5py
-from hmclab import Distributions as _Distributions
 import os as _os
 
 import numpy as _numpy

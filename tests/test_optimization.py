@@ -1,6 +1,5 @@
 """A collection of optimization tests.
 """
-from email.policy import strict
 import pytest as _pytest, numpy as _numpy
 
 import hmclab as _hmclab
