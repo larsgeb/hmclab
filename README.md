@@ -1,6 +1,6 @@
 # HMC Tomography
 
-[![Python version](https://img.shields.io/badge/python-3.7-blue)]() [![GitHub CI Build status](https://github.com/larsgeb/hmclab/workflows/Python%20application/badge.svg)]() [![codecov](https://codecov.io/gh/larsgeb/hmclab/branch/master/graph/badge.svg?token=6svV9YDRhd)](https://codecov.io/gh/larsgeb/hmclab) [![license](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black) [![GitHub releases](https://img.shields.io/badge/download-latest%20release-green.svg)](https://github.com/larsgeb/hmclab/releases/latest)
+![Python version](https://img.shields.io/badge/python-3.9-blue) ![GitHub CI Build status](https://github.com/larsgeb/hmclab/workflows/Python%20application/badge.svg) [![codecov](https://codecov.io/gh/larsgeb/hmclab/branch/master/graph/badge.svg?token=6svV9YDRhd)](https://codecov.io/gh/larsgeb/hmclab) [![license](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black) [![GitHub releases](https://img.shields.io/badge/download-latest%20release-green.svg)](https://github.com/larsgeb/hmclab/releases/latest)
 
 
 **HMCLab** is a numerical laboratory for research in Bayesian seismology. We
