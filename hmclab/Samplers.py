@@ -230,6 +230,7 @@ class _AbstractSampler(_ABC):
         max_time: int,
         disable_progressbar: bool = False,
         diagnostic_mode: bool = False,
+        queue=None,
         **kwargs,
     ):
         """A method that is called everytime any markov chain sampler object is
@@ -340,13 +341,6 @@ class _AbstractSampler(_ABC):
             samples_hdf5_filename += ".h5"
         self.samples_hdf5_filename = samples_hdf5_filename
 
-        # Open the HDF5 file
-        self._open_samples_hdf5(
-            self.samples_hdf5_filename,
-            self.proposals_after_thinning,
-            overwrite=overwrite_existing_file,
-        )
-
         # Set up the initial model and preallocate other necessary arrays --------------
 
         if initial_model is None:
@@ -402,22 +396,10 @@ class _AbstractSampler(_ABC):
 
         # Do sampler specific operations -----------------------------------------------
 
+        self.queue = queue
+
         # Set up specifics for each algorithm
         self._init_sampler_specific(**kwargs)
-
-        # Write out the tuning settings
-        self._write_tuning_settings()
-
-        # Create attributes before sampling, such that SWMR works
-        self.samples_hdf5_dataset.attrs["write_index"] = -1
-        self.samples_hdf5_dataset.attrs["last_written_sample"] = -1
-        self.samples_hdf5_dataset.attrs["proposals"] = self.proposals
-        self.samples_hdf5_dataset.attrs["acceptance_rate"] = 0
-        self.samples_hdf5_dataset.attrs["online_thinning"] = self.online_thinning
-        self.samples_hdf5_dataset.attrs["start_time"] = _datetime.now().strftime(
-            "%d-%b-%Y (%H:%M:%S.%f)"
-        )
-        self.samples_hdf5_dataset.attrs["sampler"] = self.name
 
         # Capture NumPy exceptions -----------------------------------------------------
         class Log(object):
@@ -433,6 +415,27 @@ class _AbstractSampler(_ABC):
         # This avoids some weird stdout bugs on OSX. Doesn't do anything than
         # fiddle with the stdout.
         print(" ", end="", flush=True)
+
+        # Open the HDF5 file
+        self._open_samples_hdf5(
+            self.samples_hdf5_filename,
+            self.proposals_after_thinning,
+            overwrite=overwrite_existing_file,
+        )
+
+        # Write out the tuning settings
+        self._write_tuning_settings()
+
+        # Create attributes before sampling, such that SWMR works
+        self.samples_hdf5_dataset.attrs["write_index"] = -1
+        self.samples_hdf5_dataset.attrs["last_written_sample"] = -1
+        self.samples_hdf5_dataset.attrs["proposals"] = self.proposals
+        self.samples_hdf5_dataset.attrs["acceptance_rate"] = 0
+        self.samples_hdf5_dataset.attrs["online_thinning"] = self.online_thinning
+        self.samples_hdf5_dataset.attrs["start_time"] = _datetime.now().strftime(
+            "%d-%b-%Y (%H:%M:%S.%f)"
+        )
+        self.samples_hdf5_dataset.attrs["sampler"] = self.name
 
     def create_progressbar(self):
         try:
@@ -592,6 +595,9 @@ class _AbstractSampler(_ABC):
             self._samples_to_disk()
             self.end_time = _datetime.now()
             self._close_sampler()
+            if self.parallel:
+                self.queue.put({f"{self.sampler_index}": self._widget_data()})
+                self.queue.close()
 
     def _save_sample(self):
         # If we are on a thinning number ... (i.e. one of the non-discarded
@@ -1121,35 +1127,25 @@ class RWMH(_AbstractSampler):
         """
         # We put the creation of the sampler entirely in a try/catch block, so we can
         # actually close the hdf5 file if something goes wrong.
-        try:
-            self._init_sampler(
-                samples_hdf5_filename=samples_hdf5_filename,
-                distribution=distribution,
-                stepsize=stepsize,
-                initial_model=initial_model,
-                proposals=proposals,
-                diagnostic_mode=diagnostic_mode,
-                online_thinning=online_thinning,
-                ram_buffer_size=ram_buffer_size,
-                overwrite_existing_file=overwrite_existing_file,
-                max_time=max_time,
-                autotuning=autotuning,
-                target_acceptance_rate=target_acceptance_rate,
-                learning_rate=learning_rate,
-                disable_progressbar=disable_progressbar,
-            )
-        except Exception as e:
-            if self.samples_hdf5_filehandle is not None:
-                self.samples_hdf5_filehandle.close()
-                self.samples_hdf5_filehandle = None
-                self.samples_hdf5_dataset = None
-            raise e
+        self._init_sampler(
+            samples_hdf5_filename=samples_hdf5_filename,
+            distribution=distribution,
+            stepsize=stepsize,
+            initial_model=initial_model,
+            proposals=proposals,
+            diagnostic_mode=diagnostic_mode,
+            online_thinning=online_thinning,
+            ram_buffer_size=ram_buffer_size,
+            overwrite_existing_file=overwrite_existing_file,
+            max_time=max_time,
+            autotuning=autotuning,
+            target_acceptance_rate=target_acceptance_rate,
+            learning_rate=learning_rate,
+            disable_progressbar=disable_progressbar,
+            queue=queue,
+        )
 
         self._sample_loop()
-
-        if self.parallel:
-            queue.put({f"{self.sampler_index}": self._widget_data()})
-            queue.close()
 
         return self
 
@@ -1480,46 +1476,30 @@ class HMC(_AbstractSampler):
 
         # We put the creation of the sampler entirely in a try/catch block, so we can
         # actually close the hdf5 file if something goes wrong.
-        try:
-            self._init_sampler(
-                samples_hdf5_filename=samples_hdf5_filename,
-                distribution=distribution,
-                stepsize=stepsize,
-                randomize_stepsize=randomize_stepsize,
-                amount_of_steps=amount_of_steps,
-                mass_matrix=mass_matrix,
-                integrator=integrator,
-                initial_model=initial_model,
-                autotuning=autotuning,
-                target_acceptance_rate=target_acceptance_rate,
-                learning_rate=learning_rate,
-                proposals=proposals,
-                diagnostic_mode=diagnostic_mode,
-                online_thinning=online_thinning,
-                ram_buffer_size=ram_buffer_size,
-                overwrite_existing_file=overwrite_existing_file,
-                max_time=max_time,
-                disable_progressbar=disable_progressbar,
-            )
 
-        except Exception as e:
-            if self.samples_hdf5_filehandle is not None:
-                self.samples_hdf5_filehandle.close()
-                self.samples_hdf5_filehandle = None
-                self.samples_hdf5_dataset = None
-
-            if type(e) is FileExistsError:
-                if (
-                    str(e) == "Skipping sampling due to samples file existing. Code "
-                    "execution continues."
-                ):
-                    return
-            raise e
+        self._init_sampler(
+            samples_hdf5_filename=samples_hdf5_filename,
+            distribution=distribution,
+            stepsize=stepsize,
+            randomize_stepsize=randomize_stepsize,
+            amount_of_steps=amount_of_steps,
+            mass_matrix=mass_matrix,
+            integrator=integrator,
+            initial_model=initial_model,
+            autotuning=autotuning,
+            target_acceptance_rate=target_acceptance_rate,
+            learning_rate=learning_rate,
+            proposals=proposals,
+            diagnostic_mode=diagnostic_mode,
+            online_thinning=online_thinning,
+            ram_buffer_size=ram_buffer_size,
+            overwrite_existing_file=overwrite_existing_file,
+            max_time=max_time,
+            disable_progressbar=disable_progressbar,
+            queue=queue,
+        )
 
         self._sample_loop()
-
-        if self.parallel:
-            queue.put({f"{self.sampler_index}": self._widget_data()})
 
         return self
 
