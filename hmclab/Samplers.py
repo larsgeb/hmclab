@@ -220,17 +220,24 @@ class _AbstractSampler(_ABC):
 
     def _init_sampler(
         self,
+        # Required settings
         samples_hdf5_filename: str,
         distribution: _AbstractDistribution,
+        # Markov chain settings
         initial_model: _numpy.ndarray,
         proposals: int,
         online_thinning: int,
+        # Code settings
+        target_acceptance_rate: float,
+        learning_rate: float,
+        diagnostic_mode: bool,
         ram_buffer_size: int,
         overwrite_existing_file: bool,
-        max_time: int,
-        disable_progressbar: bool = False,
-        diagnostic_mode: bool = False,
+        max_time: float,
+        disable_progressbar,
+        # Not to be used by users
         queue=None,
+        # Algorithm specific settings
         **kwargs,
     ):
         """A method that is called everytime any markov chain sampler object is
@@ -422,6 +429,9 @@ class _AbstractSampler(_ABC):
             self.proposals_after_thinning,
             overwrite=overwrite_existing_file,
         )
+
+        target_acceptance_rate = target_acceptance_rate
+        learning_rate = learning_rate
 
         # Write out the tuning settings
         self._write_tuning_settings()
@@ -1055,13 +1065,13 @@ class RWMH(_AbstractSampler):
         # Algorithm settings
         stepsize: _Union[float, _numpy.ndarray] = 1.0,
         autotuning: bool = False,
-        target_acceptance_rate: float = 0.35,
-        learning_rate: float = 0.75,
         # Markov chain settings
         initial_model: _numpy.ndarray = None,
         proposals: int = 100,
         online_thinning: int = 1,
         # Code settings
+        target_acceptance_rate: float = 0.35,
+        learning_rate: float = 0.75,
         diagnostic_mode: bool = False,
         ram_buffer_size: int = None,
         overwrite_existing_file: bool = False,
@@ -1134,16 +1144,17 @@ class RWMH(_AbstractSampler):
             # Required settings
             samples_hdf5_filename=samples_hdf5_filename,
             distribution=distribution,
-            # Algorithm settings
+            # Algorithm settings - these are algorithm specific and handled in
+            # _init_sampler_specific() after _init_sampler().
             stepsize=stepsize,
             autotuning=autotuning,
-            target_acceptance_rate=target_acceptance_rate,
-            learning_rate=learning_rate,
             # Markov chain settings
             initial_model=initial_model,
             proposals=proposals,
             online_thinning=online_thinning,
             # Code settings
+            target_acceptance_rate=target_acceptance_rate,
+            learning_rate=learning_rate,
             diagnostic_mode=diagnostic_mode,
             ram_buffer_size=ram_buffer_size,
             overwrite_existing_file=overwrite_existing_file,
@@ -1159,12 +1170,10 @@ class RWMH(_AbstractSampler):
 
     def _init_sampler_specific(self, **kwargs):
 
-        # Parse all possible kwargs
+        # Parse all algorithm kwargs
         for key in [
             "stepsize",
             "autotuning",
-            "target_acceptance_rate",
-            "learning_rate",
         ]:
             setattr(self, key, kwargs[key])
             kwargs.pop(key)
@@ -1399,13 +1408,13 @@ class HMC(_AbstractSampler):
         mass_matrix: _AbstractMassMatrix = None,
         integrator: str = "lf",
         autotuning: bool = False,
-        target_acceptance_rate: float = 0.65,
-        learning_rate: float = 0.75,
         # Markov chain settings
         initial_model: _numpy.ndarray = None,
         proposals: int = 100,
         online_thinning: int = 1,
         # Code settings
+        target_acceptance_rate: float = 0.65,
+        learning_rate: float = 0.75,
         diagnostic_mode: bool = False,
         ram_buffer_size: int = None,
         overwrite_existing_file: bool = False,
@@ -1487,27 +1496,25 @@ class HMC(_AbstractSampler):
 
         """
 
-        # We put the creation of the sampler entirely in a try/catch block, so we can
-        # actually close the hdf5 file if something goes wrong.
-
         self._init_sampler(
             # Required settings
             samples_hdf5_filename=samples_hdf5_filename,
             distribution=distribution,
-            # Algorithm settings
+            # Algorithm settings - these are algorithm specific and handled in
+            # _init_sampler_specific() after _init_sampler().
             stepsize=stepsize,
             randomize_stepsize=randomize_stepsize,
             amount_of_steps=amount_of_steps,
             mass_matrix=mass_matrix,
             integrator=integrator,
             autotuning=autotuning,
-            target_acceptance_rate=target_acceptance_rate,
-            learning_rate=learning_rate,
             # Markov chain settings
             initial_model=initial_model,
             proposals=proposals,
             online_thinning=online_thinning,
             # Code settings
+            target_acceptance_rate=target_acceptance_rate,
+            learning_rate=learning_rate,
             diagnostic_mode=diagnostic_mode,
             ram_buffer_size=ram_buffer_size,
             overwrite_existing_file=overwrite_existing_file,
@@ -1522,7 +1529,8 @@ class HMC(_AbstractSampler):
         return self
 
     def _init_sampler_specific(self, **kwargs):
-        # Parse all possible kwargs
+
+        # Parse all algorithm kwargs
         for key in (
             "stepsize",
             "randomize_stepsize",
@@ -1530,8 +1538,6 @@ class HMC(_AbstractSampler):
             "mass_matrix",
             "integrator",
             "autotuning",
-            "target_acceptance_rate",
-            "learning_rate",
         ):
             setattr(self, key, kwargs[key])
             kwargs.pop(key)
