@@ -9,7 +9,8 @@ HMCLab
     self
     hmc
     setup
-    notebooks
+    tutorials
+    inverse_problems
     api/index
     py-modindex
     genindex

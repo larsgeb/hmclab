@@ -14,7 +14,7 @@ Available classes within `Optimizers`:
    :recursive:
 
    _AbstractOptimizer
-    gradient_descent
+   gradient_descent
    
    
    
