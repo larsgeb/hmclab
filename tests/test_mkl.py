@@ -4,7 +4,7 @@ import matplotlib.pyplot as _plt
 import numpy as _numpy
 import pytest as _pytest
 
-from hmc_tomography.Distributions.LinearMatrix import (
+from hmclab.Distributions.LinearMatrix import (
     _LinearMatrix_sparse_forward_simple_covariance,
 )
 
@@ -68,7 +68,7 @@ def test_misfit_bounds(dimensions: int, use_mkl: bool, dtype):
     assert distribution.use_mkl == use_mkl
 
     lower_bounds = _numpy.ones((dimensions, 1))
-    distribution.update_bounds(lower_bounds=lower_bounds)
+    distribution.update_bounds(lower=lower_bounds)
 
     # Compute misfit above lower bounds
 
@@ -87,7 +87,7 @@ def test_misfit_bounds(dimensions: int, use_mkl: bool, dtype):
     # Create upper bounds
 
     upper_bounds = 3 * _numpy.ones((dimensions, 1))
-    distribution.update_bounds(upper_bounds=upper_bounds)
+    distribution.update_bounds(upper=upper_bounds)
 
     # Compute misfit between the two limits
 
@@ -120,7 +120,7 @@ def test_misfit_bounds_impossible(dimensions: int, use_mkl: bool, dtype):
 
     # Try to switch the bounds s.t. lower > upper
     try:
-        distribution.update_bounds(lower_bounds=upper_bounds, upper_bounds=lower_bounds)
+        distribution.update_bounds(lower=upper_bounds, upper=lower_bounds)
     except ValueError as e:
         # Assert that the exception is raised by the bounds
         assert e.args[0] == "Bounds vectors are incompatible."

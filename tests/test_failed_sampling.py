@@ -4,18 +4,18 @@ import os as _os
 
 import numpy as _numpy
 import pytest as _pytest
+import uuid as _uuid
 
-import hmc_tomography as _hmc_tomography
-from hmc_tomography.Helpers.CustomExceptions import (
-    InvalidCaseError as _InvalidCaseError,
-)
+import hmclab as _hmclab
+from hmclab.Helpers.CustomExceptions import InvalidCaseError as _InvalidCaseError
 
-_ad = _hmc_tomography.Distributions._AbstractDistribution
-_as = _hmc_tomography.Samplers._AbstractSampler
+_ad = _hmclab.Distributions._AbstractDistribution
+_as = _hmclab.Samplers._AbstractSampler
 
 dimensions = [1, 2, 10]
 distribution_classes = _ad.__subclasses__()
 sampler_classes = _as.__subclasses__()
+sampler_classes.remove(_hmclab.Samplers._AbstractVisualSampler)
 proposals = [10, 1000]  # , 731, 1500]
 
 
@@ -24,7 +24,10 @@ proposals = [10, 1000]  # , 731, 1500]
 @_pytest.mark.parametrize("dimensions", dimensions)
 @_pytest.mark.parametrize("proposals", proposals)
 def test_basic_sampling(
-    sampler_class: _as, distribution_class: _ad, dimensions: int, proposals: int,
+    sampler_class: _as,
+    distribution_class: _ad,
+    dimensions: int,
+    proposals: int,
 ):
 
     try:
@@ -36,11 +39,12 @@ def test_basic_sampling(
 
     assert isinstance(sampler, _as)
 
-    filename = "temporary_file.h5"
+    unique_name = _uuid.uuid4().hex.upper()
+    filename = f"temporary_file_{unique_name}.h5"
 
     # Remove file before attempting to sample
     if _os.path.exists(filename):
-        _os.remove(filename)
+        _os.remove(filename)  # pragma: no cover
 
     try:
         sampler.sample()
@@ -53,8 +57,8 @@ def test_basic_sampling(
             distribution,
             proposals=proposals,
             ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
-            max_time=1.0,
-            mass_matrix=_hmc_tomography.MassMatrices.Unit(434),
+            max_time=0.1,
+            mass_matrix=_hmclab.MassMatrices.Unit(434),
         )
     except Exception as e:
         print(e)
@@ -65,7 +69,7 @@ def test_basic_sampling(
         proposals=proposals,
         online_thinning=10,
         ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
-        max_time=1.0,
+        max_time=0.1,
         overwrite_existing_file=True,
     )
 

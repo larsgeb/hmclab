@@ -1,22 +1,22 @@
-##############
-HMC Tomography
-##############
+######
+HMCLab
+######
 
 .. toctree::
     :maxdepth: 1
     :caption: Contents:
 
     self
+    hmc
     setup
-    examples
+    notebooks
     api/index
     py-modindex
     genindex
 
-
 .. note::
 
-   This documentation is far from complete. Please let us know if you miss something.
+   This documentation can never be complete. Please let us know if you miss something.
 
 .. warning::
 
@@ -24,4 +24,5 @@ HMC Tomography
 
 .. centered:: Andrea Zunino, Andreas Fichtner, Lars Gebraad
 
-This documentation is built on top of commit `COMMIT_HASH <https://github.com/larsgeb/hmc-tomography/commit/COMMIT_HASH>`_.
+This documentation is built on top of commit `COMMIT_HASH <https://github.com/larsgeb/hmclab/commit/COMMIT_HASH>`_.
+

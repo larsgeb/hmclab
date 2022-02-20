@@ -1,24 +1,27 @@
 """A collection of integrated tests.
 """
-from hmc_tomography.Distributions import Normal
+from hmclab.Distributions import Normal
 import os as _os
-import hmc_tomography as _hmc_tomography
+import hmclab as _hmclab
+import uuid as _uuid
 
-_ad = _hmc_tomography.Distributions._AbstractDistribution
-_as = _hmc_tomography.Samplers._AbstractSampler
+
+_ad = _hmclab.Distributions._AbstractDistribution
+_as = _hmclab.Samplers._AbstractSampler
 
 
 def test_basic_sampling():
 
     distribution = Normal.create_default(dimensions=10)
 
-    sampler_instance = _hmc_tomography.Samplers.HMC()
+    sampler_instance = _hmclab.Samplers.HMC()
 
-    filename = "temporary_file.h5"
+    unique_name = _uuid.uuid4().hex.upper()
+    filename = f"temporary_file_{unique_name}.h5"
 
     # Remove file before attempting to sample
     if _os.path.exists(filename):
-        _os.remove(filename)
+        _os.remove(filename)  # pragma: no cover
 
     sampler_instance.sample(
         filename,
@@ -26,7 +29,7 @@ def test_basic_sampling():
         diagnostic_mode=True,
         proposals=10000,
         online_thinning=1,
-        max_time=1.0,
+        max_time=0.1,
         autotuning=True,
     )
 

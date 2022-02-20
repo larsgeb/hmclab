@@ -1,18 +1,48 @@
-FROM ubuntu:latest
+FROM condaforge/miniforge3
+WORKDIR /home
 
-ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get --yes -qq update \
+ && apt-get --yes -qq upgrade \
+ && DEBIAN_FRONTEND=noninteractive \ 
+ apt-get --yes -qq install \
+                      build-essential \
+                      cmake \
+                      curl \
+                      g++ \
+                      gcc \
+                      gfortran \
+                      git \
+                      libblas-dev \
+                      liblapack-dev \
+                      libopenmpi-dev \
+                      openmpi-bin \
+                      wget \
+                      htop \
+                      nano \
+                      zsh \
+ && apt-get --yes -qq clean \
+ && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update \
-    && apt-get install -y python3-pip python3-dev \
-    && cd /usr/local/bin \
-    && ln -s /usr/bin/python3 python \
-    && pip3 install --upgrade pip
+SHELL ["/bin/bash", "-c"]
 
-COPY . /hmc-tomography
-WORKDIR /hmc-tomography
-RUN pip install -v -e .[testing]
-RUN pip install -v psvWave
-RUN pip install jupyter
+RUN conda init bash
+RUN conda init zsh
+RUN conda create -n hmclab python==3.9
+RUN echo "conda activate hmclab" >> $HOME/.zshrc
+RUN echo "conda activate hmclab" >> $HOME/.bashrc
 
-WORKDIR /hmc-tomography/examples/notebooks
-CMD ["jupyter", "notebook", "--port=8888", "--no-browser", "--ip=0.0.0.0", "--allow-root"] 
+SHELL ["conda", "run", "-n", "hmclab", "/bin/bash", "-c"]
+
+RUN mkdir /home/hmclab
+ADD .  /home/hmclab
+
+RUN cd /home/hmclab && \
+    pip install -e . 
+
+RUN pip install psvWave==0.2.1
+
+
+CMD ["conda", "run", "--no-capture-output", "-n", "hmclab", "jupyter", \
+     "notebook", "--notebook-dir=hmclab/notebooks", "--ip=0.0.0.0", \
+     "--port=8888", "--allow-root", "--NotebookApp.token=''", \
+     "--NotebookApp.password=''", "--no-browser"]

@@ -14,18 +14,16 @@
 
 import os
 import sys
-import hmc_tomography
+import hmclab
+
 
 sys.path.insert(0, os.path.abspath("../../"))
-sys.path.insert(0, os.path.abspath("../../hmc_tomography/Tests"))
+sys.path.insert(0, os.path.abspath("../../hmclab/Tests"))
 sys.path.insert(0, os.path.abspath("../../examples"))
 
 # - Custom configuration -----------------------------------------------------
 
 autodoc_member_order = "bysource"
-
-# override wide tables in RTD theme
-html_context = {"css_files": ["_static/theme_overrides.css"]}
 
 autodoc_inherit_docstrings = False
 autodoc_default_flags = ["members", "undoc-members", "show-inheritance"]
@@ -36,14 +34,14 @@ nbsphinx_execute = "never"
 
 # -- Project information -----------------------------------------------------
 
-project = "HMC Tom"
-copyright = "2019-2020, Andrea Zunino, Andreas Fichtner, Lars Gebraad"
+project = "HMCLab"
+copyright = "2019-2021, Andrea Zunino, Andreas Fichtner, Lars Gebraad"
 author = "Andrea Zunino, Andreas Fichtner, Lars Gebraad"
 
 # The short X.Y version
-version = hmc_tomography.__version__
+version = hmclab.__version__
 # The full version, including alpha/beta/rc tags
-release = hmc_tomography.__version__
+release = hmclab.__version__
 
 
 # -- General configuration ---------------------------------------------------
@@ -56,6 +54,7 @@ release = hmc_tomography.__version__
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "autoclasstoc",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.todo",
@@ -66,8 +65,18 @@ extensions = [
     "IPython.sphinxext.ipython_console_highlighting",
     "IPython.sphinxext.ipython_directive",
     "nbsphinx",
-    'sphinx_git',
+    "sphinx_git",
+    "sphinxcontrib.bibtex",
 ]
+
+html_theme_options = {
+    "collapse_navigation": True,
+    "sticky_navigation": True,
+    "navigation_depth": -1,
+}
+
+bibtex_bibfiles = ["biblio.bib"]
+bibtex_default_style = "unsrt"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -130,7 +139,7 @@ html_static_path = ["_static"]
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "HMCTomdoc"
+htmlhelp_basename = "HMCLab"
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -156,8 +165,8 @@ latex_elements = {
 latex_documents = [
     (
         master_doc,
-        "HMCTom.tex",
-        "HMC Tomography Documentation",
+        "HMCLab.tex",
+        "HMCLab Documentation",
         "Andrea Zunino, Andreas Fichtner, Lars Gebraad",
         "manual",
     )
@@ -213,3 +222,5 @@ epub_exclude_files = ["search.html"]
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
+autodoc_default_flags = ["members"]
+autosummary_generate = True

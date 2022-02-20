@@ -2,21 +2,22 @@
 Optimizers
 ==========
 
-.. automodule:: hmc_tomography.Optimizers
+.. automodule:: hmclab.Optimizers
     :no-members:
 
 Available classes within `Optimizers`:
 
-.. toctree::
-   :hidden:
-   :maxdepth: 1
-   :caption: Overview of samplers
+.. autosummary:: 
+   :toctree: _autosummary
+   :template: custom-class-template.rst
+   :nosignatures:
+   :recursive:
 
    _AbstractOptimizer
-   gradient_descent
-
-.. autosummary:: hmc_tomography.Optimizers._AbstractOptimizer
-                 hmc_tomography.Optimizers.gradient_descent
+    gradient_descent
+   
+   
+   
 
 Using SciPy's optimization routines
 ***********************************
@@ -28,10 +29,10 @@ function handles:
 - a function that computes the gradient of the objective
 
 The input of these functions should be ``(n, )`` arrays, not the column arrays
-``(n, 1)`` used throughout hmc_tomography. Similarly, SciPy requires the return of the
+``(n, 1)`` used throughout hmclab. Similarly, SciPy requires the return of the
 gradient to be an array of shape ``(n, )``, so we'll have to adapt the inputs to both
 functions and the gradient returned from the gradient function implemented for
-hmc_tomography.
+hmclab.
 
 This is an easy way to extract the methods and convert the arguments needed to run
 SciPy's routines, given that you constructed a target distribution:

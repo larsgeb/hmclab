@@ -4,12 +4,10 @@ import matplotlib.pyplot as _plt
 import numpy as _numpy
 import pytest as _pytest
 
-from hmc_tomography import Distributions as _Distributions
-from hmc_tomography.Helpers.CustomExceptions import (
-    InvalidCaseError as _InvalidCaseError,
-)
+from hmclab import Distributions as _Distributions
+from hmclab.Helpers.CustomExceptions import InvalidCaseError as _InvalidCaseError
 
-dimensions = [1, 2, 50]
+dimensions = [1, 2, 5, 50]
 subclasses = _Distributions._AbstractDistribution.__subclasses__()
 deltas = [1e-10, 1e-2, -1e-10, -1e-2]
 
@@ -32,6 +30,42 @@ def test_creation(pclass: _Distributions._AbstractDistribution, dimensions: int)
     assert distribution.dimensions == dimensions
 
     return True
+
+
+@_pytest.mark.parametrize("pclass", subclasses)
+@_pytest.mark.parametrize("dimensions", dimensions)
+def test_generation(pclass: _Distributions._AbstractDistribution, dimensions: int):
+    try:
+        distribution: _Distributions._AbstractDistribution = pclass.create_default(
+            dimensions
+        )
+    except _InvalidCaseError:
+        return 0
+
+    try:
+        samples = distribution.generate(100)
+    except NotImplementedError:
+        return 0
+
+    assert samples.shape == (distribution.dimensions, 100)
+
+    return True
+
+
+@_pytest.mark.parametrize("pclass", subclasses)
+@_pytest.mark.parametrize("dimensions", dimensions)
+def test_normalization(pclass: _Distributions._AbstractDistribution, dimensions: int):
+    try:
+        distribution: _Distributions._AbstractDistribution = pclass.create_default(
+            dimensions
+        )
+    except _InvalidCaseError:
+        return 0
+
+    try:
+        distribution.normalize()
+    except AttributeError:
+        return 0
 
 
 @_pytest.mark.parametrize("pclass", subclasses)
@@ -67,7 +101,7 @@ def test_misfit_bounds(pclass: _Distributions._AbstractDistribution, dimensions:
         return 0
 
     lower_bounds = _numpy.ones((dimensions, 1))
-    distribution.update_bounds(lower_bounds=lower_bounds)
+    distribution.update_bounds(lower=lower_bounds)
 
     # Compute misfit above lower bounds
 
@@ -90,7 +124,7 @@ def test_misfit_bounds(pclass: _Distributions._AbstractDistribution, dimensions:
     # Create upper bounds
 
     upper_bounds = 3 * _numpy.ones((dimensions, 1))
-    distribution.update_bounds(upper_bounds=upper_bounds)
+    distribution.update_bounds(upper=upper_bounds)
 
     # Compute misfit between the two limits
 
@@ -129,7 +163,7 @@ def test_misfit_bounds_impossible(
 
     # Try to switch the bounds s.t. lower > upper
     try:
-        distribution.update_bounds(lower_bounds=upper_bounds, upper_bounds=lower_bounds)
+        distribution.update_bounds(lower=upper_bounds, upper=lower_bounds)
     except ValueError as e:
         # Assert that the exception is raised by the bounds, else re-raise
         if e.args[0] != "Bounds vectors are incompatible.":
@@ -184,36 +218,3 @@ def test_gradient(
         results_bag.relative_error = 0
 
     return True
-
-
-@_pytest.mark.plot
-def test_gradient_plots(module_results_df):
-    """
-    Shows that the `module_results_df` fixture already contains what you need
-    """
-    # drop the 'pytest_obj' column
-    module_results_df.drop("pytest_obj", axis=1, inplace=True)
-
-    for name, df in module_results_df[
-        module_results_df.test_type == "gradient"
-    ].groupby("class_name"):
-
-        for dimensions, df_dim in df.groupby("dimensions"):
-            if not _numpy.all(_numpy.isnan(df_dim.relative_error)):
-                _plt.scatter(
-                    df_dim.delta,
-                    _numpy.abs(df_dim.relative_error),
-                    alpha=0.5,
-                    label=dimensions,
-                )
-        ax = _plt.gca()
-        _plt.grid(True)
-        _plt.xlim([-2e-2, 2e-2])
-        _plt.ylim([-1e-7, 1e0])
-        ax.set_xscale("symlog", linthreshx=1e-11)
-        ax.set_yscale("symlog", linthreshy=1e-8)
-        _plt.legend()
-        _plt.title(name)
-        ax.set_xticks([-1e-3, -1e-6, -1e-9, 0, 1e-9, 1e-6, 1e-3])
-
-        _plt.show()

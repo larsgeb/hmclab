@@ -2,4 +2,4 @@
 marginal_grid
 *************
 
-.. automethod:: hmc_tomography.Visualization.marginal_grid
+.. automethod:: hmclab.Visualization.marginal_grid

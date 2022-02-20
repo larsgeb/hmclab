@@ -1,7 +1,7 @@
 API reference
 =============
 
-.. module:: hmc_tomography
+.. module:: hmclab
 
 .. warning:: 
 
@@ -11,7 +11,7 @@ API reference
     updates.
 
 These packages describe the modules, classes and methods that constitute the 
-:code:`hmc_tomography` package. Here you'll find detailed explanations of how all the 
+:code:`hmclab` package. Here you'll find detailed explanations of how all the 
 components work together.
 
 .. toctree::
@@ -23,15 +23,20 @@ components work together.
    massmatrices/index
    samplers/index
    optimizers/index
-   samples
    visualization/index
 
 .. autosummary::
 
-    hmc_tomography.Distributions
-    hmc_tomography.MassMatrices
-    hmc_tomography.Samplers
-    hmc_tomography.Optimizers
-    hmc_tomography.Samples
-    hmc_tomography.Visualization
+    Distributions
+    MassMatrices
+    Samplers
+    Optimizers
+    Visualization
 
+.. autosummary:: 
+   :toctree: _autosummary
+   :template: custom-class-template.rst
+   :nosignatures:
+   :recursive:
+
+   Samples
