@@ -1,6 +1,12 @@
 import numpy as _numpy
 
 
+class H5FileOpenedError(FileExistsError):
+    """An internal exception that helps us keep track of H5 files."""
+
+    pass
+
+
 class AbstractMethodError(Exception):
     def __init__(self, message="", errors=""):
 
@@ -37,3 +43,8 @@ class Assertions:
             f"The passed {type_ndarray} with shape: {v.shape} is not of the correct "
             f"shape, which would be {shape}."
         )
+
+
+dev_assertion_message = (
+    "Something went wrong internally, please report this to the developers."
+)

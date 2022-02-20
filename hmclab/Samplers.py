@@ -41,27 +41,20 @@ import h5py as _h5py
 from matplotlib import pyplot as _plt
 import numpy as _numpy
 import tqdm.auto as _tqdm_au
+import ipywidgets as _widgets
+from IPython.display import display as _display
+
 
 from hmclab.Distributions import _AbstractDistribution
 from hmclab.MassMatrices import Unit as _Unit
 from hmclab.MassMatrices import _AbstractMassMatrix
 from hmclab.Helpers.Timers import AccumulatingTimer as _AccumulatingTimer
-from hmclab.Helpers.CustomExceptions import InvalidCaseError
-
-import ipywidgets as _widgets
-from IPython.display import display as _display
-
-from hmclab.Helpers.CustomExceptions import AbstractMethodError as _AbstractMethodError
-
-dev_assertion_message = (
-    "Something went wrong internally, please report this to the developers."
+from hmclab.Helpers.CustomExceptions import (
+    InvalidCaseError as _InvalidCaseError,
+    H5FileOpenedError as _H5FileOpenedError,
+    AbstractMethodError as _AbstractMethodError,
+    dev_assertion_message as _dev_assertion_message,
 )
-
-
-class H5FileOpenedError(FileExistsError):
-    """An internal exception that helps us keep track of H5 files."""
-
-    pass
 
 
 class _AbstractSampler(_ABC):
@@ -75,17 +68,16 @@ class _AbstractSampler(_ABC):
     rng = None
 
     dimensions: int = None
-    """An integer representing the dimensionality in which the MCMC sampler works."""
+    """Dimension of the target scalar function."""
 
     distribution: _AbstractDistribution = None
-    """The _AbstractDistribution-derived object on which the sampler works."""
+    """The target, required subclass of `hmclab.Distributions.AbstractDistribution`."""
 
     samples_hdf5_filename: str = None
-    """A string containing the path+filename of the hdf5 file to which samples will be
-    stored."""
+    """Path to output file."""
 
     samples_hdf5_filehandle = None
-    """A HDF5 file handle of the hdf5 file to which samples will be stored."""
+    """HDF5 file handle of output file."""
 
     samples_hdf5_dataset = None
     """A string containing the HDF5 group of the hdf5 file to which samples will be
@@ -332,7 +324,7 @@ class _AbstractSampler(_ABC):
             # actual ram size.
             self.ram_buffer_size = min(ram_buffer_size, self.proposals_after_thinning)
 
-            assert type(self.ram_buffer_size) == int, dev_assertion_message
+            assert type(self.ram_buffer_size) == int, _dev_assertion_message
 
         shape = (self.dimensions + 1, self.ram_buffer_size)
 
@@ -654,7 +646,7 @@ class _AbstractSampler(_ABC):
                 == f"Unable to create file (unable to open file: name = '{name}', "
                 f"errno = 17, error message = 'File exists', flags = 15, o_flags = c2)"
             ):
-                raise H5FileOpenedError(
+                raise _H5FileOpenedError(
                     "This file is already opened as HDF5 file. If you "
                     "want to write to it, close the filehandle."
                 )
@@ -684,7 +676,7 @@ class _AbstractSampler(_ABC):
             self.current_proposal / self.online_thinning
         )
         # Assert that it's an integer (if we only write on end of buffer)
-        assert self.current_proposal % self.online_thinning == 0, dev_assertion_message
+        assert self.current_proposal % self.online_thinning == 0, _dev_assertion_message
 
         # Calculate index for the RAM array
         index_in_ram = self.current_proposal_after_thinning % self.ram_buffer_size
@@ -723,11 +715,11 @@ class _AbstractSampler(_ABC):
             # Some sanity checks on the indices
             assert (
                 robust_start >= 0 and robust_start <= self.proposals_after_thinning + 1
-            ), dev_assertion_message
+            ), _dev_assertion_message
             assert (
                 end >= 0 and end <= self.proposals_after_thinning + 1
-            ), dev_assertion_message
-            assert end >= robust_start, dev_assertion_message
+            ), _dev_assertion_message
+            assert end >= robust_start, _dev_assertion_message
 
             # Update the amount of writes
             self.amount_of_writes += 1
@@ -878,7 +870,7 @@ class _AbstractSampler(_ABC):
 
     def get_diagnostics(self):
         if not self.diagnostic_mode:
-            raise InvalidCaseError(
+            raise _InvalidCaseError(
                 "Can't return diagnostics if sampler is not in diagnostic mode"
             )
         return self.functions_to_diagnose + self.sampler_specific_functions_to_diagnose
@@ -1286,7 +1278,7 @@ class RWMH(_AbstractSampler):
             * self._stepsize_non_scalar_part
             * self.rng.normal(size=(self.dimensions, 1))
         )
-        assert self.proposed_model.shape == (self.dimensions, 1), dev_assertion_message
+        assert self.proposed_model.shape == (self.dimensions, 1), _dev_assertion_message
 
     def _evaluate_acceptance(self):
 
@@ -2228,18 +2220,12 @@ class _AbstractVisualSampler(_AbstractSampler):
         self,
         samples_hdf5_filename: str,
         distribution: _AbstractDistribution,
-        initial_model: _numpy.ndarray,
-        proposals: int,
-        online_thinning: int,
-        ram_buffer_size: int,
-        overwrite_existing_file: bool,
-        max_time: int,
-        disable_progressbar: bool = False,
-        diagnostic_mode: bool = False,
         **kwargs,
     ):
 
         dimensions = distribution.dimensions
+        proposals = kwargs["proposals"]
+
         for dim in self.dims_to_plot:
             assert (
                 dim < dimensions
@@ -2312,19 +2298,7 @@ class _AbstractVisualSampler(_AbstractSampler):
         self.plots["samples"]["legend"] = None
 
         # Run original function
-        return super()._init_sampler(
-            samples_hdf5_filename,
-            distribution,
-            initial_model,
-            proposals,
-            online_thinning,
-            ram_buffer_size,
-            overwrite_existing_file,
-            max_time,
-            disable_progressbar=disable_progressbar,
-            diagnostic_mode=diagnostic_mode,
-            **kwargs,
-        )
+        return super()._init_sampler(samples_hdf5_filename, distribution, **kwargs)
 
     def _update_plots_after_acceptance(self, force=False):
 
