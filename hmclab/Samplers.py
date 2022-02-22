@@ -80,8 +80,7 @@ class _AbstractSampler(_ABC):
     """HDF5 file handle of output file."""
 
     samples_hdf5_dataset = None
-    """A string containing the HDF5 group of the hdf5 file to which samples will be
-    stored. """
+    """Dataset within the HDF5 file containing data and metadata."""
 
     ram_buffer_size: int = None
     """A positive integer indicating the size of the RAM buffer in amount of samples."""

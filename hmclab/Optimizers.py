@@ -15,7 +15,7 @@ import numpy as _numpy
 import tqdm.auto as _tqdm_au
 
 from hmclab.Distributions import _AbstractDistribution
-
+from hmclab.Helpers.CustomExceptions import AbstractMethodError as _AbstractMethodError
 from typing import Tuple as _Tuple, List as _List
 
 
@@ -30,7 +30,7 @@ class _AbstractOptimizer(_ABC):
     def iterate(
         self,
     ) -> _numpy.ndarray:
-        pass
+        _AbstractMethodError
 
 
 class gradient_descent(_AbstractOptimizer):
