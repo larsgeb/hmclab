@@ -1986,13 +1986,13 @@ class ParallelSampleSMP:
         self.samplers = _copy.deepcopy(samplers)
 
         assert len(filenames) == number_of_chains, (
-            f"The number of supplied initial models ({len(filenames)}) "
+            f"The number of supplied filenames ({len(filenames)}) "
             f"is not equal to the amount of chains ({number_of_chains}). "
             f"Supply {number_of_chains} models."
         )
 
         assert len(posteriors) == number_of_chains, (
-            f"The number of supplied initial models ({len(posteriors)}) "
+            f"The number of supplied posteriors ({len(posteriors)}) "
             f"is not equal to the amount of chains ({number_of_chains}). "
             f"Supply {number_of_chains} posteriors."
         )
