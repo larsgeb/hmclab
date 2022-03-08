@@ -493,3 +493,27 @@ class _LinearMatrix_sparse_forward_sparse_covariance(_AbstractDistribution):
         return _LinearMatrix_sparse_forward_sparse_covariance(
             G, d, data_variance, dtype=dtype
         )
+
+    # The following two methods are essential for using this subclass in parallel
+    # sampling. During the initialization of parallel sampling, objects are duplicated
+    # using a method called "Pickling". However, one of the methods of this class
+    # (specifically factorized_covariance) is actually a reference to a function
+    # constructed from a matrix. Here we implement the process of reconstructing this
+    # method upon pickling.
+
+    def __getstate__(self):
+        # capture what is normally pickled
+        state = self.__dict__.copy()
+        # replace the `value` key (now an EnumValue instance), with it's index:
+        state["factorized_covariance"] = self.data_covariance.tocsc()
+        # what we return here will be stored in the pickle
+        return state
+
+    def __setstate__(self, newstate):
+        # re-create the EnumState instance based on the stored index
+        newstate["factorized_covariance"] = _sparse_linalg.factorized(
+            newstate["factorized_covariance"]
+        )
+
+        # re-instate our __dict__ state from the pickled state
+        self.__dict__.update(newstate)
