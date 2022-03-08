@@ -31,6 +31,7 @@ from hmclab.Distributions.LinearMatrix import LinearMatrix
 
 from hmclab.Distributions.SourceLocation import SourceLocation2D
 from hmclab.Distributions.SourceLocation import SourceLocation3D
+from hmclab.Distributions.transforms import TransformToLogSpace
 
 __all__ = [
     "_AbstractDistribution",
@@ -47,6 +48,7 @@ __all__ = [
     "SourceLocation3D",
     "Mixture",
     "EvaluationLimiter_ClassConstructor",
+    "TransformToLogSpace",
 ]
 
 # Try to import 2D FWI examples if psvWave is installed, otherwise, don't fail
