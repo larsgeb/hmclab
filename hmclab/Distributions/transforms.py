@@ -1,11 +1,12 @@
 import numpy as _numpy
-import jax as _jax
-from functools import partial
 from hmclab.Distributions import _AbstractDistribution
 from hmclab.Distributions import Normal as _Normal
 
 
 class TransformToLogSpace(_AbstractDistribution):
+
+    grad_logdetjac_jax = None
+
     def __init__(self, distribution: _AbstractDistribution, base: float = 10):
 
         assert issubclass(type(distribution), _AbstractDistribution)
@@ -13,8 +14,6 @@ class TransformToLogSpace(_AbstractDistribution):
         self.base: float = base
         self.dimensions: int = distribution.dimensions
         self.distribution: _AbstractDistribution = distribution
-
-        self.grad_logdetjac = _jax.jit(_jax.grad(self._grad_logdetjac))
 
     def misfit(self, m):
 
@@ -32,6 +31,23 @@ class TransformToLogSpace(_AbstractDistribution):
         )
 
     def gradient(self, m):
+
+        assert m.shape == (m.size, 1)
+
+        _m = self.transform_forward(m)
+
+        J = self.jacobian(m)
+
+        return (
+            self.distribution.gradient(_m).T @ J - self.manual_grad_logdetjac(m).T
+        ).T + self.misfit_bounds(m)
+
+    def _gradient_using_jax(self, m):
+
+        import jax as _jax
+
+        if self.grad_logdetjac_jax is None:
+            self.grad_logdetjac_jax = _jax.jit(_jax.grad(self._jax_logdetjac))
 
         assert m.shape == (m.size, 1)
 
@@ -66,9 +82,27 @@ class TransformToLogSpace(_AbstractDistribution):
         assert m.shape == (m.size, 1)
         return _numpy.diag((1.0 / m.flatten()) / _numpy.log(self.base))
 
-    def _grad_logdetjac(self, m):
+    def inv_jacobian(self, m):
+        assert m.shape == (m.size, 1)
+        return _numpy.diag(m.flatten() * _numpy.log(self.base))
+
+    def hessian(self, m):
+        assert m.shape == (m.size, 1)
+        return _numpy.diag((-1.0 / m.flatten() ** 2) / _numpy.log(self.base))
+
+    def _jax_logdetjac(self, m):
+
         return _jax.numpy.log(
             _jax.numpy.linalg.det(
                 _jax.numpy.diag((1.0 / m.flatten()) / _jax.numpy.log(self.base))
             )
         )
+
+    def manual_grad_logdetjac(self, m):
+
+        # This is computed using Jacobi's rule. Taking the matrix inverse using NumPy
+        # is unstable.
+        # 
+        # Formula: d/dm log det jac = tr ( jac^-1 @ (d jac / dm) ) 
+
+        return (_numpy.diag((self.inv_jacobian(m)) @ self.hessian(m)))[:, None]
