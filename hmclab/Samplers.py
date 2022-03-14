@@ -475,6 +475,13 @@ class _AbstractSampler(_ABC):
         self.current_model = initial_model.astype(_numpy.float64)
         self.current_x = distribution.misfit(self.current_model)
 
+        assert not _numpy.isnan(
+            self.current_x
+        ), "Initial position in model space gives NaN probability"
+        assert not _numpy.isinf(
+            self.current_x
+        ), "Initial position in model space gives inf/-inf probability"
+
         self.proposed_model = _numpy.empty_like(self.current_model)
         self.proposed_x = _numpy.nan
 

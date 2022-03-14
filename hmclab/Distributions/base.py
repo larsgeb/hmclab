@@ -988,6 +988,9 @@ class AdditiveDistribution(_AbstractDistribution):
         for i_distribution, distribution in enumerate(self.separate_distributions):
             assert distribution.dimensions == self.dimensions
 
+        self.lower_bounds = lower_bounds
+        self.upper_bounds = upper_bounds
+
         self.collapse_bounds()
 
     def misfit(self, coordinates: _numpy.ndarray) -> float:

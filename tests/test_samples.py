@@ -47,10 +47,16 @@ def test_samples_detail(
     if _os.path.exists(filename):
         _os.remove(filename)  # pragma: no cover
 
+    try:
+        initial_model = distribution.generate()
+    except:
+        initial_model = _numpy.ones((distribution.dimensions, 1))
+
     sampler_instance.sample(
         filename,
         distribution,
         proposals=proposals,
+        initial_model=initial_model,
         ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
         max_time=0.1,
     )
@@ -95,9 +101,15 @@ def test_samples_concat(
         if _os.path.exists(filename):
             _os.remove(filename)  # pragma: no cover
 
+        try:
+            initial_model = distribution.generate()
+        except:
+            initial_model = _numpy.ones((distribution.dimensions, 1))
+
         sampler_instance.sample(
             filename,
             distribution,
+            initial_model=initial_model,
             proposals=proposals,
             ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
             max_time=0.1,

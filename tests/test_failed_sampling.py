@@ -52,10 +52,16 @@ def test_basic_sampling(
         print(e)
 
     try:
+        initial_model = distribution.generate()
+    except:
+        initial_model = _numpy.ones((distribution.dimensions, 1))
+
+    try:
         sampler.sample(
             filename,
             distribution,
             proposals=proposals,
+            initial_model=initial_model,
             ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
             max_time=0.1,
             mass_matrix=_hmclab.MassMatrices.Unit(434),
@@ -67,6 +73,7 @@ def test_basic_sampling(
         filename,
         distribution,
         proposals=proposals,
+        initial_model=initial_model,
         online_thinning=10,
         ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
         max_time=0.1,

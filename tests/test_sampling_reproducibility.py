@@ -53,10 +53,16 @@ def test_samples_file(
     if _os.path.exists(filename_2):
         _os.remove(filename_2)
 
+    try:
+        initial_model = distribution.generate()
+    except:
+        initial_model = _numpy.ones((distribution.dimensions, 1))
+
     sampler_instance_1.sample(
         filename_1,
         distribution,
         proposals=proposals,
+        initial_model=initial_model,
         max_time=0.1,
         autotuning=autotuning,
     )
@@ -64,6 +70,7 @@ def test_samples_file(
         filename_2,
         distribution,
         proposals=proposals,
+        initial_model=initial_model,
         max_time=0.1,
         autotuning=autotuning,
     )
@@ -102,6 +109,9 @@ def test_samples_file(
         min_written_samples = min(
             samples_written_expected_1, samples_written_expected_2
         )
+
+        var_a = samples_1[:, :min_written_samples]
+        var_b = samples_2[:, :min_written_samples]
 
         assert _numpy.all(
             samples_1[:, :min_written_samples] == samples_2[:, :min_written_samples]

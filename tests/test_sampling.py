@@ -55,10 +55,16 @@ def test_basic_sampling(
     if _os.path.exists(filename):
         _os.remove(filename)  # pragma: no cover
 
+    try:
+        initial_model = distribution.generate()
+    except:
+        initial_model = _numpy.ones((distribution.dimensions, 1))
+
     sampler_instance.sample(
         filename,
         distribution,
         proposals=proposals,
+        initial_model=initial_model,
         online_thinning=10,
         ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
         max_time=0.1,
@@ -104,8 +110,18 @@ def test_samples_file(
     if _os.path.exists(filename):
         _os.remove(filename)  # pragma: no cover
 
+    try:
+        initial_model = distribution.generate()
+    except:
+        initial_model = _numpy.ones((distribution.dimensions, 1))
+
     sampler_instance.sample(
-        filename, distribution, proposals=proposals, max_time=0.1, autotuning=autotuning
+        filename,
+        distribution,
+        initial_model=initial_model,
+        proposals=proposals,
+        max_time=0.1,
+        autotuning=autotuning,
     )
 
     # Check if the file was created. If it wasn't, fail
@@ -149,12 +165,20 @@ def test_improper_name():
     unique_name = _uuid.uuid4().hex.upper()
     filename_sampler = f"temporary_file_{unique_name}"
     filename = f"temporary_file_{unique_name}.h5"
+
     # Remove file before attempting to sample
     if _os.path.exists(filename):
         _os.remove(filename)  # pragma: no cover
+
+    try:
+        initial_model = distribution.generate()
+    except:
+        initial_model = _numpy.ones((distribution.dimensions, 1))
+
     sampler_instance.sample(
         filename_sampler,
         distribution,
+        initial_model=initial_model,
         proposals=100,
         max_time=0.1,
         autotuning=True,
@@ -180,12 +204,20 @@ def test_widget_functions(sampler_class: _as):
 
     unique_name = _uuid.uuid4().hex.upper()
     filename = f"temporary_file_{unique_name}.h5"
+
     # Remove file before attempting to sample
     if _os.path.exists(filename):
         _os.remove(filename)  # pragma: no cover
+
+    try:
+        initial_model = distribution.generate()
+    except:
+        initial_model = _numpy.ones((distribution.dimensions, 1))
+
     sampler_instance.sample(
         filename,
         distribution,
+        initial_model=initial_model,
         proposals=100,
         max_time=0.1,
         autotuning=True,
@@ -221,8 +253,17 @@ def test_diagnostic_mode(sampler_class: _as, diagnostic_mode: bool):
     if _os.path.exists(filename):
         _os.remove(filename)  # pragma: no cover
 
+    try:
+        initial_model = distribution.generate()
+    except:
+        initial_model = _numpy.ones((distribution.dimensions, 1))
+
     sampler_instance.sample(
-        filename, distribution, max_time=0.1, diagnostic_mode=diagnostic_mode
+        filename,
+        distribution,
+        max_time=0.1,
+        initial_model=initial_model,
+        diagnostic_mode=diagnostic_mode,
     )
 
     if sampler_instance.amount_of_writes > 0:
@@ -252,7 +293,14 @@ def test_seed(sampler_class: _as, seed: float):
     if _os.path.exists(filename):
         _os.remove(filename)  # pragma: no cover
 
-    sampler_instance.sample(filename, distribution, max_time=0.1)
+    try:
+        initial_model = distribution.generate()
+    except:
+        initial_model = _numpy.ones((distribution.dimensions, 1))
+
+    sampler_instance.sample(
+        filename, distribution, initial_model=initial_model, max_time=0.1
+    )
 
     if sampler_instance.amount_of_writes > 0:
         # 10 percent burn_in
@@ -279,10 +327,15 @@ def test_initial_model(sampler_class: _as):
     if _os.path.exists(filename):
         _os.remove(filename)  # pragma: no cover
 
+    try:
+        initial_model = distribution.generate()
+    except:
+        initial_model = _numpy.ones((distribution.dimensions, 1))
+
     sampler_instance.sample(
         filename,
         distribution,
-        initial_model=_numpy.zeros((distribution.dimensions, 1)),
+        initial_model=initial_model,
         max_time=0.1,
     )
 
@@ -313,8 +366,15 @@ def test_preexisting_file(sampler_class: _as):
 
     open(filename, "a").close()
 
+    try:
+        initial_model = distribution.generate()
+    except:
+        initial_model = _numpy.ones((distribution.dimensions, 1))
+
     with _pytest.raises(FileExistsError):
-        sampler_instance.sample(filename, distribution, max_time=0.1)
+        sampler_instance.sample(
+            filename, distribution, initial_model=initial_model, max_time=0.1
+        )
 
     # Remove the file
     _os.remove(filename)
@@ -334,7 +394,18 @@ def test_plot(sampler_class: _as):
     if _os.path.exists(filename):
         _os.remove(filename)  # pragma: no cover
 
-    sampler_instance.sample(filename, distribution, max_time=0.1, autotuning=True)
+    try:
+        initial_model = distribution.generate()
+    except:
+        initial_model = _numpy.ones((distribution.dimensions, 1))
+
+    sampler_instance.sample(
+        filename,
+        distribution,
+        initial_model=initial_model,
+        max_time=0.1,
+        autotuning=True,
+    )
 
     # Check if the file was created. If it wasn't, fail
     if not _os.path.exists(filename):
@@ -375,10 +446,16 @@ def test_parallel_sampling(
 
     controller_instance = _hmclab.Samplers.ParallelSampleSMP()
 
+    try:
+        initial_model = distributions[0].generate()
+    except:
+        initial_model = _numpy.ones((distributions[0].dimensions, 1))
+
     controller_instance.sample(
         sampler_instances,
         filenames,
         distributions,
+        initial_model=initial_model,
         exchange=exchange,
         exchange_interval=exchange_interval,
         overwrite_existing_files=True,
