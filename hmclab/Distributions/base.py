@@ -569,8 +569,8 @@ class Normal(_AbstractDistribution):
             if self.diagonal:
                 self.standard_deviation = self.covariance**0.5
             else:
-                # Perform Cholesky decompisition
-                pass
+                # Perform Cholesky decomposition
+                self.covariance_cholesky = _numpy.linalg.cholesky(self.covariance)
             self.generate_ready = True
 
         if self.diagonal:
@@ -579,8 +579,11 @@ class Normal(_AbstractDistribution):
                 + self.means
             )
         else:
-            raise NotImplementedError(
-                "Generating samples from this distribution is not implemented or supported."
+
+            return (
+                self.covariance_cholesky
+                @ _numpy.random.default_rng().normal(size=(self.dimensions, repeat))
+                + self.means
             )
 
     @staticmethod
@@ -991,7 +994,7 @@ class AdditiveDistribution(_AbstractDistribution):
         misfit = 0.0
 
         # Loop over distributions and add misfit ---------------------------------------
-        for i_distribution, distribution in enumerate(self.separate_distributions):
+        for distribution in self.separate_distributions:
             misfit += distribution.misfit(coordinates)
 
         return misfit + self.misfit_bounds(coordinates)
@@ -1000,7 +1003,7 @@ class AdditiveDistribution(_AbstractDistribution):
         gradient = _numpy.zeros((self.dimensions, 1))
 
         # Loop over distributions and compute gradient ---------------------------------
-        for i_distribution, distribution in enumerate(self.separate_distributions):
+        for distribution in self.separate_distributions:
             gradient += distribution.gradient(coordinates)
 
         assert gradient.shape == coordinates.shape

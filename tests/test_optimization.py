@@ -1,5 +1,6 @@
 """A collection of optimization tests.
 """
+from re import A
 import pytest as _pytest, numpy as _numpy
 
 import hmclab as _hmclab
@@ -38,9 +39,14 @@ def test_basic_optimization(
 
     assert isinstance(optimizer_instance, _ao)
 
+    try:
+        initial_model = distribution.generate()
+    except:
+        initial_model = _numpy.ones((distribution.dimensions, 1))
+
     m, x, ms, xs = optimizer_instance.iterate(
         target=distribution,
-        initial_model=None,
+        initial_model=initial_model,
         iterations=iterations,
         epsilon=epsilon,
         strictly_monotonic=strictly_monotonic,
@@ -77,9 +83,14 @@ def test_gradient_descent(
 
     assert isinstance(optimizer_instance, _ao)
 
+    try:
+        initial_model = distribution.generate()
+    except:
+        initial_model = _numpy.ones((distribution.dimensions, 1))
+
     m, x, ms, xs = optimizer_instance.iterate(
         target=distribution,
-        initial_model=None,
+        initial_model=initial_model,
         iterations=iterations,
         epsilon=epsilon,
         regularization=regularization,

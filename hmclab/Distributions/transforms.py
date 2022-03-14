@@ -25,8 +25,10 @@ class TransformToLogSpace(_AbstractDistribution):
         if _numpy.any(_numpy.isnan(_m)):
             return _numpy.inf
 
-        return self.distribution.misfit(_m) - _numpy.log(
-            _numpy.linalg.det(self.jacobian(m))
+        return (
+            self.distribution.misfit(_m)
+            - _numpy.log(_numpy.linalg.det(self.jacobian(m)))
+            + self.misfit_bounds(m)
         )
 
     def gradient(self, m):
@@ -40,7 +42,7 @@ class TransformToLogSpace(_AbstractDistribution):
         return (
             self.distribution.gradient(_m).T @ J
             - _numpy.asarray(self.grad_logdetjac(m)).T
-        ).T
+        ).T + self.misfit_bounds(m)
 
     @staticmethod
     def create_default(dimensions: int) -> "TransformToLogSpace":
@@ -50,7 +52,7 @@ class TransformToLogSpace(_AbstractDistribution):
         pass
 
     def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
-        return self.distribution.generate(repeat, rng)
+        return self.transform_backward(self.distribution.generate(repeat, rng))
 
     def transform_backward(self, m):
         assert m.shape[0] == self.dimensions
