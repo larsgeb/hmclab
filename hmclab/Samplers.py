@@ -790,11 +790,8 @@ class _AbstractSampler(_ABC):
         name: str,
         length: int,
         dtype: str = "f8",
-        nested=False,
         overwrite: bool = False,
     ) -> int:
-
-        choice_made = False
 
         # Try to create file
         try:
