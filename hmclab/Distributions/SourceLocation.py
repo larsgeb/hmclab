@@ -32,11 +32,27 @@ class SourceLocation2D(_AbstractDistribution):
         medium_velocity=None,
     ):
 
+        receiver_array_x = receiver_array_x.copy()
+        receiver_array_z = receiver_array_z.copy()
+        observed_data = observed_data.copy()
+        if type(data_std) == _numpy.ndarray:
+            data_std = data_std.copy()
+
         # Stations ---------------------------------------------------------------------
 
         # Assert that the arrays are row vectors.
-        assert receiver_array_x.shape == (1, receiver_array_x.size)
-        assert receiver_array_z.shape == (1, receiver_array_z.size)
+        try:
+            assert receiver_array_x.shape == (
+                1,
+                receiver_array_x.size,
+            ), f"Receivers should be row vectors, not {receiver_array_x.shape}"
+            assert receiver_array_z.shape == (
+                1,
+                receiver_array_z.size,
+            ), f"Receivers should be row vectors, not {receiver_array_z.shape}"
+        except AssertionError:
+            receiver_array_x.shape = (1, receiver_array_x.size)
+            receiver_array_z.shape = (1, receiver_array_z.size)
 
         self.receiver_array_x = receiver_array_x
         self.receiver_array_z = receiver_array_z
@@ -52,24 +68,42 @@ class SourceLocation2D(_AbstractDistribution):
         # Observed data and error statistics -------------------------------------------
 
         # Get number of events from data and array size
-        assert observed_data.size % receiver_array_x.size == 0
+        assert (
+            observed_data.size % receiver_array_x.size == 0
+        ), "Data does not match receiver array"
         self.number_of_events: int = int(observed_data.size / receiver_array_x.size)
         self.number_of_stations: int = self.receiver_array_z.size
         self.number_of_datums: int = self.number_of_events * self.number_of_stations
 
-        assert observed_data.shape == (
-            self.number_of_events,
-            self.number_of_stations,
-        )
+        try:
+            assert observed_data.shape == (
+                self.number_of_events,
+                self.number_of_stations,
+            ), "Wrong shape for the observed data, trying to transpose..."
+        except AssertionError:
+            observed_data = observed_data.T
+            assert observed_data.shape == (
+                self.number_of_events,
+                self.number_of_stations,
+            ), "Wrong shape for the observed data, not sure what to do."
+
         self.observed_data = observed_data
 
         if type(data_std) is float:
             data_std = _numpy.ones_like(observed_data) * data_std
 
-        assert data_std.shape == (
-            self.number_of_events,
-            self.number_of_stations,
-        )
+        try:
+            assert data_std.shape == (
+                self.number_of_events,
+                self.number_of_stations,
+            ), "Wrong shape for the data uncertainty, trying to transpose..."
+        except AssertionError:
+            data_std = data_std.T
+            assert data_std.shape == (
+                self.number_of_events,
+                self.number_of_stations,
+            ), "Wrong shape for the data uncertainty, not sure what to do."
+
         self.data_std = data_std
 
         # Assert that the data and data error dispersion are the same shape
@@ -360,12 +394,33 @@ class SourceLocation3D(_AbstractDistribution):
         medium_velocity=None,
     ):
 
+        receiver_array_x = receiver_array_x.copy()
+        receiver_array_y = receiver_array_y.copy()
+        receiver_array_z = receiver_array_z.copy()
+        observed_data = observed_data.copy()
+        if type(data_std) == _numpy.ndarray:
+            data_std = data_std.copy()
+
         # Stations ---------------------------------------------------------------------
 
         # Assert that the arrays are row vectors.
-        assert receiver_array_x.shape == (1, receiver_array_x.size)
-        assert receiver_array_y.shape == (1, receiver_array_y.size)
-        assert receiver_array_z.shape == (1, receiver_array_z.size)
+        try:
+            assert receiver_array_x.shape == (
+                1,
+                receiver_array_x.size,
+            ), f"Receivers should be row vectors, not {receiver_array_x.shape}"
+            assert receiver_array_y.shape == (
+                1,
+                receiver_array_y.size,
+            ), f"Receivers should be row vectors, not {receiver_array_y.shape}"
+            assert receiver_array_z.shape == (
+                1,
+                receiver_array_z.size,
+            ), f"Receivers should be row vectors, not {receiver_array_z.shape}"
+        except AssertionError:
+            receiver_array_x.shape = (1, receiver_array_x.size)
+            receiver_array_y.shape = (1, receiver_array_y.size)
+            receiver_array_z.shape = (1, receiver_array_z.size)
 
         self.receiver_array_x = receiver_array_x
         self.receiver_array_y = receiver_array_y
@@ -387,19 +442,35 @@ class SourceLocation3D(_AbstractDistribution):
         self.number_of_stations: int = self.receiver_array_z.size
         self.number_of_datums: int = self.number_of_events * self.number_of_stations
 
-        assert observed_data.shape == (
-            self.number_of_events,
-            self.number_of_stations,
-        )
+        try:
+            assert observed_data.shape == (
+                self.number_of_events,
+                self.number_of_stations,
+            ), "Wrong shape for the observed data, trying to transpose..."
+        except AssertionError:
+            observed_data = observed_data.T
+            assert observed_data.shape == (
+                self.number_of_events,
+                self.number_of_stations,
+            ), "Wrong shape for the observed data, not sure what to do."
+
         self.observed_data = observed_data
 
         if type(data_std) is float:
             data_std = _numpy.ones_like(observed_data) * data_std
 
-        assert data_std.shape == (
-            self.number_of_events,
-            self.number_of_stations,
-        )
+        try:
+            assert data_std.shape == (
+                self.number_of_events,
+                self.number_of_stations,
+            ), "Wrong shape for the data uncertainty, trying to transpose..."
+        except AssertionError:
+            data_std = data_std.T
+            assert data_std.shape == (
+                self.number_of_events,
+                self.number_of_stations,
+            ), "Wrong shape for the data uncertainty, not sure what to do."
+
         self.data_std = data_std
 
         # Assert that the data and data error dispersion are the same shape
