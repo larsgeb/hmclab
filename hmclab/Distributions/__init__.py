@@ -31,7 +31,7 @@ from hmclab.Distributions.LinearMatrix import LinearMatrix
 
 from hmclab.Distributions.SourceLocation import SourceLocation2D
 from hmclab.Distributions.SourceLocation import SourceLocation3D
-from hmclab.Distributions.transforms import TransformToLogSpace
+from hmclab.Distributions.Transforms import TransformToLogSpace
 
 __all__ = [
     "_AbstractDistribution",

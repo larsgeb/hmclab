@@ -19,14 +19,14 @@ setuptools.setup(
     },
     packages=setuptools.find_packages(),
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Programming Language :: Python :: 3.9",
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.7",
     install_requires=[
-        "obspy",
+        # "obspy",
         "numpy",
         "scipy",
         "termcolor",
