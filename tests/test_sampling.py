@@ -9,9 +9,6 @@ import numpy as _numpy
 import pytest as _pytest
 import uuid as _uuid
 
-from sqlalchemy import over
-
-
 import hmclab as _hmclab
 from hmclab.Helpers.CustomExceptions import InvalidCaseError as _InvalidCaseError
 
