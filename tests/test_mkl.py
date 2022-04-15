@@ -12,15 +12,17 @@ dimensions = [100, 10000]
 deltas = [1e-10, 1e-4, 1e-2, -1e-10, -1e-4, -1e-2]
 dtype = [_numpy.dtype("float64"), _numpy.dtype("float32")]
 
+use_mkl = [True, False]
+
 try:
     from ctypes import cdll
 
     mkl = cdll.LoadLibrary("libmkl_rt.so")
-    use_mkl = [True, False]
 except OSError:
-    use_mkl = [False]
+    skip = True
 
 
+@_pytest.mark.skipif(skip, reason="MKL not installed")
 @_pytest.mark.parametrize("dimensions", dimensions)
 @_pytest.mark.parametrize("use_mkl", use_mkl)
 @_pytest.mark.parametrize("dtype", dtype)
@@ -38,6 +40,7 @@ def test_creation(dimensions: int, use_mkl: bool, dtype):
     return True
 
 
+@_pytest.mark.skipif(skip, reason="MKL not installed")
 @_pytest.mark.parametrize("dimensions", dimensions)
 @_pytest.mark.parametrize("use_mkl", use_mkl)
 @_pytest.mark.parametrize("dtype", dtype)
@@ -57,6 +60,7 @@ def test_misfit(dimensions: int, use_mkl: bool, dtype):
     return True
 
 
+@_pytest.mark.skipif(skip, reason="MKL not installed")
 @_pytest.mark.parametrize("dimensions", dimensions)
 @_pytest.mark.parametrize("use_mkl", use_mkl)
 @_pytest.mark.parametrize("dtype", dtype)
@@ -105,6 +109,7 @@ def test_misfit_bounds(dimensions: int, use_mkl: bool, dtype):
     return True
 
 
+@_pytest.mark.skipif(skip, reason="MKL not installed")
 @_pytest.mark.parametrize("dimensions", dimensions)
 @_pytest.mark.parametrize("use_mkl", use_mkl)
 @_pytest.mark.parametrize("dtype", dtype)
@@ -129,6 +134,7 @@ def test_misfit_bounds_impossible(dimensions: int, use_mkl: bool, dtype):
         _pytest.xfail("Impossible test case, failure is required")
 
 
+@_pytest.mark.skipif(skip, reason="MKL not installed")
 @_pytest.mark.parametrize("dimensions", dimensions)
 @_pytest.mark.parametrize("delta", deltas)
 @_pytest.mark.parametrize("use_mkl", use_mkl)
@@ -177,6 +183,7 @@ def test_gradient(dimensions: int, delta: float, results_bag, use_mkl: bool, dty
     return True
 
 
+@_pytest.mark.skipif(skip, reason="MKL not installed")
 @_pytest.mark.plot
 def test_gradient_plots(module_results_df):
     """

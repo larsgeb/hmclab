@@ -31,7 +31,8 @@ class Samples:
             raise ValueError("The burn-in phase is longer than the chain itself.")
 
     def __del__(self):
-        self.file_handle.close()
+        if hasattr(self, "file_handle"):
+            self.file_handle.close()
 
     def __getitem__(self, key):
         """This operator overloads the [] brackets to correct for burn in.

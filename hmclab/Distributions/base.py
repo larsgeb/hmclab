@@ -368,10 +368,7 @@ class StandardNormal1D(_AbstractDistribution):
         """
         _CustomExceptions.Assertions.assert_shape(m, (1, 1))
 
-        return (
-            self.misfit_bounds(m)
-            + _numpy.asscalar(0.5 * m[0, 0] ** 2) / self.temperature
-        )
+        return self.misfit_bounds(m) + (0.5 * m[0, 0] ** 2).item() / self.temperature
 
     def gradient(self, m: _numpy.ndarray) -> _numpy.ndarray:
         """Compute gradient of distribution.
@@ -1197,8 +1194,11 @@ class Himmelblau(_AbstractDistribution):
             raise ValueError()
         x = coordinates[0, 0]
         y = coordinates[1, 0]
-        return self.misfit_bounds(coordinates) + _numpy.asscalar(
-            ((x**2 + y - 11) ** 2 + (x + y**2 - 7) ** 2) / self.temperature
+        return (
+            self.misfit_bounds(coordinates)
+            + (
+                ((x**2 + y - 11) ** 2 + (x + y**2 - 7) ** 2) / self.temperature
+            ).item()
         )
 
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:

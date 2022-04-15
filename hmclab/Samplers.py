@@ -2414,10 +2414,18 @@ class _AbstractVisualSampler(_AbstractSampler):
                 self.plots["global_misfit"]["scatterplot"].set_offsets(
                     _numpy.hstack((index, misfit))
                 )
+
+                ymin = misfit.min() - 0.1 * (misfit.max() - misfit.min())
+                ymax = misfit.max() + 0.1 * (misfit.max() - misfit.min())
+
+                if ymin == ymax:
+                    ymin -= 0.5
+                    ymax += 0.5
+
                 self.plots["global_misfit"]["axis"].set_ylim(
                     [
-                        misfit.min() - 0.1 * (misfit.max() - misfit.min()),
-                        misfit.max() + 0.1 * (misfit.max() - misfit.min()),
+                        ymin,
+                        ymax,
                     ]
                 )
 
@@ -2427,12 +2435,19 @@ class _AbstractVisualSampler(_AbstractSampler):
 
                 if self.animation_domain is None:
                     # Update the bounds as fit if they were not given by the user
-                    self.plots["samples"]["axis"].set_xlim(
-                        [samples_x.min(), samples_x.max()]
-                    )
-                    self.plots["samples"]["axis"].set_ylim(
-                        [samples_y.min(), samples_y.max()]
-                    )
+
+                    xmin, xmax = samples_x.min(), samples_x.max()
+                    ymin, ymax = samples_y.min(), samples_y.max()
+
+                    if xmin == xmax:
+                        xmin -= 0.5
+                        xmax += 0.5
+                    if ymin == ymax:
+                        ymin -= 0.5
+                        ymax += 0.5
+
+                    self.plots["samples"]["axis"].set_xlim([xmin, xmax])
+                    self.plots["samples"]["axis"].set_ylim([ymin, ymax])
                 self.plots["figure"].canvas.draw()
                 _plt.pause(0.00001)
 

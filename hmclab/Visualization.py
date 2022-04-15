@@ -71,7 +71,7 @@ def marginal_grid(
             axis.set_ylabel("relative density")
 
         # Plot histogram on diagonal
-        _,edges,_ = axis.hist(
+        _, edges, _ = axis.hist(
             samples[dimensions_list[i_plot], :],
             bins=bins,
             density=False,

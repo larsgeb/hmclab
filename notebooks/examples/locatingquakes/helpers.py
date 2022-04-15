@@ -5,6 +5,7 @@ from matplotlib.patches import Ellipse
 import matplotlib.transforms as transforms
 import obspy.signal
 
+
 def tilemapbase_project_array(x, y, tilemapbase_project):
     # For some stupid reason the package does not work on arrays.
     assert numpy.array(x).shape == numpy.array(y).shape
@@ -99,8 +100,6 @@ def confidence_ellipse(x, y, ax, n_std=3.0, facecolor="none", **kwargs):
     return ax.add_patch(ellipse)
 
 
-
-
 def to_xyz(lon, lat, origin):
     _x, _y = numpy.hsplit(
         numpy.vstack(
@@ -127,6 +126,7 @@ def to_lonlat(x, y, origin):
     _lat.shape = y.shape
 
     return _lon, _lat
+
 
 def match_arrays(arr1, arr2):
     return numpy.argmax(arr1[:, None] == arr2, axis=0)

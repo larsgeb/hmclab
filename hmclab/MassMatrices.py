@@ -323,12 +323,6 @@ class LBFGS(_AbstractMassMatrix):
         """Constructor for LBFGS-style mass matrices."""
 
         if starting_position is None or starting_gradient is None:
-            _warnings.warn(
-                f"The LBFGS-style mass matrix did either not receive a starting "
-                f"coordinate or a starting gradient. We will use a unit initial "
-                f"point (m=1) and gradient (g=1).",
-                Warning,
-            )
             starting_gradient = _numpy.ones((dimensions, 1))
             starting_position = _numpy.ones((dimensions, 1))
 

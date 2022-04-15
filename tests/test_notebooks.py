@@ -3,6 +3,7 @@ import nbformat
 from black import format_str, FileMode
 import pytest
 from pytest_notebook.nb_regression import NBRegressionFixture
+import warnings
 
 # Setup the fixture for testing notebooks using pytest_notebook
 fixture = NBRegressionFixture(
@@ -40,7 +41,9 @@ def test_notebook(notebook_fh):
     nbformat.write(notebook, notebook_fh)
 
     # Test notebooks
-    result = fixture.check(notebook_fh)
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=DeprecationWarning)
+        result = fixture.check(notebook_fh)
 
     # Write out final version to original file if all tests succeeded
     nbformat.write(nb=result.nb_final, fp=notebook_fh)
