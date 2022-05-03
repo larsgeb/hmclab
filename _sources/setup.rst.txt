@@ -33,9 +33,9 @@ Python version and dependencies, run the following from your terminal:
 
 .. code-block:: bash    
     
-    > $ conda create -n hmclab python=3.7
+    > $ conda create -n hmclab python=3.8
     > $ conda activate hmclab
-    > $ conda install notebook pip
+    > $ conda install h5py # Needed, as Pip itself can't install hdf5
 
 You can also create this environment byu first downloading this repo, and running the
 following command inside of it:
@@ -100,12 +100,6 @@ etc. Once you have activated the proper environment in your shell, run the follo
     
     > $ pip install -e .
 
-If the command succeeds, you now have access to the package from your Python 3.7 
-distribution by importing :code:`hmclab`:
-
-.. code-block:: python
-
-    import hmclab
 
 Installing development dependencies
 ***********************************
@@ -134,3 +128,10 @@ In :code:`Bash`:
     
         # from local clone
     > $ pip install -e .\[dev\] 
+
+One could now test if all the package components run well by invoking PyTest:
+
+.. code-block:: bash    
+    
+    > $ pytest .
+    

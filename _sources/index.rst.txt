@@ -1,6 +1,14 @@
-##############
-HMC Tomography
-##############
+#######
+HMC Lab
+#######
+
+These pages provide the documentation of the Python side of HMC Lab. Here you'll find
+notebooks detailing how different concepts in Bayesian inference using Markov chain
+Monte Carlo work. In particular, extra attention is given on how to use the Hamiltonian
+Monte Carlo algorithm on (your) geophysical inverse problems.
+
+HMC Lab is tested on Python 3.8+. In theory, it should work well on any system that has
+access to Conda. 
 
 .. toctree::
     :maxdepth: 1
@@ -14,15 +22,6 @@ HMC Tomography
     py-modindex
     genindex
 
-.. note::
-
-   This documentation is far from complete. Please let us know if you miss something.
-
-.. warning::
-
-    We provide no guarantee that the implementation in this package is correct.
-
 .. centered:: Andrea Zunino, Andreas Fichtner, Lars Gebraad
 
-This documentation is built on top of commit `COMMIT_HASH <https://github.com/larsgeb/hmclab/commit/COMMIT_HASH>`_.
 

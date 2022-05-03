@@ -22,6 +22,7 @@
       ~LinearMatrix.corrector
       ~LinearMatrix.create_default
       ~LinearMatrix.dimensions
+      ~LinearMatrix.forward
       ~LinearMatrix.generate
       ~LinearMatrix.gradient
       ~LinearMatrix.misfit

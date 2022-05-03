@@ -5,15 +5,13 @@ Optimizers
 .. automodule:: hmclab.Optimizers
     :no-members:
 
-Available classes within `Optimizers`:
+Available methods within `Optimizers`:
 
 .. autosummary:: 
    :toctree: _autosummary
-   :template: custom-class-template.rst
    :nosignatures:
    :recursive:
 
-   _AbstractOptimizer
     gradient_descent
    
    
