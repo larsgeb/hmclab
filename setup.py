@@ -43,7 +43,6 @@ setuptools.setup(
             "flake8",
             "sphinx",
             "nbsphinx",
-            "sphinx_rtd_theme",
             "numpydoc",
             "pandoc",
             "sphinx-git",
@@ -60,7 +59,8 @@ setuptools.setup(
             "autoclasstoc",
             "ipywidgets",
             "nbformat",
-            "nbconvert < 6.0.0",
+            "nbconvert",
+            "furo"
         ]
     },
 )

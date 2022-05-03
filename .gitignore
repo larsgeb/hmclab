@@ -22,3 +22,4 @@ docs-source/source/examples
 **/_autosummary
 coverage.xml
 .DS_Store
+linux*/

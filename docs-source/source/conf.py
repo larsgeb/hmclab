@@ -28,15 +28,16 @@ autodoc_member_order = "bysource"
 autodoc_inherit_docstrings = False
 autodoc_default_flags = ["members", "undoc-members", "show-inheritance"]
 
-html_logo = "../hmctom.png"
+
+# html_logo = "../HMC Lab.png"
 
 nbsphinx_execute = "never"
 
 # -- Project information -----------------------------------------------------
 
-project = "HMCLab"
-copyright = "2019-2021, Andrea Zunino, Andreas Fichtner, Lars Gebraad"
-author = "Andrea Zunino, Andreas Fichtner, Lars Gebraad"
+project = "HMC Lab"
+copyright = "2019-2022, Andrea Zunino, Lars Gebraad, Andreas Fichtner"
+author = "Andrea Zunino, Lars Gebraad, Andreas Fichtner"
 
 # The short X.Y version
 version = hmclab.__version__
@@ -69,10 +70,11 @@ extensions = [
     "sphinxcontrib.bibtex",
 ]
 
+html_static_path = ["_static"]
+html_title = f"Version {str(version).split('-')[0]}"
 html_theme_options = {
-    "collapse_navigation": True,
-    "sticky_navigation": True,
-    "navigation_depth": -1,
+    "light_logo": "HMC Lab.png",
+    "dark_logo": "HMC Lab-dark.png",
 }
 
 bibtex_bibfiles = ["biblio.bib"]
@@ -112,7 +114,7 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "furo"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

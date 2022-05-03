@@ -8,20 +8,19 @@ from hmclab.Helpers.CustomExceptions import InvalidCaseError as _InvalidCaseErro
 from hmclab.Optimizers import gradient_descent as _gradient_descent
 
 _ad = _hmclab.Distributions._AbstractDistribution
-_ao = _hmclab.Optimizers._AbstractOptimizer
 
 distribution_classes = _ad.__subclasses__()
-optimizer_classes = _ao.__subclasses__()
+optimizer_methods = [_gradient_descent]
 
 
-@_pytest.mark.parametrize("optimizer_class", optimizer_classes)
+@_pytest.mark.parametrize("optimizer_method", optimizer_methods)
 @_pytest.mark.parametrize("distribution_class", distribution_classes)
 @_pytest.mark.parametrize("dimensions", [1, 2, 5, 100])
 @_pytest.mark.parametrize("iterations", [1, 100])
 @_pytest.mark.parametrize("epsilon", [0.1])
 @_pytest.mark.parametrize("strictly_monotonic", [True, False])
 def test_basic_optimization(
-    optimizer_class: _ao,
+    optimizer_method,
     distribution_class: _ad,
     dimensions: int,
     iterations: int,
@@ -35,16 +34,12 @@ def test_basic_optimization(
     except _InvalidCaseError:
         return 0
 
-    optimizer_instance = optimizer_class()
-
-    assert isinstance(optimizer_instance, _ao)
-
     try:
         initial_model = distribution.generate()
     except:
         initial_model = _numpy.ones((distribution.dimensions, 1))
 
-    m, x, ms, xs = optimizer_instance.iterate(
+    m, x, ms, xs = optimizer_method(
         target=distribution,
         initial_model=initial_model,
         iterations=iterations,
@@ -79,16 +74,13 @@ def test_gradient_descent(
     except _InvalidCaseError:
         return 0
 
-    optimizer_instance = _gradient_descent()
-
-    assert isinstance(optimizer_instance, _ao)
 
     try:
         initial_model = distribution.generate()
     except:
         initial_model = _numpy.ones((distribution.dimensions, 1))
 
-    m, x, ms, xs = optimizer_instance.iterate(
+    m, x, ms, xs = _gradient_descent(
         target=distribution,
         initial_model=initial_model,
         iterations=iterations,

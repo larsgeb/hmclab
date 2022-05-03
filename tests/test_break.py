@@ -10,7 +10,7 @@ import uuid as _uuid
 
 def interruptor():
     # Simulate a CTRL+C event
-    _time.sleep(0.1)
+    _time.sleep(0.3)
     _thread.interrupt_main()
 
 
