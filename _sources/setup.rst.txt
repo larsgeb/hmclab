@@ -33,6 +33,7 @@ Python version and dependencies, run the following from your terminal:
 
 .. code-block:: bash    
     
+    > $ git clone https://github.com/larsgeb/hmclab.git
     > $ conda create -n hmclab python=3.8
     > $ conda activate hmclab
     > $ conda install h5py # Needed, as Pip itself can't install hdf5
