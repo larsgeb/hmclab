@@ -1,9 +1,10 @@
-# HMC Tomography
+# HMC Lab
 
-![Python version](https://img.shields.io/badge/python-3.9-blue) ![GitHub CI Build status](https://github.com/larsgeb/hmclab/workflows/Python%20application/badge.svg) [![codecov](https://codecov.io/gh/larsgeb/hmclab/branch/master/graph/badge.svg?token=6svV9YDRhd)](https://codecov.io/gh/larsgeb/hmclab) [![license](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black) [![GitHub releases](https://img.shields.io/badge/download-latest%20release-green.svg)](https://github.com/larsgeb/hmclab/releases/latest)
+![Python version](https://img.shields.io/badge/python-3.8-blue) ![GitHub CI Build status](https://github.com/larsgeb/hmclab/workflows/Python%20application/badge.svg) [![codecov](https://codecov.io/gh/larsgeb/hmclab/branch/master/graph/badge.svg?token=6svV9YDRhd)](https://codecov.io/gh/larsgeb/hmclab) [![license](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black) [![GitHub releases](https://img.shields.io/badge/download-latest%20release-green.svg)](https://github.com/larsgeb/hmclab/releases/latest)
 
+Homepage: [hmclab.science](https://hmclab.science)
 
-**HMCLab** is a numerical laboratory for research in Bayesian seismology. We
+**HMC Lab** is a numerical laboratory for research in Bayesian seismology. We
 provide all the ingredients to set up probabilistic (and deterministic) inverse
 problems, appraise them, and analyse them. This includes a plethora of prior
 distributions, different physical modelling modules and various MCMC (and
@@ -36,23 +37,22 @@ Here is a partial inventory of what we provide:
 
 **Tutorials:**
 
-0. [Getting started.ipynb](notebooks/tutorials/0%20-%20Getting%20started.ipynb)
-1. [Tuning Hamiltonian Monte Carlo.ipynb](notebooks/tutorials/1%20-%20Tuning%20Hamiltonian%20Monte%20Carlo.ipynb)
-2. [Separate priors per dimension.ipynb](notebooks/tutorials/2%20-%20Separate%20priors%20per%20dimension.ipynb)
-3. [Creating your own inverse problem.ipynb](notebooks/tutorials/3%20-%20Creating%20your%20own%20inverse%20problem.ipynb)
-4. [Running parallel Markov chains.ipynb](notebooks/tutorials/4%20-%20Running%20parallel%20Markov%20chains.ipynb)
+- [Getting started.ipynb](notebooks/tutorials/0%20-%20Getting%20started.ipynb)
+- [Tuning Hamiltonian Monte Carlo.ipynb](notebooks/tutorials/1%20-%20Tuning%20Hamiltonian%20Monte%20Carlo.ipynb)
+- [Separate priors per dimension.ipynb](notebooks/tutorials/2%20-%20Separate%20priors%20per%20dimension.ipynb)
+- [Creating your own inverse problem.ipynb](notebooks/tutorials/3%20-%20Creating%20your%20own%20inverse%20problem.ipynb)
+- [Running parallel Markov chains.ipynb](notebooks/tutorials/4%20-%20Running%20parallel%20Markov%20chains.ipynb)
 
 **Demos:**
-1. [Elastic 2d FWI](notebooks/examples/Elastic%202d%20FWI.ipynb)
-2. [Locating quakes on Grimsvötn, Iceland](notebooks/examples/Locating%20quakes%20on%20Grimsvötn%2C%20Iceland.ipynb)
-3. [Sampling linear equations](notebooks/examples/Sampling%20linear%20equations.ipynb)
-4. [Sampling sparse linear equations](notebooks/examples/Sampling%20sparse%20linear%20equations.ipynb)
+
+- [Sampling linear equations](notebooks/examples/Sampling%20linear%20equations.ipynb)
+- [Sampling sparse linear equations](notebooks/examples/Sampling%20sparse%20linear%20equations.ipynb)
+- [Locating quakes on Grimsvötn, Iceland](notebooks/examples/Locating%20quakes%20on%20Grimsvötn%2C%20Iceland.ipynb)
+- [Elastic 2d FWI](notebooks/examples/Elastic%202d%20FWI.ipynb)
 
 Manual:
-https://larsgeb.github.io/hmclab/
+https://python.hmclab.science
 
-
-notebooks/examples/Locating%20quakes%20on%20Grimsvötn%2C%20Iceland.ipynb
 ## A flying start: Jupyter notebook server in a Docker with all dependencies
 
 In the sections after these we illustrate how to use this package. If, however,
@@ -65,11 +65,11 @@ MacOS intel systems), and ARM64 (should work on Mac M1). You can automatically
 get the appropriate version and start the notebook server by running:
 
 ```bash
-docker run -p 8888:8888 larsgebraad/hmclab
+docker run -p 7999:8888 larsgebraad/hmclab
 ```
 
 You can then immediately go into your webbrowser to the address
-`localhost:8888` to access the tutorial and demo notebooks.
+`localhost:7999` to access the tutorial and demo notebooks.
 
 If you have another service running at port 8888, modify the command and web
 address like this:
@@ -82,7 +82,9 @@ localhost:PORT
 
 ## The long way around: installing the packge on your system
 
-For full installation instructions, [see here](https://larsgeb.github.io/hmclab/setup.html).
+For full installation instructions, including creating a proper Python environment, [see the installation instructions](https://python.hmclab.science/setup.html). 
+
+Start with making sure that you have HDF5 or h5py installed properly.
 
 Directly to your environment:
 

@@ -2328,7 +2328,7 @@ class _AbstractVisualSampler(_AbstractSampler):
         # Subplot 2; samples over time
         self.plots["samples"]["axis"] = a1  # _plt.subplot(122)
         self.plots["samples"]["axis"].set_aspect(1)
-        self.plots["samples"]["title"] = _plt.title("2d marginal over time")
+        self.plots["samples"]["title"] = _plt.title("2d samples over time")
         self.plots["samples"]["axis"].set_xlabel(
             f"Model dimension {self.dims_to_plot[0]}"
         )

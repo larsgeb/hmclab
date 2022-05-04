@@ -12,24 +12,8 @@ us a message (issue) on the GitHub repo and we will try to throw a tutorial toge
 .. toctree::
    :maxdepth: 1
 
-   notebooks/tutorials/0 - Getting started
-   notebooks/tutorials/1 - Tuning Hamiltonian Monte Carlo
-   notebooks/tutorials/2 - Separate priors per dimension
-   notebooks/tutorials/3 - Creating your own inverse problem
-   notebooks/tutorials/4 - Running parallel Markov chains
-   notebooks/tutorials/5 - Transforming parameters
-
-
-`Inverse problem examples`
-
-.. toctree::
-   :maxdepth: 1
-
-   notebooks/examples/Sampling linear equations
-   notebooks/examples/Sampling sparse linear equations
-   notebooks/examples/Locating quakes on Grimsvötn, Iceland
-   notebooks/examples/Elastic 2d FWI
-
+   index-tutorials
+   index-examples
 
 
 

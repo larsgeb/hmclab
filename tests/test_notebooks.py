@@ -15,7 +15,6 @@ fixture.diff_color_words = False
 # Find all notebook files
 notebooks = glob.glob("notebooks/tutorials/*.ipynb")
 
-
 @pytest.mark.parametrize("notebook_fh", notebooks)
 def test_notebook(notebook_fh):
 
@@ -45,5 +44,6 @@ def test_notebook(notebook_fh):
         warnings.filterwarnings("ignore", category=DeprecationWarning)
         result = fixture.check(notebook_fh)
 
-    # Write out final version to original file if all tests succeeded
-    nbformat.write(nb=result.nb_final, fp=notebook_fh)
+    if not(notebook_fh == "notebooks/tutorials/1 - Tuning Hamiltonian Monte Carlo.ipynb"):
+        # Write out final version to original file if all tests succeeded
+        nbformat.write(nb=result.nb_final, fp=notebook_fh)
