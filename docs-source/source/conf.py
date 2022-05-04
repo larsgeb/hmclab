@@ -190,10 +190,10 @@ man_pages = [(master_doc, "hmctom", "HMC Tom Documentation", [author], 1)]
 texinfo_documents = [
     (
         master_doc,
-        "HMCTom",
-        "HMC Tom Documentation",
+        "HMC Lab",
+        "HMC Lab Documentation",
         author,
-        "HMCTom",
+        "Lars Gebraad",
         "One line description of project.",
         "Miscellaneous",
     )
