@@ -3,7 +3,7 @@ import tilemapbase
 import obspy.signal
 from matplotlib.patches import Ellipse
 import matplotlib.transforms as transforms
-import obspy.signal
+
 
 
 def tilemapbase_project_array(x, y, tilemapbase_project):

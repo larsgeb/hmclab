@@ -571,10 +571,11 @@ class Normal(_AbstractDistribution):
             self.generate_ready = True
 
         if self.diagonal:
-            return (
+            samples = (
                 rng.normal(size=(self.dimensions, repeat)) * self.standard_deviation
                 + self.means
             )
+            return samples
         else:
 
             return (
