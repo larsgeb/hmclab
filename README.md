@@ -1,16 +1,22 @@
 # HMC Lab
+## Andrea Zunino, Lars Gebraad, Andreas Fichtner
 
-![Python version](https://img.shields.io/badge/python-3.8-blue) ![GitHub CI Build status](https://github.com/larsgeb/hmclab/workflows/Python%20application/badge.svg) [![codecov](https://codecov.io/gh/larsgeb/hmclab/branch/master/graph/badge.svg?token=6svV9YDRhd)](https://codecov.io/gh/larsgeb/hmclab) [![license](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black) [![GitHub releases](https://img.shields.io/badge/download-latest%20release-green.svg)](https://github.com/larsgeb/hmclab/releases/latest)
+[![codecov](https://codecov.io/gh/larsgeb/hmclab/branch/master/graph/badge.svg?token=6svV9YDRhd)](https://codecov.io/gh/larsgeb/hmclab) [![license](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black) [![GitHub releases](https://img.shields.io/badge/download-latest%20release-green.svg)](https://github.com/larsgeb/hmclab/releases/latest)
 
-Homepage: [hmclab.science](https://hmclab.science)
+**HMC Lab** is a numerical laboratory for research in Bayesian seismology, written in Python and Julia. Jump to [Docker one-command setup](#docker-one-command-setup).
 
-**HMC Lab** is a numerical laboratory for research in Bayesian seismology. We
-provide all the ingredients to set up probabilistic (and deterministic) inverse
+- **Website:** https://hmclab.science
+- **Python documentation:** https://python.hmclab.science
+- **Source code:** https://github.com/larsgeb/hmclab
+- **Docker image:** https://hub.docker.com/repository/docker/larsgebraad/hmclab
+- **Bug reports:** https://github.com/larsgeb/hmclab/issues
+
+It provides all the ingredients to set up probabilistic (and deterministic) inverse
 problems, appraise them, and analyse them. This includes a plethora of prior
 distributions, different physical modelling modules and various MCMC (and
 other) algorithms. 
 
-Here is a partial inventory of what we provide:
+In particular it provides prior distributions, physics and appraisal algorithms.
 
 **Prior distributions:**
 - Normal
@@ -35,6 +41,25 @@ Here is a partial inventory of what we provide:
 - Interfaces to non-linear optimization methods from SciPy
 - Animated versions of various algorithms
 
+# <a name="docker"></a>Docker one-command setup
+
+To get staerting with the tutorial and example notebooks, one can use a single command
+in Docker. This will pull a Docker image based on the Jupyter Datascience stack. The
+final container is approximately 5GB.
+
+```bash
+    docker run -p 9123:9123 larsgebraad/hmclab \
+    start-notebook.sh --NotebookApp.token='hmclab'  \
+    --NotebookApp.port='9123' --LabApp.default_url='/lab/tree/Home.ipynb'
+```
+
+Then either copy-past the link from your terminal, or navigate manually to [http://127.0.0.1:9123/lab/tree/Home.ipynb?token=hmclab](http://127.0.0.1:9123/lab/tree/Home.ipynb?token=hmclab).
+
+# Online tutorial notebooks
+
+All tutorial notebooks can also be accessed online in a non-interactive fashion. Simply 
+use https://python.hmclab.science or use the following links:
+
 **Tutorials:**
 
 - [Getting started.ipynb](notebooks/tutorials/0%20-%20Getting%20started.ipynb)
@@ -50,37 +75,8 @@ Here is a partial inventory of what we provide:
 - [Locating quakes on Grimsvötn, Iceland](notebooks/examples/Locating%20quakes%20on%20Grimsvötn%2C%20Iceland.ipynb)
 - [Elastic 2d FWI](notebooks/examples/Elastic%202d%20FWI.ipynb)
 
-Manual:
-https://python.hmclab.science
 
-## A flying start: Jupyter notebook server in a Docker with all dependencies
-
-In the sections after these we illustrate how to use this package. If, however,
-you simply want to try out some of the notebooks, we recommend running our 
-Docker images. This also ensures that the C++ codes for the FWI module are well
-compiled and you have all the appropriate requirements.
-
-We build two docker images: one for AMD64 (should work on most Linux/Windows/
-MacOS intel systems), and ARM64 (should work on Mac M1). You can automatically
-get the appropriate version and start the notebook server by running:
-
-```bash
-docker run -p 7999:8888 larsgebraad/hmclab
-```
-
-You can then immediately go into your webbrowser to the address
-`localhost:7999` to access the tutorial and demo notebooks.
-
-If you have another service running at port 8888, modify the command and web
-address like this:
-
-```bash
-docker run -p PORT:8888 larsgebraad/hmclab
-localhost:PORT
-```
-
-
-## The long way around: installing the packge on your system
+# The long way around: installing the package on your system
 
 For full installation instructions, including creating a proper Python environment, [see the installation instructions](https://python.hmclab.science/setup.html). 
 
