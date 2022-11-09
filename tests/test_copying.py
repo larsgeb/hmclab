@@ -71,7 +71,12 @@ def test_samples_file(
         _os.remove(filename)  # pragma: no cover
 
     sampler_instance.sample(
-        filename, distribution, proposals=proposals, max_time=0.1, autotuning=autotuning
+        filename,
+        distribution,
+        proposals=proposals,
+        max_time=0.1,
+        autotuning=autotuning,
+        disable_progressbar=True,
     )
 
     # Check if the file was created. If it wasn't, fail

@@ -51,6 +51,7 @@ def test_break(execution_number):
         ram_buffer_size=1,
         amount_of_steps=2,
         stepsize=0.03,
+        disable_progressbar=True,
     )
 
     if not _os.path.exists(filename):

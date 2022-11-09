@@ -65,6 +65,7 @@ def test_samples_file(
         initial_model=initial_model,
         max_time=0.1,
         autotuning=autotuning,
+        disable_progressbar=True,
     )
     sampler_instance_2.sample(
         filename_2,
@@ -73,6 +74,7 @@ def test_samples_file(
         initial_model=initial_model,
         max_time=0.1,
         autotuning=autotuning,
+        disable_progressbar=True,
     )
 
     # Check if the file was created. If it wasn't, fail

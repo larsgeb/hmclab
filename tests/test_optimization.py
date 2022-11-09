@@ -45,6 +45,7 @@ def test_basic_optimization(
         iterations=iterations,
         epsilon=epsilon,
         strictly_monotonic=strictly_monotonic,
+        disable_progressbar=True,
     )
 
     assert len(ms) == len(xs)
@@ -74,7 +75,6 @@ def test_gradient_descent(
     except _InvalidCaseError:
         return 0
 
-
     try:
         initial_model = distribution.generate()
     except:
@@ -87,6 +87,7 @@ def test_gradient_descent(
         epsilon=epsilon,
         regularization=regularization,
         strictly_monotonic=strictly_monotonic,
+        disable_progressbar=True,
     )
 
     assert m.shape == (distribution.dimensions, 1)

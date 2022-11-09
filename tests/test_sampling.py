@@ -66,6 +66,7 @@ def test_basic_sampling(
         ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
         max_time=0.1,
         autotuning=autotuning,
+        disable_progressbar=True,
     )
     if sampler_instance.amount_of_writes > 0:
         # 10 percent burn_in
@@ -119,6 +120,7 @@ def test_samples_file(
         proposals=proposals,
         max_time=0.1,
         autotuning=autotuning,
+        disable_progressbar=True,
     )
 
     # Check if the file was created. If it wasn't, fail
@@ -179,6 +181,7 @@ def test_improper_name():
         proposals=100,
         max_time=0.1,
         autotuning=True,
+        disable_progressbar=True,
     )
     if sampler_instance.amount_of_writes > 0:
         # 10 percent burn_in
@@ -218,6 +221,7 @@ def test_widget_functions(sampler_class: _as):
         proposals=100,
         max_time=0.1,
         autotuning=True,
+        disable_progressbar=True,
     )
     if sampler_instance.amount_of_writes > 0:
         # 10 percent burn_in
@@ -230,10 +234,10 @@ def test_widget_functions(sampler_class: _as):
     _os.remove(filename)
 
     # Test widget / printing
-    sampler_instance.print_results()
+    # sampler_instance.print_results()
 
     # Test __str__()
-    print(str(sampler_instance))
+    # print(str(sampler_instance))
 
 
 @_pytest.mark.parametrize("diagnostic_mode", [True, False])
@@ -261,6 +265,7 @@ def test_diagnostic_mode(sampler_class: _as, diagnostic_mode: bool):
         max_time=0.1,
         initial_model=initial_model,
         diagnostic_mode=diagnostic_mode,
+        disable_progressbar=True,
     )
 
     if sampler_instance.amount_of_writes > 0:
@@ -296,7 +301,11 @@ def test_seed(sampler_class: _as, seed: float):
         initial_model = _numpy.ones((distribution.dimensions, 1))
 
     sampler_instance.sample(
-        filename, distribution, initial_model=initial_model, max_time=0.1
+        filename,
+        distribution,
+        initial_model=initial_model,
+        max_time=0.1,
+        disable_progressbar=True,
     )
 
     if sampler_instance.amount_of_writes > 0:
@@ -334,6 +343,7 @@ def test_initial_model(sampler_class: _as):
         distribution,
         initial_model=initial_model,
         max_time=0.1,
+        disable_progressbar=True,
     )
 
     if sampler_instance.amount_of_writes > 0:
@@ -370,7 +380,11 @@ def test_preexisting_file(sampler_class: _as):
 
     with _pytest.raises(FileExistsError):
         sampler_instance.sample(
-            filename, distribution, initial_model=initial_model, max_time=0.1
+            filename,
+            distribution,
+            initial_model=initial_model,
+            max_time=0.1,
+            disable_progressbar=True,
         )
 
     # Remove the file
@@ -402,6 +416,7 @@ def test_plot(sampler_class: _as):
         initial_model=initial_model,
         max_time=0.1,
         autotuning=True,
+        disable_progressbar=True,
     )
 
     # Check if the file was created. If it wasn't, fail
@@ -411,8 +426,8 @@ def test_plot(sampler_class: _as):
     # Remove the file
     _os.remove(filename)
 
-    sampler_instance.plot_stepsizes()
-    sampler_instance.plot_acceptance_rate()
+    # sampler_instance.plot_stepsizes()
+    # sampler_instance.plot_acceptance_rate()
 
 
 @_pytest.mark.parametrize("sampler_class", sampler_classes)
@@ -456,6 +471,7 @@ def test_parallel_sampling(
         exchange=exchange,
         exchange_interval=exchange_interval,
         overwrite_existing_files=True,
+        kwargs={"disable_progressbar": True},
     )
 
     for filename in filenames:

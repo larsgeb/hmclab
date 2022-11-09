@@ -31,6 +31,7 @@ def test_basic_sampling():
         online_thinning=1,
         max_time=0.1,
         autotuning=True,
+        disable_progressbar=True,
     )
 
     print()

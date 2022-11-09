@@ -65,6 +65,7 @@ def test_basic_sampling(
             ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
             max_time=0.1,
             mass_matrix=_hmclab.MassMatrices.Unit(434),
+            disable_progressbar=True,
         )
     except Exception as e:
         print(e)
@@ -78,6 +79,7 @@ def test_basic_sampling(
         ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
         max_time=0.1,
         overwrite_existing_file=True,
+        disable_progressbar=True,
     )
 
     # Check if the file was created. If it wasn't, fail

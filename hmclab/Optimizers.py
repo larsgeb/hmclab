@@ -16,7 +16,6 @@ from hmclab.Distributions import _AbstractDistribution
 from typing import Tuple as _Tuple, List as _List
 
 
-
 def gradient_descent(
     target: _AbstractDistribution,
     initial_model: _numpy.ndarray = None,
@@ -24,11 +23,9 @@ def gradient_descent(
     iterations: int = 100,
     regularization: float = None,
     strictly_monotonic=False,
+    disable_progressbar=False,
 ) -> _Tuple[_numpy.ndarray, float, _List[_numpy.ndarray], _List[float]]:
-    """Gradient descent on the target misfit.
-
-
-    """
+    """Gradient descent on the target misfit."""
 
     dimensions = target.dimensions
 
@@ -46,12 +43,14 @@ def gradient_descent(
             desc="Iterating",
             leave=True,
             dynamic_ncols=True,
+            disable=disable_progressbar,
         )
     except Exception:
         progressbar = _tqdm_au.trange(
             iterations,
             desc="Iterating",
             leave=True,
+            disable=disable_progressbar,
         )
 
     # Compute initial misfit
@@ -71,9 +70,7 @@ def gradient_descent(
         g = target.gradient(m)
 
         if regularization is not None:
-            preconditioner = _numpy.diag(
-                1.0 / (_numpy.diag(g @ g.T) + regularization)
-            )
+            preconditioner = _numpy.diag(1.0 / (_numpy.diag(g @ g.T) + regularization))
             # Update model
             g = preconditioner @ g
 

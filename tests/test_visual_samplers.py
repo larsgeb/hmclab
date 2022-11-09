@@ -82,6 +82,7 @@ def test_basic_sampling(
             ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
             max_time=0.1,
             autotuning=autotuning,
+            disable_progressbar=True,
         )
         if sampler_instance.amount_of_writes > 0:
             # 10 percent burn_in

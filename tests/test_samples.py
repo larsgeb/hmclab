@@ -59,6 +59,7 @@ def test_samples_detail(
         initial_model=initial_model,
         ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
         max_time=0.1,
+        disable_progressbar=True,
     )
 
     # Check if the file was created. If it wasn't, fail
@@ -113,6 +114,7 @@ def test_samples_concat(
             proposals=proposals,
             ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
             max_time=0.1,
+            disable_progressbar=True,
         )
 
         # Check if the file was created. If it wasn't, fail

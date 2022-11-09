@@ -24,7 +24,14 @@ def test_sampling_interrupt_himmelblau(sampler_class):
 
     sampler = sampler_class()
 
-    sampler.sample(filename, dist, proposals=1000000, online_thinning=100, max_time=0.1)
+    sampler.sample(
+        filename,
+        dist,
+        proposals=1000000,
+        online_thinning=100,
+        max_time=0.1,
+        disable_progressbar=True,
+    )
 
     samples_written_expected = int(
         _numpy.floor(sampler.current_proposal / sampler.online_thinning) + 1
