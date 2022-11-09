@@ -7,3 +7,8 @@ docs
 docs-source
 **/*.h5
 **/*.npy
+
+!notebooks/examples/locatingquakes/data/data_array.npy
+!notebooks/examples/locatingquakes/data/snr_array.npy
+!notebooks/examples/locatingquakes/data/uncertainty_array.npy
+!notebooks/examples/locatingquakes/data/csv_files.npy

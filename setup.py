@@ -36,6 +36,8 @@ setuptools.setup(
         "ipywidgets",
         "multiprocess",
         "tilemapbase",
+        "pandas",
+        "obspy",
     ],
     extras_require={
         "dev": [
@@ -60,7 +62,7 @@ setuptools.setup(
             "ipywidgets",
             "nbformat",
             "nbconvert",
-            "furo"
+            "furo",
         ]
     },
 )
