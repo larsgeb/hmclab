@@ -449,15 +449,13 @@ class _AbstractSampler(_ABC):
         if self.diagnostic_mode:
             self._propose = _AccumulatingTimer(self._propose)
             self._evaluate_acceptance = _AccumulatingTimer(self._evaluate_acceptance)
-            self._sample_to_ram = _AccumulatingTimer(self._sample_to_ram)
-            self._samples_to_disk = _AccumulatingTimer(self._samples_to_disk)
+            self.samples.append = _AccumulatingTimer(self.samples.append)
             self._update_progressbar = _AccumulatingTimer(self._update_progressbar)
 
             self.functions_to_diagnose = [
                 self._propose,
                 self._evaluate_acceptance,
-                self._sample_to_ram,
-                self._samples_to_disk,
+                self.samples.append,
                 self._update_progressbar,
             ]
 

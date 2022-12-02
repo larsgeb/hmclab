@@ -75,6 +75,9 @@ class Samples:
                 )
 
         elif mode == "w":
+            self._buffer = []
+            self._buffer_interval = 1
+            self._last_append_time = _numpy.nan
 
             # Check for irrelevant parameters in write mode
             if burn_in is not None:
@@ -113,10 +116,6 @@ class Samples:
                 self.setup_write_numpy()
             else:
                 raise AttributeError(f"Unkown filetype `{self.filetype}`.")
-
-            self._buffer = []
-            self._buffer_interval = 1
-            self._last_append_time = _numpy.nan
 
             # Set the current index of samples to the start of the file
             self.write_attribute("write_index", 0)
@@ -283,6 +282,7 @@ class Samples:
             self.flush_buffer()
 
     def flush_buffer(self):
+        assert self.mode == "w"
         if len(self._buffer) == 0:
             return
 
