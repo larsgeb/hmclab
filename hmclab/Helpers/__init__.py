@@ -6,6 +6,7 @@ from hmclab.Helpers import (
     Processing,
     CaptureStdout,
     Timers,
+    AppendNPY,
 )
 
 __all__ = [
@@ -16,4 +17,5 @@ __all__ = [
     "Processing",
     "CaptureStdout",
     "Timers",
+    "AppendNPY",
 ]

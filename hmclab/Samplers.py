@@ -46,7 +46,8 @@ from hmclab.Distributions import _AbstractDistribution
 from hmclab.MassMatrices import Unit as _Unit
 from hmclab.MassMatrices import _AbstractMassMatrix
 from hmclab.Helpers.Timers import AccumulatingTimer as _AccumulatingTimer
-from hmclab.Helpers.CustomExceptions import InvalidCaseError
+from hmclab.Helpers.CustomExceptions import InvalidCaseError as _InvalidCaseError
+from hmclab.Samples import Samples as _Samples
 
 import ipywidgets as _widgets
 from IPython.display import display as _display
@@ -80,22 +81,9 @@ class _AbstractSampler(_ABC):
     distribution: _AbstractDistribution = None
     """The _AbstractDistribution-derived object on which the sampler works."""
 
-    samples_hdf5_filename: str = None
+    samples_filename: str = None
     """A string containing the path+filename of the hdf5 file to which samples will be
     stored."""
-
-    samples_hdf5_filehandle = None
-    """A HDF5 file handle of the hdf5 file to which samples will be stored."""
-
-    samples_hdf5_dataset = None
-    """A string containing the HDF5 group of the hdf5 file to which samples will be
-    stored. """
-
-    ram_buffer_size: int = None
-    """A positive integer indicating the size of the RAM buffer in amount of samples."""
-
-    ram_buffer: _numpy.ndarray = None
-    """A NumPy ndarray containing the samples that are as of yet not written to disk."""
 
     current_model: _numpy.ndarray = None
     """A NumPy array containing the model at the current state of the Markov chain. """
@@ -153,6 +141,8 @@ class _AbstractSampler(_ABC):
 
     disable_progressbar: bool = False
     """A bool describing whether or not to disable the TQDM progressbar"""
+
+    samples: _Samples = None
 
     # distribution = type("NoDistribution", (object,), {"name": None})
     # """The distribution """
@@ -227,7 +217,7 @@ class _AbstractSampler(_ABC):
         )
 
         run_details["acceptance rate"] = acceptance_rate
-        run_details["output file"] = self.samples_hdf5_filename
+        run_details["output file"] = self.samples_filename
         run_details["proposals made (excluding first position)"] = proposed_samples
         run_details["samples written (after online thinning)"] = written_samples
         run_details["amount of writes"] = self.amount_of_writes
@@ -254,7 +244,6 @@ class _AbstractSampler(_ABC):
         algorithm = {}
         algorithm["algorithm used"] = self.name
         algorithm["diagnostic mode"] = self.diagnostic_mode
-        algorithm["ram buffer size"] = self.ram_buffer_size
         algorithm["this object has started sampling ... times"] = self.times_started
 
         return {
@@ -331,12 +320,11 @@ class _AbstractSampler(_ABC):
 
     def _init_sampler(
         self,
-        samples_hdf5_filename: str,
+        samples_filename: str,
         distribution: _AbstractDistribution,
         initial_model: _numpy.ndarray,
         proposals: int,
         online_thinning: int,
-        ram_buffer_size: int,
         overwrite_existing_file: bool,
         max_time: int,
         disable_progressbar: bool = False,
@@ -347,20 +335,19 @@ class _AbstractSampler(_ABC):
         constructed.
 
         Args:
-            samples_hdf5_filename ([type]): [description]
+            samples_filename ([type]): [description]
             distribution ([type]): [description]
             initial_model ([type]): [description]
             proposals ([type]): [description]
             online_thinning ([type]): [description]
-            ram_buffer_size ([type]): [description]
             overwrite_existing_file ([type]): [description]
             max_time ([type]): [description]
         """
 
-        assert type(samples_hdf5_filename) == str, (
+        assert type(samples_filename) == str, (
             f"First argument should be a string containing the path of the file to "
             f"which to write samples. It was an object of type "
-            f"{type(samples_hdf5_filename)}."
+            f"{type(samples_filename)}."
         )
 
         # Parse the distribution -------------------------------------------------------
@@ -403,59 +390,15 @@ class _AbstractSampler(_ABC):
         )
         self.proposals_after_thinning = int(self.proposals / self.online_thinning)
 
-        # Set up the sample RAM buffer -------------------------------------------------
-
-        if ram_buffer_size is not None:
-            # Assert that ram_buffer_size is a positive integer
-            assert type(ram_buffer_size) == int and ram_buffer_size > 0, (
-                "The ram buffer size (`ram_buffer_size`) needs to be an integer larger "
-                "than zero."
-            )
-
-            # Set the ram buffer size
-            self.ram_buffer_size = ram_buffer_size
-
-        else:
-            # This is all automated stuff. You can force any size by setting it
-            # manually.
-
-            # Detailed explanation: we strive for approximately 1 gigabyte in
-            # memory before we write to disk, by default. The amount of floats that are
-            # in memory is calculated as follows: (dimensions + 1) *
-            # ram_buffer_size. The plus ones comes from requiring to store the
-            # misfit. 1 gigabyte is approximately 1e8 64 bits floats (actually 1.25e8).
-            # Additionally, there is a cap at 10000 samples.
-            ram_buffer_size = min(int(_numpy.floor(1e8 / self.dimensions)), 10000)
-            # Reduce this number until it fits in the amount of proposals
-            while self.proposals_after_thinning % ram_buffer_size != 0:
-                ram_buffer_size = ram_buffer_size - 1
-
-            # Now, this number might be larger than the actual amount of samples, so we
-            # take the minimum of this and the amount of proposals to write as the
-            # actual ram size.
-            self.ram_buffer_size = min(ram_buffer_size, self.proposals_after_thinning)
-
-            assert type(self.ram_buffer_size) == int, dev_assertion_message
-
-        shape = (self.dimensions + 1, self.ram_buffer_size)
-
-        self.ram_buffer = _numpy.empty(shape, dtype=_numpy.float64)
-
         # Set up the samples file ------------------------------------------------------
 
-        # Parse the filename
         assert (
-            type(samples_hdf5_filename) == str
+            type(samples_filename) == str
         ), "The samples filename needs to be a string."
-        if samples_hdf5_filename[-3:] != ".h5":
-            samples_hdf5_filename += ".h5"
-        self.samples_hdf5_filename = samples_hdf5_filename
-
-        # Open the HDF5 file
-        self._open_samples_hdf5(
-            self.samples_hdf5_filename,
-            self.proposals_after_thinning,
-            overwrite=overwrite_existing_file,
+        self.samples_filename = samples_filename
+        # Open the samples file
+        self.samples = _Samples(
+            samples_filename, mode="w", overwrite=overwrite_existing_file
         )
 
         # Set up the initial model and preallocate other necessary arrays --------------
@@ -527,43 +470,33 @@ class _AbstractSampler(_ABC):
         self._write_tuning_settings()
 
         # Create attributes before sampling, such that SWMR works
-        self.samples_hdf5_dataset.attrs["write_index"] = -1
-        self.samples_hdf5_dataset.attrs["last_written_sample"] = -1
-        self.samples_hdf5_dataset.attrs["proposals"] = self.proposals
-        self.samples_hdf5_dataset.attrs["acceptance_rate"] = 0
-        self.samples_hdf5_dataset.attrs["online_thinning"] = self.online_thinning
-        self.samples_hdf5_dataset.attrs["start_time"] = _datetime.now().strftime(
-            "%d-%b-%Y (%H:%M:%S.%f)"
+        self.samples.write_attribute("write_index", -1)
+        self.samples.write_attribute("last_written_sample", -1)
+        self.samples.write_attribute("proposals", self.proposals)
+        self.samples.write_attribute("acceptance_rate", 0)
+        self.samples.write_attribute("online_thinning", self.online_thinning)
+        self.samples.write_attribute(
+            "start_time", _datetime.now().strftime("%d-%b-%Y (%H:%M:%S.%f)")
         )
-        self.samples_hdf5_dataset.attrs["sampler"] = self.name
+        self.samples.write_attribute("sampler", self.name)
 
     def _close_sampler(self):
 
-        self.samples_hdf5_dataset.attrs["acceptance_rate"] = self.accepted_proposals / (
-            self.current_proposal + 1
+        self.samples.write_attribute(
+            "acceptance_rate", self.accepted_proposals / (self.current_proposal + 1)
         )
 
-        # Manually check for ram_buffer_size = 1 + failed written sample
-        if self.ram_buffer_size == 1 and _numpy.all(
-            self.samples_hdf5_dataset[:, -1] == 0.0
-        ):
-            self.samples_hdf5_dataset[:, -1] = self.ram_buffer[:, 0]
-
-        self.samples_hdf5_dataset.attrs["end_time"] = _datetime.now().strftime(
-            "%d-%b-%Y (%H:%M:%S.%f)"
+        self.samples.write_attribute(
+            "end_time", _datetime.now().strftime("%d-%b-%Y (%H:%M:%S.%f)")
         )
-        self.samples_hdf5_dataset.attrs["runtime"] = str(
-            self.end_time - self.start_time
+        self.samples.write_attribute("runtime", str(self.end_time - self.start_time))
+        self.samples.write_attribute(
+            "runtime_seconds", (self.end_time - self.start_time).total_seconds()
         )
-        self.samples_hdf5_dataset.attrs["runtime_seconds"] = (
-            self.end_time - self.start_time
-        ).total_seconds()
 
         self._close_sampler_specific()
 
-        self.samples_hdf5_filehandle.close()
-        self.samples_hdf5_filehandle = None
-        self.samples_hdf5_dataset = None
+        self.samples.close()
 
         if self.diagnostic_mode:
             # This block shows the percentage of time spent in each part of the sampler.
@@ -742,20 +675,9 @@ class _AbstractSampler(_ABC):
                 # If we are on a thinning number ... (i.e. one of the non-discarded
                 # samples)
                 if self.current_proposal % self.online_thinning == 0:
-
-                    # Write sample to ram array
-                    self._sample_to_ram()
-
-                    # Calculate the index this sample has after thinning
-                    after_thinning = int(self.current_proposal / self.online_thinning)
-
-                    # Check if this number is at the end of the buffer ...
-                    if (
-                        after_thinning % self.ram_buffer_size
-                    ) == self.ram_buffer_size - 1:
-
-                        # If so, write samples to disk
-                        self._samples_to_disk()
+                    self.samples.append(
+                        _numpy.vstack([self.current_model, self.current_x])
+                    )
 
                 # Update the progressbar
                 self._update_progressbar()
@@ -774,65 +696,14 @@ class _AbstractSampler(_ABC):
             # Any other exception, we don't know how to handle
             self.proposals_iterator.close()
             self.proposals_iterator = None
-            self._samples_to_disk()
             self.end_time = _datetime.now()
             self._close_sampler()
             raise e
-        finally:  # Write out the last samples not on a full buffer --------------------
+        finally:
             self.proposals_iterator.close()
             self.proposals_iterator = None
-            self._samples_to_disk()
             self.end_time = _datetime.now()
             self._close_sampler()
-
-    def _open_samples_hdf5(
-        self,
-        name: str,
-        length: int,
-        dtype: str = "f8",
-        overwrite: bool = False,
-    ) -> int:
-
-        # Try to create file
-        try:
-            if overwrite:  # honor overwrite flag
-                flag = "w"
-            else:
-                flag = "w-"
-
-            # Create file, fail if exists and flag == w-
-            self.samples_hdf5_filehandle = _h5py.File(name, flag, libver="latest")
-
-        except OSError as e:
-            # Catch error on file creations, likely that the file already exists
-            if (
-                not str(e)
-                == f"Unable to create file (unable to open file: name = '{name}', "
-                f"errno = 17, error message = 'File exists', flags = 15, o_flags = c2)"
-            ):
-                raise H5FileOpenedError(
-                    "This file is already opened as HDF5 file. If you "
-                    "want to write to it, close the filehandle."
-                )
-            else:
-                raise e  # pragma: no cover
-
-        # Update the filename in the sampler object for later retrieval
-        self.samples_hdf5_filename = name
-
-        # Create dataset
-        self.samples_hdf5_dataset = self.samples_hdf5_filehandle.create_dataset(
-            "samples_0",
-            (self.dimensions + 1, 1),
-            maxshape=(self.dimensions + 1, length),  # one extra for misfit
-            dtype=dtype,
-            chunks=True,
-        )
-        self.samples_hdf5_dataset.set_fill_value = _numpy.nan
-
-        # Set the current index of samples to the start of the file
-        self.samples_hdf5_dataset.attrs["write_index"] = -1
-        self.samples_hdf5_dataset.attrs["last_written_sample"] = -1
 
     def _update_progressbar(self):
 
@@ -857,82 +728,6 @@ class _AbstractSampler(_ABC):
                     f"Tot. acc rate: {acceptance_rate:.2f}. Progress",
                     refresh=False,
                 )
-
-    def _sample_to_ram(self):
-        # Calculate proposal number after thinning
-        self.current_proposal_after_thinning = int(
-            self.current_proposal / self.online_thinning
-        )
-        # Assert that it's an integer (if we only write on end of buffer)
-        assert self.current_proposal % self.online_thinning == 0, dev_assertion_message
-
-        # Calculate index for the RAM array
-        index_in_ram = self.current_proposal_after_thinning % self.ram_buffer_size
-
-        # Place samples in RAM
-        self.ram_buffer[:-1, index_in_ram] = self.current_model[:, 0]
-
-        # Place misfit in RAM
-        self.ram_buffer[-1, index_in_ram] = self.current_x
-
-    def _samples_to_disk(self):
-
-        # Calculate proposal number after thinning
-        self.current_proposal_after_thinning = int(
-            _numpy.floor(self.current_proposal / self.online_thinning)
-        )
-
-        # This should always be the case if we write during or at the end of sampling,
-        # but not after a KeyboardInterrupt. However, samples are definitely only
-        # written to RAM on a whole number.
-        # assert self.current_proposal % self.online_thinning == 0:
-
-        # Calculate start/end indices
-        robust_start = (
-            self.current_proposal_after_thinning
-            - self.current_proposal_after_thinning % self.ram_buffer_size
-        )
-        end = self.current_proposal_after_thinning + 1
-
-        # If there is something to write
-        if (
-            self.samples_hdf5_dataset.attrs["write_index"] == robust_start
-            or self.samples_hdf5_dataset.attrs["write_index"] == -1
-        ):
-
-            # Some sanity checks on the indices
-            assert (
-                robust_start >= 0 and robust_start <= self.proposals_after_thinning + 1
-            ), dev_assertion_message
-            assert (
-                end >= 0 and end <= self.proposals_after_thinning + 1
-            ), dev_assertion_message
-            assert end >= robust_start, dev_assertion_message
-
-            # Update the amount of writes
-            self.amount_of_writes += 1
-
-            # Update the size in the h5 file
-            size_before = _numpy.copy(self.samples_hdf5_dataset.shape)
-            self.samples_hdf5_dataset.resize(
-                (self.dimensions + 1, self.current_proposal_after_thinning + 1)
-            )
-            size_after = _numpy.copy(self.samples_hdf5_dataset.shape)
-            # Write nan's to resized array to be sure if actual writing fails, we can
-            # recover
-            self.samples_hdf5_dataset[:, size_before[1] - size_after[1]] = _numpy.nan
-
-            # Write samples to disk
-            self.samples_hdf5_dataset[:, robust_start:end] = self.ram_buffer[
-                :, : end - robust_start
-            ]
-
-            self.ram_buffer.fill(_numpy.nan)
-
-            # Reset the markers in the HDF5 file
-            self.samples_hdf5_dataset.attrs["write_index"] = end
-            self.samples_hdf5_dataset.attrs["last_written_sample"] = end - 1
-            self.samples_hdf5_dataset.flush()
 
     @_abstractmethod
     def _propose(self):
@@ -965,18 +760,19 @@ class _AbstractSampler(_ABC):
 
     def get_diagnostics(self):
         if not self.diagnostic_mode:
-            raise InvalidCaseError(
+            raise _InvalidCaseError(
                 "Can't return diagnostics if sampler is not in diagnostic mode"
             )
         return self.functions_to_diagnose + self.sampler_specific_functions_to_diagnose
 
     def load_results(self, burn_in: int = 0) -> _numpy.array:
-
+        # TODO
+        raise NotImplementedError()
         assert burn_in >= 0
 
         from hmclab.Samples import Samples as _Samples
 
-        with _Samples(self.samples_hdf5_filename, burn_in=burn_in) as samples:
+        with _Samples(self.samples_filename, burn_in=burn_in) as samples:
             samples_numpy = samples.numpy
 
         return samples_numpy
@@ -1021,14 +817,13 @@ class RWMH(_AbstractSampler):
 
     def sample(
         self,
-        samples_hdf5_filename: str,
+        samples_filename: str,
         distribution: _AbstractDistribution,
         stepsize: _Union[float, _numpy.ndarray] = 1.0,
         initial_model: _numpy.ndarray = None,
         proposals: int = 100,
         online_thinning: int = 1,
         diagnostic_mode: bool = False,
-        ram_buffer_size: int = None,
         overwrite_existing_file: bool = False,
         max_time: float = None,
         autotuning: bool = False,
@@ -1041,7 +836,7 @@ class RWMH(_AbstractSampler):
 
         Parameters
         ----------
-        samples_hdf5_filename: str
+        samples_filename: str
             String containing the (path+)filename of the HDF5 file to contain the
             samples. **A required parameter.**
         distribution: _AbstractDistribution
@@ -1065,9 +860,6 @@ class RWMH(_AbstractSampler):
         diagnostic_mode: bool
             A boolean describing if subroutines of sampling should be timed. Useful for
             finding slow parts of the algorithm. Will add overhead to each function.
-        ram_buffer_size: int
-            An integer representing how many samples should be kept in RAM before
-            writing to storage.
         overwrite_existing_file: bool
             A boolean describing whether or not to silently overwrite existing files.
             Use with caution.
@@ -1101,14 +893,13 @@ class RWMH(_AbstractSampler):
         # actually close the hdf5 file if something goes wrong.
         try:
             self._init_sampler(
-                samples_hdf5_filename=samples_hdf5_filename,
+                samples_filename=samples_filename,
                 distribution=distribution,
                 stepsize=stepsize,
                 initial_model=initial_model,
                 proposals=proposals,
                 diagnostic_mode=diagnostic_mode,
                 online_thinning=online_thinning,
-                ram_buffer_size=ram_buffer_size,
                 overwrite_existing_file=overwrite_existing_file,
                 max_time=max_time,
                 autotuning=autotuning,
@@ -1117,10 +908,8 @@ class RWMH(_AbstractSampler):
                 disable_progressbar=disable_progressbar,
             )
         except Exception as e:
-            if self.samples_hdf5_filehandle is not None:
-                self.samples_hdf5_filehandle.close()
-                self.samples_hdf5_filehandle = None
-                self.samples_hdf5_dataset = None
+            if self.samples is not None:
+                self.samples.close()
             raise e
 
         self._sample_loop()
@@ -1209,16 +998,17 @@ class RWMH(_AbstractSampler):
             self.stepsizes = self.stepsizes[: self.current_proposal]
 
             # Also write these to the hdf5 dataset
-            self.samples_hdf5_dataset.attrs["acceptance_rates"] = self.acceptance_rates
-            self.samples_hdf5_dataset.attrs["stepsizes"] = self.stepsizes
+            self.samples.write_attribute("acceptance_rates", self.acceptance_rates)
+            self.samples.write_attribute("stepsizes", self.stepsizes)
 
     def _write_tuning_settings(self):
+
         if type(self.stepsize) == float:
-            self.samples_hdf5_dataset.attrs["stepsize"] = self.stepsize
+            stepsize_write = self.stepsize
         else:
-            self.samples_hdf5_dataset.attrs[
-                "stepsize"
-            ] = self.stepsize.__class__.__name__
+            stepsize_write = self.stepsize.__class__.__name__
+
+        self.samples.write_attribute("stepsize", stepsize_write)
 
     def _tuning_settings(self):
 
@@ -1393,10 +1183,10 @@ class HMC(_AbstractSampler):
 
     def sample(
         self,
-        samples_hdf5_filename: str,
+        samples_filename: str,
         distribution: _AbstractDistribution,
         stepsize: float = 0.1,
-        randomize_stepsize: bool = None,
+        randomize_stepsize: bool = True,
         amount_of_steps: int = 10,
         mass_matrix: _AbstractMassMatrix = None,
         integrator: str = "lf",
@@ -1404,7 +1194,6 @@ class HMC(_AbstractSampler):
         proposals: int = 100,
         online_thinning: int = 1,
         diagnostic_mode: bool = False,
-        ram_buffer_size: int = None,
         overwrite_existing_file: bool = False,
         max_time: float = None,
         autotuning: bool = False,
@@ -1417,7 +1206,7 @@ class HMC(_AbstractSampler):
 
         Parameters
         ----------
-        samples_hdf5_filename: str
+        samples_filename: str
             String containing the (path+)filename of the HDF5 file to contain the
             samples. **A required parameter.**
         distribution: _AbstractDistribution
@@ -1454,9 +1243,6 @@ class HMC(_AbstractSampler):
         diagnostic_mode: bool
             A boolean describing if subroutines of sampling should be timed. Useful for
             finding slow parts of the algorithm. Will add overhead to each function.
-        ram_buffer_size: int
-            An integer representing how many samples should be kept in RAM before
-            writing to storage.
         overwrite_existing_file: bool
             A boolean describing whether or not to silently overwrite existing files.
             Use with caution.
@@ -1490,7 +1276,7 @@ class HMC(_AbstractSampler):
         # actually close the hdf5 file if something goes wrong.
         try:
             self._init_sampler(
-                samples_hdf5_filename=samples_hdf5_filename,
+                samples_filename=samples_filename,
                 distribution=distribution,
                 stepsize=stepsize,
                 randomize_stepsize=randomize_stepsize,
@@ -1504,17 +1290,14 @@ class HMC(_AbstractSampler):
                 proposals=proposals,
                 diagnostic_mode=diagnostic_mode,
                 online_thinning=online_thinning,
-                ram_buffer_size=ram_buffer_size,
                 overwrite_existing_file=overwrite_existing_file,
                 max_time=max_time,
                 disable_progressbar=disable_progressbar,
             )
 
         except Exception as e:
-            if self.samples_hdf5_filehandle is not None:
-                self.samples_hdf5_filehandle.close()
-                self.samples_hdf5_filehandle = None
-                self.samples_hdf5_dataset = None
+            if self.samples is not None:
+                self.samples.close()
 
             if type(e) is FileExistsError:
                 if (
@@ -1643,16 +1426,16 @@ class HMC(_AbstractSampler):
             self.stepsizes = self.stepsizes[: self.current_proposal]
 
             # Also write these to the hdf5 dataset
-            self.samples_hdf5_dataset.attrs["acceptance_rates"] = self.acceptance_rates
-            self.samples_hdf5_dataset.attrs["stepsizes"] = self.stepsizes
+            self.samples.write_attribute("acceptance_rates", self.acceptance_rates)
+            self.samples.write_attribute("stepsizes", self.stepsizes)
 
     def _write_tuning_settings(self):
-        self.samples_hdf5_dataset.attrs["stepsize"] = self.stepsize
-        self.samples_hdf5_dataset.attrs["amount_of_steps"] = self.amount_of_steps
-        self.samples_hdf5_dataset.attrs["mass_matrix"] = self.mass_matrix.name
-        self.samples_hdf5_dataset.attrs["integrator"] = self.integrators_full_names[
-            self.integrator
-        ]
+        self.samples.write_attribute("stepsize", self.stepsize)
+        self.samples.write_attribute("amount_of_steps", self.amount_of_steps)
+        self.samples.write_attribute("mass_matrix", self.mass_matrix.name)
+        self.samples.write_attribute(
+            "integrator", self.integrators_full_names[self.integrator]
+        )
 
     def _tuning_settings(self):
         settings = {
@@ -2260,12 +2043,11 @@ class _AbstractVisualSampler(_AbstractSampler):
 
     def _init_sampler(
         self,
-        samples_hdf5_filename: str,
+        samples_filename: str,
         distribution: _AbstractDistribution,
         initial_model: _numpy.ndarray,
         proposals: int,
         online_thinning: int,
-        ram_buffer_size: int,
         overwrite_existing_file: bool,
         max_time: int,
         disable_progressbar: bool = False,
@@ -2347,12 +2129,11 @@ class _AbstractVisualSampler(_AbstractSampler):
 
         # Run original function
         return super()._init_sampler(
-            samples_hdf5_filename,
+            samples_filename,
             distribution,
             initial_model,
             proposals,
             online_thinning,
-            ram_buffer_size,
             overwrite_existing_file,
             max_time,
             disable_progressbar=disable_progressbar,
