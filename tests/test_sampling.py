@@ -63,7 +63,6 @@ def test_basic_sampling(
         proposals=proposals,
         initial_model=initial_model,
         online_thinning=10,
-        ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
         max_time=0.1,
         autotuning=autotuning,
         disable_progressbar=True,

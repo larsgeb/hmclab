@@ -113,7 +113,6 @@ def test_elasticFWI_sampling():
         filename,
         posterior,
         proposals=10,
-        ram_buffer_size=1,
         amount_of_steps=2,
         initial_model=(upper_bounds + lower_bounds) / 2.0,
         stepsize=0.03,

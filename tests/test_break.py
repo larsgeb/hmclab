@@ -48,7 +48,6 @@ def test_break(execution_number):
         filename,
         posterior,
         proposals=10000,
-        ram_buffer_size=1,
         amount_of_steps=2,
         stepsize=0.03,
         disable_progressbar=True,
