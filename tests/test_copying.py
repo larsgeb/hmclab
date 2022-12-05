@@ -64,7 +64,7 @@ def test_samples_file(
     sampler_instance = sampler_class()
 
     unique_name = _uuid.uuid4().hex.upper()
-    filename = f"temporary_file_{unique_name}.h5"
+    filename = f"temporary_file_{unique_name}.npy"
 
     # Remove file before attempting to sample
     if _os.path.exists(filename):
@@ -102,10 +102,6 @@ def test_samples_file(
             distribution.dimensions + 1,
             samples_written_expected,
         )
-
-        assert type(samples.numpy) == _numpy.ndarray
-
-        assert type(samples.h5) == _h5py._hl.dataset.Dataset
 
     # Remove the file
     _os.remove(filename)

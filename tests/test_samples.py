@@ -18,17 +18,20 @@ dimensions = [1, 2, 50]
 distribution_classes = _ad.__subclasses__()
 sampler_classes = [_hmclab.Samplers.RWMH]  # Doesn't impact the test
 proposals = [5, 100]
+extensions = ["h5", "npy"]
 
 
 @_pytest.mark.parametrize("sampler_class", sampler_classes)
 @_pytest.mark.parametrize("distribution_class", distribution_classes)
 @_pytest.mark.parametrize("dimensions", dimensions)
 @_pytest.mark.parametrize("proposals", proposals)
+@_pytest.mark.parametrize("extension", extensions)
 def test_samples_detail(
     sampler_class: _as,
     distribution_class: _ad,
     dimensions: int,
     proposals: int,
+    extension: str,
 ):
 
     try:
@@ -41,7 +44,7 @@ def test_samples_detail(
     assert isinstance(sampler_instance, _as)
 
     unique_name = _uuid.uuid4().hex.upper()
-    filename = f"temporary_file_{unique_name}.h5"
+    filename = f"temporary_file_{unique_name}.{extension}"
 
     # Remove file before attempting to sample
     if _os.path.exists(filename):
@@ -57,7 +60,6 @@ def test_samples_detail(
         distribution,
         proposals=proposals,
         initial_model=initial_model,
-        ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
         max_time=0.1,
         disable_progressbar=True,
     )
@@ -71,17 +73,21 @@ def test_samples_detail(
 
     # Remove the file
     _os.remove(filename)
+    if extension == "npy":
+        _os.remove(f"{filename}.pkl")
 
 
 @_pytest.mark.parametrize("sampler_class", sampler_classes)
 @_pytest.mark.parametrize("distribution_class", distribution_classes)
 @_pytest.mark.parametrize("dimensions", dimensions)
 @_pytest.mark.parametrize("proposals", proposals)
+@_pytest.mark.parametrize("extension", extensions)
 def test_samples_concat(
     sampler_class: _as,
     distribution_class: _ad,
     dimensions: int,
     proposals: int,
+    extension: str,
 ):
 
     try:
@@ -93,8 +99,8 @@ def test_samples_concat(
 
     assert isinstance(sampler_instance, _as)
 
-    filename_1 = "temporary_file_1.h5"
-    filename_2 = "temporary_file_2.h5"
+    filename_1 = f"temporary_file_1.{extension}"
+    filename_2 = f"temporary_file_2.{extension}"
     filenames = [filename_1, filename_2]
 
     # Remove file before attempting to sample
@@ -112,7 +118,6 @@ def test_samples_concat(
             distribution,
             initial_model=initial_model,
             proposals=proposals,
-            ram_buffer_size=int(proposals / _numpy.random.rand() * 10),
             max_time=0.1,
             disable_progressbar=True,
         )
@@ -130,6 +135,8 @@ def test_samples_concat(
 
         # Remove the file
         _os.remove(filename)
+        if extension == "npy":
+            _os.remove(f"{filename}.pkl")
 
 
 def test_samples_exception_cases():
@@ -139,5 +146,5 @@ def test_samples_exception_cases():
     try:
         with _hmclab.Samples(filename) as _:
             pass  # pragma: no cover
-    except ValueError:
+    except FileNotFoundError:
         pass

@@ -21,6 +21,7 @@ sampler_classes = _as.__subclasses__()
 sampler_classes.remove(_hmclab.Samplers._AbstractVisualSampler)
 proposals = [10, 1000]
 autotuning = [True, False]
+extensions = ["h5", "npy"]
 
 
 @_pytest.mark.parametrize("sampler_class", sampler_classes)
@@ -28,12 +29,14 @@ autotuning = [True, False]
 @_pytest.mark.parametrize("dimensions", dimensions)
 @_pytest.mark.parametrize("proposals", proposals)
 @_pytest.mark.parametrize("autotuning", autotuning)
+@_pytest.mark.parametrize("extension", extensions)
 def test_basic_sampling(
     sampler_class: _as,
     distribution_class: _ad,
     dimensions: int,
     proposals: int,
     autotuning: bool,
+    extension: str,
 ):
 
     try:
@@ -46,7 +49,7 @@ def test_basic_sampling(
     assert isinstance(sampler_instance, _as)
 
     unique_name = _uuid.uuid4().hex.upper()
-    filename = f"temporary_file_{unique_name}.h5"
+    filename = f"temporary_file_{unique_name}.{extension}"
 
     # Remove file before attempting to sample
     if _os.path.exists(filename):
@@ -78,6 +81,8 @@ def test_basic_sampling(
 
     # Remove the file
     _os.remove(filename)
+    if extension == "npy":
+        _os.remove(f"{filename}.pkl")
 
 
 @_pytest.mark.parametrize("sampler_class", sampler_classes)
@@ -85,12 +90,14 @@ def test_basic_sampling(
 @_pytest.mark.parametrize("dimensions", dimensions)
 @_pytest.mark.parametrize("proposals", proposals)
 @_pytest.mark.parametrize("autotuning", autotuning)
+@_pytest.mark.parametrize("extension", extensions)
 def test_samples_file(
     sampler_class: _as,
     distribution_class: _ad,
     dimensions: int,
     proposals: int,
     autotuning: bool,
+    extension: str,
 ):
 
     try:
@@ -101,7 +108,7 @@ def test_samples_file(
     sampler_instance = sampler_class()
 
     unique_name = _uuid.uuid4().hex.upper()
-    filename = f"temporary_file_{unique_name}.h5"
+    filename = f"temporary_file_{unique_name}.{extension}"
 
     # Remove file before attempting to sample
     if _os.path.exists(filename):
@@ -146,12 +153,10 @@ def test_samples_file(
             samples_written_expected,
         )
 
-        assert type(samples.numpy) == _numpy.ndarray
-
-        assert type(samples.h5) == _h5py._hl.dataset.Dataset
-
     # Remove the file
     _os.remove(filename)
+    if extension == "npy":
+        _os.remove(f"{filename}.pkl")
 
 
 def test_improper_name():

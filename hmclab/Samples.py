@@ -10,6 +10,8 @@ from typing import List as _List, Union as _Union
 import numpy as _numpy
 import os as _os
 
+from copy import copy, deepcopy
+
 
 class Samples:
 
@@ -192,13 +194,18 @@ class Samples:
     def __del__(self):
         self.close()
 
+    def __delete_from_disk__(self):
+        self.close()
+        _os.remove(self.filename)
+        if self.filetype == "NPY":
+            _os.remove(f"{self.filename}.pkl")
+
     def __getitem__(self, key):
         """[ ] operator"""
         if self.filetype == "HDF5":
             return self._hdf5_dataset[:, self.burn_in :][key]
         elif self.filetype == "NPY":
-            # TODO
-            pass
+            return self.numpy[:, self.burn_in :][key]
         else:
             raise AttributeError(f"Unkown filetype `{self.filetype}`.")
 
@@ -215,6 +222,19 @@ class Samples:
             self._inside_context = False
 
         self.close()
+
+    def __copy__(self):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        result.__dict__.update(self.__dict__)
+        return result
+
+    def __deepcopy__(self, memo):
+
+        if self.mode == "w":
+            return Samples(self.filename, mode="w", overwrite=True)
+        else:
+            return self
 
     def close(self):
         if self.mode == "w":
@@ -245,8 +265,7 @@ class Samples:
         if self.filetype == "HDF5":
             return self._hdf5_filehandle["samples"][-1, self.burn_in :][:, None]
         elif self.filetype == "NPY":
-            # TODO
-            pass
+            return self.numpy[-1, :]
         else:
             raise AttributeError(f"Unkown filetype `{self.filetype}`.")
 
@@ -259,7 +278,7 @@ class Samples:
         if self.filetype == "HDF5":
             return self._hdf5_filehandle["samples"][:, self.burn_in :]
         elif self.filetype == "NPY":
-            return self._numpy_array
+            return self._numpy_array[:, self.burn_in :]
         else:
             raise AttributeError(f"Unkown filetype `{self.filetype}`.")
 
@@ -322,7 +341,8 @@ class Samples:
         else:
             raise AttributeError(f"Unkown filetype `{self.filetype}`.")
 
-    """def print_details(self):
+    def print_details(self):
+
         size = _shutil.get_terminal_size((40, 20))
         width = size[0]
         if _in_notebook():
@@ -330,30 +350,59 @@ class Samples:
         print()
         print("{:^{width}}".format("H5 file details", width=width))
         print("━" * width)
-        print("{0:30} {1}".format("Filename", self.filename)) 
-        dataset = self._hdf5_filehandle["samples"]
-        details = dict(
-            (key, value) for key, value in _h5py.AttributeManager(dataset).items()
-        )
+        print("{0:30} {1}".format("Filename", self.filename))
+
+        if self.filetype == "HDF5":
+            details = dict(
+                (key, value)
+                for key, value in _h5py.AttributeManager(self._hdf5_dataset).items()
+            )
+        elif self.filetype == "NPY":
+            details = self._numpy_attributes
+        else:
+            raise AttributeError(f"Unkown filetype `{self.filetype}`.")
+
         # Print common attributes
         print()
         print("{:^{width}}".format("Sampling attributes", width=width))
         print("━" * width)
-        print("{0:30} {1}".format("Sampler", details["sampler"]))
-        print("{0:30} {1}".format("Requested proposals", details["proposals"]))
-        print("{0:30} {1}".format("Online thinning", details["online_thinning"]))
+        print("{0:30} {1}".format("Sampler", self.read_attribute("sampler")))
+        print(
+            "{0:30} {1}".format("Requested proposals", self.read_attribute("proposals"))
+        )
+        print(
+            "{0:30} {1}".format(
+                "Online thinning", self.read_attribute("online_thinning")
+            )
+        )
         print(
             "{0:30} {1:.2f}".format(
                 "Proposals per second",
-                details["online_thinning"]
-                * details["write_index"]
-                / details["runtime_seconds"],
+                self.read_attribute("online_thinning")
+                * self.read_attribute("write_index")
+                / self.read_attribute("runtime_seconds"),
             )
         )
-        print("{0:30} {1}".format("Proposals saved to disk", details["write_index"]))
-        print("{0:30} {1:.2f}".format("Acceptance rate", details["acceptance_rate"]))
-        print("{0:30} {1}".format("Sampler initiate time", details["start_time"]))
-        print("{0:30} {1}".format("Sampler terminate time", details["end_time"]))
+        print(
+            "{0:30} {1}".format(
+                "Proposals saved to disk", self.read_attribute("write_index")
+            )
+        )
+        print(
+            "{0:30} {1:.2f}".format(
+                "Acceptance rate", self.read_attribute("acceptance_rate")
+            )
+        )
+        print(
+            "{0:30} {1}".format(
+                "Sampler initiate time", self.read_attribute("start_time")
+            )
+        )
+        print(
+            "{0:30} {1}".format(
+                "Sampler terminate time", self.read_attribute("end_time")
+            )
+        )
         details.pop("sampler")
         details.pop("proposals")
         details.pop("write_index")
@@ -368,7 +417,7 @@ class Samples:
         print("{:^{width}}".format("Sampler specific attributes", width=width))
         print("━" * width)
         for key in details:
-            print("{0:30} {1}".format(key, details[key]))"""
+            print("{0:30} {1}".format(key, details[key]))
 
 
 def combine_samples(
