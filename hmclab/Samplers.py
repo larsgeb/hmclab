@@ -764,8 +764,6 @@ class _AbstractSampler(_ABC):
         return self.functions_to_diagnose + self.sampler_specific_functions_to_diagnose
 
     def load_results(self, burn_in: int = 0) -> _numpy.array:
-        # TODO
-        raise NotImplementedError()
         assert burn_in >= 0
 
         from hmclab.Samples import Samples as _Samples
