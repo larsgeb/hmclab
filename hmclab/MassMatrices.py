@@ -49,7 +49,12 @@ class _AbstractMassMatrix(_ABC):
         raise _AbstractMethodError()
 
     @_abstractmethod
-    def kinetic_energy_gradient(self, momentum: _numpy.ndarray) -> _numpy.ndarray:
+    def kinetic_energy_gradient(
+        self,
+        momentum: _numpy.ndarray,
+        position: _numpy.ndarray = None,
+        g: _numpy.ndarray = None,
+    ) -> _numpy.ndarray:
         """Abstract method for computing kinetic energy gradient for a given
         momentum.
 
@@ -66,6 +71,12 @@ class _AbstractMassMatrix(_ABC):
     @staticmethod
     def create_default(dimensions: int) -> "_AbstractMassMatrix":
         raise _AbstractMethodError()
+
+    def accept(self):
+        pass
+
+    def reject(self):
+        pass
 
 
 class Unit(_AbstractMassMatrix):
@@ -101,7 +112,12 @@ class Unit(_AbstractMassMatrix):
             raise ValueError()
         return 0.5 * (momentum.T @ momentum).item(0)
 
-    def kinetic_energy_gradient(self, momentum: _numpy.ndarray) -> _numpy.ndarray:
+    def kinetic_energy_gradient(
+        self,
+        momentum: _numpy.ndarray,
+        position: _numpy.ndarray = None,
+        g: _numpy.ndarray = None,
+    ) -> _numpy.ndarray:
         """
 
         Parameters
@@ -181,7 +197,12 @@ class Diagonal(_AbstractMassMatrix):
             raise ValueError()
         return 0.5 * _numpy.vdot(momentum, self.inverse_diagonal * momentum)
 
-    def kinetic_energy_gradient(self, momentum: _numpy.ndarray) -> _numpy.ndarray:
+    def kinetic_energy_gradient(
+        self,
+        momentum: _numpy.ndarray,
+        position: _numpy.ndarray = None,
+        g: _numpy.ndarray = None,
+    ) -> _numpy.ndarray:
         """
 
         Parameters
@@ -263,7 +284,12 @@ class Full(_AbstractMassMatrix):
             momentum, _cho_solve((self.cholesky, self.cholesky_lower), momentum)
         )
 
-    def kinetic_energy_gradient(self, momentum: _numpy.ndarray) -> _numpy.ndarray:
+    def kinetic_energy_gradient(
+        self,
+        momentum: _numpy.ndarray,
+        position: _numpy.ndarray = None,
+        g: _numpy.ndarray = None,
+    ) -> _numpy.ndarray:
         """
 
         Parameters
@@ -301,14 +327,214 @@ class Full(_AbstractMassMatrix):
         return Full(mass_matrix, rng=rng)
 
 
+class BFGS(_AbstractMassMatrix):
+    ms = []
+    gs = []
+    succesful_updates = 0
+    attempted_updates = 0
+
+    succesful_updates_current = 0
+    attempted_updates_current = 0
+
+    def __init__(
+        self,
+        dimensions: int,
+        m: _numpy.ndarray,
+        g: _numpy.ndarray,
+        Minv: _numpy.ndarray = None,
+        greedy: bool = False,
+        rng: _numpy.random.Generator = None,
+    ):
+        """
+        Initialise the BFGS iteration.
+
+        :param dimensions: number of model-space dimensions
+        :param Minv: initial mass matrix inverse
+        :param m: current model vector
+        :param g: current gradient
+
+        The matrix Minv plays the role of the inverse mass matrix, which ideally is the inverse Hessian, i.e., the covariance matrix.
+        """
+
+        self.greedy = greedy
+
+        if rng is not None:
+            self.rng = rng
+
+        self.dimensions = dimensions
+
+        assert m.shape == (self.dimensions, 1), f"{m.shape}"
+        assert g.shape == (self.dimensions, 1), f"{g.shape}"
+
+        if Minv is None:
+            self.Minv = _numpy.eye(dimensions)
+        else:
+            self.Minv = Minv
+
+        LT = _numpy.linalg.cholesky(self.Minv).transpose()
+        self.LTinv = _numpy.linalg.inv(LT)
+
+        self.m = m
+        self.g = g
+
+        self.save()
+
+    def kinetic_energy(self, momentum: _numpy.ndarray) -> float:
+        if momentum.shape != (self.dimensions, 1):
+            raise ValueError()
+
+        return 0.5 * (momentum.T @ self.Minv @ momentum).item()
+
+    def kinetic_energy_gradient(
+        self,
+        momentum: _numpy.ndarray,
+        position: _numpy.ndarray = None,
+        g: _numpy.ndarray = None,
+    ) -> _numpy.ndarray:
+
+        if momentum.shape != (self.dimensions, 1):
+            raise ValueError()
+
+        if position is not None and g is not None:
+            self._update(position, g)
+
+        return self.Minv @ momentum
+
+    def accept(self):
+
+        self.consolidate_updates()
+        self.save()
+
+        self.attempted_updates += self.attempted_updates_current
+        self.succesful_updates += self.succesful_updates_current
+
+        self.attempted_updates_current = 0
+        self.succesful_updates_current = 0
+
+    def freeze(self, cast=False):
+
+        if cast:
+            return Full(_numpy.linalg.inv(self.Minv), rng=self.rng)
+
+        def nothing(*args, **kwargs):
+            pass
+
+        self.accept = nothing
+        self.reject = nothing
+        self.update = nothing
+        self._update = nothing
+
+    def reject(self):
+
+        self.reset()
+
+        self.attempted_updates_current = 0
+        self.succesful_updates_current = 0
+
+    def save(self):
+        self.backup = self.Minv.copy(), self.m.copy(), self.g.copy()
+
+    def reset(self):
+        self.Minv, self.m, self.g = self.backup
+        self.ms, self.gs = [], []
+
+    def update(self, m, g):
+
+        self.ms.append(m)
+        self.gs.append(g)
+
+        if self.greedy:
+            self.consolidate_updates()
+
+    def consolidate_updates(self):
+
+        for m, g in zip(self.ms, self.gs):
+            self._update(m, g)
+
+        ms = []
+        gs = []
+
+    def _update(self, m, g):
+        """
+        Update BFGS matrix and perform Cholesky decomposition.
+
+        :param m: current model vector
+        :param g: current gradient
+        """
+
+        backup = self.Minv.copy(), self.m.copy(), self.g.copy()
+
+        # Compute differences and update vectors.
+        s = m - self.m
+        y = g - self.g
+
+        self.m = m
+        self.g = g
+
+        # Compute update of BFGS matrix.
+        if (s.T @ y) > 0.0:
+            rho = 1.0 / (s.T @ y)
+            I = _numpy.identity(self.dimensions)
+            sy = rho * (s @ y.T)
+
+            l = I - sy
+            r = I - sy.T
+
+            ss = rho * (s @ s.T)
+
+            self.Minv = ((l @ self.Minv) @ r) + ss
+
+        # Compute Cholesky decomposition.
+
+        self.attempted_updates_current += 1
+        try:
+            LT = _numpy.linalg.cholesky(self.Minv).transpose()
+            self.LTinv = _numpy.linalg.inv(LT)
+            self.succesful_updates_current += 1
+        except _numpy.linalg.LinAlgError as e:
+            print(e)
+            print("Relevant quantities (s.T @ y, m):")
+            print(s.T @ y, m)
+            self.Minv, self.m, self.g = backup
+
+    def generate_momentum(self, repeat=1) -> _numpy.ndarray:
+
+        momentum = self.rng.normal(size=(self.dimensions, repeat))
+        momentum = self.LTinv.dot(momentum)
+
+        assert momentum.shape == (self.dimensions, repeat)
+
+        return momentum
+
+    @property
+    def matrix(self):
+        return _numpy.linalg.inv(self.Minv)
+
+    @staticmethod
+    def create_default(dimensions: int, rng: _numpy.random.Generator = None) -> "Full":
+        minv = _numpy.eye(dimensions)
+        return BFGS(
+            dimensions,
+            _numpy.zeros((dimensions, 1)),
+            _numpy.ones((dimensions, 1)),
+            minv,
+            rng=rng,
+        )
+
+
+"""
 class LBFGS(_AbstractMassMatrix):
-    """The experimental adaptive LBFGS mass matrix.
+    ""The experimental adaptive LBFGS mass matrix.
+
+
+    UNTESTED
+
 
     .. warning::
 
         This mass matrix is not guaranteed to produce valid Markov chains.
 
-    """
+    ""
 
     def __init__(
         self,
@@ -320,7 +546,7 @@ class LBFGS(_AbstractMassMatrix):
         update_interval: int = 1,
         rng: _numpy.random.Generator = None,
     ):
-        """Constructor for LBFGS-style mass matrices."""
+        ""Constructor for LBFGS-style mass matrices.""
 
         if starting_position is None or starting_gradient is None:
             starting_gradient = _numpy.ones((dimensions, 1))
@@ -353,11 +579,15 @@ class LBFGS(_AbstractMassMatrix):
             raise ValueError()
         return 0.5 * _numpy.vdot(momentum, self.Hinv(momentum))
 
-    def kinetic_energy_gradient(self, momentum: _numpy.ndarray) -> _numpy.ndarray:
+    def kinetic_energy_gradient(
+        self,
+        momentum: _numpy.ndarray,
+        position: _numpy.ndarray = None,
+        g: _numpy.ndarray = None,
+    ) -> _numpy.ndarray:
         if momentum.shape != (self.dimensions, 1):
             raise ValueError()
         return self.Hinv(momentum)
-
     def generate_momentum(self) -> _numpy.ndarray:
         return self.S(self.rng.normal(size=(self.dimensions, 1)))
 
@@ -381,6 +611,8 @@ class LBFGS(_AbstractMassMatrix):
 
         rho = 1.0 / _numpy.vdot(s_update, y_update)
         # Do nothing unless rho is positive.
+
+        print(rho)
 
         if rho > 0 and not _numpy.isnan(rho) and not _numpy.isinf(rho):
 
@@ -449,7 +681,8 @@ class LBFGS(_AbstractMassMatrix):
                 v_update, u_update
             )
         else:
-            print(f"Not updating. Rho: {rho}")
+            pass
+            # print(f"Not updating. Rho: {rho}")
 
     def S(self, h):
 
@@ -516,3 +749,4 @@ class LBFGS(_AbstractMassMatrix):
     @staticmethod
     def create_default(dimensions: int, rng: _numpy.random.Generator = None) -> "LBFGS":
         return LBFGS(dimensions, rng=rng)
+"""

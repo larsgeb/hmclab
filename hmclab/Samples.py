@@ -19,6 +19,7 @@ class Samples:
     mode = None
     filename = None
     directory = None
+    burn_in = 0
 
     def __init__(self, filename, burn_in=None, mode="r", overwrite=None):
 

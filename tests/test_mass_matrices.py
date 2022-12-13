@@ -171,39 +171,3 @@ def test_full_massmatrix():
 
     with _pytest.raises(AssertionError):
         _MassMatrices.Full(non_symmetric_matrix)
-
-
-@_pytest.mark.parametrize("dimensions", dimensions)
-@_pytest.mark.parametrize("max_determinant_change", [1e-3, 1e-1, 1e1])
-@_pytest.mark.parametrize("update_interval", [1, 5])
-def test_lbfgs_massmatrix(
-    dimensions,
-    max_determinant_change,
-    update_interval,
-):
-    """Test all parts of the L-BFGS mass matrix that aren't hit yet."""
-
-    # Create the object
-    mass_matrix = _MassMatrices.LBFGS(
-        dimensions,
-        max_determinant_change=max_determinant_change,
-        update_interval=update_interval,
-    )
-
-    target_distribution = _Distributions.Normal.create_default(
-        dimensions, diagonal=True
-    )
-
-    for _ in range(100):
-        sample = target_distribution.generate()
-        gradient = target_distribution.gradient(sample)
-        mass_matrix.update(sample, gradient)
-
-    sample = target_distribution.generate()
-    gradient = target_distribution.gradient(sample)
-
-    # Adding the same sample many times is meant to force non-updates
-    for _ in range(100):
-        mass_matrix.update(sample, gradient)
-
-    mass_matrix.logdet()

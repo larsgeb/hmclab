@@ -1487,6 +1487,9 @@ class HMC(_AbstractSampler):
             self.current_model = _numpy.copy(self.proposed_model)
             self.current_x = self.proposed_x
             self.accepted_proposals += 1
+            self.mass_matrix.accept()
+        else:
+            self.mass_matrix.reject()
 
     def autotune(self, acceptance_rate):
         # Write out parameters
@@ -1525,6 +1528,7 @@ class HMC(_AbstractSampler):
         # Make sure not to alter a view but a copy of arrays ---------------------------
         position = self.current_model.copy()
         momentum = self.current_momentum.copy()
+        dXdpos = None
 
         if self.randomize_stepsize:
             local_stepsize = self.rng.uniform(0.5, 1.5) * self.stepsize
@@ -1533,7 +1537,9 @@ class HMC(_AbstractSampler):
 
         # Leapfrog integration ---------------------------------------------------------
         position += (
-            0.5 * local_stepsize * self.mass_matrix.kinetic_energy_gradient(momentum)
+            0.5
+            * local_stepsize
+            * self.mass_matrix.kinetic_energy_gradient(momentum, position, dXdpos)
         )
 
         self.distribution.corrector(position, momentum)
@@ -1553,20 +1559,24 @@ class HMC(_AbstractSampler):
         # Integration loop
         for i in integration_iterator:
             # Momentum step
-            momentum -= local_stepsize * self.distribution.gradient(position)
+            dXdpos = self.distribution.gradient(position)
+            momentum -= local_stepsize * dXdpos
             # Position step
             position += local_stepsize * self.mass_matrix.kinetic_energy_gradient(
-                momentum
+                momentum, position, dXdpos
             )
             # Correct bounds
             self.distribution.corrector(position, momentum)
 
         # Full momentum and half step position after loop ------------------------------
         # Momentum step
-        momentum -= local_stepsize * self.distribution.gradient(position)
+        dXdpos = self.distribution.gradient(position)
+        momentum -= local_stepsize * dXdpos
         # Position step
         position += (
-            0.5 * local_stepsize * self.mass_matrix.kinetic_energy_gradient(momentum)
+            0.5
+            * local_stepsize
+            * self.mass_matrix.kinetic_energy_gradient(momentum, position, dXdpos)
         )
         self.distribution.corrector(position, momentum)
 
@@ -1595,44 +1605,55 @@ class HMC(_AbstractSampler):
         # Make sure not to alter a view but a copy of the passed arrays.
         position = self.current_model.copy()
         momentum = self.current_momentum.copy()
+        dXdpos = None
 
         # Leapfrog integration -------------------------------------------------
         for i in range(self.amount_of_steps):
 
             # A1
-            position += a1 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            position += a1 * self.mass_matrix.kinetic_energy_gradient(
+                momentum, position, dXdpos
+            )
             self.distribution.corrector(position, momentum)
 
             # B1
-            potential_gradient = self.distribution.gradient(position)
-            momentum -= b1 * potential_gradient
+            dXdpos = self.distribution.gradient(position)
+            momentum -= b1 * dXdpos
 
             # A2
-            position += a2 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            position += a2 * self.mass_matrix.kinetic_energy_gradient(
+                momentum, position, dXdpos
+            )
             self.distribution.corrector(position, momentum)
 
             # B2
-            potential_gradient = self.distribution.gradient(position)
-            momentum -= b2 * potential_gradient
+            dXdpos = self.distribution.gradient(position)
+            momentum -= b2 * dXdpos
 
             # A3
-            position += a3 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            position += a3 * self.mass_matrix.kinetic_energy_gradient(
+                momentum, position, dXdpos
+            )
             self.distribution.corrector(position, momentum)
 
             # B2
-            potential_gradient = self.distribution.gradient(position)
-            momentum -= b2 * potential_gradient
+            dXdpos = self.distribution.gradient(position)
+            momentum -= b2 * dXdpos
 
             # A2
-            position += a2 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            position += a2 * self.mass_matrix.kinetic_energy_gradient(
+                momentum, position, dXdpos
+            )
             self.distribution.corrector(position, momentum)
 
             # B1
-            potential_gradient = self.distribution.gradient(position)
-            momentum -= b1 * potential_gradient
+            dXdpos = self.distribution.gradient(position)
+            momentum -= b1 * dXdpos
 
             # A1
-            position += a1 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            position += a1 * self.mass_matrix.kinetic_energy_gradient(
+                momentum, position, dXdpos
+            )
             self.distribution.corrector(position, momentum)
 
         # For the update
@@ -1660,36 +1681,45 @@ class HMC(_AbstractSampler):
         # Make sure not to alter a view but a copy of the passed arrays.
         position = self.current_model.copy()
         momentum = self.current_momentum.copy()
+        dXdpos = None
 
         # Leapfrog integration -------------------------------------------------
         for i in range(self.amount_of_steps):
 
             # A1
-            position += a1 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            position += a1 * self.mass_matrix.kinetic_energy_gradient(
+                momentum, position, dXdpos
+            )
             self.distribution.corrector(position, momentum)
 
             # B1
-            potential_gradient = self.distribution.gradient(position)
-            momentum -= b1 * potential_gradient
+            dXdpos = self.distribution.gradient(position)
+            momentum -= b1 * dXdpos
 
             # A2
-            position += a2 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            position += a2 * self.mass_matrix.kinetic_energy_gradient(
+                momentum, position, dXdpos
+            )
             self.distribution.corrector(position, momentum)
 
             # B2
-            potential_gradient = self.distribution.gradient(position)
-            momentum -= b2 * potential_gradient
+            dXdpos = self.distribution.gradient(position)
+            momentum -= b2 * dXdpos
 
             # A2
-            position += a2 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            position += a2 * self.mass_matrix.kinetic_energy_gradient(
+                momentum, position, dXdpos
+            )
             self.distribution.corrector(position, momentum)
 
             # B1
-            potential_gradient = self.distribution.gradient(position)
-            momentum -= b1 * potential_gradient
+            dXdpos = self.distribution.gradient(position)
+            momentum -= b1 * dXdpos
 
             # A1
-            position += a1 * self.mass_matrix.kinetic_energy_gradient(momentum)
+            position += a1 * self.mass_matrix.kinetic_energy_gradient(
+                momentum, position, dXdpos
+            )
             self.distribution.corrector(position, momentum)
 
         self.proposed_model = position.copy()
@@ -2257,6 +2287,7 @@ class HMC_visual(_AbstractVisualSampler, HMC):
 
         position = self.current_model.copy()
         momentum = self.current_momentum.copy()
+        dXdpos = None
 
         # These are the positions stored for animating the trajectory
         positions_x = _numpy.array([])
@@ -2279,7 +2310,9 @@ class HMC_visual(_AbstractVisualSampler, HMC):
 
         # Leapfrog integration ---------------------------------------------------------
         position += (
-            0.5 * local_stepsize * self.mass_matrix.kinetic_energy_gradient(momentum)
+            0.5
+            * local_stepsize
+            * self.mass_matrix.kinetic_energy_gradient(momentum, position, dXdpos)
         )
 
         line.set_xdata(
@@ -2337,11 +2370,13 @@ class HMC_visual(_AbstractVisualSampler, HMC):
 
         # Integration loop
         for i in integration_iterator:
+
             # Momentum step
-            momentum -= local_stepsize * self.distribution.gradient(position)
+            dXdpos = self.distribution.gradient(position)
+            momentum -= local_stepsize * dXdpos
             # Position step
             position += local_stepsize * self.mass_matrix.kinetic_energy_gradient(
-                momentum
+                momentum, position, dXdpos
             )
 
             # Correct bounds
@@ -2372,10 +2407,13 @@ class HMC_visual(_AbstractVisualSampler, HMC):
 
         # Full momentum and half step position after loop ------------------------------
         # Momentum step
-        momentum -= local_stepsize * self.distribution.gradient(position)
+        dXdpos = self.distribution.gradient(position)
+        momentum -= local_stepsize * dXdpos
         # Position step
         position += (
-            0.5 * local_stepsize * self.mass_matrix.kinetic_energy_gradient(momentum)
+            0.5
+            * local_stepsize
+            * self.mass_matrix.kinetic_energy_gradient(momentum, position, dXdpos)
         )
         self.distribution.corrector(position, momentum)
 
