@@ -28,10 +28,11 @@ from hmclab.Distributions.base import (
     _AbstractDistribution,
 )
 from hmclab.Distributions.LinearMatrix import LinearMatrix
-
 from hmclab.Distributions.SourceLocation import SourceLocation2D
 from hmclab.Distributions.SourceLocation import SourceLocation3D
 from hmclab.Distributions.Transforms import TransformToLogSpace
+from hmclab.Distributions.LayeredRayTracing2D import LayeredRayTracing2D
+
 
 __all__ = [
     "_AbstractDistribution",
@@ -46,6 +47,7 @@ __all__ = [
     "LinearMatrix",
     "SourceLocation2D",
     "SourceLocation3D",
+    "LayeredRayTracing2D",
     "Mixture",
     "EvaluationLimiter_ClassConstructor",
     "TransformToLogSpace",
