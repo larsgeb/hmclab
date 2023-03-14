@@ -53,54 +53,60 @@ def gradient_descent(
             disable=disable_progressbar,
         )
 
-    # Compute initial misfit
-    x = target.misfit(m)
+    try:
 
-    # Create the returns
-    xs = []
-    ms = []
-
-    # Add starting model and misfit to the returns
-    xs.append(x)
-    ms.append(m)
-
-    for _ in progressbar:
-
-        # Compute gradient
-        g = target.gradient(m)
-
-        if regularization is not None:
-            preconditioner = _numpy.diag(1.0 / (_numpy.diag(g @ g.T) + regularization))
-            # Update model
-            g = preconditioner @ g
-
-        # Update model
-        m = m - epsilon * g
-
-        # Compute misfit and store
+        # Compute initial misfit
         x = target.misfit(m)
 
-        if _numpy.isnan(x) or _numpy.isinf(x):
-            # Reset model and misfit
-            x = xs[-1]
-            m = ms[-1]
-            # And exit loop
-            progressbar.close()
-            print("Encountered infinite or NaN values, terminating")
-            break
+        # Create the returns
+        xs = []
+        ms = []
 
-        if x > xs[-1] and strictly_monotonic:
-            # Reset model and misfit
-            x = xs[-1]
-            m = ms[-1]
-            # And exit loop
-            progressbar.close()
-            print("Value is not strictly decreasing, terminating")
-            break
-
-        progressbar.set_description(f"Misfit: {x:.1e}")
-        # Place current model and misfit
+        # Add starting model and misfit to the returns
         xs.append(x)
         ms.append(m)
+
+        for _ in progressbar:
+
+            # Compute gradient
+            g = target.gradient(m)
+
+            if regularization is not None:
+                preconditioner = _numpy.diag(
+                    1.0 / (_numpy.diag(g @ g.T) + regularization)
+                )
+                # Update model
+                g = preconditioner @ g
+
+            # Update model
+            m = m - epsilon * g
+
+            # Compute misfit and store
+            x = target.misfit(m)
+
+            if _numpy.isnan(x) or _numpy.isinf(x):
+                # Reset model and misfit
+                x = xs[-1]
+                m = ms[-1]
+                # And exit loop
+                progressbar.close()
+                print("Encountered infinite or NaN values, terminating")
+                break
+
+            if x > xs[-1] and strictly_monotonic:
+                # Reset model and misfit
+                x = xs[-1]
+                m = ms[-1]
+                # And exit loop
+                progressbar.close()
+                print("Value is not strictly decreasing, terminating")
+                break
+
+            progressbar.set_description(f"Misfit: {x:.1e}")
+            # Place current model and misfit
+            xs.append(x)
+            ms.append(m)
+    except KeyboardInterrupt:
+        pass
 
     return m, x, _numpy.array(ms), _numpy.array(xs)
