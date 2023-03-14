@@ -38,11 +38,10 @@ def test_basic_sampling(
     autotuning: bool,
     extension: str,
 ):
-
     try:
         distribution: _ad = distribution_class.create_default(dimensions)
     except _InvalidCaseError:
-        return 0
+        return _pytest.skip("Invalid case")
 
     sampler_instance = sampler_class()
 
@@ -99,11 +98,10 @@ def test_samples_file(
     autotuning: bool,
     extension: str,
 ):
-
     try:
         distribution: _ad = distribution_class.create_default(dimensions)
     except _InvalidCaseError:
-        return 0
+        return _pytest.skip("Invalid case")
 
     sampler_instance = sampler_class()
 
@@ -160,7 +158,6 @@ def test_samples_file(
 
 
 def test_improper_name():
-
     distribution: _ad = _hmclab.Distributions.Normal.create_default(10)
     sampler_instance = _hmclab.Samplers.RWMH()
     assert isinstance(sampler_instance, _as)
@@ -201,7 +198,6 @@ def test_improper_name():
 
 @_pytest.mark.parametrize("sampler_class", sampler_classes)
 def test_widget_functions(sampler_class: _as):
-
     distribution: _ad = _hmclab.Distributions.Normal.create_default(10)
     sampler_instance = sampler_class()
     assert isinstance(sampler_instance, _as)
@@ -247,7 +243,6 @@ def test_widget_functions(sampler_class: _as):
 @_pytest.mark.parametrize("diagnostic_mode", [True, False])
 @_pytest.mark.parametrize("sampler_class", sampler_classes)
 def test_diagnostic_mode(sampler_class: _as, diagnostic_mode: bool):
-
     distribution: _ad = _hmclab.Distributions.Normal.create_default(10)
     sampler_instance = sampler_class()
     assert isinstance(sampler_instance, _as)
@@ -288,7 +283,6 @@ def test_diagnostic_mode(sampler_class: _as, diagnostic_mode: bool):
 @_pytest.mark.parametrize("seed", [None, 42])
 @_pytest.mark.parametrize("sampler_class", sampler_classes)
 def test_seed(sampler_class: _as, seed: float):
-
     distribution: _ad = _hmclab.Distributions.Normal.create_default(10)
     sampler_instance = sampler_class(seed=seed)
     assert isinstance(sampler_instance, _as)
@@ -326,7 +320,6 @@ def test_seed(sampler_class: _as, seed: float):
 
 @_pytest.mark.parametrize("sampler_class", sampler_classes)
 def test_initial_model(sampler_class: _as):
-
     distribution: _ad = _hmclab.Distributions.Normal.create_default(10)
     sampler_instance = sampler_class()
     assert isinstance(sampler_instance, _as)
@@ -364,7 +357,6 @@ def test_initial_model(sampler_class: _as):
 
 @_pytest.mark.parametrize("sampler_class", sampler_classes)
 def test_preexisting_file(sampler_class: _as):
-
     distribution: _ad = _hmclab.Distributions.Normal.create_default(10)
     sampler_instance = sampler_class()
     assert isinstance(sampler_instance, _as)
@@ -397,7 +389,6 @@ def test_preexisting_file(sampler_class: _as):
 
 @_pytest.mark.parametrize("sampler_class", sampler_classes)
 def test_plot(sampler_class: _as):
-
     distribution: _ad = _hmclab.Distributions.Normal.create_default(10)
     sampler_instance = sampler_class()
     assert isinstance(sampler_instance, _as)
@@ -446,7 +437,6 @@ def test_parallel_sampling(
     exchange_interval: int,
     exchange: bool,
 ):
-
     distributions = [
         _hmclab.Distributions.Normal.create_default(dimensions)
         for _ in range(parallel_chains)

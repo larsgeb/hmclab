@@ -14,7 +14,6 @@ from copy import copy, deepcopy
 
 
 class Samples:
-
     filetype = None
     mode = None
     filename = None
@@ -22,7 +21,6 @@ class Samples:
     burn_in = 0
 
     def __init__(self, filename, burn_in=None, mode="r", overwrite=None):
-
         filename_stripped, file_extension = _os.path.splitext(filename)
 
         # Check file extension
@@ -42,7 +40,6 @@ class Samples:
         self.filename = filename
 
         if mode == "r":
-
             # Check for irrelevant parameters in read mode
             if overwrite is not None:
                 raise AttributeError("Overwrite is not relevant when writing samples.")
@@ -128,7 +125,6 @@ class Samples:
             raise AttributeError(f"Unkown file mode `{mode}` for samples file.")
 
     def setup_write_hdf5(self):
-
         # Create file, fail if exists and flag == w-
         if self.overwrite:
             flag = "w"
@@ -148,7 +144,6 @@ class Samples:
         self._hdf5_dataset.set_fill_value = _numpy.nan
 
     def setup_write_numpy(self):
-
         if _os.path.isfile(self.filename) and self.overwrite:
             _os.remove(self.filename)
 
@@ -173,9 +168,6 @@ class Samples:
             self._hdf5_dataset.attrs[name] = value
         elif self.filetype == "NPY":
             self._numpy_attributes[name] = value
-            if not _os.path.exists(self.filename):
-                print("NumPy samples file does not exist, not writing attributes")
-                return
             with open(f"{self.filename}.pkl", "wb") as f:
                 _pickle.dump(self._numpy_attributes, f)
         else:
@@ -231,7 +223,6 @@ class Samples:
         return result
 
     def __deepcopy__(self, memo):
-
         if self.mode == "w":
             return Samples(self.filename, mode="w", overwrite=True)
         else:
@@ -249,7 +240,6 @@ class Samples:
             if hasattr(self, "_hdf5_filehandle"):
                 self._hdf5_filehandle.close()
         elif self.filetype == "NPY":
-
             # Close the appendable array
             if hasattr(self, "_numpy_appendable_array"):
                 self._numpy_appendable_array.close()
@@ -294,7 +284,6 @@ class Samples:
 
         # Check if we should write to disk
         if len(self._buffer) > self._buffer_interval:
-
             delta_time = _time() - self._last_append_time
             self._last_append_time = _time()
             if delta_time < 1.0:
@@ -318,7 +307,6 @@ class Samples:
 
         assert self.mode == "w"
         if self.filetype == "HDF5":
-
             new_samples_count = array.shape[1]
             size_before = _numpy.copy(self._hdf5_dataset.shape)
             size_after = size_before.copy()
@@ -347,7 +335,6 @@ class Samples:
             raise AttributeError(f"Unkown filetype `{self.filetype}`.")
 
     def print_details(self):
-
         size = _shutil.get_terminal_size((40, 20))
         width = size[0]
         if _in_notebook():

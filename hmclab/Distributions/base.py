@@ -1286,9 +1286,14 @@ class Mixture(_AbstractDistribution):
 
     def misfit(self, m):
         misfits = [d.misfit(m) for d in self.distributions]
-        return self.misfit_bounds(m) - _numpy.log(
-            _numpy.sum(_numpy.exp(_numpy.log(self.probabilities) - misfits))
-        )
+
+
+        with _numpy.errstate(divide = 'ignore'):
+            _misfit = self.misfit_bounds(m) - _numpy.log(
+                _numpy.sum(_numpy.exp(_numpy.log(self.probabilities) - misfits))
+            )
+
+        return _misfit
 
     def gradient(self, m):
 

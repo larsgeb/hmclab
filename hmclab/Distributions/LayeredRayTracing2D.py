@@ -15,13 +15,13 @@ from functools import partial as _partial
 from hmclab.Distributions import _AbstractDistribution
 from hmclab.Helpers.CustomExceptions import InvalidCaseError as _InvalidCaseError
 
-_cmap = _matplotlib.cm.get_cmap("nipy_spectral")
+
+_cmap = _matplotlib.colormaps.get_cmap("nipy_spectral")
 
 ############################################################################
 
 
 class LayeredRayTracing2D(_AbstractDistribution):
-
     description = {
         "Free parameter": "Layer velocities",
         "Control on dimensionality": "Number of layers",
@@ -47,7 +47,6 @@ class LayeredRayTracing2D(_AbstractDistribution):
         traveltimes_observed=None,
         tolerance=None,
     ) -> None:
-
         self.layer_interfaces = _check1darray(layer_interfaces)
         self.shot_offset = _check1darray(shot_offset)
         self.receiver_depths = _check1darray(receiver_depths)
@@ -127,7 +126,6 @@ class LayeredRayTracing2D(_AbstractDistribution):
         return TTS, DTS
 
     def gradient(self, velocities):
-
         velocities = velocities.flatten()
         if (self.last_model is None) or not (
             _numpy.allclose(self.last_model, velocities)
@@ -148,7 +146,6 @@ class LayeredRayTracing2D(_AbstractDistribution):
         raise NotImplementedError
 
     def forward(self, velocities, force_new_angles=False, verbose=None):
-
         if self.solved_angles is None or force_new_angles:
             angles = 100
         else:
@@ -194,7 +191,6 @@ class LayeredRayTracing2D(_AbstractDistribution):
         raise _InvalidCaseError()
 
     def fit_homogeneous(self):
-
         if self.traveltimes_observed is None:
             raise AttributeError("No observations provided")
 
@@ -224,7 +220,6 @@ class LayeredRayTracing2D(_AbstractDistribution):
         return _numpy.ones((self.dimensions)) * self.approximate_speed
 
     def plot_data(self):
-
         if self.approximate_speed is None:
             self.fit_homogeneous()
 
@@ -446,7 +441,6 @@ def _search_angles(
     parallel=False,
     processes=8,
 ):
-
     # Create a lookup table for all computed values of take-off angles
     lookup_table = _numpy.empty((0, 3))
 
@@ -497,15 +491,12 @@ def _search_angles(
 
     # Compute refraction for all take-off angles
     for angle, result in zip(angles, results):
-
         # If results are not failing...
         if result is not None:
-
             RAYCO, TT, DIST = result
 
             # ... then check if the ray made it to the receiver line ...
             if (RAYCO[-1][0]) == receivers_x:
-
                 # Then add result to look-up table
                 lookup_table = _numpy.vstack(
                     (lookup_table, _numpy.array([angle, RAYCO[-1][-1], TT]))
@@ -529,7 +520,6 @@ def _search_angles(
     # Start refining the take-off angles, while keeping track of the number of failures
     failed_refines = 0
     while not _numpy.all(converged) and failed_refines < max_attempts:
-
         # Check if we found extra rays since last pass, if so, reset failure count
         if n_converged < converged.sum():
             n_converged = converged.sum()
@@ -553,7 +543,6 @@ def _search_angles(
         refine, counts = _numpy.unique(closest_ray_above, return_counts=True)
 
         for refine_here, count in zip(refine, counts):
-
             a1 = lookup_table[refine_here - 1, 0]
             a2 = lookup_table[refine_here, 0]
 
@@ -609,7 +598,6 @@ def _search_angles(
                     )
 
             for new_angle, result in zip(new_angles, results):
-
                 if result is not None:
                     RAYCO, TT, DIST = result
                     if (RAYCO[-1][0]) == receivers_x:
@@ -656,7 +644,6 @@ def _derivative_to_layer_speeds(
     parallel=True,
     processes=8,
 ):
-
     TTS = _numpy.empty((angles.size))
     DTS = _numpy.empty((angles.size, velocities.size))
 
@@ -694,7 +681,6 @@ def _derivative_to_layer_speeds(
             )
 
     for iangle, (angle, result) in enumerate(zip(angles, results)):
-
         RAYCO, TT, _, distance_per_layer = result
         TTS[iangle] = TT
         DTS[iangle, :] = distance_per_layer
@@ -715,7 +701,6 @@ def _plot_rays_and_model(
     parallel=True,
     processes=8,
 ):
-
     fig = _plt.figure(figsize=(12, 12))
     ax1 = _plt.gca()
     _plt.title("Ray tracing vertical profile")
@@ -757,7 +742,6 @@ def _plot_rays_and_model(
         )
 
     for result, angle in zip(results, angles):
-
         if result is not None:
             RAYCO, TT, DIST = result
 

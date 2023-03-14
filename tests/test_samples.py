@@ -33,11 +33,10 @@ def test_samples_detail(
     proposals: int,
     extension: str,
 ):
-
     try:
         distribution: _ad = distribution_class.create_default(dimensions)
     except _InvalidCaseError:
-        return 0
+        return _pytest.skip("Invalid case")
 
     sampler_instance = sampler_class()
 
@@ -89,11 +88,10 @@ def test_samples_concat(
     proposals: int,
     extension: str,
 ):
-
     try:
         distribution: _ad = distribution_class.create_default(dimensions)
     except _InvalidCaseError:
-        return 0
+        return _pytest.skip("Invalid case")
 
     sampler_instance = sampler_class()
 
@@ -132,7 +130,6 @@ def test_samples_concat(
     assert combined_samples.shape[0] == distribution.dimensions + 1
 
     for filename in filenames:
-
         # Remove the file
         _os.remove(filename)
         if extension == "npy":
@@ -140,7 +137,6 @@ def test_samples_concat(
 
 
 def test_samples_exception_cases():
-
     filename = "non_existent_file.h5"
 
     try:

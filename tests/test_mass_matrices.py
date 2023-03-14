@@ -19,7 +19,6 @@ subclasses = _MassMatrices._AbstractMassMatrix.__subclasses__()
 @_pytest.mark.parametrize("mmclass", subclasses)
 @_pytest.mark.parametrize("dimensions", dimensions)
 def test_creation(mmclass: _MassMatrices._AbstractMassMatrix, dimensions: int):
-
     # Create the object
     mass_matrix: _MassMatrices._AbstractMassMatrix = mmclass.create_default(dimensions)
 
@@ -31,7 +30,7 @@ def test_creation(mmclass: _MassMatrices._AbstractMassMatrix, dimensions: int):
 
     assert mass_matrix.matrix.shape == (dimensions, dimensions)
 
-    return True
+    return
 
 
 @_pytest.mark.parametrize("mmclass", subclasses)
@@ -42,7 +41,6 @@ def test_generate(
     dimensions: int,
     rng: _numpy.random.Generator,
 ):
-
     # Create the object
     mass_matrix: _MassMatrices._AbstractMassMatrix = mmclass.create_default(
         dimensions, rng=rng
@@ -57,13 +55,12 @@ def test_generate(
     # Assert float type
     assert momentum.dtype is _numpy.dtype("float")
 
-    return True
+    return
 
 
 @_pytest.mark.parametrize("mmclass", subclasses)
 @_pytest.mark.parametrize("dimensions", dimensions)
 def test_kinetic_energy(mmclass: _MassMatrices._AbstractMassMatrix, dimensions: int):
-
     # Create the object
     mass_matrix: _MassMatrices._AbstractMassMatrix = mmclass.create_default(dimensions)
 
@@ -79,7 +76,7 @@ def test_kinetic_energy(mmclass: _MassMatrices._AbstractMassMatrix, dimensions: 
     with _pytest.raises(ValueError):
         kinetic_energy = mass_matrix.kinetic_energy(momentum)
 
-    return True
+    return
 
 
 @_pytest.mark.parametrize("mmclass", subclasses)
@@ -88,7 +85,6 @@ def test_kinetic_energy(mmclass: _MassMatrices._AbstractMassMatrix, dimensions: 
 def test_kinetic_energy_gradient(
     mmclass: _MassMatrices._AbstractMassMatrix, dimensions: int, stepsize_delta: float
 ):
-
     # Create the object
     mass_matrix: _MassMatrices._AbstractMassMatrix = mmclass.create_default(dimensions)
 
@@ -120,14 +116,13 @@ def test_kinetic_energy_gradient(
     with _pytest.raises(ValueError):
         kinetic_energy_gradient = mass_matrix.kinetic_energy_gradient(momentum)
 
-    return True
+    return
 
 
 @_pytest.mark.parametrize("dimensions", dimensions)
 def test_basic_sampling(
     dimensions: int,
 ):
-
     means = _numpy.zeros((dimensions, 1))
     covariance = _numpy.eye(dimensions)
     distribution = _Normal(means, covariance)

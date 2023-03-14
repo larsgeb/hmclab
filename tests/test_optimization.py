@@ -32,7 +32,7 @@ def test_basic_optimization(
     try:
         distribution: _ad = distribution_class.create_default(dimensions)
     except _InvalidCaseError:
-        return 0
+        return _pytest.skip("Invalid case")
 
     try:
         initial_model = distribution.generate()
@@ -73,7 +73,7 @@ def test_gradient_descent(
     try:
         distribution: _ad = distribution_class.create_default(dimensions)
     except _InvalidCaseError:
-        return 0
+        return _pytest.skip("Invalid case")
 
     try:
         initial_model = distribution.generate()

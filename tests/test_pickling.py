@@ -25,7 +25,7 @@ def test_creation(pclass: _Distributions._AbstractDistribution, dimensions: int)
             dimensions
         )
     except _InvalidCaseError:
-        return 0
+        return _pytest.skip("Invalid case")
 
     # Check if a subtype of mass matrices
     assert issubclass(type(distribution), _Distributions._AbstractDistribution)
@@ -44,7 +44,6 @@ def test_creation(pclass: _Distributions._AbstractDistribution, dimensions: int)
 def test_basic_sampling(
     sampler_class: _as,
 ):
-
     sampler_instance = sampler_class()
 
     assert isinstance(sampler_instance, _as)

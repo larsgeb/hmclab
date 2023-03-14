@@ -29,11 +29,10 @@ def test_basic_sampling(
     dimensions: int,
     proposals: int,
 ):
-
     try:
         distribution: _ad = distribution_class.create_default(dimensions)
     except _InvalidCaseError:
-        return 0
+        return _pytest.skip("Invalid case")
 
     sampler = sampler_class()
 

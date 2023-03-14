@@ -72,7 +72,7 @@ def test_creation(
     # Check if the distribution has right amount of dimensions
     assert distribution.dimensions == dimension_model
 
-    return True
+    return
 
 
 @_pytest.mark.parametrize("dimension_data", dimension_data)
@@ -133,7 +133,7 @@ def test_misfit(
 
     assert type(misfit) == dtype or type(misfit) == _numpy.dtype("float64")
 
-    return True
+    return
 
 
 @_pytest.mark.parametrize("dimension_data", dimension_data)
@@ -219,7 +219,7 @@ def test_misfit_bounds(
     misfit = distribution.misfit(location.astype(dtype))
 
     assert misfit == _numpy.inf, " ds"
-    return True
+    return
 
 
 @_pytest.mark.parametrize("dimension_data", dimension_data)
@@ -287,7 +287,7 @@ def test_misfit_bounds_impossible(
         ), "Something unexpected went wrong."
 
         # Required fail
-        return True
+        return
     else:
         raise RuntimeError(
             "The distribution accepted invalid bounds, this should not have happened."
@@ -376,4 +376,4 @@ def test_gradient(
     else:
         assert _numpy.allclose(gradient, 0.0)
 
-    return True
+    return

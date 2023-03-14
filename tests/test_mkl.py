@@ -37,7 +37,7 @@ def test_creation(dimensions: int, use_mkl: bool, dtype):
     # Check if the right amount of dimensions
     assert distribution.dimensions == dimensions
 
-    return True
+    return
 
 
 @_pytest.mark.skipif(skip, reason="MKL not installed")
@@ -57,7 +57,7 @@ def test_misfit(dimensions: int, use_mkl: bool, dtype):
 
     assert type(misfit) == dtype or type(misfit) == _numpy.dtype("float64")
 
-    return True
+    return
 
 
 @_pytest.mark.skipif(skip, reason="MKL not installed")
@@ -106,7 +106,7 @@ def test_misfit_bounds(dimensions: int, use_mkl: bool, dtype):
     misfit = distribution.misfit(location)
 
     assert misfit == _numpy.inf, " ds"
-    return True
+    return
 
 
 @_pytest.mark.skipif(skip, reason="MKL not installed")
@@ -140,7 +140,6 @@ def test_misfit_bounds_impossible(dimensions: int, use_mkl: bool, dtype):
 @_pytest.mark.parametrize("use_mkl", use_mkl)
 @_pytest.mark.parametrize("dtype", dtype)
 def test_gradient(dimensions: int, delta: float, results_bag, use_mkl: bool, dtype):
-
     results_bag.test_type = "gradient"
     results_bag.class_name = "Using mkl" if use_mkl else "Not using mkl"
 
@@ -180,7 +179,7 @@ def test_gradient(dimensions: int, delta: float, results_bag, use_mkl: bool, dty
         assert _numpy.allclose(gradient, 0.0)
         results_bag.relative_error = 0
 
-    return True
+    return
 
 
 @_pytest.mark.skipif(skip, reason="MKL not installed")
@@ -195,7 +194,6 @@ def test_gradient_plots(module_results_df):
     for name, df in module_results_df[
         module_results_df.test_type == "gradient"
     ].groupby("class_name"):
-
         for dimensions, df_dim in df.groupby("dimensions"):
             if not _numpy.all(_numpy.isnan(df_dim.relative_error)):
                 _plt.scatter(

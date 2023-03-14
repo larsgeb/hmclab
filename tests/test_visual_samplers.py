@@ -6,12 +6,15 @@ import uuid as _uuid
 
 
 import numpy as _numpy
+import matplotlib as _matplotlib
 import matplotlib.pyplot as _plt
 import pytest as _pytest
 import uuid as _uuid
 
 
 import hmclab as _hmclab
+
+_matplotlib.use("QtAgg")
 
 _ad = _hmclab.Distributions._AbstractDistribution
 _as = _hmclab.Samplers._AbstractVisualSampler
@@ -54,7 +57,6 @@ def test_basic_sampling(
     animate_proposals: bool,
     animation_domain: _numpy.array,
 ):
-
     distribution = _hmclab.Distributions.Normal.create_default(dimensions)
 
     sampler_instance = sampler_class(

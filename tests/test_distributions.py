@@ -21,15 +21,13 @@ def test_creation(pclass: _Distributions._AbstractDistribution, dimensions: int)
             dimensions
         )
     except _InvalidCaseError:
-        return 0
+        return _pytest.skip("Invalid case")
 
     # Check if a subtype of mass matrices
     assert issubclass(type(distribution), _Distributions._AbstractDistribution)
 
     # Check if the right amount of dimensions
     assert distribution.dimensions == dimensions
-
-    return True
 
 
 @_pytest.mark.parametrize("pclass", subclasses)
@@ -40,16 +38,14 @@ def test_generation(pclass: _Distributions._AbstractDistribution, dimensions: in
             dimensions
         )
     except _InvalidCaseError:
-        return 0
+        return _pytest.skip("Invalid case")
 
     try:
         samples = distribution.generate(100)
     except NotImplementedError:
-        return 0
+        return _pytest.skip("Note implemented case")
 
     assert samples.shape == (distribution.dimensions, 100)
-
-    return True
 
 
 @_pytest.mark.parametrize("pclass", subclasses)
@@ -60,12 +56,12 @@ def test_normalization(pclass: _Distributions._AbstractDistribution, dimensions:
             dimensions
         )
     except _InvalidCaseError:
-        return 0
+        return _pytest.skip("Invalid case")
 
     try:
         distribution.normalize()
     except AttributeError:
-        return 0
+        return _pytest.skip("Not normalizable, skipping")
 
 
 @_pytest.mark.parametrize("pclass", subclasses)
@@ -76,7 +72,7 @@ def test_misfit(pclass: _Distributions._AbstractDistribution, dimensions: int):
             dimensions
         )
     except _InvalidCaseError:
-        return 0
+        return _pytest.skip("Invalid case")
 
     location = _numpy.ones((dimensions, 1)) + _numpy.random.rand(1)
     misfit = distribution.misfit(location)
@@ -87,7 +83,7 @@ def test_misfit(pclass: _Distributions._AbstractDistribution, dimensions: int):
         or type(misfit) == _numpy.float32
     )
 
-    return True
+    return
 
 
 @_pytest.mark.parametrize("pclass", subclasses)
@@ -98,7 +94,7 @@ def test_misfit_bounds(pclass: _Distributions._AbstractDistribution, dimensions:
             dimensions
         )
     except _InvalidCaseError:
-        return 0
+        return _pytest.skip("Invalid case")
 
     lower_bounds = _numpy.ones((dimensions, 1))
     distribution.update_bounds(lower=lower_bounds)
@@ -143,7 +139,7 @@ def test_misfit_bounds(pclass: _Distributions._AbstractDistribution, dimensions:
     misfit = distribution.misfit(location)
 
     assert misfit == _numpy.inf, " ds"
-    return True
+    return
 
 
 @_pytest.mark.parametrize("pclass", subclasses)
@@ -156,7 +152,7 @@ def test_misfit_bounds_impossible(
             dimensions
         )
     except _InvalidCaseError:
-        return 0
+        return _pytest.skip("Invalid case")
 
     lower_bounds = _numpy.ones((dimensions, 1))
     upper_bounds = 3 * _numpy.ones((dimensions, 1))
@@ -179,7 +175,6 @@ def test_gradient(
     delta: float,
     results_bag,
 ):
-
     results_bag.test_type = "gradient"
     results_bag.class_name = pclass.__name__
 
@@ -188,7 +183,7 @@ def test_gradient(
             dimensions
         )
     except _InvalidCaseError:
-        return 0
+        _pytest.skip("Invalid case")  # pragma: no cover
 
     location = _numpy.ones((dimensions, 1)) + _numpy.random.rand(1)
     gradient = distribution.gradient(location)
@@ -217,4 +212,4 @@ def test_gradient(
 
         results_bag.relative_error = 0
 
-    return True
+    return
