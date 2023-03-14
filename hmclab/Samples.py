@@ -173,6 +173,9 @@ class Samples:
             self._hdf5_dataset.attrs[name] = value
         elif self.filetype == "NPY":
             self._numpy_attributes[name] = value
+            if not _os.path.exists(self.filename):
+                print("NumPy samples file does not exist, not writing attributes")
+                return
             with open(f"{self.filename}.pkl", "wb") as f:
                 _pickle.dump(self._numpy_attributes, f)
         else:
@@ -182,9 +185,6 @@ class Samples:
         if self.filetype == "HDF5":
             return self._hdf5_dataset.attrs[name]
         elif self.filetype == "NPY":
-            # if self.mode == "w":
-            #     with open(f"{self.filename}.pkl", "rb") as f:
-            #         self._numpy_attributes = _pickle.load(f)
             return self._numpy_attributes[name]
         else:
             raise AttributeError()
@@ -253,6 +253,10 @@ class Samples:
             # Close the appendable array
             if hasattr(self, "_numpy_appendable_array"):
                 self._numpy_appendable_array.close()
+
+            if not _os.path.exists(self.filename):
+                print("NumPy samples file does not exist, not writing attributes")
+                return
 
             # Write out the last attributes if open and in write mode
             if hasattr(self, "_numpy_attributes") and self.mode == "w":
