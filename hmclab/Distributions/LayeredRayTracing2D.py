@@ -1,25 +1,3 @@
-# ------------------------------------------------------------------------
-#
-#    PestoSeis, a numerical laboratory to learn about seismology, written
-#    in the Python language.
-#    Copyright (C) 2022  Andrea Zunino
-#
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-# ------------------------------------------------------------------------
-
 """
 Calculate rays in a horizontally layered model.
 
@@ -32,9 +10,12 @@ import numpy as _numpy
 from mpl_toolkits.axes_grid1.axes_divider import (
     make_axes_locatable as _make_axes_locatable,
 )
+import multiprocess as _multiprocess
+from functools import partial as _partial
 from hmclab.Distributions import _AbstractDistribution
+from hmclab.Helpers.CustomExceptions import InvalidCaseError as _InvalidCaseError
 
-cmap = _matplotlib.cm.get_cmap("nipy_spectral")
+_cmap = _matplotlib.cm.get_cmap("nipy_spectral")
 
 ############################################################################
 
@@ -45,26 +26,47 @@ class LayeredRayTracing2D(_AbstractDistribution):
         "Free parameter": "Layer velocities",
         "Control on dimensionality": "Number of layers",
     }
+    solved_angles = None
+    last_model = None
+    traveltimes_observed = None
+    verbose = False
+
+    approximate_speed = None
+    approximate_origin_time = None
+
+    parallel = True
+    processes = 8
+
+    data_sigma = 0.0005
 
     def __init__(
         self,
         layer_interfaces,
-        shot_distances,
+        shot_offset,
         receiver_depths,
+        traveltimes_observed=None,
         tolerance=None,
     ) -> None:
 
         self.layer_interfaces = _check1darray(layer_interfaces)
-        self.shot_distances = _check1darray(shot_distances)
+        self.shot_offset = _check1darray(shot_offset)
         self.receiver_depths = _check1darray(receiver_depths)
+        if traveltimes_observed is not None:
+            self.traveltimes_observed = _check1darray(traveltimes_observed)
         self.dimensions = len(layer_interfaces)
 
-        self.data_shape = (self.shot_distances.size, self.receiver_depths.size)
+        self.data_shape = (self.shot_offset.size, self.receiver_depths.size)
+
+        self.distances = (self.receiver_depths**2 + self.shot_offset[0] ** 2) ** 0.5
 
         if tolerance is None:
             self.tolerance = 0.1 * _numpy.mean(_numpy.diff(self.receiver_depths))
         else:
             self.tolerance = tolerance
+
+        assert (
+            self.layer_interfaces.max() > receiver_depths.max()
+        ), "Last layers has to be below last receiver."
 
     def plot_rays(
         self,
@@ -78,7 +80,7 @@ class LayeredRayTracing2D(_AbstractDistribution):
     ):
         return _plot_rays_and_model(
             self.layer_interfaces,
-            self.shot_distances[shot_to_plot],
+            self.shot_offset[shot_to_plot],
             self.receiver_depths,
             angles,
             velocities,
@@ -88,14 +90,80 @@ class LayeredRayTracing2D(_AbstractDistribution):
             vlims,
         )
 
-    def misfit(self, coordinates: _numpy.ndarray) -> float:
-        return super().misfit(coordinates)
+    def misfit(
+        self, velocities: _numpy.ndarray, verbose=None, force_new_angles=False
+    ) -> float:
+        velocities = velocities.flatten()
+        if verbose is None:
+            verbose = self.verbose
+        traveltimes_synthetic = self.forward(
+            velocities, verbose=verbose, force_new_angles=force_new_angles
+        )
 
-    def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
-        return super().gradient(coordinates)
+        self.last_model = velocities
+
+        return self._misfit(self.traveltimes_observed, traveltimes_synthetic)
+
+    def _misfit(self, tts_obs, tts_syn):
+        return _numpy.nansum(
+            (tts_syn - tts_obs - _numpy.nanmean(tts_syn - tts_obs)) ** 2
+        ) / (self.data_sigma**2)
+
+    def _dmisfitdsyn(self, tts_obs, tts_syn):
+        return (tts_syn - tts_obs - _numpy.nanmean(tts_syn - tts_obs)) / (
+            self.data_sigma**2
+        )
+
+    def distance_per_layer(self, velocities):
+        TTS, DTS = _derivative_to_layer_speeds(
+            velocities=velocities,
+            interfaces=self.layer_interfaces,
+            receivers_x=self.shot_offset[0],
+            receivers_z=self.receiver_depths,
+            angles=self.solved_angles,
+            parallel=self.parallel,
+            processes=self.processes,
+        )
+        return TTS, DTS
+
+    def gradient(self, velocities):
+
+        velocities = velocities.flatten()
+        if (self.last_model is None) or not (
+            _numpy.allclose(self.last_model, velocities)
+        ):
+            self.misfit(velocities)
+
+        TTS, dTTSdSL = self.distance_per_layer(velocities)
+
+        dXdTT = self._dmisfitdsyn(tts_obs=self.traveltimes_observed, tts_syn=TTS)
+
+        nnan = _numpy.logical_not(_numpy.isnan(dXdTT))
+
+        gradient = dXdTT[nnan] @ dTTSdSL[nnan]
+
+        return (-gradient.flatten() / velocities**2)[:, None]
 
     def generate(self, repeat=1, rng=...) -> _numpy.ndarray:
         raise NotImplementedError
+
+    def forward(self, velocities, force_new_angles=False, verbose=None):
+
+        if self.solved_angles is None or force_new_angles:
+            angles = 100
+        else:
+            angles = self.solved_angles
+
+        if verbose is None:
+            verbose = self.verbose
+
+        angles, traveltimes_synthetic, lt = self.search_angles(
+            velocities, angles=angles, verbose=verbose
+        )
+
+        self.solved_angles = angles
+
+        return traveltimes_synthetic
 
     def search_angles(
         self,
@@ -105,11 +173,10 @@ class LayeredRayTracing2D(_AbstractDistribution):
         max_attempts=100,
         randomize_angle_fraction=0.1,
         verbose=False,
-        rayparameter_spacing=False,
     ):
-        angles, _, _, _, traveltimes = _search_angles(
+        angles, _, _, _, traveltimes, lt = _search_angles(
             self.layer_interfaces,
-            self.shot_distances[shot_to_solve],
+            self.shot_offset[shot_to_solve],
             self.receiver_depths,
             self.tolerance,
             velocities,
@@ -117,67 +184,101 @@ class LayeredRayTracing2D(_AbstractDistribution):
             max_attempts=max_attempts,
             randomize_angle_fraction=randomize_angle_fraction,
             verbose=verbose,
-            rayparameter_spacing=rayparameter_spacing,
+            parallel=self.parallel,
+            processes=self.processes,
         )
 
-        return angles, traveltimes
+        return angles, traveltimes, lt
+
+    def create_default(dimensions):
+        raise _InvalidCaseError()
+
+    def fit_homogeneous(self):
+
+        if self.traveltimes_observed is None:
+            raise AttributeError("No observations provided")
+
+        nnan = _numpy.logical_not(_numpy.isnan(self.traveltimes_observed))
+
+        A = _numpy.array([self.distances, _numpy.ones_like(self.distances)]).T[nnan, :]
+        b = self.traveltimes_observed[nnan]
+
+        best_fit = _numpy.linalg.lstsq(A, b, rcond=-1)
+
+        approximate_speed = (1.0 / best_fit[0][0]).item()
+        approximate_origin_time = (best_fit[0][1]).item()
+
+        print(
+            f"Approximate medium velocity:\t{approximate_speed:.2f}"
+            f"m/s\r\nApproximate origin time:\t{approximate_origin_time:.2f} s"
+        )
+
+        self.approximate_speed, self.approximate_origin_time = (
+            approximate_speed,
+            approximate_origin_time,
+        )
+
+        return approximate_speed, approximate_origin_time
+
+    def homogeneous_model(self):
+        return _numpy.ones((self.dimensions)) * self.approximate_speed
+
+    def plot_data(self):
+
+        if self.approximate_speed is None:
+            self.fit_homogeneous()
+
+        # _plt.figure(figsize=(12, 6))
+        _plt.subplot(121)
+        _plt.scatter(
+            self.traveltimes_observed - self.approximate_origin_time,
+            self.receiver_depths,
+            s=1,
+            label="Observed data",
+        )
+        # _plt.xlim([0, 0.5])
+        # _plt.ylim([0, 1600])
+        _plt.xlabel("Travel time [s]")
+        _plt.ylabel("Channel depth [m]")
+        _plt.gca().invert_yaxis()
+        _plt.subplot(122)
+        _plt.scatter(
+            self.traveltimes_observed
+            - self.approximate_origin_time
+            - self.distances / self.approximate_speed,
+            self.receiver_depths,
+            s=1,
+            label="Observed data",
+        )
+        # _plt.ylim([0, 1600])
+        _plt.xlabel("Travel time deviation from homogeneous [s]")
+        _plt.ylabel("Channel depth [m]")
+        _plt.gca().invert_yaxis()
 
 
-def _tracerayhorlay(
-    laydep,
-    vel,
+def _tracerays(
+    interfaces,
+    velocities,
     xystart,
-    takeoffangle,
     receivers_x,
     receivers_z,
+    takeoffangle,
     maxnumiterations=20000,
     keep_upgoing=False,
     trace_layers=False,
 ):
-    """
-    Trace rays in a horizontally layered model.
-
-    Args:
-      laydep (ndarray): input depth of layers
-      vel (ndarray): velocity for each layer
-      xystart(ndarray): origin coordinates of the ray
-      takeoffangle (float): take off angle
-      maxnumiterations (int): limit the number of ray segments to calculate, in case
-                               the ray never reaches the surface
-
-    Returns:
-         (ndarray,float,float): coordinates of the the ray path, traveltime
-                                and distance covered
-
-    """
-
-    #
-    # v1,theta1
-    #
-    # --------xpt1------------
-    #           \
-    # v2,theta2  \
-    #             \
-    # ------------xpt2--------
-    #
-    #
-    #   |\
-    #   | \   theta
-    #   |  \
-    #   |<->\
-    #   |    *
-    #
-
-    assert laydep.size == vel.size  # +1
+    assert interfaces.size == velocities.size
     assert xystart[1] >= 0.0
-    assert all(laydep > 0.0)  # first layer starts at 0 by definition
+    # first layer starts at 0 by definition
+    assert all(interfaces > 0.0)
+    assert _numpy.max(interfaces) > _numpy.max(receivers_z)
 
-    laydep = _numpy.append(0.0, _numpy.asarray(laydep))
-    nlay = laydep.size - 1
+    interfaces = _numpy.append(0.0, _numpy.asarray(interfaces))
+    nlay = interfaces.size - 1
 
-    ids = _numpy.where(laydep >= xystart[1])  ## >= !!
-    ideplay = ids[0][0]  # _numpy.argmin(abs(pt[1]-laydep[ids]))
-    raypar = _numpy.sin(_numpy.deg2rad(takeoffangle)) / vel[ideplay]
+    ids = _numpy.where(interfaces >= xystart[1])  ## >= !!
+    ideplay = ids[0][0]  # _numpy.argmin(abs(pt[1]-interfaces[ids]))
+    raypar = _numpy.sin(_numpy.deg2rad(takeoffangle)) / velocities[ideplay]
     thetarad = _numpy.deg2rad(takeoffangle)
 
     raycoo = _numpy.zeros((1, 2))
@@ -199,11 +300,14 @@ def _tracerayhorlay(
         pt = _numpy.array([raycoo[i, 0], raycoo[i, 1]])
 
         ## find closest layer below starting point (z)...
-        ids = _numpy.where(laydep >= pt[1])  ## >= !!
+        ids = _numpy.where(interfaces >= pt[1])  ## >= !!
         ideplay = ids[0][0]
 
         if ideplay > nlay - 1:
-            return raycoo, None, None
+            if trace_layers:
+                return raycoo, None, None, None
+            else:
+                return raycoo, None, None
         else:
             pass
 
@@ -221,54 +325,56 @@ def _tracerayhorlay(
         if direction == "down" and (not firstsegment):
             ## arcsin domain goes [-1 1], so if
             ##   asarg>=0.0 we have a turning ray
-            asarg = vel[ideplay] * raypar
+            asarg = velocities[ideplay] * raypar
 
             if abs(asarg) >= 1.0:
                 # turning ray
-                # get the new angle (Snell's law), vel of layer above
+                # get the new angle (Snell's law), velocities of layer above
+                if not keep_upgoing:
+                    break
                 thetarad = _numpy.pi / 2.0 - thetarad + _numpy.pi / 2.0
-                zlay = laydep[ideplay - 1]
-                laythick = laydep[ideplay] - laydep[ideplay - 1]
-                vellay = vel[ideplay - 1]
+                layer_depth = interfaces[ideplay - 1]
+                layer_thickness = interfaces[ideplay] - interfaces[ideplay - 1]
+                layer_velocity = velocities[ideplay - 1]
             else:
-                # get the new angle (Snell's law), vel of layer below
-                thetarad = _numpy.arcsin(vel[ideplay] * raypar)
-                zlay = laydep[ideplay + 1]
-                laythick = laydep[ideplay + 1] - laydep[ideplay]
-                vellay = vel[ideplay]
+                # get the new angle (Snell's law), velocities of layer below
+                thetarad = _numpy.arcsin(velocities[ideplay] * raypar)
+                layer_depth = interfaces[ideplay + 1]
+                layer_thickness = interfaces[ideplay + 1] - interfaces[ideplay]
+                layer_velocity = velocities[ideplay]
 
         elif direction == "up" and (not firstsegment):
-            # get the new angle (Snell's law), vel of layer above
-            asarg = vel[ideplay - 1] * raypar
+            # get the new angle (Snell's law), velocities of layer above
+            asarg = velocities[ideplay - 1] * raypar
 
             if abs(asarg) >= 1.0:
                 # turning ray
                 thetarad = thetarad - _numpy.pi / 2.0
-                zlay = laydep[ideplay]  # laydep[ideplay+1]
-                laythick = (
-                    laydep[ideplay] - laydep[ideplay - 1]
-                )  # laydep[ideplay+1]-laydep[ideplay]
-                vellay = vel[ideplay]  # vel[ideplay+1]
+                layer_depth = interfaces[ideplay]  # interfaces[ideplay+1]
+                layer_thickness = (
+                    interfaces[ideplay] - interfaces[ideplay - 1]
+                )  # interfaces[ideplay+1]-interfaces[ideplay]
+                layer_velocity = velocities[ideplay]  # velocities[ideplay+1]
             else:
                 ## going up..
                 thetarad = (
                     _numpy.pi / 2.0
-                    - _numpy.arcsin(vel[ideplay - 1] * raypar)
+                    - _numpy.arcsin(velocities[ideplay - 1] * raypar)
                     + _numpy.pi / 2.0
                 )
-                zlay = laydep[ideplay - 1]
-                laythick = laydep[ideplay] - laydep[ideplay - 1]
-                vellay = vel[ideplay - 1]
+                layer_depth = interfaces[ideplay - 1]
+                layer_thickness = interfaces[ideplay] - interfaces[ideplay - 1]
+                layer_velocity = velocities[ideplay - 1]
 
         #############
         if i == 0:
             firstsegment = False  # take off (so angle is fixed)
             if direction == "down":
-                zlay = laydep[ideplay]
-                vellay = vel[ideplay]
+                layer_depth = interfaces[ideplay]
+                layer_velocity = velocities[ideplay]
             elif direction == "up":
-                zlay = laydep[ideplay]
-                vellay = vel[ideplay]
+                layer_depth = interfaces[ideplay]
+                layer_velocity = velocities[ideplay]
 
         #####################################
 
@@ -278,7 +384,7 @@ def _tracerayhorlay(
                     _numpy.rad2deg(thetarad)
                 )
             )
-            if _tracerayhorlay:
+            if trace_layers:
                 return raycoo, None, None, None
             else:
                 return raycoo, None, None
@@ -287,33 +393,33 @@ def _tracerayhorlay(
         else:
             # get the angular coefficient of ray segment
             m = _numpy.cos(thetarad) / _numpy.sin(thetarad)
-            xray = (zlay + m * pt[0] - pt[1]) / m
+            xray = (layer_depth + m * pt[0] - pt[1]) / m
 
         if xray > receivers_x:
             m = _numpy.cos(thetarad) / _numpy.sin(thetarad)
 
             xray = receivers_x
-            zlay = m * xray - m * pt[0] + pt[1]
+            layer_depth = m * xray - m * pt[0] + pt[1]
 
         ##-----------------------------------
         ## Do ray path calculations
-        curdist = _numpy.sqrt((xray - pt[0]) ** 2 + (zlay - pt[1]) ** 2)
+        curdist = _numpy.sqrt((xray - pt[0]) ** 2 + (layer_depth - pt[1]) ** 2)
         if trace_layers:
             distance_per_layer[ideplay] += curdist
         dist += curdist
-        tt += curdist / vellay
+        tt += curdist / layer_velocity
 
         ##-----------------------------------
-        raycoo = _numpy.r_[raycoo, _numpy.array([[xray, zlay]])]
+        raycoo = _numpy.r_[raycoo, _numpy.array([[xray, layer_depth]])]
 
         if xray > receivers_x:
             break
 
         if (raycoo[-2, 1] > 0.0) and (
-            abs(zlay - 0.0) <= 1e-6
-        ):  # direction=="up" and (abs(zlay-0.0)<=1e-6) :
+            abs(layer_depth - 0.0) <= 1e-6
+        ):  # direction=="up" and (abs(layer_depth-0.0)<=1e-6) :
             break
-        elif (raycoo[-2, 1] < 0.0) and (abs(zlay - 0.0) <= 1e-6):
+        elif (raycoo[-2, 1] < 0.0) and (abs(layer_depth - 0.0) <= 1e-6):
             break
 
         elif i > maxnumiterations:
@@ -337,9 +443,11 @@ def _search_angles(
     max_attempts=100,
     randomize_angle_fraction=0.1,
     verbose=False,
-    rayparameter_spacing=False,
+    parallel=False,
+    processes=8,
 ):
-    # Create a lookup table for all computed values
+
+    # Create a lookup table for all computed values of take-off angles
     lookup_table = _numpy.empty((0, 3))
 
     # If no angles are given (i.e. count or specific ones) start with double the amount
@@ -350,64 +458,96 @@ def _search_angles(
     # If an integer is given, that's how many angles the algorithm starts off with.
     if type(angles) == int:
         angles = _numpy.linspace(0, 89.9, angles)
-        # if rayparameter_spacing:
-        #     angle_1, angle_2 = 0, 89.9
-        #     p_1, p_2 = (
-        #         _numpy.sin(2 * _numpy.pi * angle_1 / 360) / velocities[0],
-        #         _numpy.sin(2 * _numpy.pi * angle_2 / 360) / velocities[0],
-        #     )
-        #     angles = (
-        #         _numpy.arcsin(_numpy.linspace(p_1, p_2, 100) * velocities[0])
-        #         * 360
-        #         / (2 * _numpy.pi)
-        #     )
     else:
         # Otherwise, make sure any initial angles are sorted
         angles = _numpy.sort(angles)[::-1]
 
-    for angle in angles:
-        ding = _tracerayhorlay(
-            interfaces,
-            velocities,
-            _numpy.array([0, 0]),
-            angle,
-            receivers_x,
-            receivers_z,
-            maxnumiterations=interfaces.size * 3,
-            keep_upgoing=False,
-        )
-        if ding is not None:
-            RAYCO, TT, DIST = ding
+    improper_ray = []
+
+    if parallel:
+        with _multiprocess.Pool(processes) as pool:
+            results = pool.map(
+                _partial(
+                    _tracerays,
+                    interfaces,
+                    velocities,
+                    _numpy.array([0, 0]),
+                    receivers_x,
+                    receivers_z,
+                    maxnumiterations=interfaces.size * 3,
+                    keep_upgoing=False,
+                ),
+                angles,
+            )
+    else:
+        results = []
+        for angle in angles:
+            results.append(
+                _partial(
+                    _tracerays,
+                    interfaces,
+                    velocities,
+                    _numpy.array([0, 0]),
+                    receivers_x,
+                    receivers_z,
+                    maxnumiterations=interfaces.size * 3,
+                    keep_upgoing=False,
+                )(angle)
+            )
+
+    # Compute refraction for all take-off angles
+    for angle, result in zip(angles, results):
+
+        # If results are not failing...
+        if result is not None:
+
+            RAYCO, TT, DIST = result
+
+            # ... then check if the ray made it to the receiver line ...
             if (RAYCO[-1][0]) == receivers_x:
 
+                # Then add result to look-up table
                 lookup_table = _numpy.vstack(
                     (lookup_table, _numpy.array([angle, RAYCO[-1][-1], TT]))
                 )
+            else:
+                improper_ray.append(angles)
+        else:
+            improper_ray.append(angles)
 
+    # Check for every receiver which ray is closest
     distance_to_closest_ray = _numpy.min(
         _numpy.abs(lookup_table[:, 1] - receivers_z[:, None]), axis=1
     )
 
+    # Check which receivers have converged (i.e. found a close enough ray)
     converged = distance_to_closest_ray < tolerance
 
+    # Count converged receivers
     n_converged = converged.sum()
-    failed_refines = 0
 
+    # Start refining the take-off angles, while keeping track of the number of failures
+    failed_refines = 0
     while not _numpy.all(converged) and failed_refines < max_attempts:
 
+        # Check if we found extra rays since last pass, if so, reset failure count
         if n_converged < converged.sum():
             n_converged = converged.sum()
-            failed_refines = 0
+            failed_refines -= 1  # check dit nog even TODO
         else:
             failed_refines += 1
+
+        failed_refines = max(0, failed_refines)
 
         if verbose:
             print(converged.sum(), failed_refines)
 
+        # Find closest ray above receiver
         closest_ray_above = _numpy.argmin(
             (lookup_table[:, 1] - receivers_z[:, None]) > 0, axis=1
         )
-        # Filter out converged stations
+
+        # Filter out converged receiver
         closest_ray_above = closest_ray_above[converged == False]
 
         refine, counts = _numpy.unique(closest_ray_above, return_counts=True)
@@ -416,28 +556,65 @@ def _search_angles(
 
             a1 = lookup_table[refine_here - 1, 0]
             a2 = lookup_table[refine_here, 0]
-            new_angles = _numpy.linspace(
-                a1, a2, count * (1 + int(1.5**failed_refines)) + 2
-            )[1:-1]
 
-            for newa in new_angles:
-                newa = newa * (1 + randomize_angle_fraction * _numpy.random.randn())
-                ding = _tracerayhorlay(
-                    interfaces,
-                    velocities,
-                    _numpy.array([0, 0]),
-                    newa,
-                    receivers_x,
-                    receivers_z,
-                    maxnumiterations=interfaces.size * 3,
-                    keep_upgoing=False,
-                )
-                if ding is not None:
-                    RAYCO, TT, DIST = ding
+            # subinterval_refines = 3
+            subinterval_refines = count * (1 + int(1.5**failed_refines)) + 2
+            new_angles_linspace = _numpy.linspace(a1, a2, subinterval_refines)[1:-1]
+
+            z1 = lookup_table[refine_here - 1, 1]
+            z2 = lookup_table[refine_here, 1]
+
+            z_focus = receivers_z[
+                _numpy.logical_and(receivers_z < z1, receivers_z > z2)
+            ]
+
+            new_angles_interpolation = a1 + (a2 - a1) * ((z_focus - z2) / (z1 - z2))
+            new_angles = _numpy.concatenate(
+                [new_angles_linspace.flatten(), new_angles_interpolation.flatten()]
+            )
+
+            new_angles = new_angles * (
+                1 + randomize_angle_fraction * _numpy.random.randn(*new_angles.shape)
+            )
+
+            if parallel:
+                with _multiprocess.Pool(processes) as pool:
+                    results = pool.map(
+                        _partial(
+                            _tracerays,
+                            interfaces,
+                            velocities,
+                            _numpy.array([0, 0]),
+                            receivers_x,
+                            receivers_z,
+                            maxnumiterations=interfaces.size * 3,
+                            keep_upgoing=False,
+                        ),
+                        new_angles,
+                    )
+            else:
+                results = []
+                for new_angle in new_angles:
+                    results.append(
+                        _partial(
+                            _tracerays,
+                            interfaces,
+                            velocities,
+                            _numpy.array([0, 0]),
+                            receivers_x,
+                            receivers_z,
+                            maxnumiterations=interfaces.size * 3,
+                            keep_upgoing=False,
+                        )(new_angle)
+                    )
+
+            for new_angle, result in zip(new_angles, results):
+
+                if result is not None:
+                    RAYCO, TT, DIST = result
                     if (RAYCO[-1][0]) == receivers_x:
-
                         lookup_table = _numpy.vstack(
-                            (lookup_table, _numpy.array([newa, RAYCO[-1][-1], TT]))
+                            (lookup_table, _numpy.array([new_angle, RAYCO[-1][-1], TT]))
                         )
 
         lookup_table = lookup_table[_numpy.argsort(lookup_table[:, 0])]
@@ -448,7 +625,8 @@ def _search_angles(
 
         converged = distance_to_closest_ray < tolerance
 
-    print(f"Found: {converged.sum()} / {receivers_z.size} receivers.")
+    if verbose:
+        print(f"Found: {converged.sum()} / {receivers_z.size} receivers.")
 
     closest_ray = _numpy.argmin(
         _numpy.abs(lookup_table[:, 1] - receivers_z[:, None]), axis=1
@@ -465,6 +643,7 @@ def _search_angles(
         _numpy.asfarray(distance_to_closest_ray),
         _numpy.asfarray(angles_og),
         _numpy.asfarray(traveltimes),
+        lookup_table,
     )
 
 
@@ -474,24 +653,49 @@ def _derivative_to_layer_speeds(
     receivers_x,
     receivers_z,
     angles,
+    parallel=True,
+    processes=8,
 ):
 
     TTS = _numpy.empty((angles.size))
     DTS = _numpy.empty((angles.size, velocities.size))
 
-    for iangle, angle in enumerate(angles):
-        RAYCO, TT, _, distance_per_layer = _tracerayhorlay(
-            interfaces,
-            velocities,
-            _numpy.array([0, 0]),
-            angle,
-            receivers_x,
-            receivers_z,
-            maxnumiterations=interfaces.size * 3,
-            keep_upgoing=False,
-            trace_layers=True,
-        )
+    if parallel:
+        with _multiprocess.Pool(processes) as pool:
+            results = pool.map(
+                _partial(
+                    _tracerays,
+                    interfaces,
+                    velocities,
+                    _numpy.array([0, 0]),
+                    receivers_x,
+                    receivers_z,
+                    maxnumiterations=interfaces.size * 3,
+                    keep_upgoing=False,
+                    trace_layers=True,
+                ),
+                angles,
+            )
+    else:
+        results = []
+        for angle in angles:
+            results.append(
+                _partial(
+                    _tracerays,
+                    interfaces,
+                    velocities,
+                    _numpy.array([0, 0]),
+                    receivers_x,
+                    receivers_z,
+                    maxnumiterations=interfaces.size * 3,
+                    keep_upgoing=False,
+                    trace_layers=True,
+                )(angle)
+            )
 
+    for iangle, (angle, result) in enumerate(zip(angles, results)):
+
+        RAYCO, TT, _, distance_per_layer = result
         TTS[iangle] = TT
         DTS[iangle, :] = distance_per_layer
 
@@ -508,26 +712,56 @@ def _plot_rays_and_model(
     domain_x_axis_margin=200,
     force_aspect=True,
     vlims=None,
+    parallel=True,
+    processes=8,
 ):
+
     fig = _plt.figure(figsize=(12, 12))
     ax1 = _plt.gca()
     _plt.title("Ray tracing vertical profile")
 
-    for angle in angles:
-        ding = _tracerayhorlay(
-            interfaces,
-            velocities,
-            _numpy.array([0, 0]),
-            angle,
-            receivers_x,
-            receivers_z,
-            maxnumiterations=interfaces.size * 5,
-            keep_upgoing=keep_upgoing,
-        )
-        if ding is not None:
-            RAYCO, TT, DIST = ding
+    assert interfaces.size == velocities.size
+    assert all(interfaces > 0.0)
+    assert _numpy.max(interfaces) > _numpy.max(
+        receivers_z
+    ), "Last layer needs to be below the last receiver."
 
-            rgba = cmap(angle / 90)
+    if parallel:
+        with _multiprocess.Pool(processes) as pool:
+            results = pool.map(
+                _partial(
+                    _tracerays,
+                    interfaces,
+                    velocities,
+                    _numpy.array([0, 0]),
+                    receivers_x,
+                    receivers_z,
+                    maxnumiterations=interfaces.size * 5,
+                    keep_upgoing=keep_upgoing,
+                ),
+                angles,
+            )
+    else:
+        results = map(
+            _partial(
+                _tracerays,
+                interfaces,
+                velocities,
+                _numpy.array([0, 0]),
+                receivers_x,
+                receivers_z,
+                maxnumiterations=interfaces.size * 5,
+                keep_upgoing=keep_upgoing,
+            ),
+            angles,
+        )
+
+    for result, angle in zip(results, angles):
+
+        if result is not None:
+            RAYCO, TT, DIST = result
+
+            rgba = _cmap(angle / 90)
 
             _plt.plot(RAYCO[:, 0] - receivers_x, -RAYCO[:, 1], alpha=0.5, color=rgba)
 
@@ -553,7 +787,7 @@ def _plot_rays_and_model(
 
     cb = _plt.colorbar(
         _matplotlib.cm.ScalarMappable(
-            norm=_matplotlib.colors.Normalize(vmin=0, vmax=90), cmap=cmap
+            norm=_matplotlib.colors.Normalize(vmin=0, vmax=90), cmap=_cmap
         ),
         orientation="horizontal",
         fraction=0.046,
@@ -590,7 +824,7 @@ def _check1darray(array):
     if not (type(array) == list or type(array) == _numpy.ndarray):
         raise AttributeError(
             "Don't know what to do with the given object. Try to pass a one-dimensional"
-            "list or NumPy array."
+            "list or _numpy array."
         )
     if type(array) == list:
         array = _numpy.array(array)
