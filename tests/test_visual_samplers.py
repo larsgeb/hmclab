@@ -6,15 +6,12 @@ import uuid as _uuid
 
 
 import numpy as _numpy
-import matplotlib as _matplotlib
 import matplotlib.pyplot as _plt
 import pytest as _pytest
 import uuid as _uuid
 
 
 import hmclab as _hmclab
-
-_matplotlib.use("QtAgg")
 
 _ad = _hmclab.Distributions._AbstractDistribution
 _as = _hmclab.Samplers._AbstractVisualSampler

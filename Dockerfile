@@ -1,4 +1,4 @@
-FROM jupyter/datascience-notebook
+FROM jupyter/datascience-notebook:python-3.10.9
 WORKDIR /home/jovyan/
 RUN mkdir /home/jovyan/hmclab
 
