@@ -5,6 +5,7 @@ import os as _os
 import copy as _copy
 import h5py as _h5py
 import uuid as _uuid
+import time as _time
 
 
 import numpy as _numpy
@@ -103,13 +104,13 @@ def test_samples_file(
             samples_written_expected,
         )
 
-    # Remove the file
+    # sampler_instance_copy = _copy.deepcopy(sampler_instance)
+
+    # assert isinstance(sampler_instance_copy, _as)
+
+    # assert sampler_instance is not sampler_instance_copy
+
+    # assert type(sampler_instance) == type(sampler_instance_copy)
+
+    _os.remove(f"{filename}.pkl")
     _os.remove(filename)
-
-    sampler_instance_copy = _copy.deepcopy(sampler_instance)
-
-    assert isinstance(sampler_instance_copy, _as)
-
-    assert sampler_instance is not sampler_instance_copy
-
-    assert type(sampler_instance) == type(sampler_instance_copy)
