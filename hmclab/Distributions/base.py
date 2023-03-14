@@ -104,6 +104,39 @@ class _AbstractDistribution(metaclass=_ABCMeta):
         """
         raise _AbstractMethodError()
 
+    def misfit_v(self, coordinates: _numpy.ndarray, vectors_in_dim=None) -> float:
+
+        if coordinates.size == self.dimensions:
+            coordinates.shape = (coordinates.size, 1)
+            return self.misfit(coordinates)
+
+        if vectors_in_dim is None:
+            assert (
+                len(coordinates.shape) == 2
+            ), "Can only take 1D or 2D arrays as input if not specifying vector input dimension"
+            if coordinates.shape[0] == self.dimensions:
+                vectors_in_dim = 0
+            elif coordinates.shape[1] == self.dimensions:
+                vectors_in_dim = 1
+            else:
+                raise AttributeError(
+                    f"Don't know what to do with input of shape {coordinates.shape}."
+                )
+
+        _misfits = _numpy.zeros_like(_numpy.take(coordinates, 0, vectors_in_dim))
+
+        it = _numpy.ndenumerate(_misfits)
+
+        for _index, _element in it:
+            _index_v = list(_index)
+            _index_v.insert(vectors_in_dim, slice(None, None, None))
+            _index_v.append(None)
+            _index_v = tuple(_index_v)
+
+            _misfits[_index] = self.misfit(coordinates[_index_v])
+
+        return _misfits
+
     @_abstractmethod
     def gradient(self, coordinates: _numpy.ndarray) -> _numpy.ndarray:
         """Compute gradient of distribution.
@@ -624,6 +657,12 @@ class Laplace(_AbstractDistribution):
         lower_bounds: _numpy.ndarray = None,
         upper_bounds: _numpy.ndarray = None,
     ):
+
+        if type(means) == list:
+            means = _numpy.array(means)[:, None]
+        if type(dispersions) == list:
+            dispersions = _numpy.array(dispersions)[:, None]
+
         # Automatically get dimensionality from means
         self.dimensions = means.size
 
@@ -686,9 +725,12 @@ class Laplace(_AbstractDistribution):
             raise ValueError("Covariance matrix shape not understood.")
 
     def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
-        raise NotImplementedError(
-            "Generating samples from this distribution is not implemented or supported."
+
+        samples = rng.laplace(
+            loc=self.means, scale=self.dispersions, size=(self.dimensions, repeat)
         )
+
+        return samples
 
     @staticmethod
     def create_default(dimensions: int) -> "Laplace":
@@ -1270,8 +1312,20 @@ class Mixture(_AbstractDistribution):
         return Mixture([Normal1, Normal2], [0.5, 0.5])
 
     def generate(self, repeat=1, rng=_numpy.random.default_rng()) -> _numpy.ndarray:
-        # TODO; this one is doable
-        raise NotImplementedError
+
+        generate_from = _numpy.random.choice(
+            _numpy.arange(len(self.probabilities)),
+            size=repeat,
+            p=self.probabilities,
+        )
+
+        samples = []
+        for _index, _repeats in _numpy.vstack(
+            _numpy.unique(generate_from, return_counts=True)
+        ).T:
+            samples.append(self.distributions[_index].generate(_repeats))
+
+        return _numpy.hstack(samples)
 
 
 def EvaluationLimiter_ClassConstructor(
