@@ -1,2 +1,0 @@
-Alphabetic index
-================

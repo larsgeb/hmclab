@@ -1,4 +1,0 @@
-name: hmclab
-dependencies:
-  - python=3.9
-  - h5py

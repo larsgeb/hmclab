@@ -1,22 +1,14 @@
-# content of conftest.py
+import sys
 import pytest
 
 
-def pytest_addoption(parser):
-    parser.addoption(
-        "--plot", action="store_true", default=False, help="run plot tests"
-    )
-
-
-def pytest_configure(config):
-    config.addinivalue_line("markers", "plot: mark test as plot to run")
-
-
-def pytest_collection_modifyitems(config, items):
-    if config.getoption("--plot"):
-        # --plot given in cli: do not skip plot tests
-        return
-    skip_plot = pytest.mark.skip(reason="need --plot option to run")
-    for item in items:
-        if "plot" in item.keywords:
-            item.add_marker(skip_plot)
+# each test runs on cwd to its temp dir
+@pytest.fixture(autouse=True)
+def go_to_tmpdir(request):
+    # Get the fixture dynamically by its name.
+    tmpdir = request.getfixturevalue("tmpdir")
+    # ensure local test created packages can be imported
+    sys.path.insert(0, str(tmpdir))
+    # Chdir only for the duration of the test.
+    with tmpdir.as_cwd():
+        yield

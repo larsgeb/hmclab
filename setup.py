@@ -1,77 +1,44 @@
-import setuptools
-import versioneer
+"""Python setup.py for project_name package"""
+import io
+import os
+from setuptools import find_packages, setup
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
 
-setuptools.setup(
-    version=versioneer.get_version(),
-    cmdclass=versioneer.get_cmdclass(),
+def read(*paths, **kwargs):
+    """Read the contents of a text file safely.
+    """
+
+    content = ""
+    with io.open(
+        os.path.join(os.path.dirname(__file__), *paths),
+        encoding=kwargs.get("encoding", "utf8"),
+    ) as open_file:
+        content = open_file.read().strip()
+    return content
+
+
+def read_requirements(path):
+    return [
+        line.strip()
+        for line in read(path).split("\n")
+        if not line.startswith(('"', "#", "-", "git+"))
+    ]
+
+
+setup(
     name="hmclab",
-    author="Lars Gebraad, Andrea Zunino, Andreas Fichtner",
-    author_email="lars.gebraad@erdw.ethz.ch",
-    description="A numerical laboratory for Bayesian Seismology",
-    long_description=long_description,
+    version=read("hmclab", "VERSION"),
+    description="project_description",
+    url="https://github.com/larsgeb/hmclab/",
+    long_description=read("README.md"),
     long_description_content_type="text/markdown",
-    url="https://github.com/larsgeb/hmclab",
-    project_urls={
-        "Bug Tracker": "https://github.com/larsgeb/hmclab/issues",
+    author="Lars Gebraad",
+    author_email="larsgebraad@gmail.com",
+    packages=find_packages(exclude=["dev", ".github"]),
+    install_requires=read_requirements("requirements.txt"),
+    entry_points={
+        "console_scripts": ["hmclab = hmclab.__main__:main"]
     },
-    packages=setuptools.find_packages(),
-    classifiers=[
-        "Development Status :: 5 - Production/Stable",
-        "Programming Language :: Python :: 3.9",
-        "License :: OSI Approved :: BSD License",
-        "Operating System :: OS Independent",
-    ],
-    python_requires=">=3.9",
-    install_requires=[
-        "dill==0.3.5.1",
-        "numpy",
-        "scipy",
-        "termcolor",
-        "matplotlib",
-        "tqdm",
-        "h5py",
-        "pyyaml",
-        "ipywidgets",
-        "multiprocess",
-        "tilemapbase",
-        "pandas",
-        "obspy",
-    ],
-    extras_require={
-        "testing": [
-            "pytest",
-            "pytest-notebook",
-            "pytest-harvest",
-            "pytest-cov",
-            "pytest-ordering",
-            "nbformat",
-            "black",
-        ],
-        "dev": [
-            "pytest",
-            "pytest-notebook",
-            "pytest-harvest",
-            "pytest-cov",
-            "pytest-ordering",
-            "nbformat",
-            "black",
-            "autoclasstoc",
-            "codecov",
-            "flake8",
-            "furo",
-            "ipywidgets",
-            "nbconvert",
-            "nbsphinx",
-            "numpydoc",
-            "pandoc",
-            "pre-commit",
-            "sphinx",
-            "sphinx-git",
-            "sphinxcontrib-bibtex",
-            "versioneer",
-        ],
-    },
+    extras_require={"dev": read_requirements("requirements-dev.txt")},
+    python_requires=">=3.11",
 )

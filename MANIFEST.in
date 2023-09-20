@@ -1,2 +1,3 @@
-include versioneer.py
-include hmclab/_version.py
+include LICENSE
+graft tests
+graft hmclab
