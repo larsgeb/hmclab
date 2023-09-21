@@ -27,7 +27,9 @@ class Inversion:
         algorithm_settings (dict): Settings for the inversion algorithm.
     """
 
-    def __init__(self, target_distribution):
+    def __init__(
+        self, target_distribution: AbstractTargetDistribution | None = None
+    ):
         """
         Initialize the Inversion object with a target distribution.
 
@@ -35,7 +37,8 @@ class Inversion:
             target_distribution (object): The target distribution to be
             inverted.
         """
-        assert isinstance(target_distribution, AbstractTargetDistribution)
+        if target_distribution is not None:
+            assert isinstance(target_distribution, AbstractTargetDistribution)
         self.target_distribution = target_distribution
         self.samples = None
 
@@ -65,19 +68,23 @@ class Inversion:
         if format == "numpy":
             self.save_results_numpy(filename)
         else:
-            raise ValueError("Unsupported format. Choose 'numpy'.")
+            raise ValueError(
+                "Unsupported format. Choose 'numpy'."
+            )  # pragma: no cover
 
     def load_results(self, filename, format="numpy"):
         if format == "numpy":
             self.load_results_numpy(filename)
         else:
-            raise ValueError("Unsupported format. Choose 'numpy'.")
+            raise ValueError(
+                "Unsupported format. Choose 'numpy'."
+            )  # pragma: no cover
 
     def save_results_numpy(self, filename):
         # Save inversion results to a NumPy file, including algorithm settings
         # as a dictionary
         data_to_save = {
-            "target_name": self.target_distribution.target_name,
+            "target_name": self.target_distribution.name,
             "samples": self.samples,
             "algorithm_settings": self.algorithm_settings,
         }
@@ -108,7 +115,7 @@ class Inversion:
             plt.plot(self.samples[:, i], label=f"Parameter {i+1}")
         plt.legend()
         plt.grid(True)
-        plt.show()
+        plt.show(block=False)
 
     def plot_subset_marginal_distributions(
         self, dimensions=None, bins=30, color="skyblue", grid=True
@@ -140,7 +147,7 @@ class Inversion:
                 ax.grid(True)  # Enable grid for the current subplot
 
         plt.tight_layout()
-        plt.show()
+        plt.show(block=False)
 
     def plot_subset_pairwise_scatterplot(
         self, dimensions=None, color="skyblue", grid=True
@@ -179,7 +186,7 @@ class Inversion:
                     ax.grid(True)  # Enable grid for the current subplot
 
         plt.tight_layout()
-        plt.show()
+        plt.show(block=False)
 
     def compute_mcmc_statistics(self):
         # Compute and print MCMC statistics for each parameter
@@ -230,19 +237,7 @@ class Inversion:
             )
         plt.legend()
         plt.grid(True)
-        plt.show()
-
-    def effective_sample_size(self):
-        # Compute effective sample size for each parameter
-        num_samples = self.samples.shape[0]
-        ess = np.zeros(self.samples.shape[2])
-        for i in range(self.samples.shape[2]):
-            autocorr = np.correlate(
-                self.samples[:, :, i], self.samples[:, :, i], mode="full"
-            )
-            autocorr = autocorr / np.max(autocorr)  # Normalize
-            ess[i] = num_samples / (1 + 2 * np.sum(autocorr))
-        return ess
+        plt.show(block=False)
 
     def summarise_algorithm_settings(self):
         if hasattr(self, "algorithm_settings"):
@@ -256,4 +251,4 @@ class Inversion:
 
             print(summary)
         else:
-            print("Algorithm_settings not available.")
+            print("Algorithm_settings not available.")  # pragma: no cover
