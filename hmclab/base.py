@@ -45,11 +45,14 @@ def _parse_vector_input(arr, size=None, warn_if_changed=True):
                 "the desired shape and type; (size,)."
             )
 
+    if isinstance(arr, list):
+        arr = _numpy.array(arr)
+
     if isinstance(arr, (float, int)):
         if size is None or size == 1:
             return _numpy.array([arr])
         else:
-            raise ValueError("Scalar input size must be 1.")
+            raise ValueError(f"Input must be size {size}, not scalar.")
     elif isinstance(arr, _numpy.ndarray):
         if size is None:
             new_arr = arr.ravel()
@@ -58,7 +61,7 @@ def _parse_vector_input(arr, size=None, warn_if_changed=True):
             return new_arr.copy()
         elif size == 1:
             if arr.size == 1:
-                return arr.item()
+                return arr.ravel()
             else:
                 raise ValueError("Array size must be 1 when size is 1.")
         else:

@@ -108,3 +108,17 @@ def test_if_vector():
 def test_if_specific_length_vector():
     array = numpy.ones((10,))
     assert _is_vector(array, size=10)
+
+
+def test_weird_list_size():
+    weird_list = [[0.0, 3.0], [1.0, 2.0]]
+    parsed_array = _parse_vector_input(weird_list)
+    assert isinstance(parsed_array, numpy.ndarray)
+    assert parsed_array.size == 4
+
+
+def test_length_one_list():
+    weird_short_list = [[[4.32]]]
+    parsed_array = _parse_vector_input(weird_short_list, size=1)
+    assert isinstance(parsed_array, numpy.ndarray)
+    assert parsed_array.size == 1
