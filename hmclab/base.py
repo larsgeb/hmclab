@@ -71,18 +71,3 @@ def _parse_vector_input(arr, size=None, warn_if_changed=True):
             return new_arr.copy()
     else:
         raise ValueError("Input must be a NumPy array, float, or int.")
-
-
-class StandardNormalDistribution:
-    dimensions = 1
-    name = "Standard Normal Distribution"
-    descriptions = """A 1-dimensional normal distribution with a variance of 1
-and a mean of 0."""
-
-    def f(self, m):
-        m = _parse_vector_input(m, size=self.dimensions)
-        return 0.5 * float(_numpy.sum(m)) ** 2
-
-    def g(self, m):
-        m = _parse_vector_input(m, size=self.dimensions)
-        return m
