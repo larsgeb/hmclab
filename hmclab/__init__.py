@@ -1,3 +1,4 @@
 from .base import StandardNormalDistribution
+from .Inversion import Inversion
 
-__all__ = ["StandardNormalDistribution"]
+__all__ = ["StandardNormalDistribution", "Inversion"]
