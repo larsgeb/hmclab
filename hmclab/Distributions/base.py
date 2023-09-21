@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class AbstractTargetDistribution(ABC):
+class AbstractDistribution(ABC):
     dimensionality: int = 1
     name: str = ""
 

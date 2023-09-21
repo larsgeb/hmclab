@@ -2,10 +2,11 @@ import numpy as np
 
 from hmclab.base import _parse_vector_input
 
-from .base import AbstractTargetDistribution
+from .base import AbstractDistribution
 
 
-class MultivariateNormal(AbstractTargetDistribution):
+class MultivariateNormal(AbstractDistribution):
+    dimensionality: int = 5
     name: str = "Multivariate Normal Distribution"
 
     def __init__(self, mean, covariance_matrix):
@@ -32,7 +33,7 @@ class MultivariateNormal(AbstractTargetDistribution):
         return -grad
 
     @classmethod
-    def create_default(cls, dimensionality):
+    def create_default(cls, dimensionality=5):
         # Create a default instance with zero mean and identity covariance
         # matrix
         mean = np.zeros(dimensionality)

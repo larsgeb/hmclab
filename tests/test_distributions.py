@@ -1,7 +1,7 @@
-from hmclab.Distributions.base import AbstractTargetDistribution
-import pytest, numpy as np
+from hmclab.Distributions.base import AbstractDistribution
+import pytest, numpy as np, dill
 
-distributions = AbstractTargetDistribution.__subclasses__()
+distributions = AbstractDistribution.__subclasses__()
 
 
 def test_list_all_distributions():
@@ -52,3 +52,12 @@ def test_log_prob_grad_exist_and_run(distribution_class):
         assert (
             False
         ), f"Error running log_prob_grad for {distribution_class}: {str(e)}"
+
+
+# Parametrize the distribution classes for log_prob_grad test
+@pytest.mark.parametrize("distribution_class", distributions)
+def test_log_prob_grad_exist_and_run(distribution_class):
+    dimensionality = 10
+    distribution_instance = distribution_class.create_default(dimensionality)
+
+    dill.pickles(distribution_instance)

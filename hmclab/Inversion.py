@@ -8,7 +8,7 @@ Author: Lars Gebraad
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .Distributions.base import AbstractTargetDistribution
+from .Distributions.base import AbstractDistribution
 
 __all__ = ["Inversion"]
 
@@ -28,7 +28,7 @@ class Inversion:
     """
 
     def __init__(
-        self, target_distribution: AbstractTargetDistribution | None = None
+        self, target_distribution: AbstractDistribution | None = None
     ):
         """
         Initialize the Inversion object with a target distribution.
@@ -38,7 +38,7 @@ class Inversion:
             inverted.
         """
         if target_distribution is not None:
-            assert isinstance(target_distribution, AbstractTargetDistribution)
+            assert isinstance(target_distribution, AbstractDistribution)
         self.target_distribution = target_distribution
         self.samples = None
 
