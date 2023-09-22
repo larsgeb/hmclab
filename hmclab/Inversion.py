@@ -112,12 +112,18 @@ class Inversion:
         inversion.load_results_numpy(filename)
 
         return inversion
+
     def save_results_numpy(self, filename):
+        serialized_target_distribution = dill.dumps(self.target_distribution)
+
         # Save inversion results to a NumPy file, including algorithm settings
         # as a dictionary
         data_to_save = {
+            "target_distribution": serialized_target_distribution,
             "target_name": self.target_distribution.name,
             "samples": self.samples,
+            "acceptance_rates": self.acceptance_rates,
+            "log_probs": self.log_probs,
             "algorithm_settings": self.algorithm_settings,
         }
         np.savez(
@@ -130,8 +136,14 @@ class Inversion:
         data = np.load(
             filename, allow_pickle=True
         )  # Allow pickle deserialization
+
+        serialized_target_distribution = data["target_distribution"]
+        self.target_distribution = dill.loads(serialized_target_distribution)
+
         self.target_name = data["target_name"]
         self.samples = data["samples"]
+        self.acceptance_rates = data["acceptance_rates"]
+        self.log_probs = data["log_probs"]
 
         # Retrieve the algorithm_settings dictionary
         # self.algorithm_settings = data['algorithm_settings']
