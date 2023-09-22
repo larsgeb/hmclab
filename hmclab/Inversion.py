@@ -93,6 +93,25 @@ class Inversion:
                 "Unsupported format. Choose 'numpy'."
             )  # pragma: no cover
 
+    @classmethod
+    def load(cls, filename):
+        """
+        Class method to load an Inversion instance from a file.
+
+        Args:
+            filename (str): The name of the file to load the Inversion
+            instance from.
+
+        Returns:
+            Inversion: An Inversion instance loaded from the file.
+        """
+        # Create an instance of the Inversion class
+        inversion = cls()
+
+        # Load inversion results from the specified file
+        inversion.load_results_numpy(filename)
+
+        return inversion
     def save_results_numpy(self, filename):
         # Save inversion results to a NumPy file, including algorithm settings
         # as a dictionary
