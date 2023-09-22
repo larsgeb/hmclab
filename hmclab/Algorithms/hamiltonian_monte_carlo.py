@@ -75,7 +75,7 @@ def hmc_sampler(
     target_acceptance_rate: float = 0.65,
     step_size: float = 0.1,
     mass_matrix: None | np.ndarray = None,
-    visualise_leapfrog: bool = True,
+    visualise_leapfrog: bool = False,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Perform Hamiltonian Monte Carlo (HMC) sampling.

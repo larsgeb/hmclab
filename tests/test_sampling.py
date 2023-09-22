@@ -9,7 +9,6 @@ def test_basic_inversion():
     covariance_matrix = [[1, 0.5], [0.5, 2]]
     multivariate_norm = MultivariateNormal(mean_vector, covariance_matrix)
 
-    print(multivariate_norm)
     # Create an inversion instance with the MultivariateNormal distribution
     inversion = Inversion(target_distribution=multivariate_norm)
     # # Create an inversion instance
@@ -70,7 +69,6 @@ def test_mass_matrix():
     covariance_matrix = [[1, 2.5], [2.5, 20]]
     multivariate_norm = MultivariateNormal(mean_vector, covariance_matrix)
 
-    print(multivariate_norm)
     # Create an inversion instance with the MultivariateNormal distribution
     inversion = Inversion(target_distribution=multivariate_norm)
     # # Create an inversion instance
@@ -111,7 +109,6 @@ def test_total_samples():
     covariance_matrix = [[1, 0.5], [0.5, 2]]
     multivariate_norm = MultivariateNormal(mean_vector, covariance_matrix)
 
-    print(multivariate_norm)
     # Create an inversion instance with the MultivariateNormal distribution
     inversion = Inversion(target_distribution=multivariate_norm)
     # # Create an inversion instance
@@ -189,3 +186,30 @@ def test_total_samples():
 
     loaded_inversion2.plot_trace()
     plt.show()
+
+
+def test_leapfrog_visualisation():
+    mean_vector = [0, 0]
+    covariance_matrix = [[1, 0.5], [0.5, 2]]
+    multivariate_norm = MultivariateNormal(mean_vector, covariance_matrix)
+
+    # Create an inversion instance with the MultivariateNormal distribution
+    inversion = Inversion(target_distribution=multivariate_norm)
+    # # Create an inversion instance
+    # inversion = Inversion(target_distribution=target_distribution)
+
+    # Define an initial position for the HMC sampler (1D example)
+    initial_position = np.array(
+        [0.0, 0.0]
+    )  # Adjust the initial value as needed
+
+    # Run the inversion
+    inversion.run_sampler(
+        hmc_sampler,
+        initial_position=initial_position,  # Make sure you provide initial_position
+        num_samples=1000,
+        num_leapfrog_steps=10,
+        target_acceptance_rate=0.4,
+        step_size=0.1,
+        visualise_leapfrog=True,
+    )
