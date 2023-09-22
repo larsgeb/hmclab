@@ -5,6 +5,7 @@ This module provides a class for running and managing inversion processes.
 
 Author: Lars Gebraad
 """
+import dill
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -146,18 +147,58 @@ class Inversion:
         self.log_probs = data["log_probs"]
 
         # Retrieve the algorithm_settings dictionary
-        # self.algorithm_settings = data['algorithm_settings']
         self.algorithm_settings = data["algorithm_settings"].item()
 
-    def plot_trace(self):
-        # Plot trace plots for the samples
-        plt.figure(figsize=(12, 6))
-        plt.title(f"Trace Plots for {self.target_name}")
-        plt.xlabel("Sample Number")
-        plt.ylabel("Sample Value")
-        for i in range(self.samples.shape[1]):
-            plt.plot(self.samples[:, i], label=f"Parameter {i+1}")
-        plt.legend()
+    def plot_trace(self, dimensions=None):
+        if dimensions is None:
+            dimensions = range(self.samples.shape[1])
+
+        fig, (ax1, ax2, ax3) = plt.subplots(
+            3, 1, figsize=(12, 10), sharex=True
+        )
+        plt.subplots_adjust(
+            hspace=0.2
+        )  # Remove vertical spacing between subplots
+        plt.suptitle(
+            f"Trace Plots, Log Probability, and Acceptance Rate"
+            f"for {self.target_name}"
+        )
+
+        # Plot trace plots on the upper subplot
+        ax1.set_ylabel("Sample Value")
+        for i in dimensions:
+            ax1.plot(self.samples[:, i], label=f"Parameter {i+1}")
+        ax1.legend(loc="upper right")
+
+        # Plot log probability on the middle subplot
+        ax2.set_ylabel("Log Probability", color="red")
+        ax2.semilogy(self.log_probs, color="red", label="Log Prob")
+        ax2.legend(loc="upper right")
+
+        # Plot acceptance rate and its rolling average on the lower subplot
+        ax3.set_xlabel("Sample Number")
+        ax3.set_ylabel("Acceptance Rate", color="green")
+        ax3.plot(
+            self.acceptance_rates,
+            color="green",
+            label="Acceptance Rate",
+            alpha=0.2,
+        )
+        ax3.set_ylim(0, 1)  # Set the y-axis limit for acceptance rate (0 to 1)
+
+        # Calculate the rolling average of acceptance rate (e.g., over 50
+        # samples)
+        rolling_average = np.convolve(
+            self.acceptance_rates, np.ones(500) / 500, mode="valid"
+        )
+        ax3.plot(
+            np.arange(len(rolling_average)) + 250,
+            rolling_average,
+            color="blue",
+            label="Rolling Avg.",
+        )
+        ax3.legend(loc="upper right")
+
         plt.grid(True)
         plt.show(block=False)
 
