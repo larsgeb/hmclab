@@ -54,7 +54,20 @@ class Inversion:
         self.algorithm_settings["algorithm"] = str(sampler.__name__)
 
         # Run the sampler with provided arguments
-        self.samples = sampler(self.target_distribution, **sampler_kwargs)
+        samples, acceptance_rates, log_probs = sampler(
+            self.target_distribution, **sampler_kwargs
+        )
+
+        if self.samples is None:
+            self.samples = samples
+            self.acceptance_rates = acceptance_rates
+            self.log_probs = log_probs
+        else:
+            self.samples = np.vstack((self.samples, samples[1:, :]))
+            self.acceptance_rates = np.hstack(
+                (self.acceptance_rates, acceptance_rates[1:])
+            )
+            self.log_probs = np.hstack((self.log_probs, log_probs[1:]))
 
     def save_results(self, filename, format="numpy"):
         """
